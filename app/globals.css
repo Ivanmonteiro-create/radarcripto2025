@@ -103,3 +103,31 @@ body{
   border-radius: 10px;
   font-weight: 700;
 }
+/* Barra superior do gráfico (fora do iframe) — lado ESQUERDO */
+.graphTopBar{
+  position:absolute; top:6px; left:8px; z-index:6;
+  display:flex; align-items:center; gap:8px;
+}
+.indicatorsWrap{ display:flex; align-items:center; gap:6px; }
+.indBtn{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 10px; border-radius:10px;
+  background:rgba(0,0,0,.35); color:#d5fbe6;
+  border:1px solid rgba(255,255,255,.2);
+}
+.indBtn:hover{ outline:2px solid var(--accent); color:var(--accent-strong); }
+.indSelect{
+  padding:6px 8px; border-radius:10px;
+  background:rgba(255,255,255,.06); color:inherit;
+  border:1px solid rgba(255,255,255,.18);
+}
+
+/* Botão de tela cheia mais chamativo no header dos Controles */
+.btn-fs-strong{
+  background: radial-gradient(400px 200px at 50% -100%, rgba(33,243,141,.25), transparent) , rgba(255,255,255,.08) !important;
+  color: var(--accent-strong) !important;
+  box-shadow: 0 0 0 2px rgba(33,243,141,.35) inset, 0 0 16px rgba(33,243,141,.25);
+}
+.btn-fs-strong:hover{
+  outline: 2px solid var(--accent);
+}
