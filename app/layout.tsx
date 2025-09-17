@@ -1,34 +1,18 @@
 // app/layout.tsx
-import type { Metadata } from "next";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "RadarCrypto 2025",
-  description: "Simulador e site base — RadarCrypto 2025",
+  title: "RadarCrypto — Simulador de Trading",
+  description:
+    "Aprenda de verdade sem perder nada. Um simulador prático para testar estratégias sem risco.",
+  robots: { index: true, follow: true },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
-      <body
-        style={{
-          margin: 0,
-          fontFamily:
-            "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Noto Sans, sans-serif",
-          background: "#0b0f14",
-          color: "#e5e7eb",
-        }}
-      >
-        <Navbar />
-        <main style={{ maxWidth: 1024, margin: "32px auto", padding: "0 16px" }}>
-          {children}
-        </main>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
