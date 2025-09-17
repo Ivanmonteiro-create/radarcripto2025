@@ -2,7 +2,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 
-type Props = { symbol?: string };
+type Props = { symbol?: string }; // exemplo: "BINANCE:BTCUSDT"
 
 export default function TradingViewWidget({ symbol = "BINANCE:BTCUSDT" }: Props) {
   const ref = useRef<HTMLDivElement>(null);
@@ -11,7 +11,7 @@ export default function TradingViewWidget({ symbol = "BINANCE:BTCUSDT" }: Props)
     if (!ref.current) return;
     ref.current.innerHTML = `<iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tv_embed&symbol=${encodeURIComponent(
       symbol
-    )}&interval=60&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=f1f3f6&studies=[]&hideideas=1&theme=dark"
+    )}&interval=60&hidesidetoolbar=1&symboledit=1&saveimage=0&studies=[]&hideideas=1&theme=dark"
       style="width:100%;height:100%;border:0;border-radius:12px"></iframe>`;
   }, [symbol]);
 
