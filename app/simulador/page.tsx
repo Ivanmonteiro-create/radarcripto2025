@@ -1,31 +1,26 @@
 // app/simulador/page.tsx
 import TradingViewWidget from "@/components/TradingViewWidget";
-import Navbar from "@/components/Navbar";
+import TradeControls from "@/components/TradeControls";
 import Link from "next/link";
 
 export default function SimuladorPage() {
+  // layout: gráfico ocupa tudo; à direita apenas os controles
   return (
-    <main className="wrapper" style={{ gridTemplateColumns: "1fr 340px 200px" }}>
-      {/* Gráfico */}
-      <section className="panel" style={{ minHeight: "68dvh" }}>
-        <div style={{ height: "66dvh" }}>
+    <main className="wrapper" style={{ gridTemplateColumns: "1fr 360px" }}>
+      {/* Gráfico ocupa toda a área útil à esquerda */}
+      <section className="panel" style={{ minHeight: "78dvh" }}>
+        <div style={{ height: "76dvh" }}>
           <TradingViewWidget />
         </div>
       </section>
 
-      {/* Controles de Trade (placeholder) */}
-      <aside className="panel" style={{ minHeight: "68dvh" }}>
-        <h2 style={{ marginTop: 0 }}>Controles de Trade</h2>
-        <p className="muted small">
-          (Fase 2) Aqui entram saldo inicial, risco %, par, Comprar/Vender/Resetar e histórico.
-        </p>
-        <p style={{marginTop:20}}>
+      {/* Controles de Trade */}
+      <aside className="panel" style={{ minHeight: "78dvh" }}>
+        <TradeControls />
+        <div style={{ marginTop: 16 }}>
           <Link href="/" className="btn btn-primary">Voltar ao início</Link>
-        </p>
+        </div>
       </aside>
-
-      {/* Menu */}
-      <Navbar />
     </main>
   );
 }
