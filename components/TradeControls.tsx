@@ -28,14 +28,12 @@ export default function TradeControls({
   isFullscreen,
   onEnterFullscreen,
   onExitFullscreen,
-  strongFs = false,
 }: {
   symbol: string;
   onSymbolChange: (s: string) => void;
   isFullscreen?: boolean;
   onEnterFullscreen?: () => void;
   onExitFullscreen?: () => void;
-  strongFs?: boolean;
 }) {
   const [balance, setBalance] = useState<number>(10000);
   const [riskPct, setRiskPct] = useState<number>(1);
@@ -67,29 +65,27 @@ export default function TradeControls({
 
   return (
     <div>
-      {/* Cabeçalho com botão de tela cheia reforçado (à direita) */}
+      {/* Cabeçalho com só o ícone de tela cheia */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
         <h2 style={{ margin: 0, flex: 1 }}>Controles de Trade</h2>
         <button
-          className={`btn ${strongFs ? "btn-fs-strong" : ""}`}
+          className="btn btn-fs-icon"
           onClick={() => (isFullscreen ? onExitFullscreen?.() : onEnterFullscreen?.())}
-          title={isFullscreen ? "Sair de tela cheia (X/Esc)" : "Tela cheia do gráfico (F)"}
+          title={isFullscreen ? "Sair (X/Esc)" : "Tela cheia (F)"}
           aria-label={isFullscreen ? "Sair de tela cheia" : "Entrar em tela cheia"}
-          style={{ padding: "8px 10px", borderRadius: 10, border: "1px solid rgba(255,255,255,.18)", background: "rgba(255,255,255,.06)" }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
             {isFullscreen ? (
               <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             ) : (
               <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             )}
           </svg>
-          <span style={{ marginLeft: 6, fontWeight: 800 }}>Tela cheia</span>
         </button>
       </div>
 
       {/* Par e preço */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 10, marginBottom: 12 }}>
+      <div style={{ display: "grid", gap: 10, marginBottom: 12 }}>
         <label className="small muted">Par</label>
         <select
           value={symbol}
