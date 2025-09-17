@@ -83,3 +83,13 @@ body{
 
 /* utilidades */
 .muted{color:var(--muted)} .small{font-size:12px}
+/* Botão flutuante do fullscreen no gráfico */
+.fsBtn{
+  position:absolute; top:8px; right:8px;
+  width:34px; height:34px; border-radius:10px;
+  display:grid; place-items:center;
+  background:rgba(0,0,0,.35); color:#d5fbe6;
+  border:1px solid rgba(255,255,255,.2);
+  cursor:pointer;
+}
+.fsBtn:hover{ outline:2px solid var(--accent); color:var(--accent-strong); }
