@@ -23,9 +23,7 @@ const SYMBOLS = [
   "DOGEUSDT",
 ];
 
-const nf = new Intl.NumberFormat("pt-PT", {
-  maximumFractionDigits: 6,
-});
+const nf = new Intl.NumberFormat("pt-PT", { maximumFractionDigits: 6 });
 
 async function fetchPrice(symbol: string): Promise<number> {
   const r = await fetch(
@@ -37,10 +35,15 @@ async function fetchPrice(symbol: string): Promise<number> {
   return Number(j.price);
 }
 
-export default function TradeControls() {
+export default function TradeControls({
+  symbol,
+  onSymbolChange,
+}: {
+  symbol: string;
+  onSymbolChange: (s: string) => void;
+}) {
   const [balance, setBalance] = useState<number>(10000);
   const [riskPct, setRiskPct] = useState<number>(1);
-  const [symbol, setSymbol] = useState<string>("BTCUSDT");
   const [price, setPrice] = useState<number | null>(null);
   const [loadingPrice, setLoadingPrice] = useState(true);
   const [history, setHistory] = useState<Trade[]>([]);
@@ -48,8 +51,6 @@ export default function TradeControls() {
   // preço ao vivo do par selecionado (atualiza a cada 8s)
   useEffect(() => {
     let mounted = true;
-    let t: ReturnType<typeof setInterval> | null = null;
-
     const load = async () => {
       try {
         const p = await fetchPrice(symbol);
@@ -62,12 +63,8 @@ export default function TradeControls() {
       }
     };
     load();
-    t = setInterval(load, 8000);
-
-    return () => {
-      mounted = false;
-      if (t) clearInterval(t);
-    };
+    const t = setInterval(load, 8000);
+    return () => { mounted = false; clearInterval(t); };
   }, [symbol]);
 
   const symbolLabel = useMemo(
@@ -75,7 +72,6 @@ export default function TradeControls() {
     [symbol]
   );
 
-  // ações
   function addToHistory(trade: Trade) {
     setHistory((h) => [trade, ...h].slice(0, 50));
   }
@@ -90,7 +86,6 @@ export default function TradeControls() {
       riskPct,
     });
   }
-
   function onSell() {
     addToHistory({
       id: crypto.randomUUID(),
@@ -101,7 +96,6 @@ export default function TradeControls() {
       riskPct,
     });
   }
-
   function onReset() {
     setBalance(10000);
     setRiskPct(1);
@@ -114,7 +108,6 @@ export default function TradeControls() {
     });
   }
 
-  // valor de risco em USDT (apenas visual)
   const riskValue = useMemo(
     () => (isFinite(balance) ? (balance * riskPct) / 100 : 0),
     [balance, riskPct]
@@ -125,18 +118,11 @@ export default function TradeControls() {
       <h2 style={{ marginTop: 0, marginBottom: 12 }}>Controles de Trade</h2>
 
       {/* Par e preço */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr",
-          gap: 10,
-          marginBottom: 12,
-        }}
-      >
+      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 10, marginBottom: 12 }}>
         <label className="small muted">Par</label>
         <select
           value={symbol}
-          onChange={(e) => setSymbol(e.target.value)}
+          onChange={(e) => onSymbolChange(e.target.value)}
           style={{
             padding: "10px 12px",
             borderRadius: 12,
@@ -152,10 +138,7 @@ export default function TradeControls() {
           ))}
         </select>
 
-        <div
-          className="tickerCard"
-          style={{ display: "flex", justifyContent: "space-between" }}
-        >
+        <div className="tickerCard" style={{ display: "flex", justifyContent: "space-between" }}>
           <div className="tickerSymbol strong">{symbolLabel}</div>
           <div className="tickerPrice green">
             {loadingPrice ? "…" : price !== null ? nf.format(price) : "—"}
@@ -195,45 +178,21 @@ export default function TradeControls() {
 
       {/* Ações */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 12 }}>
-        <button onClick={onBuy} className="btn" style={btnBuy}>
-          Comprar
-        </button>
-        <button onClick={onSell} className="btn" style={btnSell}>
-          Vender
-        </button>
-        <button onClick={onReset} className="btn" style={btnReset}>
-          Resetar
-        </button>
+        <button onClick={onBuy} className="btn" style={btnBuy}>Comprar</button>
+        <button onClick={onSell} className="btn" style={btnSell}>Vender</button>
+        <button onClick={onReset} className="btn" style={btnReset}>Resetar</button>
       </div>
 
       {/* Histórico */}
       <div style={{ marginTop: 16 }}>
         <h3 style={{ margin: "0 0 8px 0", fontSize: 16 }}>Histórico</h3>
-        <div
-          style={{
-            display: "grid",
-            gap: 8,
-            maxHeight: "32dvh",
-            overflowY: "auto",
-            paddingRight: 4,
-          }}
-        >
-          {history.length === 0 && (
-            <div className="small muted">Sem operações ainda.</div>
-          )}
+        <div style={{ display: "grid", gap: 8, maxHeight: "32dvh", overflowY: "auto", paddingRight: 4 }}>
+          {history.length === 0 && <div className="small muted">Sem operações ainda.</div>}
           {history.map((t) => (
-            <div
-              key={t.id}
-              className="tickerCard"
-              style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 8 }}
-            >
+            <div key={t.id} className="tickerCard" style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 8 }}>
               <span className="small muted">{t.time}</span>
-              <span>
-                <strong>{t.side}</strong> • {t.symbol.replace("USDT", "")}/USDT
-              </span>
-              <span className="small">
-                {t.price ? nf.format(t.price) : "—"} {t.riskPct ? `• ${t.riskPct}%` : ""}
-              </span>
+              <span><strong>{t.side}</strong> • {t.symbol.replace("USDT", "")}/USDT</span>
+              <span className="small">{t.price ? nf.format(t.price) : "—"} {t.riskPct ? `• ${t.riskPct}%` : ""}</span>
             </div>
           ))}
         </div>
@@ -250,7 +209,6 @@ const inputStyle: React.CSSProperties = {
   color: "inherit",
   border: "1px solid rgba(255,255,255,.12)",
 };
-
 const btnBuy: React.CSSProperties = {
   background: "linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10))",
   color: "#1cff80",
@@ -259,7 +217,6 @@ const btnBuy: React.CSSProperties = {
   padding: "10px 12px",
   fontWeight: 800,
 };
-
 const btnSell: React.CSSProperties = {
   background: "linear-gradient(180deg, rgba(255,76,76,.20), rgba(255,76,76,.08))",
   color: "#ff6b6b",
@@ -268,7 +225,6 @@ const btnSell: React.CSSProperties = {
   padding: "10px 12px",
   fontWeight: 800,
 };
-
 const btnReset: React.CSSProperties = {
   background: "rgba(255,255,255,.06)",
   color: "inherit",
