@@ -131,3 +131,14 @@ body{
 .btn-fs-strong:hover{
   outline: 2px solid var(--accent);
 }
+/* Ícone de tela cheia mais visível */
+.btn-fs-icon{
+  background: radial-gradient(200px 100px at 50% -60%, rgba(33,243,141,.25), transparent),
+              rgba(255,255,255,.10);
+  border: 1px solid rgba(33,243,141,.5);
+  color: var(--accent-strong);
+  box-shadow: 0 0 8px rgba(33,243,141,.4);
+}
+.btn-fs-icon:hover{
+  outline: 2px solid var(--accent);
+}
