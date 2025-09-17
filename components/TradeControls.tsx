@@ -13,7 +13,6 @@ type Trade = {
 };
 
 const SYMBOLS = ["BTCUSDT","ETHUSDT","SOLUSDT","BNBUSDT","ADAUSDT","XRPUSDT","LINKUSDT","DOGEUSDT"];
-
 const nf = new Intl.NumberFormat("pt-PT", { maximumFractionDigits: 6 });
 
 async function fetchPrice(symbol: string): Promise<number> {
@@ -29,12 +28,14 @@ export default function TradeControls({
   isFullscreen,
   onEnterFullscreen,
   onExitFullscreen,
+  strongFs = false,
 }: {
   symbol: string;
   onSymbolChange: (s: string) => void;
   isFullscreen?: boolean;
   onEnterFullscreen?: () => void;
   onExitFullscreen?: () => void;
+  strongFs?: boolean;
 }) {
   const [balance, setBalance] = useState<number>(10000);
   const [riskPct, setRiskPct] = useState<number>(1);
@@ -42,19 +43,13 @@ export default function TradeControls({
   const [loadingPrice, setLoadingPrice] = useState(true);
   const [history, setHistory] = useState<Trade[]>([]);
 
-  // preço ao vivo do par selecionado (atualiza a cada 8s)
   useEffect(() => {
     let mounted = true;
     const load = async () => {
       try {
         const p = await fetchPrice(symbol);
-        if (mounted) {
-          setPrice(p);
-          setLoadingPrice(false);
-        }
-      } catch {
-        if (mounted) setPrice(null);
-      }
+        if (mounted) { setPrice(p); setLoadingPrice(false); }
+      } catch { if (mounted) setPrice(null); }
     };
     load();
     const t = setInterval(load, 8000);
@@ -63,42 +58,25 @@ export default function TradeControls({
 
   const symbolLabel = useMemo(() => `${symbol.replace("USDT","")}/USDT`, [symbol]);
 
-  function addToHistory(trade: Trade) {
-    setHistory((h) => [trade, ...h].slice(0, 50));
-  }
-  function onBuy() {
-    addToHistory({ id: crypto.randomUUID(), time: new Date().toLocaleString(), side: "COMPRA", symbol, price: price ?? undefined, riskPct });
-  }
-  function onSell() {
-    addToHistory({ id: crypto.randomUUID(), time: new Date().toLocaleString(), side: "VENDA", symbol, price: price ?? undefined, riskPct });
-  }
-  function onReset() {
-    setBalance(10000);
-    setRiskPct(1);
-    setHistory([]);
-    addToHistory({ id: crypto.randomUUID(), time: new Date().toLocaleString(), side: "RESET", symbol });
-  }
+  function addToHistory(trade: Trade) { setHistory((h) => [trade, ...h].slice(0, 50)); }
+  function onBuy()  { addToHistory({ id: crypto.randomUUID(), time: new Date().toLocaleString(), side: "COMPRA", symbol, price: price ?? undefined, riskPct }); }
+  function onSell() { addToHistory({ id: crypto.randomUUID(), time: new Date().toLocaleString(), side: "VENDA",  symbol, price: price ?? undefined, riskPct }); }
+  function onReset(){ setBalance(10000); setRiskPct(1); setHistory([]); addToHistory({ id: crypto.randomUUID(), time: new Date().toLocaleString(), side: "RESET", symbol }); }
 
   const riskValue = useMemo(() => (isFinite(balance) ? (balance * riskPct) / 100 : 0), [balance, riskPct]);
 
   return (
     <div>
-      {/* Cabeçalho com ícone de tela cheia à direita */}
+      {/* Cabeçalho com botão de tela cheia reforçado (à direita) */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
         <h2 style={{ margin: 0, flex: 1 }}>Controles de Trade</h2>
         <button
-          className="btn"
+          className={`btn ${strongFs ? "btn-fs-strong" : ""}`}
           onClick={() => (isFullscreen ? onExitFullscreen?.() : onEnterFullscreen?.())}
           title={isFullscreen ? "Sair de tela cheia (X/Esc)" : "Tela cheia do gráfico (F)"}
-          style={{
-            padding: "8px 10px",
-            borderRadius: 10,
-            border: "1px solid rgba(255,255,255,.18)",
-            background: "rgba(255,255,255,.06)",
-          }}
           aria-label={isFullscreen ? "Sair de tela cheia" : "Entrar em tela cheia"}
+          style={{ padding: "8px 10px", borderRadius: 10, border: "1px solid rgba(255,255,255,.18)", background: "rgba(255,255,255,.06)" }}
         >
-          {/* mesmo ícone do FS, mas aqui no header */}
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
             {isFullscreen ? (
               <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -106,6 +84,7 @@ export default function TradeControls({
               <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
             )}
           </svg>
+          <span style={{ marginLeft: 6, fontWeight: 800 }}>Tela cheia</span>
         </button>
       </div>
 
