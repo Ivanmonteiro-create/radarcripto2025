@@ -93,3 +93,13 @@ body{
   cursor:pointer;
 }
 .fsBtn:hover{ outline:2px solid var(--accent); color:var(--accent-strong); }
+/* Botão flutuante no topo direito do gráfico (abaixo da barra de ferramentas do TradingView) */
+.topGraphBtn{
+  position:absolute;
+  top: 46px;     /* abaixo da barra do TV (após 'Indicadores') */
+  right: 8px;
+  z-index: 5;
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-weight: 700;
+}
