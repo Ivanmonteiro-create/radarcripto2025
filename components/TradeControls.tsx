@@ -12,24 +12,12 @@ type Trade = {
   riskPct?: number;
 };
 
-const SYMBOLS = [
-  "BTCUSDT",
-  "ETHUSDT",
-  "SOLUSDT",
-  "BNBUSDT",
-  "ADAUSDT",
-  "XRPUSDT",
-  "LINKUSDT",
-  "DOGEUSDT",
-];
+const SYMBOLS = ["BTCUSDT","ETHUSDT","SOLUSDT","BNBUSDT","ADAUSDT","XRPUSDT","LINKUSDT","DOGEUSDT"];
 
 const nf = new Intl.NumberFormat("pt-PT", { maximumFractionDigits: 6 });
 
 async function fetchPrice(symbol: string): Promise<number> {
-  const r = await fetch(
-    `https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`,
-    { cache: "no-store" }
-  );
+  const r = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`, { cache: "no-store" });
   if (!r.ok) throw new Error("Erro ao buscar preço");
   const j = (await r.json()) as { price: string };
   return Number(j.price);
@@ -38,9 +26,15 @@ async function fetchPrice(symbol: string): Promise<number> {
 export default function TradeControls({
   symbol,
   onSymbolChange,
+  isFullscreen,
+  onEnterFullscreen,
+  onExitFullscreen,
 }: {
   symbol: string;
   onSymbolChange: (s: string) => void;
+  isFullscreen?: boolean;
+  onEnterFullscreen?: () => void;
+  onExitFullscreen?: () => void;
 }) {
   const [balance, setBalance] = useState<number>(10000);
   const [riskPct, setRiskPct] = useState<number>(1);
@@ -67,55 +61,53 @@ export default function TradeControls({
     return () => { mounted = false; clearInterval(t); };
   }, [symbol]);
 
-  const symbolLabel = useMemo(
-    () => `${symbol.replace("USDT", "")}/USDT`,
-    [symbol]
-  );
+  const symbolLabel = useMemo(() => `${symbol.replace("USDT","")}/USDT`, [symbol]);
 
   function addToHistory(trade: Trade) {
     setHistory((h) => [trade, ...h].slice(0, 50));
   }
-
   function onBuy() {
-    addToHistory({
-      id: crypto.randomUUID(),
-      time: new Date().toLocaleString(),
-      side: "COMPRA",
-      symbol,
-      price: price ?? undefined,
-      riskPct,
-    });
+    addToHistory({ id: crypto.randomUUID(), time: new Date().toLocaleString(), side: "COMPRA", symbol, price: price ?? undefined, riskPct });
   }
   function onSell() {
-    addToHistory({
-      id: crypto.randomUUID(),
-      time: new Date().toLocaleString(),
-      side: "VENDA",
-      symbol,
-      price: price ?? undefined,
-      riskPct,
-    });
+    addToHistory({ id: crypto.randomUUID(), time: new Date().toLocaleString(), side: "VENDA", symbol, price: price ?? undefined, riskPct });
   }
   function onReset() {
     setBalance(10000);
     setRiskPct(1);
     setHistory([]);
-    addToHistory({
-      id: crypto.randomUUID(),
-      time: new Date().toLocaleString(),
-      side: "RESET",
-      symbol,
-    });
+    addToHistory({ id: crypto.randomUUID(), time: new Date().toLocaleString(), side: "RESET", symbol });
   }
 
-  const riskValue = useMemo(
-    () => (isFinite(balance) ? (balance * riskPct) / 100 : 0),
-    [balance, riskPct]
-  );
+  const riskValue = useMemo(() => (isFinite(balance) ? (balance * riskPct) / 100 : 0), [balance, riskPct]);
 
   return (
     <div>
-      <h2 style={{ marginTop: 0, marginBottom: 12 }}>Controles de Trade</h2>
+      {/* Cabeçalho com ícone de tela cheia à direita */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+        <h2 style={{ margin: 0, flex: 1 }}>Controles de Trade</h2>
+        <button
+          className="btn"
+          onClick={() => (isFullscreen ? onExitFullscreen?.() : onEnterFullscreen?.())}
+          title={isFullscreen ? "Sair de tela cheia (X/Esc)" : "Tela cheia do gráfico (F)"}
+          style={{
+            padding: "8px 10px",
+            borderRadius: 10,
+            border: "1px solid rgba(255,255,255,.18)",
+            background: "rgba(255,255,255,.06)",
+          }}
+          aria-label={isFullscreen ? "Sair de tela cheia" : "Entrar em tela cheia"}
+        >
+          {/* mesmo ícone do FS, mas aqui no header */}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            {isFullscreen ? (
+              <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            ) : (
+              <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            )}
+          </svg>
+        </button>
+      </div>
 
       {/* Par e preço */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 10, marginBottom: 12 }}>
@@ -123,26 +115,16 @@ export default function TradeControls({
         <select
           value={symbol}
           onChange={(e) => onSymbolChange(e.target.value)}
-          style={{
-            padding: "10px 12px",
-            borderRadius: 12,
-            background: "rgba(255,255,255,.03)",
-            color: "inherit",
-            border: "1px solid rgba(255,255,255,.12)",
-          }}
+          style={{ padding: "10px 12px", borderRadius: 12, background: "rgba(255,255,255,.03)", color: "inherit", border: "1px solid rgba(255,255,255,.12)" }}
         >
           {SYMBOLS.map((s) => (
-            <option key={s} value={s}>
-              {s.replace("USDT", "")}/USDT
-            </option>
+            <option key={s} value={s}>{s.replace("USDT","")}/USDT</option>
           ))}
         </select>
 
         <div className="tickerCard" style={{ display: "flex", justifyContent: "space-between" }}>
           <div className="tickerSymbol strong">{symbolLabel}</div>
-          <div className="tickerPrice green">
-            {loadingPrice ? "…" : price !== null ? nf.format(price) : "—"}
-          </div>
+          <div className="tickerPrice green">{loadingPrice ? "…" : price !== null ? nf.format(price) : "—"}</div>
         </div>
       </div>
 
@@ -150,25 +132,11 @@ export default function TradeControls({
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
         <div>
           <label className="small muted">Saldo (USDT)</label>
-          <input
-            type="number"
-            value={balance}
-            onChange={(e) => setBalance(Number(e.target.value))}
-            min={0}
-            style={inputStyle}
-          />
+          <input type="number" value={balance} onChange={(e) => setBalance(Number(e.target.value))} min={0} style={inputStyle} />
         </div>
         <div>
           <label className="small muted">Risco por trade (%)</label>
-          <input
-            type="number"
-            value={riskPct}
-            onChange={(e) => setRiskPct(Number(e.target.value))}
-            min={0}
-            max={100}
-            step={0.1}
-            style={inputStyle}
-          />
+          <input type="number" value={riskPct} onChange={(e) => setRiskPct(Number(e.target.value))} min={0} max={100} step={0.1} style={inputStyle} />
         </div>
       </div>
 
@@ -191,7 +159,7 @@ export default function TradeControls({
           {history.map((t) => (
             <div key={t.id} className="tickerCard" style={{ display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 8 }}>
               <span className="small muted">{t.time}</span>
-              <span><strong>{t.side}</strong> • {t.symbol.replace("USDT", "")}/USDT</span>
+              <span><strong>{t.side}</strong> • {t.symbol.replace("USDT","")}/USDT</span>
               <span className="small">{t.price ? nf.format(t.price) : "—"} {t.riskPct ? `• ${t.riskPct}%` : ""}</span>
             </div>
           ))}
