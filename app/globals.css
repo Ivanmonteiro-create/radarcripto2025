@@ -91,3 +91,9 @@ body {
 /* utilidades */
 .muted { color: var(--muted); }
 .small { font-size: 12px; }
+/* === ajustes para os tickers ao vivo === */
+.tickerCard { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 12px 14px; }
+.tickerSymbol { color: var(--text); font-size: 14px; letter-spacing: .08em; text-transform: uppercase; font-weight: 800; }
+.tickerSymbol.strong { font-size: 16px; }
+.tickerPrice { font-weight: 700; font-size: 16px; opacity: 0.95; }
+.tickerPrice.green { color: var(--accent-strong); filter: drop-shadow(0 0 6px rgba(33,243,141,.25)); }
