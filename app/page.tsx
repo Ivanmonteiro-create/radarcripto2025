@@ -1,68 +1,44 @@
 // app/page.tsx
-export default function Home() {
+import Navbar from "@/components/Navbar";
+import TickerCard from "@/components/TickerCard";
+
+export default function HomePage() {
   return (
-    <section
-      style={{
-        display: "grid",
-        gap: 16,
-        alignItems: "center",
-        justifyItems: "center",
-        minHeight: "55vh",
-        textAlign: "center",
-      }}
-    >
-      <div
-        style={{
-          padding: "8px 12px",
-          border: "1px solid rgba(34,197,94,0.35)",
-          color: "#22c55e",
-          borderRadius: 999,
-          fontSize: 12,
-          letterSpacing: 0.3,
-        }}
-      >
-        ✅ Deploy OK — Checkpoint #1
-      </div>
+    <main className="wrapper">
+      {/* Esquerda: tickers */}
+      <section className="panel leftPanel">
+        <div className="tickers">
+          <TickerCard symbol="ADA/USDT"  price="0,85729"   delta="+0,42%" />
+          <TickerCard symbol="BTC/USDT"  price="116.283,60" delta="+1,02%" />
+          <TickerCard symbol="ETH/USDT"  price="4.950,70"   delta="+0,35%" />
+          <TickerCard symbol="SOL/USDT"  price="284,27"     delta="+0,91%" />
+          <TickerCard symbol="LINK/USDT" price="30,07"      delta="-0,12%" />
+          <TickerCard symbol="BNB/USDT"  price="835,00"     delta="+0,66%" />
+          <TickerCard symbol="XRP/USDT"  price="2,3170"     delta="+0,08%" />
+          <TickerCard symbol="DOGE/USDT" price="0,36528"    delta="-0,21%" />
+        </div>
+      </section>
 
-      <h1 style={{ fontSize: 36, margin: 0, lineHeight: 1.2 }}>
-        Bem-vindo ao <span style={{ color: "#22d3ee" }}>RadarCrypto 2025</span>
-      </h1>
+      {/* Centro: hero */}
+      <section className="panel hero">
+        <div className="heroInner">
+          <div className="heroTag">SIMULADOR DE TRADING</div>
+          <h1 className="heroTitle">Aprenda de verdade sem perder nada.</h1>
+          <p className="heroSubtitle">
+            Um simulador prático para testar estratégias e evoluir sem risco — histórico local no navegador.
+            Em construção: Fase 1 (site base online).
+          </p>
 
-      <p style={{ maxWidth: 680, color: "#94a3b8" }}>
-        Este é o esqueleto inicial. A partir daqui vamos construir o simulador,
-        blocos de página e integrações — sempre com checkpoints.
-      </p>
+          <div className="liveLineWrap" aria-hidden>
+            <div className="liveLine"></div>
+            <div className="liveDot"></div>
+          </div>
+          <p className="small muted">Linha viva — efeito visual</p>
+        </div>
+      </section>
 
-      <div style={{ display: "flex", gap: 12 }}>
-        <a
-          href="/simulador"
-          style={{
-            textDecoration: "none",
-            background: "#22c55e",
-            color: "#0b0f14",
-            padding: "10px 14px",
-            borderRadius: 8,
-            fontWeight: 600,
-          }}
-        >
-          Acessar simulador
-        </a>
-        <a
-          href="https://github.com/"
-          target="_blank"
-          rel="noreferrer"
-          style={{
-            textDecoration: "none",
-            border: "1px solid rgba(255,255,255,0.18)",
-            color: "#e5e7eb",
-            padding: "10px 14px",
-            borderRadius: 8,
-            fontWeight: 600,
-          }}
-        >
-          Ver repositório
-        </a>
-      </div>
-    </section>
+      {/* Direita: menu */}
+      <Navbar />
+    </main>
   );
 }
