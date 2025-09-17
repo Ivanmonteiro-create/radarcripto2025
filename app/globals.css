@@ -97,3 +97,19 @@ body {
 .tickerSymbol.strong { font-size: 16px; }
 .tickerPrice { font-weight: 700; font-size: 16px; opacity: 0.95; }
 .tickerPrice.green { color: var(--accent-strong); filter: drop-shadow(0 0 6px rgba(33,243,141,.25)); }
+/* reduz animação para quem prefere menos movimento */
+@media (prefers-reduced-motion: reduce) {
+  .liveDot { animation: none; left: 100%; }
+}
+
+/* estado de “carregando” para cards (quando quiser usar) */
+.skeleton {
+  position: relative; overflow: hidden; background: rgba(255,255,255,.06);
+}
+.skeleton::after {
+  content: ""; position: absolute; inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+  animation: shimmer 1.2s infinite;
+}
+@keyframes shimmer { 100% { transform: translateX(100%); } }
