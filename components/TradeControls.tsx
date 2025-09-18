@@ -65,7 +65,7 @@ export default function TradeControls({
 
   return (
     <div>
-      {/* Cabeçalho com só o ícone de tela cheia */}
+      {/* Cabeçalho com apenas o ícone de tela cheia, mais forte */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
         <h2 style={{ margin: 0, flex: 1 }}>Controles de Trade</h2>
         <button
