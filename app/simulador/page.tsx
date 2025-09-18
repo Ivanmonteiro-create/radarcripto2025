@@ -36,11 +36,11 @@ export default function SimuladorPage() {
   // =========================================
 
   return (
-    // Layout específico do simulador (apenas aqui)
+    // Layout específico do simulador
     <main
       style={{
         display: 'grid',
-        gridTemplateColumns: '1fr 380px', // + ~3–4 cm para o painel
+        gridTemplateColumns: '1fr 340px', // ajustado (reduzi ~1,5 cm)
         gap: 12,
         minHeight: '100dvh',
         padding: 16,
@@ -59,17 +59,15 @@ export default function SimuladorPage() {
           <TVChart symbol={symbol} />
         </div>
 
-        {/* Ícone Tela Cheia — alinhado na MESMA LINHA da câmera */}
+        {/* Ícone Tela Cheia — mesma linha da câmera */}
         <button
           type="button"
           aria-label="Tela cheia"
           title="Tela cheia (F) / Sair (X)"
           onClick={toggleFs}
           className="chartFsBtn"
-          // linha da câmera costuma alinhar melhor com top: 8
-          style={{ top: 8, right: 74 }}
+          style={{ top: 6, right: 74 }} // alinhado com a câmera
         >
-          {/* setas para fora (ícone “original”) */}
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M9 3H3v6M15 3h6v6M9 21H3v-6M15 21h6v-6"
                   stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -77,7 +75,7 @@ export default function SimuladorPage() {
         </button>
       </section>
 
-      {/* COLUNA: Painel de Trade (único, mais largo) */}
+      {/* COLUNA: Painel de Trade */}
       <aside
         className="panel"
         style={{
@@ -88,7 +86,7 @@ export default function SimuladorPage() {
           lineHeight: 1.28,
         }}
       >
-        {/* Cabeçalho do painel: título + Voltar ao início (apenas aqui em cima) */}
+        {/* Cabeçalho do painel: título + Voltar ao início */}
         <header
           style={{
             display: 'flex',
