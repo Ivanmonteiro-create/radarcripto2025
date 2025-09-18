@@ -3,14 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import TradingViewWidget from "@/components/TradingViewWidget";
 import TradeControls from "@/components/TradeControls";
-import Link from "next/link";
 
 export default function SimuladorPage() {
   const [symbol, setSymbol] = useState<string>("BTCUSDT");
 
+  // fullscreen do gráfico
   const graphRef = useRef<HTMLDivElement>(null);
   const [isFs, setIsFs] = useState(false);
-
   const enterFs = () => graphRef.current?.requestFullscreen?.();
   const exitFs  = () => document.fullscreenElement && document.exitFullscreen?.();
 
@@ -30,25 +29,36 @@ export default function SimuladorPage() {
 
   return (
     <main className="wrapper" style={{ gridTemplateColumns: "1fr 360px" }}>
-      {/* Gráfico */}
+      {/* Gráfico ocupa tudo */}
       <section className="panel" style={{ height: "calc(100dvh - 32px)", padding: 0 }}>
         <div ref={graphRef} style={{ position: "relative", width: "100%", height: "100%" }}>
-          {/* Botão fixo no topo, ao lado da câmera/antes de 'Indicadores' */}
-          <div className="chartTopButtons">
-            <Link href="/" className="btn btn-primary">Voltar ao início</Link>
-          </div>
+          {/* Ícone de Tela Cheia AO LADO da câmera (topo direito do chart) */}
+          <button
+            className="chartFsBtn"
+            title={isFs ? "Sair de tela cheia (X/Esc)" : "Tela cheia (F)"}
+            aria-label={isFs ? "Sair de tela cheia" : "Entrar em tela cheia"}
+            onClick={() => (isFs ? exitFs() : enterFs())}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              {isFs ? (
+                <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              ) : (
+                <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              )}
+            </svg>
+          </button>
+
           <TradingViewWidget symbol={`BINANCE:${symbol}`} />
         </div>
       </section>
 
-      {/* Controles */}
+      {/* Controles (agora com “Voltar ao início” no cabeçalho) */}
       <aside className="panel" style={{ height: "calc(100dvh - 32px)" }}>
         <TradeControls
           symbol={symbol}
           onSymbolChange={setSymbol}
+          // apenas para atalhos de teclado refletirem estado
           isFullscreen={isFs}
-          onEnterFullscreen={enterFs}
-          onExitFullscreen={exitFs}
         />
       </aside>
     </main>
