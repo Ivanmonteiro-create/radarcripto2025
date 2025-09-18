@@ -1,14 +1,14 @@
-/* app/simulador/page.tsx */
+// app/simulador/page.tsx
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 
-// Gráfico
+// Gráfico TradingView (o mesmo componente que você já usa)
 const TVChart = dynamic(() => import('@/components/TradingViewWidget'), { ssr: false });
 
-// Controles
+// Painel de controles (o mesmo que você já usa)
 import TradeControls from '@/components/TradeControls';
 
 export default function SimuladorPage() {
@@ -18,16 +18,15 @@ export default function SimuladorPage() {
     if (s) setSymbol(s);
   }, []);
 
-  // Fullscreen helpers
+  // === Tela cheia (F entra/alternar, X sai) ===============================
   const enterFs = () => document.getElementById('chart-root')?.requestFullscreen?.();
-  const exitFs = () => (document as any).exitFullscreen?.();
+  const exitFs  = () => (document as any).exitFullscreen?.();
   const toggleFs = () => {
     const doc: any = document;
     if (!doc.fullscreenElement) enterFs();
     else exitFs();
   };
 
-  // Atalhos F / X
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const k = e.key.toLowerCase();
@@ -37,59 +36,70 @@ export default function SimuladorPage() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
+  // =======================================================================
 
   return (
-    <main className="wrapper">
-      {/* SEM coluna esquerda — o histórico vai dentro do painel à direita */}
-      <section className="panel" style={{ position: 'relative', gridColumn: '1 / span 2' }}>
+    // Layout ESPECÍFICO do simulador (não altera a Home):
+    <main
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 280px',   // gráfico + painel mais largo
+        gap: 12,
+        minHeight: '100dvh',
+        padding: 16,
+      }}
+    >
+      {/* COLUNA: Gráfico (margens laterais um pouco menores) */}
+      <section className="panel" style={{ position: 'relative', padding: 12 }}>
         <div
           id="chart-root"
-          style={{ position: 'relative', width: '100%', height: 'calc(100vh - 40px)' }}
+          style={{
+            position: 'relative',
+            width: '100%',
+            height: 'calc(100vh - 40px)', // preenche a tela
+          }}
         >
           <TVChart symbol={symbol} />
         </div>
 
-        {/* Ícone de tela cheia (SVG), alinhado ao lado da câmera */}
+        {/* Ícone TELACHEIA ao lado da câmera (mesma linha, ~1cm de folga) */}
         <button
           type="button"
-          title="Tela cheia (F) / Sair (X)"
           aria-label="Tela cheia"
-          className="chartFsBtn"
+          title="Tela cheia (F) / Sair (X)"
           onClick={toggleFs}
-          style={{ top: 6, right: 44 }}
+          className="chartFsBtn"
+          // a câmera do TV fica encostada na direita; deixamos ~74px para dar “respiro”
+          style={{ top: 6, right: 74 }}
         >
-          {/* setas para fora (ícone “original-style”) */}
+          {/* setas para fora (estilo original) */}
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M9 3H3v6M15 3h6v6M9 21H3v-6M15 21h6v-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M9 3H3v6M15 3h6v6M9 21H3v-6M15 21h6v-6"
+                  stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </button>
       </section>
 
-      {/* CONTROLES DE TRADE — tamanho normal/maior + histórico embaixo */}
-      <aside className="rightMenu">
-        <div className="panel" style={{ fontSize: 14, lineHeight: 1.26 }}>
-          <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 12 }}>
-            <Link href="/" className="btn btn-primary">Voltar ao início</Link>
-            <h2 style={{ fontSize: 18, fontWeight: 800, margin: 0 }}>Controles de Trade</h2>
-          </header>
+      {/* COLUNA: Painel de Trade (tamanho “normal/maior”) */}
+      <aside className="panel" style={{ fontSize: 14, lineHeight: 1.28, display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <h2 style={{ fontSize: 18, fontWeight: 800, margin: 0 }}>Controles de Trade</h2>
 
-          {/* SEUS CONTROLES (apenas um bloco) */}
-          <TradeControls symbol={symbol} onSymbolChange={onSymbolChange} />
+        {/* ÚNICO bloco de controles (sem duplicatas) */}
+        <TradeControls symbol={symbol} onSymbolChange={onSymbolChange} />
 
-          {/* HISTÓRICO & ATALHOS — agora AQUI embaixo */}
-          <div style={{ marginTop: 12, display: 'grid', gap: 8 }}>
-            <div className="cardMini">
-              <div className="cardTitle">Histórico</div>
-              <div className="histWrap fill">
-                <div className="histRow muted xs">Sem operações ainda.</div>
-              </div>
-            </div>
-
-            <div className="cardMini">
-              <div className="cardTitle">Atalhos</div>
-              <div className="muted xs">F: Tela cheia &nbsp;|&nbsp; X: Sair tela cheia</div>
+        {/* Histórico logo abaixo de Comprar/Vender (fica por último no painel) */}
+        <div style={{ display: 'grid', gap: 8 }}>
+          <div className="cardMini">
+            <div className="cardTitle">Histórico</div>
+            <div className="histWrap fill">
+              <div className="histRow muted xs">Sem operações ainda.</div>
             </div>
           </div>
+        </div>
+
+        {/* Único “Voltar ao início” — mantido somente aqui embaixo */}
+        <div style={{ marginTop: 'auto' }}>
+          <Link href="/" className="btn btn-primary">Voltar ao início</Link>
         </div>
       </aside>
     </main>
