@@ -1,256 +1,76 @@
-/* ===== Reset Básico ===== */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+/* ===== Painel compacto cheio ===== */
+.compactPanel { padding: 12px !important; }
+.compactRoot { font-size: 13px; }            /* ↑ maior que antes */
+.compactTitle { font-size: 15px; margin: 0; font-weight: 800; }
+.compactHeader { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
 
-html,
-body {
-  height: 100%;
-}
+/* Grid 2 colunas do painel */
+.compactGrid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; height: 100%; }
+.colA, .colB { display:flex; flex-direction:column; gap:8px; min-width:0; }
+.twoCols { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+.threeCols { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; }
 
-body {
-  background: #000;
-  color: #fff;
-  font-family: Arial, sans-serif;
-  line-height: 1.4;
-}
+.lbl { font-size: 12px; color: rgba(255,255,255,.7); margin-bottom:2px; }
+.muted { color: rgba(255,255,255,.65); }
+.muted.xs { font-size: 11px; color: rgba(255,255,255,.55); }
+.xs { font-size: 11px; }
+.green { color: #1cff80; font-weight: 800; }
 
-/* ===== Links ===== */
-a {
-  color: #16f08a;
-  text-decoration: none;
-}
-
-h1,
-h2,
-h3,
-h4 {
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-}
-
-/* ===== Navbar ===== */
-nav {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  padding: 10px 0;
-}
-
-nav a {
-  padding: 6px 12px;
-  border-radius: 6px;
-}
-
-nav a.active {
-  background: #16f08a;
-  color: #000;
-  font-weight: bold;
-}
-
-/* ===== Main ===== */
-main {
-  padding: 20px;
-}
-
-/* ===== Painel do Simulador ===== */
-.compactRoot {
-  font-size: 14px;
-}
-
-.compactTitle {
-  font-size: 16px;
-  font-weight: 800;
-  margin: 0;
-}
-
-.compactHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.compactGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  height: 100%;
-}
-
-.colA,
-.colB {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-}
-
-/* ===== Tipografia ===== */
-.lbl {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 2px;
-}
-
-.muted {
-  color: rgba(255, 255, 255, 0.65);
-}
-
-.muted.xs {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.xs {
-  font-size: 12px;
-}
-
-.green {
-  color: #1cff80;
-}
-
-/* ===== Tickers ===== */
-.tickerRow {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-}
-
-/* ===== Inputs ===== */
 .inp {
   width: 100%;
-  background: #111;
-  border: 1px solid #333;
-  border-radius: 6px;
-  padding: 4px;
-  font-size: 13px;
-  color: #fff;
+  height: 34px;               /* ↑ 32 -> 34px para legibilidade */
+  padding: 0 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.03);
+  color: inherit;
+  border: 1px solid rgba(255,255,255,.12);
 }
+.inp-disabled { background: rgba(255,255,255,.08); cursor: not-allowed; }
 
-/* ===== Botões ===== */
-.btn {
-  padding: 6px 10px;
-  border-radius: 6px;
-  border: 1px solid #333;
-  background: #222;
-  color: #fff;
-  cursor: pointer;
-  transition: background 0.2s ease-in-out;
-}
+.btn { border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); border-radius: 10px; color: inherit; }
+.btn:hover { background: rgba(255,255,255,.12); }
+.btn-xs { padding: 7px 9px; font-size: 12px; border-radius: 10px; } /* levemente maior */
+.btn-primary { background: rgba(33,243,141,.15); border-color: rgba(33,243,141,.35); color:#1cff80; font-weight:800; }
+.btnBuy { background: linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10)); color:#1cff80; border:1px solid rgba(33,243,141,.35); font-weight:800; }
+.btnSell{ background: linear-gradient(180deg, rgba(255,76,76,.20), rgba(255,76,76,.08)); color:#ff6b6b; border:1px solid rgba(255,76,76,.35); font-weight:800; }
 
-.btn:hover {
-  background: #333;
-}
+.tickerRow { display:flex; justify-content:space-between; align-items:center; padding:7px 9px; border:1px solid rgba(255,255,255,.12); border-radius:10px; background:rgba(255,255,255,.04); }
 
-.btn-xs {
-  font-size: 12px;
-  padding: 3px 6px;
-}
-
-.btnBuy {
-  background: #065f46;
-}
-
-.btnBuy:hover {
-  background: #047857;
-}
-
-.btnSell {
-  background: #7f1d1d;
-}
-
-.btnSell:hover {
-  background: #991b1b;
-}
-
-.btn-primary {
-  background: #1e40af;
-}
-
-.btn-primary:hover {
-  background: #1d4ed8;
-}
-
-/* ===== Grids ===== */
-.twoCols {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-}
-
-.threeCols {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 6px;
-}
-
-/* ===== Cards ===== */
 .cardMini {
-  background: #111;
-  border: 1px solid #333;
-  border-radius: 8px;
-  padding: 6px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.04);
+  border-radius: 12px;
+  padding:9px;
+  display:flex; flex-direction:column; gap:8px;
 }
+.cardTitle { font-size: 12px; font-weight: 800; }
 
-.cardTitle {
-  font-size: 13px;
-  font-weight: bold;
-  margin-bottom: 4px;
-}
+/* KPIs */
+.kpiGrid { display:grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap:8px; }
+.kpiCard { border:1px solid rgba(255,255,255,.12); border-radius:12px; background:rgba(255,255,255,.04); padding:8px; }
+.kpiLabel { font-size:11px; color:rgba(255,255,255,.6); }
+.kpiValue { font-size:14px; font-weight:800; }
 
-/* ===== Posições / KPI ===== */
-.posGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 4px;
-}
+/* Posição */
+.posGrid { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
 
-.kpiGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-}
+/* Histórico elástico — ocupa o resto da coluna direita */
+.historyCard { flex: 1; min-height: 0; display:flex; flex-direction:column; }
+.histWrap.fill { flex:1; min-height:0; overflow-y:auto; display:grid; gap:6px; padding-right:4px; }
+.histRow { border:1px solid rgba(255,255,255,.10); border-radius:10px; padding:6px 8px; background: rgba(255,255,255,.03); }
 
-.kpiCard {
-  background: #111;
-  padding: 6px;
-  border-radius: 6px;
-  text-align: center;
+/* Botão de tela cheia (já existente) */
+.chartFsBtn{
+  position:absolute;
+  top:6px;
+  right:44px;
+  z-index:6;
+  width:28px; height:28px;
+  border-radius:8px;
+  display:grid; place-items:center;
+  background: rgba(255,255,255,.12);
+  color:#e6e6e6;
+  border:1px solid rgba(255,255,255,.25);
+  cursor:pointer;
 }
-
-.kpiLabel {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.kpiValue {
-  font-size: 14px;
-  font-weight: bold;
-}
-
-/* ===== Histórico ===== */
-.historyCard {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 120px;
-}
-
-.histWrap {
-  overflow-y: auto;
-  flex: 1;
-}
-
-.histRow {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  padding: 2px 0;
-  border-bottom: 1px solid #222;
-}
+.chartFsBtn:hover{ background:rgba(255,255,255,.18); color:#fff; }
