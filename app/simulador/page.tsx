@@ -29,10 +29,10 @@ export default function SimuladorPage() {
 
   return (
     <main className="wrapper" style={{ gridTemplateColumns: "1fr 360px" }}>
-      {/* Gráfico ocupa tudo */}
+      {/* GRÁFICO */}
       <section className="panel" style={{ height: "calc(100dvh - 32px)", padding: 0 }}>
         <div ref={graphRef} style={{ position: "relative", width: "100%", height: "100%" }}>
-          {/* Ícone de Tela Cheia AO LADO da câmera (topo direito do chart) */}
+          {/* Ícone de tela cheia ao lado da câmera */}
           <button
             className="chartFsBtn"
             title={isFs ? "Sair de tela cheia (X/Esc)" : "Tela cheia (F)"}
@@ -52,13 +52,12 @@ export default function SimuladorPage() {
         </div>
       </section>
 
-      {/* Controles (agora com “Voltar ao início” no cabeçalho) */}
+      {/* CONTROLES */}
       <aside className="panel" style={{ height: "calc(100dvh - 32px)" }}>
         <TradeControls
           symbol={symbol}
           onSymbolChange={setSymbol}
-          // apenas para atalhos de teclado refletirem estado
-          isFullscreen={isFs}
+          /* <- removido: isFullscreen */
         />
       </aside>
     </main>
