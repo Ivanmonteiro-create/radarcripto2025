@@ -6,9 +6,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 /* ===== CONFIG ===== */
 const SYMBOLS = ["BTCUSDT","ETHUSDT","SOLUSDT","BNBUSDT","ADAUSDT","XRPUSDT","LINKUSDT","DOGEUSDT"];
-const FEE_RATE = 0.001;              // 0,1% por lado
-const PRICE_POLL_MS = 2000;          // pooling rápido
-const HISTORY_SHOW = 50;             // mostramos muitos, mas com área elástica
+const FEE_RATE = 0.001;
+const PRICE_POLL_MS = 2000;
+const HISTORY_SHOW = 50;
 
 /* ===== TIPOS ===== */
 type Side = "LONG" | "SHORT";
@@ -58,7 +58,7 @@ const nf = new Intl.NumberFormat("pt-PT", { maximumFractionDigits: 6 });
 const n2 = new Intl.NumberFormat("pt-PT", { maximumFractionDigits: 2 });
 
 /* ===== HELPERS ===== */
-const STORAGE_KEY = "radarcrypto.sim.v4.compact-full";
+const STORAGE_KEY = "radarcrypto.sim.v5";
 
 function loadPersist(): PersistShape | null {
   if (typeof window === "undefined") return null;
@@ -78,7 +78,7 @@ async function fetchPrice(symbol: string): Promise<number> {
   return Number(j.price);
 }
 const nowIso = () => new Date().toISOString();
-const uid = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : Math.random().toString(36).slice(2));
+const uid = () => Math.random().toString(36).slice(2);
 
 /* ===== COMPONENT ===== */
 export default function TradeControls({
@@ -88,7 +88,6 @@ export default function TradeControls({
   symbol: string;
   onSymbolChange: (s: string) => void;
 }) {
-  // estado
   const [balance, setBalance] = useState<number>(10000);
   const [riskPct, setRiskPct] = useState<number>(1);
   const [symbol, setSymbol] = useState<string>(symbolProp);
@@ -103,7 +102,6 @@ export default function TradeControls({
   const [slPriceInput, setSlPriceInput] = useState<number | null>(null);
   const [tpPriceInput, setTpPriceInput] = useState<number | null>(null);
 
-  // carregar persistência
   useEffect(() => {
     if (loadedRef.current) return;
     loadedRef.current = true;
@@ -113,18 +111,23 @@ export default function TradeControls({
       setRiskPct(p.riskPct ?? 1);
       setPosition(p.position ?? null);
       setTrades(Array.isArray(p.trades) ? p.trades : []);
-      setSlPct(p.slPct ?? null); setTpPct(p.tpPct ?? null);
-      setSlPriceInput(p.slPriceInput ?? null); setTpPriceInput(p.tpPriceInput ?? null);
-      if (p.symbol) { setSymbol(p.symbol); onSymbolChange(p.symbol); } else { setSymbol(symbolProp); }
+      setSlPct(p.slPct ?? null);
+      setTpPct(p.tpPct ?? null);
+      setSlPriceInput(p.slPriceInput ?? null);
+      setTpPriceInput(p.tpPriceInput ?? null);
+      if (p.symbol) {
+        setSymbol(p.symbol);
+        onSymbolChange(p.symbol);
+      } else {
+        setSymbol(symbolProp);
+      }
     } else {
       setSymbol(symbolProp);
     }
   }, [symbolProp, onSymbolChange]);
 
-  // sync par
   useEffect(() => { if (symbol !== symbolProp) onSymbolChange(symbol); }, [symbol, symbolProp, onSymbolChange]);
 
-  // preço + SL/TP
   useEffect(() => {
     let mounted = true;
     const check = async () => {
@@ -149,12 +152,10 @@ export default function TradeControls({
     return () => { mounted = false; clearInterval(t); };
   }, [symbol, position]);
 
-  // persistir
   useEffect(() => {
     savePersist({ balance, riskPct, symbol, position, trades, slPct, tpPct, slPriceInput, tpPriceInput });
   }, [balance, riskPct, symbol, position, trades, slPct, tpPct, slPriceInput, tpPriceInput]);
 
-  // derivados
   const symbolLabel = useMemo(() => `${symbol.replace("USDT", "")}/USDT`, [symbol]);
   const riskValueUSDT = useMemo(() => (isFinite(balance) ? (balance * riskPct) / 100 : 0), [balance, riskPct]);
   const pnlOpen = useMemo(() => {
@@ -169,27 +170,23 @@ export default function TradeControls({
   }, [position, price, pnlOpen]);
   const equityLive = useMemo(() => balance + (pnlOpen || 0), [balance, pnlOpen]);
 
-  // KPIs (preenchem espaço + dão valor)
   const tradeCount = trades.length;
   const winCount = trades.filter(t => t.pnl > 0).length;
   const winRate = tradeCount > 0 ? (winCount / tradeCount) * 100 : 0;
   const totalPnl = trades.reduce((acc, t) => acc + t.pnl, 0);
 
-  // núcleo
   function sizeFromRisk(p: number) {
     const notional = riskValueUSDT > 0 ? riskValueUSDT : 100;
     return p > 0 ? notional / p : 0;
   }
   function deriveTargets(entry: number, side: Side) {
-    const slFromPrice = (typeof slPriceInput === "number" && slPriceInput > 0) ? slPriceInput : null;
-    const tpFromPrice = (typeof tpPriceInput === "number" && tpPriceInput > 0) ? tpPriceInput : null;
+    const slFromPrice = slPriceInput || null;
+    const tpFromPrice = tpPriceInput || null;
     let sl: number | undefined, tp: number | undefined;
-    if (slFromPrice !== null) sl = slFromPrice;
-    else if (typeof slPct === "number" && slPct > 0) sl = side === "LONG" ? entry * (1 - slPct/100) : entry * (1 + slPct/100);
-    if (tpFromPrice !== null) tp = tpFromPrice;
-    else if (typeof tpPct === "number" && tpPct > 0) tp = side === "LONG" ? entry * (1 + tpPct/100) : entry * (1 - tpPct/100);
-    if (side === "LONG") { if (typeof sl === "number" && sl >= entry) sl = undefined; if (typeof tp === "number" && tp <= entry) tp = undefined; }
-    else { if (typeof sl === "number" && sl <= entry) sl = undefined; if (typeof tp === "number" && tp >= entry) tp = undefined; }
+    if (slFromPrice) sl = slFromPrice;
+    else if (slPct) sl = side === "LONG" ? entry * (1 - slPct/100) : entry * (1 + slPct/100);
+    if (tpFromPrice) tp = tpFromPrice;
+    else if (tpPct) tp = side === "LONG" ? entry * (1 + tpPct/100) : entry * (1 - tpPct/100);
     return { sl, tp };
   }
   function openPosition(side: Side, p: number) {
@@ -225,27 +222,21 @@ export default function TradeControls({
     setBalance(10000); setRiskPct(1); setTrades([]); setPosition(null);
   }
 
-  const canChangeSymbol = !position;
-
   return (
     <div className="compactRoot">
-      {/* cabeçalho compacto */}
       <div className="compactHeader">
         <h2 className="compactTitle">Controles de Trade</h2>
         <Link href="/" className="btn btn-xs btn-primary">Voltar ao início</Link>
       </div>
 
-      {/* Grid 2 colunas fixas */}
       <div className="compactGrid">
-        {/* Coluna A – Inputs */}
+        {/* Coluna A */}
         <div className="colA">
-          {/* Par e preço */}
           <label className="lbl">Par</label>
           <select
             value={symbol}
             onChange={(e) => setSymbol(e.target.value)}
-            disabled={!canChangeSymbol}
-            className={`inp ${!canChangeSymbol ? "inp-disabled" : ""}`}
+            className="inp"
           >
             {SYMBOLS.map((s) => <option key={s} value={s}>{s.replace("USDT","")}/USDT</option>)}
           </select>
@@ -254,50 +245,42 @@ export default function TradeControls({
             <div className="green">{loadingPrice ? "…" : price !== null ? nf.format(price) : "—"}</div>
           </div>
 
-          {/* Saldo e risco */}
           <div className="twoCols">
             <div>
               <label className="lbl">Saldo (USDT)</label>
-              <input type="number" value={balance} onChange={(e)=>setBalance(Number(e.target.value))} className="inp" min={0}/>
+              <input type="number" value={balance} onChange={(e)=>setBalance(Number(e.target.value))} className="inp"/>
             </div>
             <div>
               <label className="lbl">Risco (%)</label>
-              <input type="number" value={riskPct} onChange={(e)=>setRiskPct(Number(e.target.value))} className="inp" min={0} max={100} step={0.1}/>
+              <input type="number" value={riskPct} onChange={(e)=>setRiskPct(Number(e.target.value))} className="inp"/>
             </div>
           </div>
           <div className="muted xs">Risco estimado: <strong>{n2.format((balance* riskPct)/100 || 0)}</strong> USDT</div>
 
-          {/* SL/TP compactos */}
           <div className="cardMini">
             <div className="cardTitle">Stop Loss</div>
             <div className="twoCols">
-              <input type="number" placeholder="%" value={slPct ?? ""} onChange={e=>setSlPct(e.target.value===""?null:Number(e.target.value))} className="inp" min={0} step={0.1}/>
-              <input type="number" placeholder="Preço" value={slPriceInput ?? ""} onChange={e=>setSlPriceInput(e.target.value===""?null:Number(e.target.value))} className="inp" min={0} step={0.0001}/>
+              <input type="number" placeholder="%" value={slPct ?? ""} onChange={e=>setSlPct(e.target.value===""?null:Number(e.target.value))} className="inp"/>
+              <input type="number" placeholder="Preço" value={slPriceInput ?? ""} onChange={e=>setSlPriceInput(e.target.value===""?null:Number(e.target.value))} className="inp"/>
             </div>
           </div>
           <div className="cardMini">
             <div className="cardTitle">Take Profit</div>
             <div className="twoCols">
-              <input type="number" placeholder="%" value={tpPct ?? ""} onChange={e=>setTpPct(e.target.value===""?null:Number(e.target.value))} className="inp" min={0} step={0.1}/>
-              <input type="number" placeholder="Preço" value={tpPriceInput ?? ""} onChange={e=>setTpPriceInput(e.target.value===""?null:Number(e.target.value))} className="inp" min={0} step={0.0001}/>
+              <input type="number" placeholder="%" value={tpPct ?? ""} onChange={e=>setTpPct(e.target.value===""?null:Number(e.target.value))} className="inp"/>
+              <input type="number" placeholder="Preço" value={tpPriceInput ?? ""} onChange={e=>setTpPriceInput(e.target.value===""?null(Number(e.target.value)))} className="inp"/>
             </div>
           </div>
 
-          {/* Botões compactos */}
           <div className="threeCols">
-            <button onClick={()=>onClickTrade("COMPRA")} className="btn btn-xs btnBuy">
-              {position?.side === "SHORT" ? "Fechar Short" : "Comprar"}
-            </button>
-            <button onClick={()=>onClickTrade("VENDA")} className="btn btn-xs btnSell">
-              {position?.side === "LONG" ? "Fechar Long" : "Vender"}
-            </button>
+            <button onClick={()=>onClickTrade("COMPRA")} className="btn btn-xs btnBuy">Comprar</button>
+            <button onClick={()=>onClickTrade("VENDA")} className="btn btn-xs btnSell">Vender</button>
             <button onClick={onResetAll} className="btn btn-xs">Resetar</button>
           </div>
         </div>
 
-        {/* Coluna B – Status / KPIs / Histórico (elástico) */}
+        {/* Coluna B */}
         <div className="colB">
-          {/* Equity + Posição */}
           <div className="tickerRow">
             <div className="muted">Equity</div>
             <strong>{n2.format(equityLive)} USDT</strong>
@@ -307,58 +290,30 @@ export default function TradeControls({
             <div className="cardTitle">Posição</div>
             {position ? (
               <div className="posGrid">
-                <div><span className="muted xs">Lado</span><div><strong>{position.side}</strong></div></div>
+                <div><span className="muted xs">Lado</span><div>{position.side}</div></div>
                 <div><span className="muted xs">Entrada</span><div>{nf.format(position.entryPrice)}</div></div>
                 <div><span className="muted xs">Qtd</span><div>{nf.format(position.qty)}</div></div>
-                <div><span className="muted xs">SL</span><div>{typeof position.slPrice==="number"? nf.format(position.slPrice):"—"}</div></div>
-                <div><span className="muted xs">TP</span><div>{typeof position.tpPrice==="number"? nf.format(position.tpPrice):"—"}</div></div>
-                <div>
-                  <span className="muted xs">PnL aberto</span>
-                  <div style={{ color: pnlOpen >= 0 ? "#1cff80" : "#ff6b6b", fontWeight: 800 }}>
-                    {pnlOpen>=0?"+":""}{n2.format(pnlOpen)} USDT ({n2.format(pnlOpenPct)}%)
-                  </div>
-                </div>
-                <div style={{ gridColumn: "1/-1", textAlign: "right" }}>
-                  <button className="btn btn-xs" onClick={()=> price && closePosition(price, "Manual")}>Fechar agora</button>
-                </div>
+                <div><span className="muted xs">PnL aberto</span><div style={{color:pnlOpen>=0?"#1cff80":"#ff6b6b"}}>{n2.format(pnlOpen)} USDT</div></div>
+                <div style={{gridColumn:"1/-1",textAlign:"right"}}><button className="btn btn-xs" onClick={()=> price && closePosition(price,"Manual")}>Fechar</button></div>
               </div>
-            ) : (
-              <div className="muted xs">Sem posição aberta.</div>
-            )}
+            ) : (<div className="muted xs">Sem posição aberta</div>)}
           </div>
 
-          {/* KPIs para preencher espaço e agregar valor */}
           <div className="kpiGrid">
-            <div className="kpiCard">
-              <div className="kpiLabel">Trades</div>
-              <div className="kpiValue">{tradeCount}</div>
-            </div>
-            <div className="kpiCard">
-              <div className="kpiLabel">Win rate</div>
-              <div className="kpiValue">{n2.format(winRate)}%</div>
-            </div>
-            <div className="kpiCard">
-              <div className="kpiLabel">PnL total</div>
-              <div className="kpiValue" style={{ color: totalPnl>=0 ? "#1cff80" : "#ff6b6b" }}>
-                {totalPnl>=0?"+":""}{n2.format(totalPnl)}
-              </div>
-            </div>
+            <div className="kpiCard"><div className="kpiLabel">Trades</div><div className="kpiValue">{tradeCount}</div></div>
+            <div className="kpiCard"><div className="kpiLabel">Win rate</div><div className="kpiValue">{n2.format(winRate)}%</div></div>
+            <div className="kpiCard"><div className="kpiLabel">PnL</div><div className="kpiValue" style={{color:totalPnl>=0?"#1cff80":"#ff6b6b"}}>{totalPnl>=0?"+":""}{n2.format(totalPnl)}</div></div>
           </div>
 
-          {/* Histórico ELÁSTICO — ocupa todo o resto */}
           <div className="cardMini historyCard">
             <div className="cardTitle">Histórico</div>
             <div className="histWrap fill">
-              {trades.length === 0 && <div className="muted xs">Sem operações ainda.</div>}
+              {trades.length === 0 && <div className="muted xs">Sem operações</div>}
               {trades.slice(0, HISTORY_SHOW).map((t)=>(
                 <div key={t.id} className="histRow">
                   <div className="xs muted">{new Date(t.timeClose).toLocaleString()}</div>
-                  <div className="xs">
-                    <strong>{t.side}</strong> {t.symbol.replace("USDT","")}/USDT · {nf.format(t.priceEntry)}→{nf.format(t.priceExit)} · Q {nf.format(t.qty)} · <em>{t.exitReason}</em>
-                  </div>
-                  <div className="xs" style={{ color: t.pnl>=0?"#1cff80":"#ff6b6b", fontWeight:700 }}>
-                    {t.pnl>=0?"+":""}{n2.format(t.pnl)} ({n2.format(t.pnlPct)}%)
-                  </div>
+                  <div className="xs"><strong>{t.side}</strong> {t.symbol.replace("USDT","")}/USDT</div>
+                  <div className="xs" style={{color:t.pnl>=0?"#1cff80":"#ff6b6b"}}>{t.pnl>=0?"+":""}{n2.format(t.pnl)}</div>
                 </div>
               ))}
             </div>
