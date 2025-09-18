@@ -175,3 +175,70 @@ body{
   cursor:pointer;
 }
 .chartFsBtn:hover{ background:rgba(255,255,255,.18); color:#fff; }
+/* ===== Painel compacto ===== */
+.compactPanel { padding: 12px !important; }
+.compactRoot { font-size: 12px; }
+.compactTitle { font-size: 14px; margin: 0; }
+.compactHeader { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+
+/* Grid 2 colunas do painel */
+.compactGrid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; height: 100%; }
+.colA, .colB { display:flex; flex-direction:column; gap:8px; min-width:0; }
+.twoCols { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+.threeCols { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; }
+
+.lbl { font-size: 11px; color: rgba(255,255,255,.6); margin-bottom:2px; }
+.muted { color: rgba(255,255,255,.6); }
+.muted.xs { font-size: 11px; color: rgba(255,255,255,.55); }
+.xs { font-size: 11px; }
+.green { color: #1cff80; font-weight: 700; }
+
+.inp {
+  width: 100%;
+  height: 32px;               /* slim */
+  padding: 0 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.03);
+  color: inherit;
+  border: 1px solid rgba(255,255,255,.12);
+}
+.inp-disabled { background: rgba(255,255,255,.08); cursor: not-allowed; }
+
+.btn { border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); border-radius: 10px; color: inherit; }
+.btn:hover { background: rgba(255,255,255,.12); }
+.btn-xs { padding: 6px 8px; font-size: 12px; border-radius: 10px; }
+.btn-primary { background: rgba(33,243,141,.15); border-color: rgba(33,243,141,.35); color:#1cff80; font-weight:700; }
+.btnBuy { background: linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10)); color:#1cff80; border:1px solid rgba(33,243,141,.35); }
+.btnSell{ background: linear-gradient(180deg, rgba(255,76,76,.20), rgba(255,76,76,.08)); color:#ff6b6b; border:1px solid rgba(255,76,76,.35); }
+
+.tickerRow { display:flex; justify-content:space-between; align-items:center; padding:6px 8px; border:1px solid rgba(255,255,255,.12); border-radius:10px; background:rgba(255,255,255,.04); }
+
+.cardMini {
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.04);
+  border-radius: 12px;
+  padding:8px;
+  display:flex; flex-direction:column; gap:8px;
+}
+.cardTitle { font-size: 12px; font-weight: 700; }
+
+.posGrid { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+
+.histWrap { display:grid; gap:6px; max-height: 22vh; overflow-y:auto; padding-right:4px; }
+.histRow { border:1px solid rgba(255,255,255,.10); border-radius:10px; padding:6px 8px; background: rgba(255,255,255,.03); }
+
+/* Botão de tela cheia (já existente) */
+.chartFsBtn{
+  position:absolute;
+  top:6px;
+  right:44px;
+  z-index:6;
+  width:28px; height:28px;
+  border-radius:8px;
+  display:grid; place-items:center;
+  background: rgba(255,255,255,.12);
+  color:#e6e6e6;
+  border:1px solid rgba(255,255,255,.25);
+  cursor:pointer;
+}
+.chartFsBtn:hover{ background:rgba(255,255,255,.18); color:#fff; }
