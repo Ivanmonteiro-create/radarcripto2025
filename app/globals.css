@@ -1,109 +1,61 @@
-/* app/globals.css */
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --bg: #0a0f0d;
-  --panel: #0f1513;
-  --grid: rgba(255, 255, 255, 0.06);
-  --text: #d5fbe6;
-  --muted: #8fbfa8;
-  --accent: #21f38d;
-  --accent-strong: #1cff80;
-}
-* { box-sizing: border-box; }
-html, body { height: 100%; }
-body {
-  margin: 0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-  color: var(--text);
-  background-color: var(--bg);
-  background-image:
-    linear-gradient(to right, var(--grid) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
-  background-size: 60px 60px;
-}
+/* ========== BASE SEGURA (não quebra o build) ========== */
+* { box-sizing: border-box; margin:0; padding:0; }
+html, body { height:100%; }
+body { background:#000; color:#fff; font-family: Arial, sans-serif; line-height:1.4; }
+a { color:#16f08a; text-decoration:none; }
+h1,h2,h3,h4 { font-weight:700; margin-bottom:.5rem; }
+main { padding:20px; }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-/* layout 3 colunas: esquerda (tickers), centro (conteúdo), direita (menu) */
-.wrapper {
-  display: grid;
-  grid-template-columns: 320px 1fr 220px;
-  gap: 20px;
-  min-height: 100dvh;
-  padding: 20px;
-}
-@media (max-width: 1100px) {
-  .wrapper { grid-template-columns: 1fr; }
-  .rightMenu { position: static; }
-  .leftPanel { order: 2; }
-}
+/* Navbar simples (se existir) */
+nav { display:flex; justify-content:center; gap:20px; padding:10px 0; }
+nav a { padding:6px 12px; border-radius:6px; }
+nav a.active { background:#16f08a; color:#000; font-weight:700; }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-.panel {
-  background: radial-gradient(1200px 1200px at -10% -10%, rgba(33, 243, 141, 0.06), transparent 40%), var(--panel);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 18px;
-  padding: 16px;
-}
+/* ===== Painel do simulador (classes usadas no projeto) ===== */
+.compactRoot { font-size:14px; }
+.compactTitle { font-size:16px; font-weight:800; margin:0; }
+.compactHeader { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-/* tickers */
-.tickers {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
-.tickerCard {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 14px;
-  padding: 12px 14px;
-}
-.tickerSymbol { color: var(--muted); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
-.tickerPrice { font-weight: 700; font-size: 20px; }
-.tickerDelta { font-size: 12px; opacity: .8; }
+.compactGrid { display:grid; grid-template-columns:1fr 1fr; gap:8px; height:100%; }
+.colA,.colB { display:flex; flex-direction:column; gap:8px; min-width:0; }
 
-/* hero central + linha viva */
-.hero {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-.heroInner { width: min(980px, 95%); text-align: center; }
-.heroTag { color: var(--muted); letter-spacing: .15em; font-size: 12px; text-transform: uppercase; }
-.heroTitle { font-size: clamp(28px, 5vw, 64px); line-height: 1.05; margin: 10px 0 14px; font-weight: 800; }
-.heroSubtitle { color: #c9eedc; opacity: .9; max-width: 720px; margin: 0 auto 28px; }
+.lbl { font-size:13px; color:rgba(255,255,255,.7); margin-bottom:2px; }
+.muted { color:rgba(255,255,255,.65); }
+.muted.xs { font-size:12px; color:rgba(255,255,255,.55); }
+.xs { font-size:12px; }
+.green { color:#1cff80; font-weight:800; }
 
-.liveLineWrap { position: relative; height: 72px; margin: 24px auto 6px; width: min(760px, 100%); }
-.liveLine { position: absolute; inset: 0; border-radius: 999px; background: linear-gradient(90deg, transparent, var(--accent), transparent); filter: drop-shadow(0 0 10px var(--accent)); opacity: .8; }
-.liveDot { position: absolute; top: 50%; width: 12px; height: 12px; background: var(--accent-strong); border-radius: 999px; transform: translate(-50%, -50%); filter: drop-shadow(0 0 10px var(--accent-strong)); animation: run 2.2s linear infinite; }
-@keyframes run { from { left: 0%; } to { left: 100%; } }
+.tickerRow { display:flex; justify-content:space-between; align-items:center; font-size:13px; padding:6px 8px; border:1px solid #333; border-radius:8px; background:#111; }
 
-/* menu direito */
-.rightMenu { position: sticky; top: 20px; height: fit-content; }
-.menuList { display: grid; gap: 10px; }
-.menuBtn {
-  display: block; text-decoration: none; color: var(--text);
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  padding: 10px 12px; border-radius: 12px; text-align: center; font-weight: 600;
-}
-.menuBtn.active { outline: 2px solid var(--accent); box-shadow: 0 0 0 4px rgba(33, 243, 141, .12) inset; color: var(--accent-strong); }
+.inp { width:100%; background:#111; border:1px solid #333; border-radius:8px; padding:6px 8px; font-size:13px; color:#fff; }
 
-/* utilidades */
-.muted { color: var(--muted); }
-.small { font-size: 12px; }
+.btn { padding:6px 10px; border-radius:8px; border:1px solid #333; background:#222; color:#fff; cursor:pointer; transition:background .15s; }
+.btn:hover { background:#333; }
+.btn-xs { font-size:12px; padding:4px 8px; }
+.btnBuy { background:#065f46; }
+.btnBuy:hover { background:#047857; }
+.btnSell { background:#7f1d1d; }
+.btnSell:hover { background:#991b1b; }
+.btn-primary { background:#1e40af; }
+.btn-primary:hover { background:#1d4ed8; }
+
+.twoCols { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.threeCols { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
+
+.cardMini { background:#111; border:1px solid #333; border-radius:10px; padding:8px; display:flex; flex-direction:column; gap:8px; }
+.cardTitle { font-size:13px; font-weight:700; }
+
+.posGrid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+
+.kpiGrid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.kpiCard { background:#111; padding:8px; border-radius:10px; text-align:center; border:1px solid #333; }
+.kpiLabel { font-size:12px; color:rgba(255,255,255,.6); }
+.kpiValue { font-size:14px; font-weight:800; }
+
+.historyCard { flex:1; display:flex; flex-direction:column; min-height:120px; }
+.histWrap { overflow-y:auto; flex:1; display:grid; gap:6px; }
+.histRow { display:flex; justify-content:space-between; gap:10px; font-size:12px; padding:6px 8px; border:1px solid #222; border-radius:8px; background:#0c0c0c; }
+
+/* Ícone tela cheia (se estiver sendo usado) */
+.chartFsBtn { position:absolute; top:6px; right:44px; z-index:6; width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:rgba(255,255,255,.12); color:#e6e6e6; border:1px solid rgba(255,255,255,.25); cursor:pointer; }
+.chartFsBtn:hover { background:rgba(255,255,255,.18); color:#fff; }
