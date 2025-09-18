@@ -1,157 +1,191 @@
-/* ===== Reset Básico ===== */
-* { margin:0; padding:0; box-sizing:border-box; }
-html, body { height:100%; }
-body { background:#000; color:#fff; font-family: Arial, sans-serif; line-height:1.4; }
-a { color:#16f08a; text-decoration:none; }
-h1,h2,h3,h4 { font-weight:800; margin-bottom:.5rem; }
+/* ===================================================================
+   globals.css — RadarCrypto
+   @versao: 1.0.0 (reconstruido)
+   - Reset básico
+   - Estilos da HOME (tickers + hero + footer)
+   - Estilos do SIMULADOR (escopados em .simWrap)
+   Observação: nada aqui depende de Tailwind.
+   =================================================================== */
 
-/* ===== Navbar simples (se existir) ===== */
-nav { display:flex; justify-content:center; gap:20px; padding:10px 0; }
-nav a { padding:6px 12px; border-radius:6px; }
-nav a.active { background:#16f08a; color:#000; font-weight:700; }
+/* ===== Reset ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body { background: #000; color: #fff; font-family: Arial, Helvetica, sans-serif; line-height: 1.4; }
+a { color: #16f08a; text-decoration: none; }
+h1, h2, h3, h4 { font-weight: 800; margin-bottom: .5rem; }
 
-/* ===== HOME ===== */
-.homeWrap { min-height:100vh; display:flex; flex-direction:column; }
+/* ===== (Opcional) Navbar genérica, se existir ===== */
+nav { display: flex; justify-content: center; gap: 20px; padding: 10px 0; }
+nav a { padding: 6px 12px; border-radius: 6px; }
+nav a.active { background: #16f08a; color: #000; font-weight: 700; }
+
+/* ===================================================================
+   HOME
+   Classes usadas nas páginas iniciais que você já tinha: 
+   - .homeWrap  .marketStrip  .marketItem  .marketSym  .marketPx
+   - .hero  .heroCard  .heroTitle  .heroP  .ctaCol
+   - .homeFooter  .hash
+   =================================================================== */
+
+.homeWrap { min-height: 100vh; display: flex; flex-direction: column; }
+
+/* Linha de moedas (8 colunas, sem rolagem vertical em zoom 100%) */
 .marketStrip {
-  display:grid;
+  display: grid;
   grid-template-columns: repeat(8, 1fr);
-  gap:8px;
-  padding:12px 16px 0 16px;
-  max-width:1200px;
-  margin:0 auto;
+  gap: 8px;
+  padding: 12px 16px 0 16px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 .marketItem {
-  background: #0e0e0e;
-  border: 1px solid #2a2a2a;
+  background: #0f0f0f;
+  border: 1px solid #262626;
   border-radius: 12px;
   padding: 8px 10px;
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-  min-height:68px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 62px; /* altura compacta para caber tudo */
 }
-.marketSym { font-size:14px; letter-spacing:.5px; color:rgba(255,255,255,.85); font-weight:800; }
-.marketPx  { font-size:13px; color:#16f08a; font-weight:800; }
-.marketMuted { height:22px; border-top:1px dashed #222; opacity:.6; }
+.marketSym { font-size: 14px; letter-spacing: .4px; color: rgba(255,255,255,.9); font-weight: 800; }
+.marketPx  { font-size: 13px; color: #16f08a; font-weight: 800; }
 
-.hero {
-  flex:1;
-  display:grid;
-  place-items:center;
-  padding:0 16px;
-}
+/* Hero central */
+.hero { flex: 1; display: grid; place-items: center; padding: 0 16px; }
 .heroCard {
   width: min(1200px, 94vw);
   background: #0c0c0c;
-  border: 1px solid #222;
+  border: 1px solid #1f1f1f;
   border-radius: 18px;
   padding: 24px;
-  display:grid;
+  display: grid;
   grid-template-columns: 1.1fr .9fr;
   gap: 18px;
 }
-.heroTitle {
-  font-size: clamp(28px, 6vw, 64px);
-  line-height:1.05;
-}
-.heroP { color:rgba(255,255,255,.8); max-width:40ch; }
-.ctaCol { align-self:center; }
-.ctaCol .btn { display:block; width:100%; margin-bottom:10px; }
+.heroTitle { font-size: clamp(28px, 6vw, 64px); line-height: 1.05; }
+.heroP { color: rgba(255,255,255,.8); max-width: 44ch; }
+.ctaCol { align-self: center; }
+.ctaCol .btn { display: block; width: 100%; margin-bottom: 10px; }
 
+/* Rodapé com hash/versão */
 .homeFooter {
-  max-width:1200px;
+  max-width: 1200px;
   margin: 8px auto 14px auto;
-  padding:0 16px;
-  font-size:12px;
+  padding: 0 16px;
+  font-size: 12px;
   color: rgba(255,255,255,.65);
-  display:flex; justify-content:space-between; align-items:center;
+  display: flex; justify-content: space-between; align-items: center;
 }
-.hash { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; opacity:.85; }
+.hash { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; opacity: .85; }
 
-/* Ajustes responsivos para caber SEM rolagem em 100% */
+/* Ajustes leves de altura (mantêm tudo visível sem rolagem) */
 @media (max-height: 820px) {
-  .marketItem { min-height:62px; padding:7px 9px; }
-  .marketSym { font-size:13px; }
-  .marketPx  { font-size:12px; }
-  .heroCard { padding:20px; }
+  .marketItem { min-height: 58px; padding: 7px 9px; }
+  .marketSym { font-size: 13px; }
+  .marketPx  { font-size: 12px; }
+  .heroCard { padding: 20px; }
 }
 @media (max-height: 740px) {
   .heroCard { grid-template-columns: 1fr; }
-  .heroP { max-width:none; }
-}
-@media (max-width: 1100px) {
-  .marketStrip { grid-template-columns: repeat(4, 1fr); }
-}
-@media (max-width: 640px) {
-  .marketStrip { grid-template-columns: repeat(2, 1fr); }
+  .heroP { max-width: none; }
 }
 
-/* ===== SIMULADOR / Painel compacto ===== */
-.compactRoot { font-size:14px; }
-.compactHeader { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-.compactTitle { font-size: 18px; font-weight:900; margin:0; }     /* ↑ maior */
-.backHome { font-size: 14px; font-weight:800; }                   /* ↑ maior */
+/* Responsivo horizontal (não interfere no desktop 100% zoom) */
+@media (max-width: 1100px) { .marketStrip { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 640px)  { .marketStrip { grid-template-columns: repeat(2, 1fr); } }
 
-.compactGrid { display:grid; grid-template-columns:1fr 1fr; gap:8px; height:100%; }
-.colA,.colB { display:flex; flex-direction:column; gap:8px; min-width:0; }
+/* ===================================================================
+   SIMULADOR — escopado em .simWrap para não afetar a Home
+   Classes usadas: compactRoot/Title/Header/Grid, colA/colB, lbl/muted/xs,
+   inp, btn(+variantes), cardMini, kpi*, history*, tickerRow, etc.
+   =================================================================== */
 
-.lbl { font-size:13px; color:rgba(255,255,255,.7); margin-bottom:2px; }
-.muted { color:rgba(255,255,255,.65); }
-.muted.xs { font-size:12px; color:rgba(255,255,255,.55); }
-.xs { font-size:12px; }
-.green { color:#16f08a; font-weight:800; }
+.simWrap .compactRoot { font-size: 14px; }
 
-.tickerRow { display:flex; justify-content:space-between; align-items:center; font-size:13px; padding:6px 8px; border:1px solid #333; border-radius:10px; background:#0f0f0f; }
-
-.inp { width:100%; background:#111; border:1px solid #333; border-radius:10px; padding:6px 8px; font-size:13px; color:#fff; }
-
-.btn { padding:6px 10px; border-radius:10px; border:1px solid #333; background:#222; color:#fff; cursor:pointer; transition:background .15s; }
-.btn:hover { background:#333; }
-.btn-xs { font-size:12px; padding:4px 8px; }
-.btn-sm { font-size:13px; padding:6px 10px; }
-.btnBuy { background:#065f46; } .btnBuy:hover { background:#047857; }
-.btnSell{ background:#7f1d1d; } .btnSell:hover{ background:#991b1b; }
-.btn-primary{ background:#1e40af; } .btn-primary:hover{ background:#1d4ed8; }
-
-.twoCols { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
-.threeCols { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
-
-.cardMini { background:#0e0e0e; border:1px solid #2a2a2a; border-radius:12px; padding:8px; display:flex; flex-direction:column; gap:8px; }
-.cardTitle { font-size:13px; font-weight:800; }
-
-.posGrid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
-
-.kpiGrid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
-.kpiCard { background:#0e0e0e; padding:8px; border-radius:12px; text-align:center; border:1px solid #2a2a2a; }
-.kpiLabel { font-size:12px; color:rgba(255,255,255,.6); }
-.kpiValue { font-size:14px; font-weight:900; }
-
-.historyCard { flex:1; display:flex; flex-direction:column; min-height:120px; }
-.histWrap { overflow-y:auto; flex:1; display:grid; gap:6px; }
-.histRow { display:flex; justify-content:space-between; gap:10px; font-size:12px; padding:6px 8px; border:1px solid #222; border-radius:10px; background:#0b0b0b; }
-
-/* Botão tela cheia (se estiver presente) */
-.chartFsBtn { position:absolute; top:6px; right:44px; z-index:6; width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:rgba(255,255,255,.12); color:#e6e6e6; border:1px solid rgba(255,255,255,.25); cursor:pointer; }
-.chartFsBtn:hover { background:rgba(255,255,255,.18); color:#fff; }
-/* ==== HOTFIX MINIMO — NÃO ALTERA OUTRAS PÁGINAS ==== */
-/* HOME: caber as 8 moedas sem rolagem e manter o herói do jeito que já estava */
-.marketStrip { 
-  grid-template-columns: repeat(8, 1fr) !important;
-  padding: 8px 12px 0 12px !important;
-  max-width: 1200px !important;
-  margin: 0 auto !important;
+.simWrap .compactHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
 }
-.marketItem {
-  min-height: 56px !important;
-  padding: 6px 8px !important;
+
+/* Aumento pedido */
+.simWrap .compactTitle { font-size: 20px; font-weight: 900; margin: 0; }
+.simWrap .backHome     { font-size: 16px; font-weight: 800; }
+
+.simWrap .compactGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; height: 100%; }
+.simWrap .colA, 
+.simWrap .colB { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+
+/* Tipografia */
+.simWrap .lbl { font-size: 13px; color: rgba(255,255,255,.7); margin-bottom: 2px; }
+.simWrap .muted { color: rgba(255,255,255,.65); }
+.simWrap .muted.xs { font-size: 12px; color: rgba(255,255,255,.55); }
+.simWrap .xs { font-size: 12px; }
+.simWrap .green { color: #16f08a; font-weight: 800; }
+
+/* Ticker/linha de status */
+.simWrap .tickerRow {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 13px; padding: 6px 8px; border: 1px solid #333;
+  border-radius: 10px; background: #0f0f0f;
 }
-.marketSym { font-size: 13px !important; }
-.marketPx  { font-size: 12px !important; }
 
-/* Se ainda faltar 1–2px na sua tela, descomente as duas linhas abaixo: */
-/* .hero      { padding-top: 4px !important; } */
-/* .homeFooter{ margin: 4px auto 10px auto !important; } */
+/* Inputs e botões */
+.simWrap .inp {
+  width: 100%; background: #111; border: 1px solid #333; border-radius: 10px;
+  padding: 6px 8px; font-size: 13px; color: #fff;
+}
+.simWrap .btn {
+  padding: 6px 10px; border-radius: 10px; border: 1px solid #333;
+  background: #222; color: #fff; cursor: pointer; transition: background .15s;
+}
+.simWrap .btn:hover { background: #333; }
+.simWrap .btn-xs { font-size: 12px; padding: 4px 8px; }
+.simWrap .btn-sm { font-size: 13px; padding: 6px 10px; }
+.simWrap .btnBuy { background: #065f46; }
+.simWrap .btnBuy:hover { background: #047857; }
+.simWrap .btnSell { background: #7f1d1d; }
+.simWrap .btnSell:hover { background: #991b1b; }
+.simWrap .btn-primary { background: #1e40af; }
+.simWrap .btn-primary:hover { background: #1d4ed8; }
 
-/* SIMULADOR: título e voltar ao início um pouco maiores (sem mexer no resto) */
-.compactTitle { font-size: 20px !important; }
-.backHome     { font-size: 16px !important; font-weight: 800 !important; }
+/* Grids utilitários */
+.simWrap .twoCols { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.simWrap .threeCols { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+
+/* Cards */
+.simWrap .cardMini {
+  background: #0e0e0e; border: 1px solid #2a2a2a; border-radius: 12px;
+  padding: 8px; display: flex; flex-direction: column; gap: 8px;
+}
+.simWrap .cardTitle { font-size: 13px; font-weight: 800; }
+
+/* Posição/KPI */
+.simWrap .posGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.simWrap .kpiGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.simWrap .kpiCard {
+  background: #0e0e0e; padding: 8px; border-radius: 12px; text-align: center;
+  border: 1px solid #2a2a2a;
+}
+.simWrap .kpiLabel { font-size: 12px; color: rgba(255,255,255,.6); }
+.simWrap .kpiValue { font-size: 14px; font-weight: 900; }
+
+/* Histórico */
+.simWrap .historyCard { flex: 1; display: flex; flex-direction: column; min-height: 120px; }
+.simWrap .histWrap { overflow-y: auto; flex: 1; display: grid; gap: 6px; }
+.simWrap .histRow {
+  display: flex; justify-content: space-between; gap: 10px;
+  font-size: 12px; padding: 6px 8px; border: 1px solid #222;
+  border-radius: 10px; background: #0b0b0b;
+}
+
+/* Botão de tela cheia do gráfico (se utilizado) */
+.simWrap .chartFsBtn {
+  position: absolute; top: 6px; right: 44px; z-index: 6;
+  width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center;
+  background: rgba(255,255,255,.12); color: #e6e6e6; border: 1px solid rgba(255,255,255,.25);
+  cursor: pointer;
+}
+.simWrap .chartFsBtn:hover { background: rgba(255,255,255,.18); color: #fff; }
