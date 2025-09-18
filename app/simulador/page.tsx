@@ -2,7 +2,6 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import Link from 'next/link';
 import dynamic from 'next/dynamic';
 
 // Gráfico (seu componente em /components/TradingViewWidget.tsx)
@@ -15,13 +14,11 @@ export default function SimuladorPage() {
   // Símbolo global do simulador (sincroniza Controles <-> Gráfico)
   const [symbol, setSymbol] = useState<string>('BTCUSDT');
 
-  // Handler passado aos controles para trocar o par
   const handleSymbolChange = useCallback((s: string) => {
     if (!s) return;
     setSymbol(s);
   }, []);
 
-  // Fullscreen simples para o contêiner do gráfico
   const toggleFullscreen = () => {
     const el = document.getElementById('chart-root');
     if (!el) return;
@@ -35,21 +32,27 @@ export default function SimuladorPage() {
 
   return (
     <main className="wrapper simWrap">
-      {/* COLUNA ESQUERDA (opcional): histórico/atalhos */}
+      {/* COLUNA ESQUERDA (opcional) */}
       <aside className="leftPanel">
         <div className="panel">
           <div className="muted small">Histórico / Atalhos</div>
         </div>
       </aside>
 
-      {/* COLUNA CENTRAL: GRÁFICO */}
+      {/* COLUNA CENTRAL: GRÁFICO (ocupando a altura total visível) */}
       <section className="panel" style={{ position: 'relative' }}>
-        <div id="chart-root" style={{ position: 'relative' }}>
-          {/* Passamos o símbolo atual para o gráfico (se o componente aceitar) */}
+        <div
+          id="chart-root"
+          style={{
+            position: 'relative',
+            width: '100%',
+            height: 'calc(100vh - 140px)', // gráfico grande
+          }}
+        >
           <TVChart symbol={symbol} />
         </div>
 
-        {/* Ícone Tela Cheia (classes já existem no globals.css) */}
+        {/* Ícone Tela Cheia (ao lado da câmera) */}
         <button
           type="button"
           title="Tela cheia"
@@ -59,22 +62,15 @@ export default function SimuladorPage() {
         >
           ⛶
         </button>
-
-        {/* Se quiser, botoeira/indicadores no topo do gráfico */}
-        {/* <div className="graphTopBar">
-          <button className="indBtn">Indicadores</button>
-        </div> */}
       </section>
 
-      {/* COLUNA DIREITA: CONTROLES DE TRADE */}
+      {/* COLUNA DIREITA: CONTROLES DE TRADE (sem o link duplicado de Voltar) */}
       <aside className="rightMenu">
         <div className="panel compactPanel">
-          <header className="compactHeader">
+          <div className="compactHeader">
             <h2 className="compactTitle">Controles de Trade</h2>
-            <Link href="/" className="btn btn-primary">Voltar ao início</Link>
-          </header>
+          </div>
 
-          {/* IMPORTANTE: passar os props exigidos pelo seu TradeControls */}
           <TradeControls
             symbol={symbol}
             onSymbolChange={handleSymbolChange}
