@@ -1,355 +1,81 @@
-/* app/globals.css */
-:root{
-  --bg:#0a0f0d;--panel:#0f1513;--grid:rgba(255,255,255,.06);
-  --text:#d5fbe6;--muted:#8fbfa8;--accent:#21f38d;--accent-strong:#1cff80;
-}
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
-  color:var(--text);background-color:var(--bg);
-  background-image:linear-gradient(to right,var(--grid) 1px,transparent 1px),linear-gradient(to bottom,var(--grid) 1px,transparent 1px);
-  background-size:60px 60px;
+/* ===== Reset básico ===== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-/* ===== layout: laterais discretamente menores para caber tudo na 1ª dobra ===== */
-.wrapper{
-  display:grid;
-  grid-template-columns: 300px 1fr 200px; /* antes 320 / 220 */
-  gap:16px; /* antes 20px */
-  min-height:100dvh;
-  padding:16px; /* antes 20px */
-  align-items:start;
-}
-@media (max-width:1100px){
-  .wrapper{grid-template-columns:1fr}
-  .rightMenu{position:static}
-  .leftPanel{order:2}
+body {
+  background: #000;
+  color: #fff;
+  font-family: Arial, sans-serif;
 }
 
-.panel{
-  background:radial-gradient(1200px 1200px at -10% -10%,rgba(33,243,141,.06),transparent 40%),var(--panel);
-  border:1px solid rgba(255,255,255,.06);
-  border-radius:16px; /* -2px */
-  padding:14px;       /* -2px */
+/* ===== Painel cheio ===== */
+.compactRoot {
+  font-size: 14px;
+}
+.compactTitle {
+  font-size: 16px;
+  font-weight: 800;
+  margin: 0;
+}
+.compactHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
 }
 
-/* ===== tickers (mais compactos) ===== */
-.tickers{display:grid;grid-template-columns:1fr;gap:10px} /* -2px */
-.tickerCard{
-  background:rgba(255,255,255,.02);
-  border:1px solid rgba(255,255,255,.06);
-  border-radius:12px;        /* -2px */
-  padding:10px 12px;         /* -2px */
+.compactGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  height: 100%;
 }
-.tickerSymbol{color:var(--text);font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-weight:800}
-.tickerSymbol.strong{font-size:15px}
-.tickerPrice{font-weight:700;font-size:15px;opacity:.95} /* -1px */
-.tickerPrice.green{color:var(--accent-strong);filter:drop-shadow(0 0 6px rgba(33,243,141,.25))}
-
-/* ===== hero central um pouco mais contido ===== */
-.hero{height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
-.heroInner{width:min(940px,95%);text-align:center} /* -40px */
-.heroTag{color:var(--muted);letter-spacing:.15em;font-size:12px;text-transform:uppercase}
-.heroTitle{font-size:clamp(26px,4.5vw,56px);line-height:1.06;margin:8px 0 12px;font-weight:800} /* levemente menor */
-.heroSubtitle{color:#c9eedc;opacity:.9;max-width:700px;margin:0 auto 22px} /* -6px */
-
-.liveLineWrap{position:relative;height:64px;margin:18px auto 4px;width:min(720px,100%)} /* -8px, -6px, -40px */
-.liveLine{position:absolute;inset:0;border-radius:999px;background:linear-gradient(90deg,transparent,var(--accent),transparent);filter:drop-shadow(0 0 10px var(--accent));opacity:.8}
-.liveDot{position:absolute;top:50%;width:10px;height:10px;background:var(--accent-strong);border-radius:999px;transform:translate(-50%,-50%);filter:drop-shadow(0 0 10px var(--accent-strong));animation:run 2.2s linear infinite}
-@keyframes run{from{left:0%}to{left:100%}}
-
-/* ===== menu direito ===== */
-.rightMenu{position:sticky;top:16px;height:fit-content}
-.menuList{display:grid;gap:8px} /* -2px */
-.menuBtn{
-  display:block;text-decoration:none;color:var(--text);
-  background:rgba(255,255,255,.03);
-  border:1px solid rgba(255,255,255,.06);
-  padding:10px 12px;border-radius:12px;text-align:center;font-weight:600
-}
-.menuBtn.active{outline:2px solid var(--accent);box-shadow:0 0 0 4px rgba(33,243,141,.12) inset;color:var(--accent-strong)}
-
-/* ===== botões de ação (Voltar ao início) ===== */
-.btn{
-  display:inline-block;padding:10px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.12);
-  text-decoration:none;font-weight:700
-}
-.btn-primary{background:linear-gradient(180deg,rgba(33,243,141,.18),rgba(33,243,141,.08));color:var(--accent-strong)}
-.btn-primary:hover{outline:2px solid var(--accent);box-shadow:0 0 0 4px rgba(33,243,141,.12) inset}
-
-/* acessibilidade: menos movimento */
-@media (prefers-reduced-motion: reduce){ .liveDot{animation:none;left:100%} }
-
-/* utilidades */
-.muted{color:var(--muted)} .small{font-size:12px}
-/* Botão flutuante do fullscreen no gráfico */
-.fsBtn{
-  position:absolute; top:8px; right:8px;
-  width:34px; height:34px; border-radius:10px;
-  display:grid; place-items:center;
-  background:rgba(0,0,0,.35); color:#d5fbe6;
-  border:1px solid rgba(255,255,255,.2);
-  cursor:pointer;
-}
-.fsBtn:hover{ outline:2px solid var(--accent); color:var(--accent-strong); }
-/* Botão flutuante no topo direito do gráfico (abaixo da barra de ferramentas do TradingView) */
-.topGraphBtn{
-  position:absolute;
-  top: 46px;     /* abaixo da barra do TV (após 'Indicadores') */
-  right: 8px;
-  z-index: 5;
-  padding: 6px 10px;
-  border-radius: 10px;
-  font-weight: 700;
-}
-/* Barra superior do gráfico (fora do iframe) — lado ESQUERDO */
-.graphTopBar{
-  position:absolute; top:6px; left:8px; z-index:6;
-  display:flex; align-items:center; gap:8px;
-}
-.indicatorsWrap{ display:flex; align-items:center; gap:6px; }
-.indBtn{
-  display:inline-flex; align-items:center; gap:6px;
-  padding:6px 10px; border-radius:10px;
-  background:rgba(0,0,0,.35); color:#d5fbe6;
-  border:1px solid rgba(255,255,255,.2);
-}
-.indBtn:hover{ outline:2px solid var(--accent); color:var(--accent-strong); }
-.indSelect{
-  padding:6px 8px; border-radius:10px;
-  background:rgba(255,255,255,.06); color:inherit;
-  border:1px solid rgba(255,255,255,.18);
+.colA,
+.colB {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
 }
 
-/* Botão de tela cheia mais chamativo no header dos Controles */
-.btn-fs-strong{
-  background: radial-gradient(400px 200px at 50% -100%, rgba(33,243,141,.25), transparent) , rgba(255,255,255,.08) !important;
-  color: var(--accent-strong) !important;
-  box-shadow: 0 0 0 2px rgba(33,243,141,.35) inset, 0 0 16px rgba(33,243,141,.25);
+.lbl {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 2px;
 }
-.btn-fs-strong:hover{
-  outline: 2px solid var(--accent);
+.muted {
+  color: rgba(255, 255, 255, 0.65);
 }
-/* Ícone de tela cheia mais visível */
-.btn-fs-icon{
-  background: radial-gradient(200px 100px at 50% -60%, rgba(33,243,141,.25), transparent),
-              rgba(255,255,255,.10);
-  border: 1px solid rgba(33,243,141,.5);
-  color: var(--accent-strong);
-  box-shadow: 0 0 8px rgba(33,243,141,.4);
+.muted.xs {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
 }
-.btn-fs-icon:hover{
-  outline: 2px solid var(--accent);
+.xs {
+  font-size: 12px;
 }
-/* Botão de tela cheia mais forte/neutro */
-.btn-fs-icon{
-  background: rgba(255,255,255,.12);
-  border: 1px solid rgba(255,255,255,.25);
-  color: #e5e5e5;
+.green {
+  color: #1cff80;
 }
-.btn-fs-icon:hover{
-  background: rgba(255,255,255,.18);
+
+.tickerRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.inp {
+  width: 100%;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 4px;
+  font-size: 13px;
   color: #fff;
 }
 
-/* Botão "Voltar ao início" fixo no topo do gráfico */
-.chartTopButtons{
-  position:absolute;
-  top:6px;
-  left:50px; /* aparece logo depois do ícone de câmera */
-  z-index:6;
-}
-/* Ícone de Tela Cheia ao lado da câmera (topo direito do gráfico) */
-.chartFsBtn{
-  position:absolute;
-  top:6px;
-  right:44px; /* coloca à ESQUERDA da câmera para não sobrepor */
-  z-index:6;
-  width:28px; height:28px;                 /* mesmo tamanho visual da câmera */
-  border-radius:8px;
-  display:grid; place-items:center;
-  background: rgba(255,255,255,.12);
-  color:#e6e6e6;
-  border:1px solid rgba(255,255,255,.25);
-  cursor:pointer;
-}
-.chartFsBtn:hover{ background:rgba(255,255,255,.18); color:#fff; }
-/* ===== Painel compacto ===== */
-.compactPanel { padding: 12px !important; }
-.compactRoot { font-size: 12px; }
-.compactTitle { font-size: 14px; margin: 0; }
-.compactHeader { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
-
-/* Grid 2 colunas do painel */
-.compactGrid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; height: 100%; }
-.colA, .colB { display:flex; flex-direction:column; gap:8px; min-width:0; }
-.twoCols { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
-.threeCols { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; }
-
-.lbl { font-size: 11px; color: rgba(255,255,255,.6); margin-bottom:2px; }
-.muted { color: rgba(255,255,255,.6); }
-.muted.xs { font-size: 11px; color: rgba(255,255,255,.55); }
-.xs { font-size: 11px; }
-.green { color: #1cff80; font-weight: 700; }
-
-.inp {
-  width: 100%;
-  height: 32px;               /* slim */
-  padding: 0 10px;
-  border-radius: 10px;
-  background: rgba(255,255,255,.03);
-  color: inherit;
-  border: 1px solid rgba(255,255,255,.12);
-}
-.inp-disabled { background: rgba(255,255,255,.08); cursor: not-allowed; }
-
-.btn { border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); border-radius: 10px; color: inherit; }
-.btn:hover { background: rgba(255,255,255,.12); }
-.btn-xs { padding: 6px 8px; font-size: 12px; border-radius: 10px; }
-.btn-primary { background: rgba(33,243,141,.15); border-color: rgba(33,243,141,.35); color:#1cff80; font-weight:700; }
-.btnBuy { background: linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10)); color:#1cff80; border:1px solid rgba(33,243,141,.35); }
-.btnSell{ background: linear-gradient(180deg, rgba(255,76,76,.20), rgba(255,76,76,.08)); color:#ff6b6b; border:1px solid rgba(255,76,76,.35); }
-
-.tickerRow { display:flex; justify-content:space-between; align-items:center; padding:6px 8px; border:1px solid rgba(255,255,255,.12); border-radius:10px; background:rgba(255,255,255,.04); }
-
-.cardMini {
-  border:1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.04);
-  border-radius: 12px;
-  padding:8px;
-  display:flex; flex-direction:column; gap:8px;
-}
-.cardTitle { font-size: 12px; font-weight: 700; }
-
-.posGrid { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
-
-.histWrap { display:grid; gap:6px; max-height: 22vh; overflow-y:auto; padding-right:4px; }
-.histRow { border:1px solid rgba(255,255,255,.10); border-radius:10px; padding:6px 8px; background: rgba(255,255,255,.03); }
-
-/* Botão de tela cheia (já existente) */
-.chartFsBtn{
-  position:absolute;
-  top:6px;
-  right:44px;
-  z-index:6;
-  width:28px; height:28px;
-  border-radius:8px;
-  display:grid; place-items:center;
-  background: rgba(255,255,255,.12);
-  color:#e6e6e6;
-  border:1px solid rgba(255,255,255,.25);
-  cursor:pointer;
-}
-.chartFsBtn:hover{ background:rgba(255,255,255,.18); color:#fff; }
-/* ===== Painel compacto cheio ===== */
-.compactPanel { padding: 12px !important; }
-.compactRoot { font-size: 13px; }            /* ↑ maior que antes */
-.compactTitle { font-size: 15px; margin: 0; font-weight: 800; }
-.compactHeader { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
-
-/* Grid 2 colunas do painel */
-.compactGrid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; height: 100%; }
-.colA, .colB { display:flex; flex-direction:column; gap:8px; min-width:0; }
-.twoCols { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
-.threeCols { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; }
-
-.lbl { font-size: 12px; color: rgba(255,255,255,.7); margin-bottom:2px; }
-.muted { color: rgba(255,255,255,.65); }
-.muted.xs { font-size: 11px; color: rgba(255,255,255,.55); }
-.xs { font-size: 11px; }
-.green { color: #1cff80; font-weight: 800; }
-
-.inp {
-  width: 100%;
-  height: 34px;               /* ↑ 32 -> 34px para legibilidade */
-  padding: 0 10px;
-  border-radius: 10px;
-  background: rgba(255,255,255,.03);
-  color: inherit;
-  border: 1px solid rgba(255,255,255,.12);
-}
-.inp-disabled { background: rgba(255,255,255,.08); cursor: not-allowed; }
-
-.btn { border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); border-radius: 10px; color: inherit; }
-.btn:hover { background: rgba(255,255,255,.12); }
-.btn-xs { padding: 7px 9px; font-size: 12px; border-radius: 10px; } /* levemente maior */
-.btn-primary { background: rgba(33,243,141,.15); border-color: rgba(33,243,141,.35); color:#1cff80; font-weight:800; }
-.btnBuy { background: linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10)); color:#1cff80; border:1px solid rgba(33,243,141,.35); font-weight:800; }
-.btnSell{ background: linear-gradient(180deg, rgba(255,76,76,.20), rgba(255,76,76,.08)); color:#ff6b6b; border:1px solid rgba(255,76,76,.35); font-weight:800; }
-
-.tickerRow { display:flex; justify-content:space-between; align-items:center; padding:7px 9px; border:1px solid rgba(255,255,255,.12); border-radius:10px; background:rgba(255,255,255,.04); }
-
-.cardMini {
-  border:1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.04);
-  border-radius: 12px;
-  padding:9px;
-  display:flex; flex-direction:column; gap:8px;
-}
-.cardTitle { font-size: 12px; font-weight: 800; }
-
-/* KPIs */
-.kpiGrid { display:grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap:8px; }
-.kpiCard { border:1px solid rgba(255,255,255,.12); border-radius:12px; background:rgba(255,255,255,.04); padding:8px; }
-.kpiLabel { font-size:11px; color:rgba(255,255,255,.6); }
-.kpiValue { font-size:14px; font-weight:800; }
-
-/* Posição */
-.posGrid { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
-
-/* Histórico elástico — ocupa o resto da coluna direita */
-.historyCard { flex: 1; min-height: 0; display:flex; flex-direction:column; }
-.histWrap.fill { flex:1; min-height:0; overflow-y:auto; display:grid; gap:6px; padding-right:4px; }
-.histRow { border:1px solid rgba(255,255,255,.10); border-radius:10px; padding:6px 8px; background: rgba(255,255,255,.03); }
-
-/* Botão de tela cheia (já existente) */
-.chartFsBtn{
-  position:absolute;
-  top:6px;
-  right:44px;
-  z-index:6;
-  width:28px; height:28px;
-  border-radius:8px;
-  display:grid; place-items:center;
-  background: rgba(255,255,255,.12);
-  color:#e6e6e6;
-  border:1px solid rgba(255,255,255,.25);
-  cursor:pointer;
-}
-.chartFsBtn:hover{ background:rgba(255,255,255,.18); color:#fff; }
-/* ===== Painel cheio ===== */
-.compactRoot { font-size: 14px; }
-.compactTitle { font-size: 16px; font-weight: 800; margin: 0; }
-.compactHeader { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-
-.compactGrid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; height:100%; }
-.colA,.colB { display:flex; flex-direction:column; gap:10px; min-width:0; }
-
-.lbl { font-size: 13px; color: rgba(255,255,255,.7); margin-bottom:2px; }
-.muted { color: rgba(255,255,255,.65); }
-.muted.xs { font-size: 12px; color: rgba(255,255,255,.55); }
-.xs { font-size: 12px; }
-.green { color:#1cff
-/* ===== Painel cheio ===== */
-.compactRoot { font-size: 14px; }
-.compactTitle { font-size: 16px; font-weight: 800; margin: 0; }
-.compactHeader { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-
-.compactGrid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; height:100%; }
-.colA,.colB { display:flex; flex-direction:column; gap:10px; min-width:0; }
-
-.lbl { font-size: 13px; color: rgba(255,255,255,.7); margin-bottom:2px; }
-.muted { color: rgba(255,255,255,.65); }
-.muted.xs { font-size: 12px; color: rgba(255,255,255,.55); }
-.xs { font-size: 12px; }
-.green { color:#1cff80; }
-
-.tickerRow { display:flex; justify-content:space-between; font-size:13px; }
-
-.inp { width:100%; background:#111; border:1px solid #333; border-radius:6px; padding:4px; font-size:13px; color:#fff; }
-
-.btn { padding:4px 8px; border-radius:6px; border:1px solid #333; background:#222; color:#fff;
 .btn {
   padding: 4px 8px;
   border-radius: 6px;
@@ -359,24 +85,82 @@ body{
   cursor: pointer;
 }
 
-.btn-xs { font-size: 12px; padding: 2px 6px; }
-.btnBuy { background: #065f46; }
-.btnSell { background: #7f1d1d; }
-.btn-primary { background: #1e40af; }
+.btn-xs {
+  font-size: 12px;
+  padding: 2px 6px;
+}
+.btnBuy {
+  background: #065f46;
+}
+.btnSell {
+  background: #7f1d1d;
+}
+.btn-primary {
+  background: #1e40af;
+}
 
-.twoCols { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.threeCols { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+.twoCols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.threeCols {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+}
 
-.cardMini { background: #111; border: 1px solid #333; border-radius: 8px; padding: 6px; }
-.cardTitle { font-size: 13px; font-weight: bold; margin-bottom: 4px; }
+.cardMini {
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 6px;
+}
+.cardTitle {
+  font-size: 13px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
 
-.posGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; }
+.posGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+}
 
-.kpiGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.kpiCard { background: #111; padding: 6px; border-radius: 6px; text-align: center; }
-.kpiLabel { font-size: 12px; color: rgba(255,255,255,.6); }
-.kpiValue { font-size: 14px; font-weight: bold; }
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.kpiCard {
+  background: #111;
+  padding: 6px;
+  border-radius: 6px;
+  text-align: center;
+}
+.kpiLabel {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+.kpiValue {
+  font-size: 14px;
+  font-weight: bold;
+}
 
-.historyCard { flex: 1; display: flex; flex-direction: column; }
-.histWrap { overflow-y: auto; flex: 1; }
-.histRow { display: flex; justify-content: space-between; font-size: 12px; padding: 2px 0; border-bottom: 1px solid #222; }
+.historyCard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.histWrap {
+  overflow-y: auto;
+  flex: 1;
+}
+.histRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 2px 0;
+  border-bottom: 1px solid #222;
+}
