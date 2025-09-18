@@ -4,11 +4,11 @@
 import { useEffect, useRef, useState } from "react";
 import TradingViewWidget from "@/components/TradingViewWidget";
 import TradeControls from "@/components/TradeControls";
+import Link from "next/link";
 
 export default function SimuladorPage() {
   const [symbol, setSymbol] = useState<string>("BTCUSDT");
 
-  // fullscreen do gráfico
   const graphRef = useRef<HTMLDivElement>(null);
   const [isFs, setIsFs] = useState(false);
 
@@ -39,14 +39,19 @@ export default function SimuladorPage() {
 
   return (
     <main className="wrapper" style={{ gridTemplateColumns: "1fr 360px" }}>
-      {/* Gráfico ocupa tudo */}
+      {/* GRÁFICO */}
       <section className="panel" style={{ height: "calc(100dvh - 32px)", padding: 0 }}>
         <div ref={graphRef} style={{ position: "relative", width: "100%", height: "100%" }}>
+          {/* Botão “Voltar ao início” fixo no topo, ao lado da câmera/indicadores */}
+          <div className="chartTopButtons">
+            <Link href="/" className="btn btn-primary">Voltar ao início</Link>
+          </div>
+
           <TradingViewWidget symbol={`BINANCE:${symbol}`} />
         </div>
       </section>
 
-      {/* Controles à direita */}
+      {/* CONTROLES */}
       <aside className="panel" style={{ height: "calc(100dvh - 32px)" }}>
         <TradeControls
           symbol={symbol}
