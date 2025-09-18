@@ -1,16 +1,26 @@
 /* app/simulador/page.tsx */
 'use client';
 
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 
-// Gráfico (seu componente existente em /components/TradingViewWidget.tsx)
+// Gráfico (seu componente em /components/TradingViewWidget.tsx)
 const TVChart = dynamic(() => import('@/components/TradingViewWidget'), { ssr: false });
 
-// Controles (seu componente existente em /components/TradeControls.tsx)
+// Controles (seu componente em /components/TradeControls.tsx)
 import TradeControls from '@/components/TradeControls';
 
 export default function SimuladorPage() {
+  // Símbolo global do simulador (sincroniza Controles <-> Gráfico)
+  const [symbol, setSymbol] = useState<string>('BTCUSDT');
+
+  // Handler passado aos controles para trocar o par
+  const handleSymbolChange = useCallback((s: string) => {
+    if (!s) return;
+    setSymbol(s);
+  }, []);
+
   // Fullscreen simples para o contêiner do gráfico
   const toggleFullscreen = () => {
     const el = document.getElementById('chart-root');
@@ -25,7 +35,7 @@ export default function SimuladorPage() {
 
   return (
     <main className="wrapper simWrap">
-      {/* COLUNA ESQUERDA (opcional): você pode usar para histórico/atalhos */}
+      {/* COLUNA ESQUERDA (opcional): histórico/atalhos */}
       <aside className="leftPanel">
         <div className="panel">
           <div className="muted small">Histórico / Atalhos</div>
@@ -35,10 +45,11 @@ export default function SimuladorPage() {
       {/* COLUNA CENTRAL: GRÁFICO */}
       <section className="panel" style={{ position: 'relative' }}>
         <div id="chart-root" style={{ position: 'relative' }}>
-          <TVChart />
+          {/* Passamos o símbolo atual para o gráfico (se o componente aceitar) */}
+          <TVChart symbol={symbol} />
         </div>
 
-        {/* Botão de Tela Cheia (mesmas classes do globals.css) */}
+        {/* Ícone Tela Cheia (classes já existem no globals.css) */}
         <button
           type="button"
           title="Tela cheia"
@@ -49,7 +60,7 @@ export default function SimuladorPage() {
           ⛶
         </button>
 
-        {/* Espaço para botões/indicadores se você usar (as classes já existem no CSS) */}
+        {/* Se quiser, botoeira/indicadores no topo do gráfico */}
         {/* <div className="graphTopBar">
           <button className="indBtn">Indicadores</button>
         </div> */}
@@ -63,8 +74,11 @@ export default function SimuladorPage() {
             <Link href="/" className="btn btn-primary">Voltar ao início</Link>
           </header>
 
-          {/* Seu painel de controles exatamente como já usa */}
-          <TradeControls />
+          {/* IMPORTANTE: passar os props exigidos pelo seu TradeControls */}
+          <TradeControls
+            symbol={symbol}
+            onSymbolChange={handleSymbolChange}
+          />
         </div>
       </aside>
     </main>
