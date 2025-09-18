@@ -15,21 +15,33 @@ const tickers = [
 export default function HomePage() {
   return (
     <main className="wrapper">
-      {/* COLUNA ESQUERDA: Tickers */}
+      {/* COLUNA ESQUERDA: Tickers – 8 itens SEMPRE visíveis no 100% */}
       <aside className="leftPanel">
-        <div className="panel">
-          <div className="tickers">
+        <div className="panel" style={{ height: 'calc(100vh - 32px)' }}>
+          <div
+            className="tickers"
+            style={{
+              display: 'grid',
+              gridTemplateRows: 'repeat(8, 1fr)',
+              gap: 8,
+              height: '100%',
+            }}
+          >
             {tickers.map((t) => (
-              <div key={t.sym} className="tickerCard">
-                <div className="tickerSymbol strong">{t.sym}</div>
-                <div className="tickerPrice green">{t.px}</div>
+              <div
+                key={t.sym}
+                className="tickerCard"
+                style={{ padding: '8px 10px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
+              >
+                <div className="tickerSymbol strong" style={{ fontSize: 14 }}>{t.sym}</div>
+                <div className="tickerPrice green" style={{ fontSize: 16 }}>{t.px}</div>
               </div>
             ))}
           </div>
         </div>
       </aside>
 
-      {/* COLUNA CENTRAL: Hero + Linha Viva (sem lista de botões abaixo) */}
+      {/* COLUNA CENTRAL: Hero + Linha Viva */}
       <section className="panel">
         <div className="hero">
           <div className="heroInner">
