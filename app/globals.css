@@ -1,25 +1,43 @@
-/* ===== Reset básico ===== */
+/* ===== Reset Básico ===== */
 * {
-  box-sizing: border-box;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
 }
 
 body {
   background: #000;
   color: #fff;
   font-family: Arial, sans-serif;
+  line-height: 1.4;
 }
 
-/* ===== Painel cheio ===== */
+/* ===== Layout Geral ===== */
+a {
+  color: #16f08a;
+  text-decoration: none;
+}
+
+h1, h2, h3, h4 {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+/* ===== Painel Compacto ===== */
 .compactRoot {
   font-size: 14px;
 }
+
 .compactTitle {
   font-size: 16px;
   font-weight: 800;
   margin: 0;
 }
+
 .compactHeader {
   display: flex;
   justify-content: space-between;
@@ -33,6 +51,7 @@ body {
   gap: 10px;
   height: 100%;
 }
+
 .colA,
 .colB {
   display: flex;
@@ -41,31 +60,38 @@ body {
   min-width: 0;
 }
 
+/* ===== Tipografia ===== */
 .lbl {
   font-size: 13px;
   color: rgba(255, 255, 255, 0.7);
   margin-bottom: 2px;
 }
+
 .muted {
   color: rgba(255, 255, 255, 0.65);
 }
+
 .muted.xs {
   font-size: 12px;
   color: rgba(255, 255, 255, 0.55);
 }
+
 .xs {
   font-size: 12px;
 }
+
 .green {
   color: #1cff80;
 }
 
+/* ===== Tickers ===== */
 .tickerRow {
   display: flex;
   justify-content: space-between;
   font-size: 13px;
 }
 
+/* ===== Inputs ===== */
 .inp {
   width: 100%;
   background: #111;
@@ -76,6 +102,7 @@ body {
   color: #fff;
 }
 
+/* ===== Botões ===== */
 .btn {
   padding: 4px 8px;
   border-radius: 6px;
@@ -89,39 +116,47 @@ body {
   font-size: 12px;
   padding: 2px 6px;
 }
+
 .btnBuy {
   background: #065f46;
 }
+
 .btnSell {
   background: #7f1d1d;
 }
+
 .btn-primary {
   background: #1e40af;
 }
 
+/* ===== Grids ===== */
 .twoCols {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 6px;
 }
+
 .threeCols {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 6px;
 }
 
+/* ===== Cards ===== */
 .cardMini {
   background: #111;
   border: 1px solid #333;
   border-radius: 8px;
   padding: 6px;
 }
+
 .cardTitle {
   font-size: 13px;
   font-weight: bold;
   margin-bottom: 4px;
 }
 
+/* ===== Posições / KPI ===== */
 .posGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -133,30 +168,36 @@ body {
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
 }
+
 .kpiCard {
   background: #111;
   padding: 6px;
   border-radius: 6px;
   text-align: center;
 }
+
 .kpiLabel {
   font-size: 12px;
   color: rgba(255, 255, 255, 0.6);
 }
+
 .kpiValue {
   font-size: 14px;
   font-weight: bold;
 }
 
+/* ===== Histórico ===== */
 .historyCard {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
+
 .histWrap {
   overflow-y: auto;
   flex: 1;
 }
+
 .histRow {
   display: flex;
   justify-content: space-between;
