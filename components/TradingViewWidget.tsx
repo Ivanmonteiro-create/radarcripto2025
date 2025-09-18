@@ -13,7 +13,7 @@ export default function TradingViewWidget({ symbol = "BINANCE:BTCUSDT" }: Props)
       src="https://s.tradingview.com/widgetembed/?frameElementId=tv_embed
       &symbol=${encodeURIComponent(symbol)}
       &interval=60
-      &hidesidetoolbar=0
+      &hidesidetoolbar=0   <!-- toolbar lateral habilitada -->
       &symboledit=1
       &saveimage=0
       &hideideas=1
