@@ -1,577 +1,163 @@
-/* app/globals.css */
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --bg: #0a0f0d;
-  --panel: #0f1513;
-  --grid: rgba(255, 255, 255, 0.06);
-  --text: #d5fbe6;
-  --muted: #8fbfa8;
-  --accent: #21f38d;
-  --accent-strong: #1cff80;
-}
-* { box-sizing: border-box; }
-html, body { height: 100%; }
-body {
-  margin: 0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-  color: var(--text);
-  background-color: var(--bg);
-  background-image:
-    linear-gradient(to right, var(--grid) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
-  background-size: 60px 60px;
-}
+/* ===================== app/globals.css (reconstruído) ===================== */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-/* layout 3 colunas: esquerda (tickers), centro (conteúdo), direita (menu) */
-.wrapper {
-  display: grid;
-  grid-template-columns: 320px 1fr 220px;
-  gap: 20px;
-  min-height: 100dvh;
-  padding: 20px;
-}
-@media (max-width: 1100px) {
-  .wrapper { grid-template-columns: 1fr; }
-  .rightMenu { position: static; }
-  .leftPanel { order: 2; }
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-.panel {
-  background: radial-gradient(1200px 1200px at -10% -10%, rgba(33, 243, 141, 0.06), transparent 40%), var(--panel);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 18px;
-  padding: 16px;
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-/* tickers */
-.tickers {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
-.tickerCard {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 14px;
-  padding: 12px 14px;
-}
-.tickerSymbol { color: var(--muted); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
-.tickerPrice { font-weight: 700; font-size: 20px; }
-.tickerDelta { font-size: 12px; opacity: .8; }
-
-/* hero central + linha viva */
-.hero {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-.heroInner { width: min(980px, 95%); text-align: center; }
-.heroTag { color: var(--muted); letter-spacing: .15em; font-size: 12px; text-transform: uppercase; }
-.heroTitle { font-size: clamp(28px, 5vw, 64px); line-height: 1.05; margin: 10px 0 14px; font-weight: 800; }
-.heroSubtitle { color: #c9eedc; opacity: .9; max-width: 720px; margin: 0 auto 28px; }
-
-.liveLineWrap { position: relative; height: 72px; margin: 24px auto 6px; width: min(760px, 100%); }
-.liveLine { position: absolute; inset: 0; border-radius: 999px; background: linear-gradient(90deg, transparent, var(--accent), transparent); filter: drop-shadow(0 0 10px var(--accent)); opacity: .8; }
-.liveDot { position: absolute; top: 50%; width: 12px; height: 12px; background: var(--accent-strong); border-radius: 999px; transform: translate(-50%, -50%); filter: drop-shadow(0 0 10px var(--accent-strong)); animation: run 2.2s linear infinite; }
-@keyframes run { from { left: 0%; } to { left: 100%; } }
-
-/* menu direito */
-.rightMenu { position: sticky; top: 20px; height: fit-content; }
-.menuList { display: grid; gap: 10px; }
-.menuBtn {
-  display: block; text-decoration: none; color: var(--text);
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  padding: 10px 12px; border-radius: 12px; text-align: center; font-weight: 600;
-}
-.menuBtn.active { outline: 2px solid var(--accent); box-shadow: 0 0 0 4px rgba(33, 243, 141, .12) inset; color: var(--accent-strong); }
-
-/* utilidades */
-.muted { color: var(--muted); }
-.small { font-size: 12px; }
-@@ -91,3 +91,9 @@ body {
-/* utilidades */
-.muted { color: var(--muted); }
-.small { font-size: 12px; }
-/* === ajustes para os tickers ao vivo === */
-.tickerCard { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 12px 14px; }
-.tickerSymbol { color: var(--text); font-size: 14px; letter-spacing: .08em; text-transform: uppercase; font-weight: 800; }
-.tickerSymbol.strong { font-size: 16px; }
-.tickerPrice { font-weight: 700; font-size: 16px; opacity: 0.95; }
-.tickerPr
-@@ -97,3 +97,19 @@ body {
-.tickerSymbol.strong { font-size: 16px; }
-.tickerPrice { font-weight: 700; font-size: 16px; opacity: 0.95; }
-.tickerPrice.green { color: var(--accent-strong); filter: drop-shadow(0 0 6px rgba(33,243,141,.25)); }
-/* reduz animação para quem prefere menos movimento */
-@media (prefers-reduced-motion: reduce) {
-  .liveDot { animation: none; left: 100%; }
-}
-
-/* estado de “carregando” para cards (quando quiser usar) */
-.skeleton {
-  position: relative; overflow: hidden; background: rgba(255,255,255,.06);
-}
-.skeleton::after {
-  content: ""; position: absolute; inset: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
-  animation: shimmer 1.2s infinite;
-}
-@keyframes shimmer { 100% { transform: translateX(100%); } }
-@@ -1,115 +1,85 @@
-/* app/globals.css */
-:root {
-  --bg: #0a0f0d;
-  --panel: #0f1513;
-  --grid: rgba(255, 255, 255, 0.06);
-  --text: #d5fbe6;
-  --muted: #8fbfa8;
-  --accent: #21f38d;
-  --accent-strong: #1cff80;
+/* ---------- Variáveis e base ---------- */
 :root{
-  --bg:#0a0f0d;--panel:#0f1513;--grid:rgba(255,255,255,.06);
-  --text:#d5fbe6;--muted:#8fbfa8;--accent:#21f38d;--accent-strong:#1cff80;
+  --bg:#0a0f0d;
+  --panel:#0f1513;
+  --grid:rgba(255,255,255,.06);
+  --text:#d5fbe6;
+  --muted:#8fbfa8;
+  --accent:#21f38d;
+  --accent-strong:#1cff80;
 }
-* { box-sizing: border-box; }
-html, body { height: 100%; }
-body {
-  margin: 0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-  color: var(--text);
-  background-color: var(--bg);
-  background-image:
-    linear-gradient(to right, var(--grid) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
-  background-size: 60px 60px;
+
 *{box-sizing:border-box}
 html,body{height:100%}
+
 body{
-  margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
-  color:var(--text);background-color:var(--bg);
-  background-image:linear-gradient(to right,var(--grid) 1px,transparent 1px),linear-gradient(to bottom,var(--grid) 1px,transparent 1px);
+  margin:0;
+  font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
+  color:var(--text);
+  background-color:var(--bg);
+  background-image:
+    linear-gradient(to right,var(--grid) 1px,transparent 1px),
+    linear-gradient(to bottom,var(--grid) 1px,transparent 1px);
   background-size:60px 60px;
+  line-height:1.4;
 }
 
-/* layout 3 colunas: esquerda (tickers), centro (conteúdo), direita (menu) */
-.wrapper {
-  display: grid;
-  grid-template-columns: 320px 1fr 220px;
-  gap: 20px;
-  min-height: 100dvh;
-  padding: 20px;
-/* ===== layout: laterais discretamente menores para caber tudo na 1ª dobra ===== */
+a{color:var(--accent-strong);text-decoration:none}
+h1,h2,h3,h4{font-weight:800;margin-bottom:.5rem}
+
+/* ---------- Layout 3 colunas ---------- */
 .wrapper{
   display:grid;
-  grid-template-columns: 300px 1fr 200px; /* antes 320 / 220 */
-  gap:16px; /* antes 20px */
+  grid-template-columns:300px 1fr 200px;
+  gap:16px;
   min-height:100dvh;
-  padding:16px; /* antes 20px */
+  padding:16px;
   align-items:start;
 }
-@media (max-width: 1100px) {
-  .wrapper { grid-template-columns: 1fr; }
-  .rightMenu { position: static; }
-  .leftPanel { order: 2; }
 @media (max-width:1100px){
   .wrapper{grid-template-columns:1fr}
   .rightMenu{position:static}
   .leftPanel{order:2}
 }
 
-.panel {
-  background: radial-gradient(1200px 1200px at -10% -10%, rgba(33, 243, 141, 0.06), transparent 40%), var(--panel);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 18px;
-  padding: 16px;
+/* ---------- Cards / painéis ---------- */
 .panel{
   background:radial-gradient(1200px 1200px at -10% -10%,rgba(33,243,141,.06),transparent 40%),var(--panel);
   border:1px solid rgba(255,255,255,.06);
-  border-radius:16px; /* -2px */
-  padding:14px;       /* -2px */
+  border-radius:16px;
+  padding:14px;
 }
 
-/* tickers */
-.tickers {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-/* ===== tickers (mais compactos) ===== */
-.tickers{display:grid;grid-template-columns:1fr;gap:10px} /* -2px */
+/* ---------- Tickers (coluna esquerda) ---------- */
+.tickers{display:grid;grid-template-columns:1fr;gap:10px}
 .tickerCard{
   background:rgba(255,255,255,.02);
   border:1px solid rgba(255,255,255,.06);
-  border-radius:12px;        /* -2px */
-  padding:10px 12px;         /* -2px */
+  border-radius:12px;
+  padding:10px 12px;
 }
-.tickerCard {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 14px;
-  padding: 12px 14px;
-}
-.tickerSymbol { color: var(--muted); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
-.tickerPrice { font-weight: 700; font-size: 20px; }
-.tickerDelta { font-size: 12px; opacity: .8; }
 .tickerSymbol{color:var(--text);font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-weight:800}
 .tickerSymbol.strong{font-size:15px}
-.tickerPrice{font-weight:700;font-size:15px;opacity:.95} /* -1px */
+.tickerPrice{font-weight:700;font-size:15px;opacity:.95}
 .tickerPrice.green{color:var(--accent-strong);filter:drop-shadow(0 0 6px rgba(33,243,141,.25))}
 
-/* hero central + linha viva */
-.hero {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-.heroInner { width: min(980px, 95%); text-align: center; }
-.heroTag { color: var(--muted); letter-spacing: .15em; font-size: 12px; text-transform: uppercase; }
-.heroTitle { font-size: clamp(28px, 5vw, 64px); line-height: 1.05; margin: 10px 0 14px; font-weight: 800; }
-.heroSubtitle { color: #c9eedc; opacity: .9; max-width: 720px; margin: 0 auto 28px; }
-/* ===== hero central um pouco mais contido ===== */
+/* ---------- Hero (centro) + linha viva ---------- */
 .hero{height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
-.heroInner{width:min(940px,95%);text-align:center} /* -40px */
+.heroInner{width:min(940px,95%);text-align:center}
 .heroTag{color:var(--muted);letter-spacing:.15em;font-size:12px;text-transform:uppercase}
-.heroTitle{font-size:clamp(26px,4.5vw,56px);line-height:1.06;margin:8px 0 12px;font-weight:800} /* levemente menor */
-.heroSubtitle{color:#c9eedc;opacity:.9;max-width:700px;margin:0 auto 22px} /* -6px */
+.heroTitle{font-size:clamp(26px,4.5vw,56px);line-height:1.06;margin:8px 0 12px;font-weight:800}
+.heroSubtitle{color:#c9eedc;opacity:.9;max-width:700px;margin:0 auto 22px}
 
-.liveLineWrap { position: relative; height: 72px; margin: 24px auto 6px; width: min(760px, 100%); }
-.liveLine { position: absolute; inset: 0; border-radius: 999px; background: linear-gradient(90deg, transparent, var(--accent), transparent); filter: drop-shadow(0 0 10px var(--accent)); opacity: .8; }
-.liveDot { position: absolute; top: 50%; width: 12px; height: 12px; background: var(--accent-strong); border-radius: 999px; transform: translate(-50%, -50%); filter: drop-shadow(0 0 10px var(--accent-strong)); animation: run 2.2s linear infinite; }
-@keyframes run { from { left: 0%; } to { left: 100%; } }
-.liveLineWrap{position:relative;height:64px;margin:18px auto 4px;width:min(720px,100%)} /* -8px, -6px, -40px */
+.liveLineWrap{position:relative;height:64px;margin:18px auto 4px;width:min(720px,100%)}
 .liveLine{position:absolute;inset:0;border-radius:999px;background:linear-gradient(90deg,transparent,var(--accent),transparent);filter:drop-shadow(0 0 10px var(--accent));opacity:.8}
 .liveDot{position:absolute;top:50%;width:10px;height:10px;background:var(--accent-strong);border-radius:999px;transform:translate(-50%,-50%);filter:drop-shadow(0 0 10px var(--accent-strong));animation:run 2.2s linear infinite}
 @keyframes run{from{left:0%}to{left:100%}}
+@media (prefers-reduced-motion:reduce){.liveDot{animation:none;left:100%}}
 
-/* menu direito */
-.rightMenu { position: sticky; top: 20px; height: fit-content; }
-.menuList { display: grid; gap: 10px; }
-.menuBtn {
-  display: block; text-decoration: none; color: var(--text);
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  padding: 10px 12px; border-radius: 12px; text-align: center; font-weight: 600;
-/* ===== menu direito ===== */
+/* ---------- Menu direito ---------- */
 .rightMenu{position:sticky;top:16px;height:fit-content}
-.menuList{display:grid;gap:8px} /* -2px */
+.menuList{display:grid;gap:8px}
 .menuBtn{
-  display:block;text-decoration:none;color:var(--text);
+  display:block;color:var(--text);text-decoration:none;
   background:rgba(255,255,255,.03);
   border:1px solid rgba(255,255,255,.06);
   padding:10px 12px;border-radius:12px;text-align:center;font-weight:600
 }
-.menuBtn.active { outline: 2px solid var(--accent); box-shadow: 0 0 0 4px rgba(33, 243, 141, .12) inset; color: var(--accent-strong); }
 .menuBtn.active{outline:2px solid var(--accent);box-shadow:0 0 0 4px rgba(33,243,141,.12) inset;color:var(--accent-strong)}
 
-/* utilidades */
-.muted { color: var(--muted); }
-.small { font-size: 12px; }
-/* === ajustes para os tickers ao vivo === */
-.tickerCard { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 12px 14px; }
-.tickerSymbol { color: var(--text); font-size: 14px; letter-spacing: .08em; text-transform: uppercase; font-weight: 800; }
-.tickerSymbol.strong { font-size: 16px; }
-.tickerPrice { font-weight: 700; font-size: 16px; opacity: 0.95; }
-.tickerPrice.green { color: var(--accent-strong); filter: drop-shadow(0 0 6px rgba(33,243,141,.25)); }
-/* reduz animação para quem prefere menos movimento */
-@media (prefers-reduced-motion: reduce) {
-  .liveDot { animation: none; left: 100%; }
-/* ===== botões de ação (Voltar ao início) ===== */
+/* ---------- Utilitários ---------- */
+.muted{color:var(--muted)}
+.small{font-size:12px}
+
+/* ================= Simulador – estilos compartilhados ================= */
+
+.compactRoot{font-size:13px}
+.compactTitle{font-size:15px;margin:0;font-weight:800}
+.compactHeader{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+
+.compactGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;height:100%}
+.colA,.colB{display:flex;flex-direction:column;gap:8px;min-width:0}
+.twoCols{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.threeCols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+
+.lbl{font-size:12px;color:rgba(255,255,255,.7);margin-bottom:2px}
+.xs{font-size:11px}
+.muted.xs{font-size:11px;color:rgba(255,255,255,.55)}
+.green{color:#1cff80;font-weight:800}
+
+.inp{
+  width:100%;height:34px;padding:0 10px;border-radius:10px;
+  background:rgba(255,255,255,.03);color:inherit;border:1px solid rgba(255,255,255,.12)
+}
+.inp-disabled{background:rgba(255,255,255,.08);cursor:not-allowed}
+
 .btn{
-  display:inline-block;padding:10px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.12);
-  text-decoration:none;font-weight:700
-}
-.btn-primary{background:linear-gradient(180deg,rgba(33,243,141,.18),rgba(33,243,141,.08));color:var(--accent-strong)}
-.btn-primary:hover{outline:2px solid var(--accent);box-shadow:0 0 0 4px rgba(33,243,141,.12) inset}
-
-/* estado de “carregando” para cards (quando quiser usar) */
-.skeleton {
-  position: relative; overflow: hidden; background: rgba(255,255,255,.06);
-}
-.skeleton::after {
-  content: ""; position: absolute; inset: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
-  animation: shimmer 1.2s infinite;
-}
-@keyframes shimmer { 100% { transform: translateX(100%); } }
-/* acessibilidade: menos movimento */
-@media (prefers-reduced-motion: reduce){ .liveDot{animation:none;left:100%} }
-
-/* utilidades */
-.muted{color:var(--muted)} .small{font-size:12px}
-/* utilidades */.muted{color:var(--muted)} .small{font-size:12px}/* Botão flutuante do fullscreen no gráfico */.fsBtn{  position:absolute; top:8px; right:8px;  width:34px; height:34px; border-radius:10px;  display:grid; place-items:center;  background:rgba(0,0,0,.35); color:#d5fbe6;  border:1px solid rgba(255,255,255,.2);  cursor:pointer;}.fsBtn:hover{ outline:2px solid var(--accent); color:var(--accent-strong); }
-@@ -93,3 +93,13 @@ body{
-  cursor:pointer;
-}
-.fsBtn:hover{ outline:2px solid var(--accent); color:var(--accent-strong); }
-/* Botão flutuante no topo direito do gráfico (abaixo da barra de ferramentas do TradingView) */
-.topGraphBtn{
-  position:absolute;
-  top: 46px;     /* abaixo da barra do TV (após 'Indicadores') */
-  right: 8px;
-  z-index: 5;
-  padding: 6px 10px;
-  border-radius: 10px;
-  font-weight: 700;
-}
-@@ -103,3 +103,31 @@ body{
-  border-radius: 10px;
-  font-weight: 700;
-}
-/* Barra superior do gráfico (fora do iframe) — lado ESQUERDO */
-.graphTopBar{
-  position:absolute; top:6px; left:8px; z-index:6;
-  display:flex; align-items:center; gap:8px;
-}
-.indicatorsWrap{ display:flex; align-items:center; gap:6px; }
-.indBtn{
-  display:inline-flex; align-items:center; gap:6px;
-  padding:6px 10px; border-radius:10px;
-  background:rgba(0,0,0,.35); color:#d5fbe6;
-  border:1px solid rgba(255,255,255,.2);
-}
-.indBtn:hover{ outline:2px solid var(--accent); color:var(--accent-strong); }
-.indSelect{
-  padding:6px 8px; border-radius:10px;
-  background:rgba(255,255,255,.06); color:inherit;
+  display:inline-block;padding:7px 10px;border-radius:10px;
   border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.06);color:inherit;cursor:pointer;transition:background .15s
+}
+.btn:hover{background:rgba(255,255,255,.12)}
+.btn-xs{padding:7px 9px;font-size:12px;border-radius:10px}
+.btn-primary{background:rgba(33,243,141,.15);border-color:rgba(33,243,141,.35);color:#1cff80;font-weight:800}
+.btnBuy{background:linear-gradient(180deg,rgba(33,243,141,.22),rgba(33,243,141,.10));color:#1cff80;border:1px solid rgba(33,243,141,.35);font-weight:800}
+.btnSell{background:linear-gradient(180deg,rgba(255,76,76,.20),rgba(255,76,76,.08));color:#ff6b6b;border:1px solid rgba(255,76,76,.35);font-weight:800}
+
+.tickerRow{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:7px 9px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(255,255,255,.04)
 }
 
-/* Botão de tela cheia mais chamativo no header dos Controles */
-.btn-fs-strong{
-  background: radial-gradient(400px 200px at 50% -100%, rgba(33,243,141,.25), transparent) , rgba(255,255,255,.08) !important;
-  color: var(--accent-strong) !important;
-  box-shadow: 0 0 0 2px rgba(33,243,141,.35) inset, 0 0 16px rgba(33,243,141,.25);
-}
-.btn-fs-strong:hover{
-  outline: 2px solid var(--accent);
-}
-@@ -131,3 +131,14 @@ body{
-.btn-fs-strong:hover{
-  outline: 2px solid var(--accent);
-}
-/* Ícone de tela cheia mais visível */
-.btn-fs-icon{
-  background: radial-gradient(200px 100px at 50% -60%, rgba(33,243,141,.25), transparent),
-              rgba(255,255,255,.10);
-  border: 1px solid rgba(33,243,141,.5);
-  color: var(--accent-strong);
-  box-shadow: 0 0 8px rgba(33,243,141,.4);
-}
-.btn-fs-icon:hover{
-  outline: 2px solid var(--accent);
-}
-@@ -142,3 +142,21 @@ body{
-.btn-fs-icon:hover{
-  outline: 2px solid var(--accent);
-}
-/* Botão de tela cheia mais forte/neutro */
-.btn-fs-icon{
-  background: rgba(255,255,255,.12);
-  border: 1px solid rgba(255,255,255,.25);
-  color: #e5e5e5;
-}
-.btn-fs-icon:hover{
-  background: rgba(255,255,255,.18);
-  color: #fff;
-}
-
-/* Botão "Voltar ao início" fixo no topo do gráfico */
-.chartTopButtons{
-  position:absolute;
-  top:6px;
-  left:50px; /* aparece logo depois do ícone de câmera */
-  z-index:6;
-}
-@@ -160,3 +160,18 @@ body{
-  left:50px; /* aparece logo depois do ícone de câmera */
-  z-index:6;
-}
-/* Ícone de Tela Cheia ao lado da câmera (topo direito do gráfico) */
-.chartFsBtn{
-  position:absolute;
-  top:6px;
-  right:44px; /* coloca à ESQUERDA da câmera para não sobrepor */
-  z-index:6;
-  width:28px; height:28px;                 /* mesmo tamanho visual da câmera */
-  border-radius:8px;
-  display:grid; place-items:center;
-  background: rgba(255,255,255,.12);
-  color:#e6e6e6;
-  border:1px solid rgba(255,255,255,.25);
-  cursor:pointer;
-}
-.chartFsBtn:hover{ background:rgba(255,255,255,.18); color:#fff; }
-@@ -175,3 +175,70 @@ body{
-  cursor:pointer;
-}
-.chartFsBtn:hover{ background:rgba(255,255,255,.18); color:#fff; }
-/* ===== Painel compacto ===== */
-.compactPanel { padding: 12px !important; }
-.compactRoot { font-size: 12px; }
-.compactTitle { font-size: 14px; margin: 0; }
-.compactHeader { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
-
-/* Grid 2 colunas do painel */
-.compactGrid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; height: 100%; }
-.colA, .colB { display:flex; flex-direction:column; gap:8px; min-width:0; }
-.twoCols { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
-.threeCols { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; }
-
-.lbl { font-size: 11px; color: rgba(255,255,255,.6); margin-bottom:2px; }
-.muted { color: rgba(255,255,255,.6); }
-.muted.xs { font-size: 11px; color: rgba(255,255,255,.55); }
-.xs { font-size: 11px; }
-.green { color: #1cff80; font-weight: 700; }
-
-.inp {
-  width: 100%;
-  height: 32px;               /* slim */
-  padding: 0 10px;
-  border-radius: 10px;
-  background: rgba(255,255,255,.03);
-  color: inherit;
-  border: 1px solid rgba(255,255,255,.12);
-}
-.inp-disabled { background: rgba(255,255,255,.08); cursor: not-allowed; }
-
-.btn { border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); border-radius: 10px; color: inherit; }
-.btn:hover { background: rgba(255,255,255,.12); }
-.btn-xs { padding: 6px 8px; font-size: 12px; border-radius: 10px; }
-.btn-primary { background: rgba(33,243,141,.15); border-color: rgba(33,243,141,.35); color:#1cff80; font-weight:700; }
-.btnBuy { background: linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10)); color:#1cff80; border:1px solid rgba(33,243,141,.35); }
-.btnSell{ background: linear-gradient(180deg, rgba(255,76,76,.20), rgba(255,76,76,.08)); color:#ff6b6b; border:1px solid rgba(255,76,76,.35); }
-
-.tickerRow { display:flex; justify-content:space-between; align-items:center; padding:6px 8px; border:1px solid rgba(255,255,255,.12); border-radius:10px; background:rgba(255,255,255,.04); }
-
-.cardMini {
+.cardMini{
   border:1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.04);
-  border-radius: 12px;
-  padding:8px;
-  display:flex; flex-direction:column; gap:8px;
+  background:rgba(255,255,255,.04);
+  border-radius:12px;padding:9px;display:flex;flex-direction:column;gap:8px
 }
-.cardTitle { font-size: 12px; font-weight: 700; }
-
-.posGrid { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
-
-.histWrap { display:grid; gap:6px; max-height: 22vh; overflow-y:auto; padding-right:4px; }
-.histRow { border:1px solid rgba(255,255,255,.10); border-radius:10px; padding:6px 8px; background: rgba(255,255,255,.03); }
-
-/* Botão de tela cheia (já existente) */
-.chartFsBtn{
-  position:absolute;
-  top:6px;
-  right:44px;
-  z-index:6;
-  width:28px; height:28px;
-  border-radius:8px;
-  display:grid; place-items:center;
-  background: rgba(255,255,255,.12);
-  color:#e6e6e6;
-  border:1px solid rgba(255,255,255,.25);
-  cursor:pointer;
-}
-.chartFsBtn:hover{ background:rgba(255,255,255,.18); color:#fff; }
-@@ -242,3 +242,79 @@ body{
-  cursor:pointer;
-}
-.chartFsBtn:hover{ background:rgba(255,255,255,.18); color:#fff; }
-/* ===== Painel compacto cheio ===== */
-.compactPanel { padding: 12px !important; }
-.compactRoot { font-size: 13px; }            /* ↑ maior que antes */
-.compactTitle { font-size: 15px; margin: 0; font-weight: 800; }
-.compactHeader { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
-
-/* Grid 2 colunas do painel */
-.compactGrid { display:grid; grid-template-columns: 1fr 1fr; gap:10px; height: 100%; }
-.colA, .colB { display:flex; flex-direction:column; gap:8px; min-width:0; }
-.twoCols { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
-.threeCols { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px; }
-
-.lbl { font-size: 12px; color: rgba(255,255,255,.7); margin-bottom:2px; }
-.muted { color: rgba(255,255,255,.65); }
-.muted.xs { font-size: 11px; color: rgba(255,255,255,.55); }
-.xs { font-size: 11px; }
-.green { color: #1cff80; font-weight: 800; }
-
-.inp {
-  width: 100%;
-  height: 34px;               /* ↑ 32 -> 34px para legibilidade */
-  padding: 0 10px;
-  border-radius: 10px;
-  background: rgba(255,255,255,.03);
-  color: inherit;
-  border: 1px solid rgba(255,255,255,.12);
-}
-.inp-disabled { background: rgba(255,255,255,.08); cursor: not-allowed; }
-
-.btn { border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); border-radius: 10px; color: inherit; }
-.btn:hover { background: rgba(255,255,255,.12); }
-.btn-xs { padding: 7px 9px; font-size: 12px; border-radius: 10px; } /* levemente maior */
-.btn-primary { background: rgba(33,243,141,.15); border-color: rgba(33,243,141,.35); color:#1cff80; font-weight:800; }
-.btnBuy { background: linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10)); color:#1cff80; border:1px solid rgba(33,243,141,.35); font-weight:800; }
-.btnSell{ background: linear-gradient(180deg, rgba(255,76,76,.20), rgba(255,76,76,.08)); color:#ff6b6b; border:1px solid rgba(255,76,76,.35); font-weight:800; }
-
-.tickerRow { display:flex; justify-content:space-between; align-items:center; padding:7px 9px; border:1px solid rgba(255,255,255,.12); border-radius:10px; background:rgba(255,255,255,.04); }
-
-.cardMini {
-  border:1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.04);
-  border-radius: 12px;
-  padding:9px;
-  display:flex; flex-direction:column; gap:8px;
-}
-.cardTitle { font-size: 12px; font-weight: 800; }
+.cardTitle{font-size:12px;font-weight:800}
 
 /* KPIs */
-.kpiGrid { display:grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap:8px; }
-.kpiCard { border:1px solid rgba(255,255,255,.12); border-radius:12px; background:rgba(255,255,255,.04); padding:8px; }
-.kpiLabel { font-size:11px; color:rgba(255,255,255,.6); }
-.kpiValue { font-size:14px; font-weight:800; }
+.kpiGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.kpiCard{border:1px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(255,255,255,.04);padding:8px}
+.kpiLabel{font-size:11px;color:rgba(255,255,255,.6)}
+.kpiValue{font-size:14px;font-weight:800}
 
 /* Posição */
-.posGrid { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+.posGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 
-/* Histórico elástico — ocupa o resto da coluna direita */
-.historyCard { flex: 1; min-height: 0; display:flex; flex-direction:column; }
-.histWrap.fill { flex:1; min-height:0; overflow-y:auto; display:grid; gap:6px; padding-right:4px; }
-.histRow { border:1px solid rgba(255,255,255,.10); border-radius:10px; padding:6px 8px; background: rgba(255,255,255,.03); }
+/* Histórico – ocupa o resto da coluna direita */
+.historyCard{flex:1;min-height:0;display:flex;flex-direction:column}
+.histWrap.fill{flex:1;min-height:0;overflow-y:auto;display:grid;gap:6px;padding-right:4px}
+.histRow{border:1px solid rgba(255,255,255,.10);border-radius:10px;padding:6px 8px;background:rgba(255,255,255,.03)}
 
-/* Botão de tela cheia (já existente) */
+/* ---------- Botões do gráfico (fora do iframe do TradingView) ---------- */
 .chartFsBtn{
-  position:absolute;
-  top:6px;
-  right:44px;
-  z-index:6;
-  width:28px; height:28px;
-  border-radius:8px;
-  display:grid; place-items:center;
-  background: rgba(255,255,255,.12);
-  color:#e6e6e6;
-  border:1px solid rgba(255,255,255,.25);
-  cursor:pointer;
+  position:absolute;top:6px;right:44px;z-index:6;
+  width:28px;height:28px;border-radius:8px;display:grid;place-items:center;
+  background:rgba(255,255,255,.12);color:#e6e6e6;border:1px solid rgba(255,255,255,.25);cursor:pointer
 }
-.chartFsBtn:hover{ background:rgba(255,255,255,.18); color:#fff; }
+.chartFsBtn:hover{background:rgba(255,255,255,.18);color:#fff}
+
+/* ====================================================================== */
