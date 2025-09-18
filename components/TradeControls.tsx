@@ -4,9 +4,9 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-/** ================================
- *  CONFIG
- *  ================================ */
+/* =========================================
+ * CONFIG
+ * ======================================= */
 const SYMBOLS = [
   "BTCUSDT",
   "ETHUSDT",
@@ -19,20 +19,24 @@ const SYMBOLS = [
 ];
 
 const FEE_RATE = 0.001; // 0.1% por lado (abertura e fechamento)
+const PRICE_POLL_MS = 2000; // pooling mais rápido para sensação “tempo real”
 
-/** ================================
- *  TYPES
- *  ================================ */
+/* =========================================
+ * TIPOS
+ * ======================================= */
 type Side = "LONG" | "SHORT";
 type TradeSideBtn = "COMPRA" | "VENDA";
+type ExitReason = "Manual" | "SL" | "TP";
 
 type Position = {
   side: Side;
   symbol: string;
   entryPrice: number;
-  qty: number; // quantidade (em unidades do ativo)
+  qty: number; // unidades do ativo
   entryTime: string; // ISO
-  feesOpen: number; // USDT cobradas na abertura
+  feesOpen: number; // USDT na abertura
+  slPrice?: number; // preço alvo do stop
+  tpPrice?: number; // preço alvo do take
 };
 
 type ClosedTrade = {
@@ -48,6 +52,7 @@ type ClosedTrade = {
   pnl: number; // em USDT (já descontando fees)
   pnlPct: number; // sobre o notional de entrada
   balanceAfter: number; // saldo após fechar
+  exitReason: ExitReason;
 };
 
 type PersistShape = {
@@ -56,15 +61,20 @@ type PersistShape = {
   symbol: string;
   position: Position | null;
   trades: ClosedTrade[];
+  // preferências dos inputs SL/TP (prático para retomar)
+  slPct?: number | null;
+  tpPct?: number | null;
+  slPriceInput?: number | null;
+  tpPriceInput?: number | null;
 };
 
 const nf = new Intl.NumberFormat("pt-PT", { maximumFractionDigits: 6 });
 const n2 = new Intl.NumberFormat("pt-PT", { maximumFractionDigits: 2 });
 
-/** ================================
- *  HELPERS
- *  ================================ */
-const STORAGE_KEY = "radarcrypto.sim.v1";
+/* =========================================
+ * HELPERS
+ * ======================================= */
+const STORAGE_KEY = "radarcrypto.sim.v2";
 
 function loadPersist(): PersistShape | null {
   if (typeof window === "undefined") return null;
@@ -94,16 +104,15 @@ async function fetchPrice(symbol: string): Promise<number> {
 function nowIso() {
   return new Date().toISOString();
 }
-
 function uid() {
   return typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
     : Math.random().toString(36).slice(2);
 }
 
-/** ================================
- *  COMPONENT
- *  ================================ */
+/* =========================================
+ * COMPONENTE
+ * ======================================= */
 export default function TradeControls({
   symbol: symbolProp,
   onSymbolChange,
@@ -114,12 +123,20 @@ export default function TradeControls({
   // ---------- STATE ----------
   const [balance, setBalance] = useState<number>(10000);
   const [riskPct, setRiskPct] = useState<number>(1);
-  const [symbol, setSymbol] = useState<string>(symbolProp); // espelha props + persiste
+  const [symbol, setSymbol] = useState<string>(symbolProp);
+
   const [price, setPrice] = useState<number | null>(null);
   const [loadingPrice, setLoadingPrice] = useState(true);
+
   const [position, setPosition] = useState<Position | null>(null);
   const [trades, setTrades] = useState<ClosedTrade[]>([]);
   const loadedRef = useRef(false);
+
+  // Inputs SL/TP (o usuário pode preencher por % ou por preço).
+  const [slPct, setSlPct] = useState<number | null>(null);
+  const [tpPct, setTpPct] = useState<number | null>(null);
+  const [slPriceInput, setSlPriceInput] = useState<number | null>(null);
+  const [tpPriceInput, setTpPriceInput] = useState<number | null>(null);
 
   // ---------- LOAD PERSIST ----------
   useEffect(() => {
@@ -131,13 +148,17 @@ export default function TradeControls({
       setRiskPct(p.riskPct ?? 1);
       setPosition(p.position ?? null);
       setTrades(Array.isArray(p.trades) ? p.trades : []);
-      // símbolo persistido sobrepõe o atual
       if (p.symbol) {
         setSymbol(p.symbol);
         onSymbolChange(p.symbol);
+      } else {
+        setSymbol(symbolProp);
       }
+      setSlPct(p.slPct ?? null);
+      setTpPct(p.tpPct ?? null);
+      setSlPriceInput(p.slPriceInput ?? null);
+      setTpPriceInput(p.tpPriceInput ?? null);
     } else {
-      // garantir sincronismo com a page ao primeiro load
       setSymbol(symbolProp);
     }
   }, [symbolProp, onSymbolChange]);
@@ -147,27 +168,54 @@ export default function TradeControls({
     if (symbol !== symbolProp) onSymbolChange(symbol);
   }, [symbol, symbolProp, onSymbolChange]);
 
-  // ---------- PRICE POLLING ----------
+  // ---------- PRICE POLLING (2s) + auto SL/TP ----------
   useEffect(() => {
     let mounted = true;
-    const load = async () => {
+
+    const check = async () => {
       try {
         const p = await fetchPrice(symbol);
-        if (mounted) {
-          setPrice(p);
-          setLoadingPrice(false);
+        if (!mounted) return;
+        setPrice(p);
+        setLoadingPrice(false);
+
+        // Se houver posição, checar SL/TP
+        if (position) {
+          const { side, slPrice, tpPrice } = position;
+
+          // executa SL/TP quando tocar
+          if (side === "LONG") {
+            if (typeof slPrice === "number" && p <= slPrice) {
+              closePosition(p, "SL");
+              return;
+            }
+            if (typeof tpPrice === "number" && p >= tpPrice) {
+              closePosition(p, "TP");
+              return;
+            }
+          } else if (side === "SHORT") {
+            if (typeof slPrice === "number" && p >= slPrice) {
+              closePosition(p, "SL");
+              return;
+            }
+            if (typeof tpPrice === "number" && p <= tpPrice) {
+              closePosition(p, "TP");
+              return;
+            }
+          }
         }
       } catch {
         if (mounted) setPrice(null);
       }
     };
-    load();
-    const t = setInterval(load, 8000);
+
+    check();
+    const t = setInterval(check, PRICE_POLL_MS);
     return () => {
       mounted = false;
       clearInterval(t);
     };
-  }, [symbol]);
+  }, [symbol, position]);
 
   // ---------- PERSIST ON CHANGE ----------
   useEffect(() => {
@@ -177,40 +225,95 @@ export default function TradeControls({
       symbol,
       position,
       trades,
+      slPct,
+      tpPct,
+      slPriceInput,
+      tpPriceInput,
     });
-  }, [balance, riskPct, symbol, position, trades]);
+  }, [balance, riskPct, symbol, position, trades, slPct, tpPct, slPriceInput, tpPriceInput]);
 
   // ---------- DERIVED ----------
   const symbolLabel = useMemo(
     () => `${symbol.replace("USDT", "")}/USDT`,
     [symbol]
   );
-  const equity = balance; // por enquanto, sem mark-to-market da posição aberta
 
-  // Risco em USDT (apenas info visual)
+  // Risco em USDT (info visual)
   const riskValueUSDT = useMemo(
     () => (isFinite(balance) ? (balance * riskPct) / 100 : 0),
     [balance, riskPct]
   );
 
-  // ---------- CORE LOGIC ----------
-  /**
-   * Define o tamanho da posição (qty) usando o risco % do saldo como "notional".
-   * Ex.: 1% de 10.000 = 100 USDT; qty = 100 / price
-   */
+  // PnL aberto (mark-to-market) e equity ao vivo
+  const pnlOpen = useMemo(() => {
+    if (!position || !price) return 0;
+    const diff =
+      position.side === "LONG"
+        ? price - position.entryPrice
+        : position.entryPrice - price;
+    return diff * position.qty;
+  }, [position, price]);
+
+  const equityLive = useMemo(() => balance + (pnlOpen || 0), [balance, pnlOpen]);
+
+  // ---------- CORE ----------
   function sizeFromRisk(p: number): number {
-    const notional = riskValueUSDT > 0 ? riskValueUSDT : 100; // fallback
+    const notional = riskValueUSDT > 0 ? riskValueUSDT : 100;
     if (!p || p <= 0) return 0;
     return notional / p;
   }
 
-  /** Abre posição LONG ou SHORT */
+  // Converte inputs SL/TP em preços a partir do preço de entrada
+  function deriveTargets(entry: number, side: Side) {
+    // Preferência: se usuário informar preço, usa preço. Se não, usa % (se houver).
+    const slFromPrice =
+      typeof slPriceInput === "number" && slPriceInput > 0
+        ? slPriceInput
+        : null;
+    const tpFromPrice =
+      typeof tpPriceInput === "number" && tpPriceInput > 0
+        ? tpPriceInput
+        : null;
+
+    let sl: number | undefined;
+    let tp: number | undefined;
+
+    if (slFromPrice !== null) {
+      sl = slFromPrice;
+    } else if (typeof slPct === "number" && slPct > 0) {
+      const factor = slPct / 100;
+      sl =
+        side === "LONG" ? entry * (1 - factor) : entry * (1 + factor);
+    }
+
+    if (tpFromPrice !== null) {
+      tp = tpFromPrice;
+    } else if (typeof tpPct === "number" && tpPct > 0) {
+      const factor = tpPct / 100;
+      tp =
+        side === "LONG" ? entry * (1 + factor) : entry * (1 - factor);
+    }
+
+    // validações simples para não aceitar SL inválido
+    if (side === "LONG") {
+      if (typeof sl === "number" && sl >= entry) sl = undefined;
+      if (typeof tp === "number" && tp <= entry) tp = undefined;
+    } else {
+      if (typeof sl === "number" && sl <= entry) sl = undefined;
+      if (typeof tp === "number" && tp >= entry) tp = undefined;
+    }
+
+    return { sl, tp };
+  }
+
   function openPosition(side: Side, p: number) {
     const qty = sizeFromRisk(p);
     if (qty <= 0) return;
 
     const notional = qty * p;
     const feesOpen = notional * FEE_RATE;
+
+    const { sl, tp } = deriveTargets(p, side);
 
     setPosition({
       side,
@@ -219,30 +322,26 @@ export default function TradeControls({
       qty,
       entryTime: nowIso(),
       feesOpen,
+      slPrice: sl,
+      tpPrice: tp,
     });
   }
 
-  /** Fecha posição existente, calcula PnL e atualiza histórico/saldo */
-  function closePosition(p: number) {
+  function closePosition(p: number, reason: ExitReason) {
     if (!position) return;
 
     const { side, entryPrice, qty, feesOpen } = position;
-
     const notionalEntry = entryPrice * qty;
     const notionalExit = p * qty;
     const feesClose = notionalExit * FEE_RATE;
     const totalFees = feesOpen + feesClose;
 
     let gross = 0;
-    if (side === "LONG") {
-      gross = (p - entryPrice) * qty;
-    } else {
-      // SHORT
-      gross = (entryPrice - p) * qty;
-    }
+    if (side === "LONG") gross = (p - entryPrice) * qty;
+    else gross = (entryPrice - p) * qty;
+
     const pnl = gross - totalFees;
     const pnlPct = notionalEntry > 0 ? (pnl / notionalEntry) * 100 : 0;
-
     const newBalance = balance + pnl;
 
     const closed: ClosedTrade = {
@@ -258,6 +357,7 @@ export default function TradeControls({
       pnl,
       pnlPct,
       balanceAfter: newBalance,
+      exitReason: reason,
     };
 
     setTrades((h) => [closed, ...h]);
@@ -265,9 +365,8 @@ export default function TradeControls({
     setBalance(newBalance);
   }
 
-  /** Botões COMPRA/VENDA (modo 1 posição por vez) */
   function onClickTrade(btn: TradeSideBtn) {
-    if (!price) return; // sem preço não operamos
+    if (!price) return;
     if (!position) {
       // abrir nova posição
       if (btn === "COMPRA") openPosition("LONG", price);
@@ -276,26 +375,33 @@ export default function TradeControls({
     }
     // já existe posição
     if (position.side === "LONG" && btn === "VENDA") {
-      closePosition(price); // vender fecha long
+      closePosition(price, "Manual");
       return;
     }
     if (position.side === "SHORT" && btn === "COMPRA") {
-      closePosition(price); // comprar fecha short
+      closePosition(price, "Manual");
       return;
     }
-    // se clicar no mesmo lado, ignore (MVP)
   }
 
-  /** Reset total */
   function onResetAll() {
     setBalance(10000);
     setRiskPct(1);
     setTrades([]);
     setPosition(null);
-    // mantém o par atual
+    // mantém símbolo e campos SL/TP
   }
 
   // ---------- RENDER ----------
+  const canChangeSymbol = !position; // bloquear troca com posição aberta
+
+  const pnlOpenPct = useMemo(() => {
+    if (!position || !price) return 0;
+    const notional = position.entryPrice * position.qty;
+    if (notional <= 0) return 0;
+    return (pnlOpen / notional) * 100;
+  }, [position, price, pnlOpen]);
+
   return (
     <div>
       {/* Header: título + voltar ao início */}
@@ -304,30 +410,78 @@ export default function TradeControls({
         <Link href="/" className="btn btn-primary">Voltar ao início</Link>
       </div>
 
-      {/* Equity / status da posição */}
-      <div className="tickerCard" style={{ marginBottom: 10, display: "flex", justifyContent: "space-between" }}>
+      {/* Equity ao vivo */}
+      <div className="tickerCard" style={{ marginBottom: 8, display: "flex", justifyContent: "space-between" }}>
         <span className="small muted">Equity</span>
-        <strong>{n2.format(equity)} USDT</strong>
+        <strong>{n2.format(equityLive)} USDT</strong>
       </div>
+
+      {/* Posição atual */}
       <div className="tickerCard" style={{ marginBottom: 12 }}>
         {position ? (
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-            <div><span className="small muted">Posição</span><div><strong>{position.side}</strong></div></div>
-            <div><span className="small muted">Entrada</span><div>{nf.format(position.entryPrice)}</div></div>
-            <div><span className="small muted">Qtd</span><div>{nf.format(position.qty)}</div></div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 8 }}>
+            <div>
+              <span className="small muted">Posição</span>
+              <div><strong>{position.side}</strong></div>
+            </div>
+            <div>
+              <span className="small muted">Entrada</span>
+              <div>{nf.format(position.entryPrice)}</div>
+            </div>
+            <div>
+              <span className="small muted">Qtd</span>
+              <div>{nf.format(position.qty)}</div>
+            </div>
+            <div>
+              <span className="small muted">SL</span>
+              <div>{typeof position.slPrice === "number" ? nf.format(position.slPrice) : "—"}</div>
+            </div>
+            <div>
+              <span className="small muted">TP</span>
+              <div>{typeof position.tpPrice === "number" ? nf.format(position.tpPrice) : "—"}</div>
+            </div>
+            <div>
+              <span className="small muted">PnL aberto</span>
+              <div style={{ color: pnlOpen >= 0 ? "#1cff80" : "#ff6b6b", fontWeight: 800 }}>
+                {pnlOpen >= 0 ? "+" : ""}{n2.format(pnlOpen)} USDT ({n2.format(pnlOpenPct)}%)
+              </div>
+            </div>
+            <div style={{ gridColumn: "1 / -1", display: "flex", justifyContent: "flex-end" }}>
+              <button
+                className="btn"
+                onClick={() => price && closePosition(price, "Manual")}
+                style={{
+                  padding: "8px 12px",
+                  borderRadius: 12,
+                  border: "1px solid rgba(255,255,255,.18)",
+                  background: "rgba(255,255,255,.06)",
+                  fontWeight: 700,
+                }}
+              >
+                Fechar agora
+              </button>
+            </div>
           </div>
         ) : (
           <div className="small muted">Sem posição aberta.</div>
         )}
       </div>
 
-      {/* Par e preço */}
+      {/* Par e preço (bloqueia troca se houver posição) */}
       <div style={{ display: "grid", gap: 10, marginBottom: 12 }}>
         <label className="small muted">Par</label>
         <select
           value={symbol}
           onChange={(e) => setSymbol(e.target.value)}
-          style={{ padding: "10px 12px", borderRadius: 12, background: "rgba(255,255,255,.03)", color: "inherit", border: "1px solid rgba(255,255,255,.12)" }}
+          disabled={!canChangeSymbol}
+          style={{
+            padding: "10px 12px",
+            borderRadius: 12,
+            background: canChangeSymbol ? "rgba(255,255,255,.03)" : "rgba(255,255,255,.08)",
+            color: "inherit",
+            border: "1px solid rgba(255,255,255,.12)",
+            cursor: canChangeSymbol ? "pointer" : "not-allowed",
+          }}
         >
           {SYMBOLS.map((s) => (
             <option key={s} value={s}>{s.replace("USDT","")}/USDT</option>
@@ -366,11 +520,76 @@ export default function TradeControls({
         </div>
       </div>
 
-      <div className="small muted" style={{ marginTop: 6 }}>
-        Risco estimado (notional): <strong>{n2.format(riskValueUSDT)}</strong> USDT
+      {/* SL/TP */}
+      <div style={{ marginTop: 12 }}>
+        <h3 style={{ margin: "0 0 8px 0", fontSize: 16 }}>Stops e Alvos</h3>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 10 }}>
+          <div className="tickerCard" style={{ display: "grid", gap: 8 }}>
+            <strong>Stop Loss</strong>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              <div>
+                <label className="small muted">% (ex.: 2)</label>
+                <input
+                  type="number"
+                  value={slPct ?? ""}
+                  onChange={(e) => setSlPct(e.target.value === "" ? null : Number(e.target.value))}
+                  min={0}
+                  step={0.1}
+                  style={inputStyle}
+                />
+              </div>
+              <div>
+                <label className="small muted">Preço</label>
+                <input
+                  type="number"
+                  value={slPriceInput ?? ""}
+                  onChange={(e) => setSlPriceInput(e.target.value === "" ? null : Number(e.target.value))}
+                  min={0}
+                  step={0.0001}
+                  style={inputStyle}
+                />
+              </div>
+            </div>
+            <div className="small muted">
+              Se preencher **preço**, ele tem prioridade sobre o **%**.
+            </div>
+          </div>
+
+          <div className="tickerCard" style={{ display: "grid", gap: 8 }}>
+            <strong>Take Profit</strong>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              <div>
+                <label className="small muted">% (ex.: 4)</label>
+                <input
+                  type="number"
+                  value={tpPct ?? ""}
+                  onChange={(e) => setTpPct(e.target.value === "" ? null : Number(e.target.value))}
+                  min={0}
+                  step={0.1}
+                  style={inputStyle}
+                />
+              </div>
+              <div>
+                <label className="small muted">Preço</label>
+                <input
+                  type="number"
+                  value={tpPriceInput ?? ""}
+                  onChange={(e) => setTpPriceInput(e.target.value === "" ? null : Number(e.target.value))}
+                  min={0}
+                  step={0.0001}
+                  style={inputStyle}
+                />
+              </div>
+            </div>
+            <div className="small muted">
+              Se preencher **preço**, ele tem prioridade sobre o **%**.
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Ações */}
+      {/* BOTÕES */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 12 }}>
         <button onClick={() => onClickTrade("COMPRA")} className="btn" style={btnBuy}>
           {position?.side === "SHORT" ? "Fechar Short (Comprar)" : "Comprar"}
@@ -381,7 +600,7 @@ export default function TradeControls({
         <button onClick={onResetAll} className="btn" style={btnReset}>Resetar</button>
       </div>
 
-      {/* Histórico */}
+      {/* HISTÓRICO */}
       <div style={{ marginTop: 16 }}>
         <h3 style={{ margin: "0 0 8px 0", fontSize: 16 }}>Histórico</h3>
         <div style={{ display: "grid", gap: 8, maxHeight: "32dvh", overflowY: "auto", paddingRight: 4 }}>
@@ -392,6 +611,7 @@ export default function TradeControls({
               <span>
                 <strong>{t.side}</strong> • {t.symbol.replace("USDT","")}/USDT ·
                 &nbsp;{nf.format(t.priceEntry)} → {nf.format(t.priceExit)} · Qtd {nf.format(t.qty)}
+                &nbsp;· <em>Motivo: {t.exitReason}</em>
               </span>
               <span className="small" style={{ color: t.pnl >= 0 ? "#1cff80" : "#ff6b6b", fontWeight: 700 }}>
                 {t.pnl >= 0 ? "+" : ""}{n2.format(t.pnl)} USDT ({n2.format(t.pnlPct)}%)
@@ -407,9 +627,9 @@ export default function TradeControls({
   );
 }
 
-/** ================================
- *  STYLES INLINE
- *  ================================ */
+/* =========================================
+ * STYLES
+ * ======================================= */
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "10px 12px",
