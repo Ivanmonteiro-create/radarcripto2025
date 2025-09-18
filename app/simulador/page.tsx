@@ -1,4 +1,3 @@
-// app/simulador/page.tsx
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -12,16 +11,8 @@ export default function SimuladorPage() {
   const graphRef = useRef<HTMLDivElement>(null);
   const [isFs, setIsFs] = useState(false);
 
-  const enterFs = () => {
-    if (graphRef.current && graphRef.current.requestFullscreen) {
-      graphRef.current.requestFullscreen();
-    }
-  };
-  const exitFs = () => {
-    if (document.fullscreenElement && document.exitFullscreen) {
-      document.exitFullscreen();
-    }
-  };
+  const enterFs = () => graphRef.current?.requestFullscreen?.();
+  const exitFs  = () => document.fullscreenElement && document.exitFullscreen?.();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -39,19 +30,18 @@ export default function SimuladorPage() {
 
   return (
     <main className="wrapper" style={{ gridTemplateColumns: "1fr 360px" }}>
-      {/* GRÁFICO */}
+      {/* Gráfico */}
       <section className="panel" style={{ height: "calc(100dvh - 32px)", padding: 0 }}>
         <div ref={graphRef} style={{ position: "relative", width: "100%", height: "100%" }}>
-          {/* Botão “Voltar ao início” fixo no topo, ao lado da câmera/indicadores */}
+          {/* Botão fixo no topo, ao lado da câmera/antes de 'Indicadores' */}
           <div className="chartTopButtons">
             <Link href="/" className="btn btn-primary">Voltar ao início</Link>
           </div>
-
           <TradingViewWidget symbol={`BINANCE:${symbol}`} />
         </div>
       </section>
 
-      {/* CONTROLES */}
+      {/* Controles */}
       <aside className="panel" style={{ height: "calc(100dvh - 32px)" }}>
         <TradeControls
           symbol={symbol}
