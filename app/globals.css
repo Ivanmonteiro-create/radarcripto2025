@@ -160,3 +160,18 @@ body{
   left:50px; /* aparece logo depois do ícone de câmera */
   z-index:6;
 }
+/* Ícone de Tela Cheia ao lado da câmera (topo direito do gráfico) */
+.chartFsBtn{
+  position:absolute;
+  top:6px;
+  right:44px; /* coloca à ESQUERDA da câmera para não sobrepor */
+  z-index:6;
+  width:28px; height:28px;                 /* mesmo tamanho visual da câmera */
+  border-radius:8px;
+  display:grid; place-items:center;
+  background: rgba(255,255,255,.12);
+  color:#e6e6e6;
+  border:1px solid rgba(255,255,255,.25);
+  cursor:pointer;
+}
+.chartFsBtn:hover{ background:rgba(255,255,255,.18); color:#fff; }
