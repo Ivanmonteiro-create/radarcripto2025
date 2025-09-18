@@ -28,7 +28,7 @@ export default function SimuladorPage() {
   }, []);
 
   return (
-    <main className="wrapper" style={{ gridTemplateColumns: "1fr 360px" }}>
+    <main className="wrapper" style={{ gridTemplateColumns: "1fr 320px" }}>
       {/* GRÁFICO */}
       <section className="panel" style={{ height: "calc(100dvh - 32px)", padding: 0 }}>
         <div ref={graphRef} style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -52,12 +52,11 @@ export default function SimuladorPage() {
         </div>
       </section>
 
-      {/* CONTROLES */}
-      <aside className="panel" style={{ height: "calc(100dvh - 32px)" }}>
+      {/* CONTROLES (compacto) */}
+      <aside className="panel compactPanel" style={{ height: "calc(100dvh - 32px)" }}>
         <TradeControls
           symbol={symbol}
           onSymbolChange={setSymbol}
-          /* <- removido: isFullscreen */
         />
       </aside>
     </main>
