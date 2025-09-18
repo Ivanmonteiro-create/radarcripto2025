@@ -142,3 +142,21 @@ body{
 .btn-fs-icon:hover{
   outline: 2px solid var(--accent);
 }
+/* Botão de tela cheia mais forte/neutro */
+.btn-fs-icon{
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.25);
+  color: #e5e5e5;
+}
+.btn-fs-icon:hover{
+  background: rgba(255,255,255,.18);
+  color: #fff;
+}
+
+/* Botão "Voltar ao início" fixo no topo do gráfico */
+.chartTopButtons{
+  position:absolute;
+  top:6px;
+  left:50px; /* aparece logo depois do ícone de câmera */
+  z-index:6;
+}
