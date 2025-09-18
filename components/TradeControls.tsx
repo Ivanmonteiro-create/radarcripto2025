@@ -18,19 +18,13 @@ export default function TradeControls({ symbol, onSymbolChange }: Props) {
   const handleTp = (v: string) => setTpPct(Number(v || 0));
   const handleSl = (v: string) => setSlPct(Number(v || 0));
 
-  const buy = () => {/* imple de compra local */};
-  const sell = () => {/* imple de venda local */};
+  const buy = () => {/* lógica de compra local */};
+  const sell = () => {/* lógica de venda local */};
   const reset = () => { setQty(1000); setRiskPct(1); setTpPct(0); setSlPct(0); };
 
   return (
     <div className="compactPanel compactRoot" style={{ display: 'grid', gap: 10 }}>
-      {/* Linha: Ações primárias */}
-      <div className="twoCols">
-        <button className="btn btnBuy">Comprar</button>
-        <button className="btn btnSell">Vender</button>
-      </div>
-
-      {/* Linha: TP / SL */}
+      {/* TP / SL */}
       <div className="twoCols">
         <div className="cardMini">
           <div className="cardTitle">Take Profit</div>
@@ -50,7 +44,7 @@ export default function TradeControls({ symbol, onSymbolChange }: Props) {
         </div>
       </div>
 
-      {/* Linha: Quantidade / Risco */}
+      {/* Quantidade / Risco */}
       <div className="twoCols">
         <div className="cardMini">
           <div className="cardTitle">Saldo (USDT)</div>
@@ -63,7 +57,7 @@ export default function TradeControls({ symbol, onSymbolChange }: Props) {
         </div>
       </div>
 
-      {/* Linha: Símbolo */}
+      {/* Símbolo + Reset */}
       <div className="cardMini">
         <div className="cardTitle">Par</div>
         <div className="twoCols">
@@ -83,6 +77,12 @@ export default function TradeControls({ symbol, onSymbolChange }: Props) {
           </select>
           <button className="btn" onClick={reset}>Resetar</button>
         </div>
+      </div>
+
+      {/* AÇÕES PRIMÁRIAS NO RODAPÉ */}
+      <div className="twoCols" style={{ marginTop: 2 }}>
+        <button className="btn btnBuy" onClick={buy}>Comprar</button>
+        <button className="btn btnSell" onClick={sell}>Vender</button>
       </div>
     </div>
   );
