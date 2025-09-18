@@ -1,4 +1,3 @@
-// components/TradeControls.tsx
 "use client";
 
 import Link from "next/link";
@@ -268,7 +267,9 @@ export default function TradeControls({
             <div className="cardTitle">Take Profit</div>
             <div className="twoCols">
               <input type="number" placeholder="%" value={tpPct ?? ""} onChange={e=>setTpPct(e.target.value===""?null:Number(e.target.value))} className="inp"/>
-              <input type="number" placeholder="Preço" value={tpPriceInput ?? ""} onChange={e=>setTpPriceInput(e.target.value===""?null(Number(e.target.value)))} className="inp"/>
+              <input type="number" placeholder="Preço" value={tpPriceInput ?? ""} 
+                onChange={e=>setTpPriceInput(e.target.value==="" ? null : Number(e.target.value))} 
+                className="inp"/>
             </div>
           </div>
 
