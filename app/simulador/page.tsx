@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic';
 // Gráfico (TradingView) sem SSR
 const TVChart = dynamic(() => import('@/components/TradingViewWidget'), { ssr: false });
 
-// Painel de controles (agora sem cabeçalho/rodapé/Histórico internos)
+// Painel de controles (sem cabeçalho/rodapé/Histórico internos)
 import TradeControls from '@/components/TradeControls';
 
 export default function SimuladorPage() {
@@ -60,14 +60,17 @@ export default function SimuladorPage() {
           <TVChart symbol={symbol} />
         </div>
 
-        {/* ÍCONE DE TELA CHEIA — MESMA LINHA DA CÂMERA, ~1–2cm de distância */}
+        {/* ÍCONE DE TELA CHEIA — MESMA LINHA DA CÂMERA (~1–2 cm de distância) */}
         <button
           type="button"
           aria-label="Tela cheia"
           title="Tela cheia (F) / Sair (X)"
           onClick={toggleFs}
           className="chartFsBtn"
-          style={{ bottom: 2, right: 56 }}   // <- alinhado pela base e afastado da câmera
+          style={{
+            bottom: 0,     // ↓ baixei para alinhar pela base da barra do TV
+            right: 56      // distância lateral para a câmera (~1–2 cm visuais)
+          }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M9 3H3v6M15 3h6v6M9 21H3v-6M15 21h6v-6"
@@ -76,7 +79,7 @@ export default function SimuladorPage() {
         </button>
       </section>
 
-      {/* COLUNA: PAINEL DE TRADE (apenas um cabeçalho e um histórico ao final) */}
+      {/* COLUNA: PAINEL DE TRADE */}
       <aside
         className="panel"
         style={{
@@ -113,15 +116,15 @@ export default function SimuladorPage() {
             <div className="histRow muted xs">Sem operações ainda.</div>
           </div>
         </div>
-      </aside>
 
-      {/* Ajustes finos locais para legibilidade (mantém tudo o resto igual) */}
-      <style jsx global>{`
-        .tcRoot .btn { font-size: 15px; padding: 10px 12px; border-radius: 10px; }
-        .tcRoot .btn.btnBuy, .tcRoot .btn.btnSell { font-weight: 800; }
-        .tcRoot .inp { height: 36px; font-size: 15px; }
-        .tcRoot .cardMini .cardTitle { font-size: 13px; }
-      `}</style>
+        {/* Ajustes finos locais para legibilidade (mantém tudo o resto igual) */}
+        <style jsx global>{`
+          .tcRoot .btn { font-size: 15px; padding: 10px 12px; border-radius: 10px; }
+          .tcRoot .btn.btnBuy, .tcRoot .btn.btnSell { font-weight: 800; }
+          .tcRoot .inp { height: 36px; font-size: 15px; }
+          .tcRoot .cardMini .cardTitle { font-size: 13px; }
+        `}</style>
+      </aside>
     </main>
   );
 }
