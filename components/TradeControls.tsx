@@ -8,7 +8,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 const SYMBOLS = ["BTCUSDT","ETHUSDT","SOLUSDT","BNBUSDT","ADAUSDT","XRPUSDT","LINKUSDT","DOGEUSDT"];
 const FEE_RATE = 0.001;              // 0,1% por lado
 const PRICE_POLL_MS = 2000;          // pooling rápido
-const HISTORY_SHOW = 3;              // mostrar só as 3 últimas no painel
+const HISTORY_SHOW = 50;             // mostramos muitos, mas com área elástica
 
 /* ===== TIPOS ===== */
 type Side = "LONG" | "SHORT";
@@ -58,7 +58,7 @@ const nf = new Intl.NumberFormat("pt-PT", { maximumFractionDigits: 6 });
 const n2 = new Intl.NumberFormat("pt-PT", { maximumFractionDigits: 2 });
 
 /* ===== HELPERS ===== */
-const STORAGE_KEY = "radarcrypto.sim.v3.compact";
+const STORAGE_KEY = "radarcrypto.sim.v4.compact-full";
 
 function loadPersist(): PersistShape | null {
   if (typeof window === "undefined") return null;
@@ -169,6 +169,12 @@ export default function TradeControls({
   }, [position, price, pnlOpen]);
   const equityLive = useMemo(() => balance + (pnlOpen || 0), [balance, pnlOpen]);
 
+  // KPIs (preenchem espaço + dão valor)
+  const tradeCount = trades.length;
+  const winCount = trades.filter(t => t.pnl > 0).length;
+  const winRate = tradeCount > 0 ? (winCount / tradeCount) * 100 : 0;
+  const totalPnl = trades.reduce((acc, t) => acc + t.pnl, 0);
+
   // núcleo
   function sizeFromRisk(p: number) {
     const notional = riskValueUSDT > 0 ? riskValueUSDT : 100;
@@ -265,23 +271,15 @@ export default function TradeControls({
           <div className="cardMini">
             <div className="cardTitle">Stop Loss</div>
             <div className="twoCols">
-              <input type="number" placeholder="%"
-                value={slPct ?? ""} onChange={e=>setSlPct(e.target.value===""?null:Number(e.target.value))}
-                className="inp" min={0} step={0.1}/>
-              <input type="number" placeholder="Preço"
-                value={slPriceInput ?? ""} onChange={e=>setSlPriceInput(e.target.value===""?null:Number(e.target.value))}
-                className="inp" min={0} step={0.0001}/>
+              <input type="number" placeholder="%" value={slPct ?? ""} onChange={e=>setSlPct(e.target.value===""?null:Number(e.target.value))} className="inp" min={0} step={0.1}/>
+              <input type="number" placeholder="Preço" value={slPriceInput ?? ""} onChange={e=>setSlPriceInput(e.target.value===""?null:Number(e.target.value))} className="inp" min={0} step={0.0001}/>
             </div>
           </div>
           <div className="cardMini">
             <div className="cardTitle">Take Profit</div>
             <div className="twoCols">
-              <input type="number" placeholder="%"
-                value={tpPct ?? ""} onChange={e=>setTpPct(e.target.value===""?null:Number(e.target.value))}
-                className="inp" min={0} step={0.1}/>
-              <input type="number" placeholder="Preço"
-                value={tpPriceInput ?? ""} onChange={e=>setTpPriceInput(e.target.value===""?null:Number(e.target.value))}
-                className="inp" min={0} step={0.0001}/>
+              <input type="number" placeholder="%" value={tpPct ?? ""} onChange={e=>setTpPct(e.target.value===""?null:Number(e.target.value))} className="inp" min={0} step={0.1}/>
+              <input type="number" placeholder="Preço" value={tpPriceInput ?? ""} onChange={e=>setTpPriceInput(e.target.value===""?null:Number(e.target.value))} className="inp" min={0} step={0.0001}/>
             </div>
           </div>
 
@@ -297,8 +295,9 @@ export default function TradeControls({
           </div>
         </div>
 
-        {/* Coluna B – Status / Posição / Histórico */}
+        {/* Coluna B – Status / KPIs / Histórico (elástico) */}
         <div className="colB">
+          {/* Equity + Posição */}
           <div className="tickerRow">
             <div className="muted">Equity</div>
             <strong>{n2.format(equityLive)} USDT</strong>
@@ -328,9 +327,28 @@ export default function TradeControls({
             )}
           </div>
 
-          <div className="cardMini">
-            <div className="cardTitle">Histórico (últimos {HISTORY_SHOW})</div>
-            <div className="histWrap">
+          {/* KPIs para preencher espaço e agregar valor */}
+          <div className="kpiGrid">
+            <div className="kpiCard">
+              <div className="kpiLabel">Trades</div>
+              <div className="kpiValue">{tradeCount}</div>
+            </div>
+            <div className="kpiCard">
+              <div className="kpiLabel">Win rate</div>
+              <div className="kpiValue">{n2.format(winRate)}%</div>
+            </div>
+            <div className="kpiCard">
+              <div className="kpiLabel">PnL total</div>
+              <div className="kpiValue" style={{ color: totalPnl>=0 ? "#1cff80" : "#ff6b6b" }}>
+                {totalPnl>=0?"+":""}{n2.format(totalPnl)}
+              </div>
+            </div>
+          </div>
+
+          {/* Histórico ELÁSTICO — ocupa todo o resto */}
+          <div className="cardMini historyCard">
+            <div className="cardTitle">Histórico</div>
+            <div className="histWrap fill">
               {trades.length === 0 && <div className="muted xs">Sem operações ainda.</div>}
               {trades.slice(0, HISTORY_SHOW).map((t)=>(
                 <div key={t.id} className="histRow">
