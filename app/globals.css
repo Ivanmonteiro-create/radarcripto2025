@@ -133,3 +133,25 @@ nav a.active { background:#16f08a; color:#000; font-weight:700; }
 /* Botão tela cheia (se estiver presente) */
 .chartFsBtn { position:absolute; top:6px; right:44px; z-index:6; width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:rgba(255,255,255,.12); color:#e6e6e6; border:1px solid rgba(255,255,255,.25); cursor:pointer; }
 .chartFsBtn:hover { background:rgba(255,255,255,.18); color:#fff; }
+/* ==== HOTFIX MINIMO — NÃO ALTERA OUTRAS PÁGINAS ==== */
+/* HOME: caber as 8 moedas sem rolagem e manter o herói do jeito que já estava */
+.marketStrip { 
+  grid-template-columns: repeat(8, 1fr) !important;
+  padding: 8px 12px 0 12px !important;
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+}
+.marketItem {
+  min-height: 56px !important;
+  padding: 6px 8px !important;
+}
+.marketSym { font-size: 13px !important; }
+.marketPx  { font-size: 12px !important; }
+
+/* Se ainda faltar 1–2px na sua tela, descomente as duas linhas abaixo: */
+/* .hero      { padding-top: 4px !important; } */
+/* .homeFooter{ margin: 4px auto 10px auto !important; } */
+
+/* SIMULADOR: título e voltar ao início um pouco maiores (sem mexer no resto) */
+.compactTitle { font-size: 20px !important; }
+.backHome     { font-size: 16px !important; font-weight: 800 !important; }
