@@ -1,4 +1,3 @@
-// app/simulador/page.tsx
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
@@ -8,7 +7,7 @@ import dynamic from 'next/dynamic';
 // Gráfico (TradingView) sem SSR
 const TVChart = dynamic(() => import('@/components/TradingViewWidget'), { ssr: false });
 
-// Painel de controles
+// Painel de controles (agora sem cabeçalho/rodapé/Histórico internos)
 import TradeControls from '@/components/TradeControls';
 
 export default function SimuladorPage() {
@@ -36,7 +35,7 @@ export default function SimuladorPage() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
-  /* ============================== */
+  /* ================================= */
 
   return (
     <main
@@ -61,17 +60,15 @@ export default function SimuladorPage() {
           <TVChart symbol={symbol} />
         </div>
 
-        {/* ÍCONE DE TELA CHEIA – MESMA LINHA DA CÂMERA (canto inferior direito do TV) */}
+        {/* ÍCONE DE TELA CHEIA — MESMA LINHA DA CÂMERA, ~1–2cm de distância */}
         <button
           type="button"
           aria-label="Tela cheia"
           title="Tela cheia (F) / Sair (X)"
           onClick={toggleFs}
           className="chartFsBtn"
-          // alinhado pela base; 4px costuma ficar na mesma linha da câmera
-          style={{ bottom: 4, right: 56 }}
+          style={{ bottom: 2, right: 56 }}   // <- alinhado pela base e afastado da câmera
         >
-          {/* ícone padrão “expand” */}
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M9 3H3v6M15 3h6v6M9 21H3v-6M15 21h6v-6"
               stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -79,7 +76,7 @@ export default function SimuladorPage() {
         </button>
       </section>
 
-      {/* COLUNA: PAINEL DE TRADE */}
+      {/* COLUNA: PAINEL DE TRADE (apenas um cabeçalho e um histórico ao final) */}
       <aside
         className="panel"
         style={{
@@ -90,7 +87,6 @@ export default function SimuladorPage() {
           lineHeight: 1.35,
         }}
       >
-        {/* ÚNICO cabeçalho (remove a duplicação inferior) */}
         <header
           style={{
             display: 'flex',
@@ -105,12 +101,12 @@ export default function SimuladorPage() {
           </Link>
         </header>
 
-        {/* ÚNICO bloco de controles */}
+        {/* Controles (sem títulos/rodapés/Histórico duplicados) */}
         <div className="tcRoot">
           <TradeControls symbol={symbol} onSymbolChange={onSymbolChange} />
         </div>
 
-        {/* ÚNICO Histórico (funcional) — mantido embaixo */}
+        {/* ÚNICO Histórico mantido embaixo */}
         <div className="cardMini" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div className="cardTitle">Histórico</div>
           <div className="histWrap fill">
@@ -119,7 +115,7 @@ export default function SimuladorPage() {
         </div>
       </aside>
 
-      {/* Ajustes finos locais (sem mexer no restante do site) */}
+      {/* Ajustes finos locais para legibilidade (mantém tudo o resto igual) */}
       <style jsx global>{`
         .tcRoot .btn { font-size: 15px; padding: 10px 12px; border-radius: 10px; }
         .tcRoot .btn.btnBuy, .tcRoot .btn.btnSell { font-weight: 800; }
