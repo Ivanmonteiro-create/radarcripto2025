@@ -5,7 +5,9 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 
+// Gráfico (TradingView) sem SSR
 const TVChart = dynamic(() => import('@/components/TradingViewWidget'), { ssr: false });
+// Painel de controles
 import TradeControls from '@/components/TradeControls';
 
 export default function SimuladorPage() {
@@ -15,7 +17,7 @@ export default function SimuladorPage() {
     if (s) setSymbol(s);
   }, []);
 
-  // ===== Tela Cheia (F alterna, X sai) =====
+  // ========= Tela Cheia =========
   const enterFs = () => document.getElementById('chart-root')?.requestFullscreen?.();
   const exitFs  = () => (document as any).exitFullscreen?.();
   const toggleFs = () => {
@@ -33,20 +35,19 @@ export default function SimuladorPage() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
-  // =========================================
+  // ==============================
 
   return (
-    // Layout específico do simulador
     <main
       style={{
         display: 'grid',
-        gridTemplateColumns: '1fr 340px', // ajustado (reduzi ~1,5 cm)
+        gridTemplateColumns: '1fr 340px', // painel ligeiramente menor (sobra + área para o gráfico)
         gap: 12,
         minHeight: '100dvh',
         padding: 16,
       }}
     >
-      {/* COLUNA: Gráfico */}
+      {/* COLUNA: GRÁFICO */}
       <section className="panel" style={{ position: 'relative', padding: 12 }}>
         <div
           id="chart-root"
@@ -56,37 +57,40 @@ export default function SimuladorPage() {
             height: 'calc(100vh - 40px)',
           }}
         >
-          <TVChart symbol={symbol} />
+              <TVChart symbol={symbol} />
         </div>
 
-        {/* Ícone Tela Cheia — mesma linha da câmera */}
+        {/* ÍCONE DE TELA CHEIA – mesma linha da CÂMERA (canto inferior direito do TV) */}
         <button
           type="button"
           aria-label="Tela cheia"
           title="Tela cheia (F) / Sair (X)"
           onClick={toggleFs}
           className="chartFsBtn"
-          style={{ top: 6, right: 74 }} // alinhado com a câmera
+          // usar bottom para alinhar com a linha da câmera; right deixa ~1–2 cm de distância
+          style={{ bottom: 10, right: 56 }}
         >
+          {/* ícone padrão (expand corners) */}
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M9 3H3v6M15 3h6v6M9 21H3v-6M15 21h6v-6"
-                  stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
       </section>
 
-      {/* COLUNA: Painel de Trade */}
+      {/* COLUNA: PAINEL DE TRADE */}
       <aside
         className="panel"
         style={{
           display: 'flex',
           flexDirection: 'column',
           gap: 12,
-          fontSize: 14,
-          lineHeight: 1.28,
+          // ↑ aumentei a base tipográfica do painel para “encher” melhor o espaço
+          fontSize: 16,
+          lineHeight: 1.35,
         }}
       >
-        {/* Cabeçalho do painel: título + Voltar ao início */}
+        {/* Cabeçalho ÚNICO (remove duplicação inferior) */}
         <header
           style={{
             display: 'flex',
@@ -95,14 +99,16 @@ export default function SimuladorPage() {
             gap: 12,
           }}
         >
-          <h2 style={{ fontSize: 18, fontWeight: 800, margin: 0 }}>Controles de Trade</h2>
-          <Link href="/" className="btn btn-primary" style={{ padding: '8px 12px', borderRadius: 10 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 900, margin: 0 }}>Controles de Trade</h2>
+          <Link href="/" className="btn btn-primary" style={{ padding: '10px 14px', borderRadius: 10 }}>
             Voltar ao início
           </Link>
         </header>
 
-        {/* ÚNICO bloco de controles */}
-        <TradeControls symbol={symbol} onSymbolChange={onSymbolChange} />
+        {/* Único conjunto de controles — envólucro com “bump” nos botões/campos */}
+        <div className="tcRoot">
+          <TradeControls symbol={symbol} onSymbolChange={onSymbolChange} />
+        </div>
 
         {/* Histórico abaixo dos controles */}
         <div className="cardMini" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -112,6 +118,15 @@ export default function SimuladorPage() {
           </div>
         </div>
       </aside>
+
+      {/* Ajustes finos de tamanho nos botões/campos do painel (escopo local) */}
+      <style jsx global>{`
+        /* aumenta botões e inputs dentro do wrapper dos controles */
+        .tcRoot .btn { font-size: 15px; padding: 10px 12px; border-radius: 10px; }
+        .tcRoot .btn.btnBuy, .tcRoot .btn.btnSell { font-weight: 800; }
+        .tcRoot .inp { height: 36px; font-size: 15px; }
+        .tcRoot .cardMini .cardTitle { font-size: 13px; }
+      `}</style>
     </main>
   );
 }
