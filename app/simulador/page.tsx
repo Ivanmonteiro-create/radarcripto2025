@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 
 // Gráfico (TradingView) sem SSR
 const TVChart = dynamic(() => import('@/components/TradingViewWidget'), { ssr: false });
+
 // Painel de controles
 import TradeControls from '@/components/TradeControls';
 
@@ -17,9 +18,9 @@ export default function SimuladorPage() {
     if (s) setSymbol(s);
   }, []);
 
-  // ========= Tela Cheia =========
+  /* ========= Tela Cheia ========= */
   const enterFs = () => document.getElementById('chart-root')?.requestFullscreen?.();
-  const exitFs  = () => (document as any).exitFullscreen?.();
+  const exitFs = () => (document as any).exitFullscreen?.();
   const toggleFs = () => {
     const doc: any = document;
     if (!doc.fullscreenElement) enterFs();
@@ -35,13 +36,13 @@ export default function SimuladorPage() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
-  // ==============================
+  /* ============================== */
 
   return (
     <main
       style={{
         display: 'grid',
-        gridTemplateColumns: '1fr 340px', // painel ligeiramente menor (sobra + área para o gráfico)
+        gridTemplateColumns: '1fr 340px',
         gap: 12,
         minHeight: '100dvh',
         padding: 16,
@@ -57,20 +58,20 @@ export default function SimuladorPage() {
             height: 'calc(100vh - 40px)',
           }}
         >
-              <TVChart symbol={symbol} />
+          <TVChart symbol={symbol} />
         </div>
 
-        {/* ÍCONE DE TELA CHEIA – mesma linha da CÂMERA (canto inferior direito do TV) */}
+        {/* ÍCONE DE TELA CHEIA – MESMA LINHA DA CÂMERA (canto inferior direito do TV) */}
         <button
           type="button"
           aria-label="Tela cheia"
           title="Tela cheia (F) / Sair (X)"
           onClick={toggleFs}
           className="chartFsBtn"
-          // usar bottom para alinhar com a linha da câmera; right deixa ~1–2 cm de distância
-          style={{ bottom: 10, right: 56 }}
+          // alinhado pela base; 4px costuma ficar na mesma linha da câmera
+          style={{ bottom: 4, right: 56 }}
         >
-          {/* ícone padrão (expand corners) */}
+          {/* ícone padrão “expand” */}
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M9 3H3v6M15 3h6v6M9 21H3v-6M15 21h6v-6"
               stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -85,12 +86,11 @@ export default function SimuladorPage() {
           display: 'flex',
           flexDirection: 'column',
           gap: 12,
-          // ↑ aumentei a base tipográfica do painel para “encher” melhor o espaço
           fontSize: 16,
           lineHeight: 1.35,
         }}
       >
-        {/* Cabeçalho ÚNICO (remove duplicação inferior) */}
+        {/* ÚNICO cabeçalho (remove a duplicação inferior) */}
         <header
           style={{
             display: 'flex',
@@ -105,12 +105,12 @@ export default function SimuladorPage() {
           </Link>
         </header>
 
-        {/* Único conjunto de controles — envólucro com “bump” nos botões/campos */}
+        {/* ÚNICO bloco de controles */}
         <div className="tcRoot">
           <TradeControls symbol={symbol} onSymbolChange={onSymbolChange} />
         </div>
 
-        {/* Histórico abaixo dos controles */}
+        {/* ÚNICO Histórico (funcional) — mantido embaixo */}
         <div className="cardMini" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div className="cardTitle">Histórico</div>
           <div className="histWrap fill">
@@ -119,9 +119,8 @@ export default function SimuladorPage() {
         </div>
       </aside>
 
-      {/* Ajustes finos de tamanho nos botões/campos do painel (escopo local) */}
+      {/* Ajustes finos locais (sem mexer no restante do site) */}
       <style jsx global>{`
-        /* aumenta botões e inputs dentro do wrapper dos controles */
         .tcRoot .btn { font-size: 15px; padding: 10px 12px; border-radius: 10px; }
         .tcRoot .btn.btnBuy, .tcRoot .btn.btnSell { font-weight: 800; }
         .tcRoot .inp { height: 36px; font-size: 15px; }
