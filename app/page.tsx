@@ -1,4 +1,4 @@
-/* app/page.tsx — HOME alinhada ao globals.css */
+/* app/page.tsx — HOME */
 import Link from 'next/link';
 
 const tickers = [
@@ -29,14 +29,15 @@ export default function HomePage() {
         </div>
       </aside>
 
-      {/* COLUNA CENTRAL: Hero + Linha Viva */}
+      {/* COLUNA CENTRAL: Hero + Linha Viva (sem lista de botões abaixo) */}
       <section className="panel">
         <div className="hero">
           <div className="heroInner">
             <div className="heroTag">SIMULADOR DE TRADING</div>
             <h1 className="heroTitle">Aprenda de verdade sem perder nada.</h1>
             <p className="heroSubtitle">
-              Um simulador prático para testar estratégias e evoluir sem risco — histórico local no navegador. Em construção: Fase 1 (site base online).
+              Um simulador prático para testar estratégias e evoluir sem risco — histórico local no navegador.
+              Em construção: Fase 1 (site base online).
             </p>
 
             {/* Linha Viva */}
@@ -44,26 +45,18 @@ export default function HomePage() {
               <div className="liveLine" />
               <div className="liveDot" />
             </div>
-
-            {/* CTA/Links (mesma estrutura que você já tinha na Home) */}
-            <div style={{ marginTop: 18, display: 'grid', gap: 10, maxWidth: 320, marginInline: 'auto' }}>
-              <Link href="/simulador" className="menuBtn active">Acessar simulador</Link>
-              <Link href="/sobre" className="menuBtn">Sobre</Link>
-              <Link href="/planos" className="menuBtn">Planos</Link>
-              <Link href="/fale-com-agente" className="menuBtn">Fale com a gente</Link>
-            </div>
           </div>
         </div>
       </section>
 
-      {/* COLUNA DIREITA: Menu (mesmo visual) */}
+      {/* COLUNA DIREITA: Menu — “Acessar simulador” ativo/verde */}
       <aside className="rightMenu">
         <div className="panel">
           <nav className="menuList">
-            <Link href="/" className="menuBtn active">Início</Link>
+            <Link href="/" className="menuBtn">Início</Link>
             <Link href="/sobre" className="menuBtn">Sobre</Link>
             <Link href="/planos" className="menuBtn">Planos</Link>
-            <Link href="/simulador" className="menuBtn">Acessar simulador</Link>
+            <Link href="/simulador" className="menuBtn active">Acessar simulador</Link>
             <Link href="/fale-com-agente" className="menuBtn">Fale com a gente</Link>
           </nav>
         </div>
