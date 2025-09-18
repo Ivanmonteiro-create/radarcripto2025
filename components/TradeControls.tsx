@@ -114,15 +114,9 @@ export default function TradeControls({
       setTpPct(p.tpPct ?? null);
       setSlPriceInput(p.slPriceInput ?? null);
       setTpPriceInput(p.tpPriceInput ?? null);
-      if (p.symbol) {
-        setSymbol(p.symbol);
-        onSymbolChange(p.symbol);
-      } else {
-        setSymbol(symbolProp);
-      }
-    } else {
-      setSymbol(symbolProp);
-    }
+      if (p.symbol) { setSymbol(p.symbol); onSymbolChange(p.symbol); }
+      else { setSymbol(symbolProp); }
+    } else { setSymbol(symbolProp); }
   }, [symbolProp, onSymbolChange]);
 
   useEffect(() => { if (symbol !== symbolProp) onSymbolChange(symbol); }, [symbol, symbolProp, onSymbolChange]);
@@ -210,35 +204,27 @@ export default function TradeControls({
   }
   function onClickTrade(btn: TradeSideBtn) {
     if (!price) return;
-    if (!position) {
-      if (btn === "COMPRA") openPosition("LONG", price); else openPosition("SHORT", price);
-      return;
-    }
+    if (!position) { if (btn === "COMPRA") openPosition("LONG", price); else openPosition("SHORT", price); return; }
     if (position.side === "LONG" && btn === "VENDA") return closePosition(price, "Manual");
     if (position.side === "SHORT" && btn === "COMPRA") return closePosition(price, "Manual");
   }
-  function onResetAll() {
-    setBalance(10000); setRiskPct(1); setTrades([]); setPosition(null);
-  }
+  function onResetAll() { setBalance(10000); setRiskPct(1); setTrades([]); setPosition(null); }
 
   return (
     <div className="compactRoot">
       <div className="compactHeader">
         <h2 className="compactTitle">Controles de Trade</h2>
-        <Link href="/" className="btn btn-xs btn-primary">Voltar ao início</Link>
+        <Link href="/" className="btn btn-sm btn-primary backHome">Voltar ao início</Link>
       </div>
 
       <div className="compactGrid">
         {/* Coluna A */}
         <div className="colA">
           <label className="lbl">Par</label>
-          <select
-            value={symbol}
-            onChange={(e) => setSymbol(e.target.value)}
-            className="inp"
-          >
-            {SYMBOLS.map((s) => <option key={s} value={s}>{s.replace("USDT","")}/USDT</option>)}
+          <select value={symbol} onChange={(e)=>setSymbol(e.target.value)} className="inp">
+            {SYMBOLS.map((s)=><option key={s} value={s}>{s.replace("USDT","")}/USDT</option>)}
           </select>
+
           <div className="tickerRow">
             <div className="muted">{symbolLabel}</div>
             <div className="green">{loadingPrice ? "…" : price !== null ? nf.format(price) : "—"}</div>
@@ -254,7 +240,7 @@ export default function TradeControls({
               <input type="number" value={riskPct} onChange={(e)=>setRiskPct(Number(e.target.value))} className="inp"/>
             </div>
           </div>
-          <div className="muted xs">Risco estimado: <strong>{n2.format((balance* riskPct)/100 || 0)}</strong> USDT</div>
+          <div className="muted xs">Risco estimado: <strong>{n2.format((balance*riskPct)/100 || 0)}</strong> USDT</div>
 
           <div className="cardMini">
             <div className="cardTitle">Stop Loss</div>
@@ -267,9 +253,7 @@ export default function TradeControls({
             <div className="cardTitle">Take Profit</div>
             <div className="twoCols">
               <input type="number" placeholder="%" value={tpPct ?? ""} onChange={e=>setTpPct(e.target.value===""?null:Number(e.target.value))} className="inp"/>
-              <input type="number" placeholder="Preço" value={tpPriceInput ?? ""} 
-                onChange={e=>setTpPriceInput(e.target.value==="" ? null : Number(e.target.value))} 
-                className="inp"/>
+              <input type="number" placeholder="Preço" value={tpPriceInput ?? ""} onChange={e=>setTpPriceInput(e.target.value==="" ? null : Number(e.target.value))} className="inp"/>
             </div>
           </div>
 
@@ -294,7 +278,7 @@ export default function TradeControls({
                 <div><span className="muted xs">Lado</span><div>{position.side}</div></div>
                 <div><span className="muted xs">Entrada</span><div>{nf.format(position.entryPrice)}</div></div>
                 <div><span className="muted xs">Qtd</span><div>{nf.format(position.qty)}</div></div>
-                <div><span className="muted xs">PnL aberto</span><div style={{color:pnlOpen>=0?"#1cff80":"#ff6b6b"}}>{n2.format(pnlOpen)} USDT</div></div>
+                <div><span className="muted xs">PnL aberto</span><div style={{color:(pnlOpen)>=0?"#16f08a":"#ff6b6b"}}>{n2.format(pnlOpen)} USDT</div></div>
                 <div style={{gridColumn:"1/-1",textAlign:"right"}}><button className="btn btn-xs" onClick={()=> price && closePosition(price,"Manual")}>Fechar</button></div>
               </div>
             ) : (<div className="muted xs">Sem posição aberta</div>)}
@@ -303,18 +287,18 @@ export default function TradeControls({
           <div className="kpiGrid">
             <div className="kpiCard"><div className="kpiLabel">Trades</div><div className="kpiValue">{tradeCount}</div></div>
             <div className="kpiCard"><div className="kpiLabel">Win rate</div><div className="kpiValue">{n2.format(winRate)}%</div></div>
-            <div className="kpiCard"><div className="kpiLabel">PnL</div><div className="kpiValue" style={{color:totalPnl>=0?"#1cff80":"#ff6b6b"}}>{totalPnl>=0?"+":""}{n2.format(totalPnl)}</div></div>
+            <div className="kpiCard"><div className="kpiLabel">PnL</div><div className="kpiValue" style={{color:totalPnl>=0?"#16f08a":"#ff6b6b"}}>{totalPnl>=0?"+":""}{n2.format(totalPnl)}</div></div>
           </div>
 
           <div className="cardMini historyCard">
             <div className="cardTitle">Histórico</div>
-            <div className="histWrap fill">
+            <div className="histWrap">
               {trades.length === 0 && <div className="muted xs">Sem operações</div>}
               {trades.slice(0, HISTORY_SHOW).map((t)=>(
                 <div key={t.id} className="histRow">
                   <div className="xs muted">{new Date(t.timeClose).toLocaleString()}</div>
                   <div className="xs"><strong>{t.side}</strong> {t.symbol.replace("USDT","")}/USDT</div>
-                  <div className="xs" style={{color:t.pnl>=0?"#1cff80":"#ff6b6b"}}>{t.pnl>=0?"+":""}{n2.format(t.pnl)}</div>
+                  <div className="xs" style={{color:t.pnl>=0?"#16f08a":"#ff6b6b"}}>{t.pnl>=0?"+":""}{n2.format(t.pnl)}</div>
                 </div>
               ))}
             </div>
