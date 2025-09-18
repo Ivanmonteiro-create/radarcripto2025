@@ -31,7 +31,7 @@ h4 {
   margin-bottom: 0.5rem;
 }
 
-/* ===== Navbar / Header ===== */
+/* ===== Navbar ===== */
 nav {
   display: flex;
   justify-content: center;
@@ -50,7 +50,7 @@ nav a.active {
   font-weight: bold;
 }
 
-/* ===== Área principal ===== */
+/* ===== Main ===== */
 main {
   padding: 20px;
 }
@@ -76,7 +76,7 @@ main {
 .compactGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 8px;
   height: 100%;
 }
 
@@ -84,7 +84,7 @@ main {
 .colB {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -132,29 +132,46 @@ main {
 
 /* ===== Botões ===== */
 .btn {
-  padding: 4px 8px;
+  padding: 6px 10px;
   border-radius: 6px;
   border: 1px solid #333;
   background: #222;
   color: #fff;
   cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.btn:hover {
+  background: #333;
 }
 
 .btn-xs {
   font-size: 12px;
-  padding: 2px 6px;
+  padding: 3px 6px;
 }
 
 .btnBuy {
   background: #065f46;
 }
 
+.btnBuy:hover {
+  background: #047857;
+}
+
 .btnSell {
   background: #7f1d1d;
 }
 
+.btnSell:hover {
+  background: #991b1b;
+}
+
 .btn-primary {
   background: #1e40af;
+}
+
+.btn-primary:hover {
+  background: #1d4ed8;
 }
 
 /* ===== Grids ===== */
@@ -176,6 +193,9 @@ main {
   border: 1px solid #333;
   border-radius: 8px;
   padding: 6px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .cardTitle {
@@ -219,6 +239,7 @@ main {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-height: 120px;
 }
 
 .histWrap {
