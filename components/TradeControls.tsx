@@ -1,6 +1,6 @@
-// components/TradeControls.tsx
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 type Trade = {
@@ -26,14 +26,10 @@ export default function TradeControls({
   symbol,
   onSymbolChange,
   isFullscreen,
-  onEnterFullscreen,
-  onExitFullscreen,
 }: {
   symbol: string;
   onSymbolChange: (s: string) => void;
   isFullscreen?: boolean;
-  onEnterFullscreen?: () => void;
-  onExitFullscreen?: () => void;
 }) {
   const [balance, setBalance] = useState<number>(10000);
   const [riskPct, setRiskPct] = useState<number>(1);
@@ -65,23 +61,10 @@ export default function TradeControls({
 
   return (
     <div>
-      {/* Cabeçalho: só o ícone do fullscreen (mais forte/neutro) */}
+      {/* Cabeçalho: título + Voltar ao início (no lugar do ícone de FS) */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
         <h2 style={{ margin: 0, flex: 1 }}>Controles de Trade</h2>
-        <button
-          className="btn btn-fs-icon"
-          onClick={() => (isFullscreen ? onExitFullscreen?.() : onEnterFullscreen?.())}
-          title={isFullscreen ? "Sair (X/Esc)" : "Tela cheia (F)"}
-          aria-label={isFullscreen ? "Sair de tela cheia" : "Entrar em tela cheia"}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            {isFullscreen ? (
-              <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            ) : (
-              <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            )}
-          </svg>
-        </button>
+        <Link href="/" className="btn btn-primary">Voltar ao início</Link>
       </div>
 
       {/* Par e preço */}
