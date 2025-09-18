@@ -1,8 +1,7 @@
-// components/TradingViewWidget.tsx
 "use client";
 import { useEffect, useRef } from "react";
 
-type Props = { symbol?: string }; // ex.: "BINANCE:BTCUSDT"
+type Props = { symbol?: string }; // "BINANCE:BTCUSDT"
 
 export default function TradingViewWidget({ symbol = "BINANCE:BTCUSDT" }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -11,14 +10,13 @@ export default function TradingViewWidget({ symbol = "BINANCE:BTCUSDT" }: Props)
     const wrap = wrapRef.current;
     if (!wrap) return;
 
-    // Limpa qualquer iframe anterior
     wrap.innerHTML = "";
 
     const params = new URLSearchParams({
       frameElementId: "tv_embed",
       symbol,
       interval: "60",
-      hidesidetoolbar: "0", // mostra a barra lateral (linhas, régua, etc.)
+      hidesidetoolbar: "0", // ← barra lateral (linhas, régua etc.) visível
       symboledit: "1",
       saveimage: "0",
       hideideas: "1",
@@ -33,13 +31,9 @@ export default function TradingViewWidget({ symbol = "BINANCE:BTCUSDT" }: Props)
     iframe.style.borderRadius = "12px";
     iframe.loading = "lazy";
     iframe.referrerPolicy = "strict-origin-when-cross-origin";
-
     wrap.appendChild(iframe);
 
-    return () => {
-      // cleanup
-      if (wrap.contains(iframe)) wrap.removeChild(iframe);
-    };
+    return () => { if (wrap.contains(iframe)) wrap.removeChild(iframe); };
   }, [symbol]);
 
   return <div ref={wrapRef} style={{ width: "100%", height: "100%" }} />;
