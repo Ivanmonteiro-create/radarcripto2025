@@ -1,21 +1,55 @@
-/* app/page.tsx — HOME */
-import Link from 'next/link';
+/* app/page.tsx — HOME (client, preços ao vivo) */
+'use client';
 
-const tickers = [
-  { sym: 'ADA/USDT', px: '0,9875' },
-  { sym: 'BTC/USDT', px: '117.228,80' },
-  { sym: 'ETH/USDT', px: '6.840,90' },
-  { sym: 'SOL/USDT', px: '234,55' },
-  { sym: 'LINK/USDT', px: '24,12' },
-  { sym: 'BNB/USDT', px: '590,81' },
-  { sym: 'XRP/USDT', px: '3,1021' },
-  { sym: 'DOGE/USDT', px: '0,27689' },
+import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
+
+type TSymbol = 'ADAUSDT' | 'BTCUSDT' | 'ETHUSDT' | 'SOLUSDT' | 'LINKUSDT' | 'BNBUSDT' | 'XRPUSDT' | 'DOGEUSDT';
+type TItem = { sym: TSymbol; label: string };
+
+const LIST: TItem[] = [
+  { sym: 'ADAUSDT',  label: 'ADA/USDT'  },
+  { sym: 'BTCUSDT',  label: 'BTC/USDT'  },
+  { sym: 'ETHUSDT',  label: 'ETH/USDT'  },
+  { sym: 'SOLUSDT',  label: 'SOL/USDT'  },
+  { sym: 'LINKUSDT', label: 'LINK/USDT' },
+  { sym: 'BNBUSDT',  label: 'BNB/USDT'  },
+  { sym: 'XRPUSDT',  label: 'XRP/USDT'  },
+  { sym: 'DOGEUSDT', label: 'DOGE/USDT' },
 ];
 
 export default function HomePage() {
+  const [prices, setPrices] = useState<Record<TSymbol, string>>({} as any);
+
+  const symbolsParam = useMemo(
+    () => encodeURIComponent(JSON.stringify(LIST.map(l => l.sym))),
+    []
+  );
+
+  useEffect(() => {
+    let stop = false;
+
+    const load = async () => {
+      try {
+        const r = await fetch(`https://api.binance.com/api/v3/ticker/price?symbols=${symbolsParam}`, { cache: 'no-store' });
+        const data: Array<{ symbol: TSymbol; price: string }> = await r.json();
+        if (stop) return;
+        const map: Record<TSymbol, string> = {} as any;
+        data.forEach(d => { map[d.symbol] = d.price; });
+        setPrices(map);
+      } catch (_) {
+        // silencioso
+      }
+    };
+
+    load();
+    const id = setInterval(load, 5000); // ~5s
+    return () => { stop = true; clearInterval(id); };
+  }, [symbolsParam]);
+
   return (
     <main className="wrapper">
-      {/* COLUNA ESQUERDA: Tickers – 8 itens SEMPRE visíveis no 100% */}
+      {/* COLUNA ESQUERDA: Tickers — 8 cartões SEMPRE visíveis */}
       <aside className="leftPanel">
         <div className="panel" style={{ height: 'calc(100vh - 32px)' }}>
           <div
@@ -27,16 +61,29 @@ export default function HomePage() {
               height: '100%',
             }}
           >
-            {tickers.map((t) => (
-              <div
-                key={t.sym}
-                className="tickerCard"
-                style={{ padding: '8px 10px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
-              >
-                <div className="tickerSymbol strong" style={{ fontSize: 14 }}>{t.sym}</div>
-                <div className="tickerPrice green" style={{ fontSize: 16 }}>{t.px}</div>
-              </div>
-            ))}
+            {LIST.map((t) => {
+              const raw = prices[t.sym];
+              const value = raw ? Number(raw) : undefined;
+
+              // formatação simples (BR)
+              const text =
+                value === undefined
+                  ? '—'
+                  : value >= 1000
+                  ? value.toLocaleString('pt-BR', { maximumFractionDigits: 2 })
+                  : value.toLocaleString('pt-BR', { maximumFractionDigits: 6 });
+
+              return (
+                <div
+                  key={t.sym}
+                  className="tickerCard"
+                  style={{ padding: '8px 10px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
+                >
+                  <div className="tickerSymbol strong" style={{ fontSize: 14 }}>{t.label}</div>
+                  <div className="tickerPrice green" style={{ fontSize: 16 }}>{text}</div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </aside>
