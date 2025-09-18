@@ -1,7 +1,7 @@
-/* app/simulador/page.tsx */
+/* app/simulador/page.tsx — SIMULADOR */
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 
 // Gráfico (seu componente em /components/TradingViewWidget.tsx)
@@ -19,16 +19,29 @@ export default function SimuladorPage() {
     setSymbol(s);
   }, []);
 
-  const toggleFullscreen = () => {
+  // Fullscreen helpers
+  const enterFs = () => {
     const el = document.getElementById('chart-root');
     if (!el) return;
-    const doc: any = document;
-    if (!doc.fullscreenElement) {
-      (el as any).requestFullscreen?.();
-    } else {
-      doc.exitFullscreen?.();
-    }
+    (el as any).requestFullscreen?.();
   };
+  const exitFs = () => (document as any).exitFullscreen?.();
+  const toggleFs = () => {
+    const doc: any = document;
+    if (!doc.fullscreenElement) enterFs();
+    else exitFs();
+  };
+
+  // Atalhos: F (fullscreen) / X (sair)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const k = e.key.toLowerCase();
+      if (k === 'f') { e.preventDefault(); toggleFs(); }
+      if (k === 'x') { e.preventDefault(); exitFs(); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   return (
     <main className="wrapper simWrap">
@@ -39,37 +52,45 @@ export default function SimuladorPage() {
         </div>
       </aside>
 
-      {/* COLUNA CENTRAL: GRÁFICO (ocupando a altura total visível) */}
+      {/* COLUNA CENTRAL: GRÁFICO (preenche a altura) */}
       <section className="panel" style={{ position: 'relative' }}>
         <div
           id="chart-root"
           style={{
             position: 'relative',
             width: '100%',
-            height: 'calc(100vh - 140px)', // gráfico grande
+            height: 'calc(100vh - 40px)', // gráfico GRANDE como antes
           }}
         >
           <TVChart symbol={symbol} />
         </div>
 
-        {/* Ícone Tela Cheia (ao lado da câmera) */}
+        {/* Ícone Tela Cheia — alinhado ao lado da câmera */}
         <button
           type="button"
-          title="Tela cheia"
+          title="Tela cheia (F) / Sair (X)"
           aria-label="Tela cheia"
           className="chartFsBtn"
-          onClick={toggleFullscreen}
+          onClick={toggleFs}
+          // garante alinhamento fino se precisar:
+          style={{ top: 6, right: 44 }}
         >
           ⛶
         </button>
       </section>
 
-      {/* COLUNA DIREITA: CONTROLES DE TRADE (sem o link duplicado de Voltar) */}
+      {/* COLUNA DIREITA: CONTROLES DE TRADE — “tamanho natural” */}
       <aside className="rightMenu">
-        <div className="panel compactPanel">
-          <div className="compactHeader">
-            <h2 className="compactTitle">Controles de Trade</h2>
-          </div>
+        <div
+          className="panel"
+          style={{
+            fontSize: 14,        // maior que o compacto
+            lineHeight: 1.25,
+          }}
+        >
+          <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <h2 style={{ fontSize: 18, fontWeight: 800, margin: 0 }}>Controles de Trade</h2>
+          </header>
 
           <TradeControls
             symbol={symbol}
