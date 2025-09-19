@@ -1,5 +1,6 @@
-/* app/globals.css — VERSÃO B (estável compacta) */
+/* app/globals.css — VERSÃO B (estável) + AJUSTES FINOS */
 
+/* ===== Vars ===== */
 :root{
   --bg:#0a0f0d;
   --panel:#0f1513;
@@ -8,6 +9,9 @@
   --muted:#8fbfa8;
   --accent:#21f38d;
   --accent-strong:#1cff80;
+
+  /* alinhamento fino do ícone de fullscreen vs câmera do TV */
+  --fs-top: 30px; /* se ainda ficar 1px fora, ajuste para 29–32 */
 }
 
 *{box-sizing:border-box}
@@ -23,7 +27,7 @@ body{
   background-size:60px 60px;
 }
 
-/* wrapper mais compacto */
+/* ===== Layout Home (3 colunas) ===== */
 .wrapper{
   display:grid;
   grid-template-columns:300px 1fr 200px;
@@ -43,14 +47,14 @@ body{
   padding:12px;
 }
 
-/* tickers */
+/* ===== Tickers ===== */
 .tickers{display:grid;grid-template-columns:1fr;gap:10px}
 .tickerCard{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:10px 12px}
 .tickerSymbol{color:var(--text);font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-weight:800}
 .tickerPrice{font-weight:700;font-size:15px;opacity:.95}
 .tickerPrice.green{color:var(--accent-strong)}
 
-/* hero */
+/* ===== Hero ===== */
 .hero{height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
 .heroInner{width:min(940px,95%);text-align:center}
 .heroTitle{font-size:clamp(26px,4.5vw,56px);line-height:1.06;margin:8px 0 12px;font-weight:800}
@@ -60,17 +64,17 @@ body{
 .liveDot{position:absolute;top:50%;width:10px;height:10px;background:var(--accent-strong);border-radius:999px;transform:translate(-50%,-50%);animation:run 2.2s linear infinite}
 @keyframes run{from{left:0%}to{left:100%}}
 
-/* menu direito */
+/* ===== Menu direito ===== */
 .rightMenu{position:sticky;top:14px;height:fit-content}
 .menuList{display:grid;gap:8px}
 .menuBtn{display:block;text-decoration:none;color:var(--text);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);padding:10px 12px;border-radius:12px;text-align:center;font-weight:600}
 .menuBtn.active{outline:2px solid var(--accent);box-shadow:0 0 0 4px rgba(33,243,141,.12) inset;color:var(--accent-strong)}
 
-/* utilidades */
+/* ===== Utilidades ===== */
 .muted{color:var(--muted)}
 .small{font-size:12px}
 
-/* painel do simulador */
+/* ===== Painel do simulador ===== */
 .compactPanel{padding:12px !important;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px}
 .compactRoot{font-size:13px}
 .compactHeader{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
@@ -87,15 +91,37 @@ body{
 .cardMini{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);border-radius:12px;padding:9px;display:flex;flex-direction:column;gap:8px}
 .cardTitle{font-size:12px;font-weight:800}
 .posGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+/* Histórico (único) */
 .historyCard{flex:1;min-height:0;display:flex;flex-direction:column}
 .histWrap{display:grid;gap:6px;max-height:22vh;overflow-y:auto;padding-right:4px}
 .histRow{border:1px solid rgba(255,255,255,.10);border-radius:10px;padding:6px 8px;background:rgba(255,255,255,.03)}
+/* Esconde o 2º “Histórico” quando houver duplicado consecutivo */
+.historyCard + .historyCard{display:none !important}
 
-/* fullscreen ao lado da câmera */
+/* Linha única para as métricas do topo (Preço / Equity / PnL), quando presentes */
+.kpisRow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.kpiCard{border:1px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(255,255,255,.04);padding:8px}
+.kpiLabel{font-size:11px;color:rgba(255,255,255,.6)}
+.kpiValue{font-size:14px;font-weight:800}
+
+/* ===== Botão de “Voltar ao início” no header do painel ===== */
+/* Sem alterar o JSX: estiliza o link do header que aponta para "/" */
+.compactHeader a[href="/"]{
+  background:linear-gradient(180deg,rgba(33,243,141,.22),rgba(33,243,141,.10));
+  color:var(--accent-strong);
+  border:1px solid rgba(33,243,141,.35);
+  padding:10px 16px;
+  border-radius:12px;
+  font-weight:800;
+}
+.compactHeader a[href="/"]:hover{outline:2px solid var(--accent);box-shadow:0 0 0 4px rgba(33,243,141,.12) inset}
+
+/* ===== Ícone de Tela Cheia — mesma linha da câmera ===== */
 .chartFsBtn{
   position:absolute;
-  top:30px;
-  right:44px;
+  top:var(--fs-top);  /* controla o alinhamento vertical */
+  right:44px;        /* ~1 cm da câmera */
   z-index:6;
   width:28px;height:28px;border-radius:8px;
   display:grid;place-items:center;
