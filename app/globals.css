@@ -257,3 +257,29 @@ body {
 /* Histórico do painel */
 .histWrap { display:grid; gap:6px; max-height: 22vh; overflow-y:auto; padding-right:4px; }
 .histRow { border:1px solid rgba(255,255,255,.10); border-radius:10px; padding:6px 8px; background: rgba(255,255,255,.03); }
+/* === Ajuste fino do botão de Tela Cheia ao lado da câmera === */
+:root{
+  /* altura da barra de ferramentas do TV onde fica a câmera */
+  --chart-toolbar-top: 34px;        /* ajuste fino; se ainda ficar 1–2px fora, mude aqui */
+  --chart-toolbar-gap: 12px;        /* ~1 cm de distância da câmera (visualmente) */
+}
+
+/* Ícone de Tela Cheia ao lado da câmera (mesma linha da câmera) */
+.chartFsBtn{
+  position:absolute;
+  top: var(--chart-toolbar-top);    /* alinha verticalmente com a câmera */
+  right: calc(44px + var(--chart-toolbar-gap)); /* mantém a distância da câmera */
+  z-index:6;
+  width:28px; height:28px;
+  border-radius:8px;
+  display:grid; place-items:center;
+  background: rgba(255,255,255,.12);
+  color:#e6e6e6;
+  border:1px solid rgba(255,255,255,.25);
+  cursor:pointer;
+}
+.chartFsBtn:hover{ background:rgba(255,255,255,.18); color:#fff; }
+
+/* ===== Alturas do painel: o histórico preenche o resto e vira scroll ===== */
+.historyCard { flex: 1; min-height: 0; display:flex; flex-direction:column; }
+.histWrap.fill { flex:1; min-height:0; overflow-y:auto; display:grid; gap:6px; padding-right:4px; }
