@@ -175,9 +175,19 @@ export default function TradeControls({ symbol, onSymbolChange }: Props) {
     setRiskPct(1); setTpPct(0); setSlPct(0); setQtyInput(1000); setPosition(null);
   };
 
-  // ====== UI (mantido) ======
+  // ====== UI (mantendo tudo, só compactando e com um único histórico) ======
   return (
-    <div className="compactPanel compactRoot" style={{ display: 'grid', gap: 10 }}>
+    <div
+      className="compactPanel compactRoot"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        /* limita para não passar do gráfico; ajuste o 160px se precisar fino */
+        maxHeight: 'calc(100vh - 160px)',
+        gap: 10
+      }}
+    >
+      {/* KPIs em uma linha */}
       <div className="kpiGrid">
         <div className="kpiCard"><div className="kpiLabel">Preço</div><div className="kpiValue">{price ? fmt2(price) : '—'}</div></div>
         <div className="kpiCard"><div className="kpiLabel">Equity</div><div className="kpiValue">{fmt2(equity)} USDT</div></div>
@@ -189,68 +199,73 @@ export default function TradeControls({ symbol, onSymbolChange }: Props) {
         </div>
       </div>
 
-      <div className="twoCols">
-        <div className="cardMini">
-          <div className="cardTitle">Take Profit (%)</div>
-          <div className="twoCols">
-            <input className="inp" type="number" value={tpPct || ''} placeholder="%"
-                   onChange={e => setTpPct(Number(e.target.value || 0))} />
-            <button className="btn" onClick={() => setTpPct(0)}>Zerar</button>
-          </div>
-        </div>
-        <div className="cardMini">
-          <div className="cardTitle">Stop Loss (%)</div>
-          <div className="twoCols">
-            <input className="inp" type="number" value={slPct || ''} placeholder="%"
-                   onChange={e => setSlPct(Number(e.target.value || 0))} />
-            <button className="btn" onClick={() => setSlPct(0)}>Zerar</button>
-          </div>
-        </div>
-      </div>
-
-      <div className="threeCols">
-        <div className="cardMini">
-          <div className="cardTitle">Saldo (USDT)</div>
-          <input className="inp" type="number" value={equity} onChange={e => setEquity(Number(e.target.value || 0))} />
-          <div className="muted xs">Equity simulado total</div>
-        </div>
-        <div className="cardMini">
-          <div className="cardTitle">Risco por trade (%)</div>
-          <input className="inp" type="number" value={riskPct} onChange={e => setRiskPct(Number(e.target.value || 0))} />
-          <div className="muted xs">Tamanho sug.: {suggestedQty ? suggestedQty.toFixed(5) : '—'}</div>
-        </div>
-        <div className="cardMini">
-          <div className="cardTitle">USDT p/ referência</div>
-          <input className="inp" type="number" value={qtyInput} onChange={e => setQtyInput(Number(e.target.value || 0))} />
-          <div className="muted xs">Usado só como fallback p/ qty</div>
-        </div>
-      </div>
-
-      <div className="cardMini">
-        <div className="cardTitle">Par</div>
+      {/* bloco de inputs */}
+      <div style={{ display: 'grid', gap: 10 }}>
         <div className="twoCols">
-          <select className="inp" value={symbol} onChange={e => onSymbolChange(e.target.value)}>
-            <option>BTCUSDT</option><option>ETHUSDT</option><option>SOLUSDT</option><option>LINKUSDT</option>
-            <option>BNBUSDT</option><option>XRPUSDT</option><option>DOGEUSDT</option><option>ADAUSDT</option>
-          </select>
-          <button className="btn" onClick={resetAll}>Resetar</button>
+          <div className="cardMini">
+            <div className="cardTitle">Take Profit (%)</div>
+            <div className="twoCols">
+              <input className="inp" type="number" value={tpPct || ''} placeholder="%"
+                     onChange={e => setTpPct(Number(e.target.value || 0))} />
+              <button className="btn" onClick={() => setTpPct(0)}>Zerar</button>
+            </div>
+          </div>
+          <div className="cardMini">
+            <div className="cardTitle">Stop Loss (%)</div>
+            <div className="twoCols">
+              <input className="inp" type="number" value={slPct || ''} placeholder="%"
+                     onChange={e => setSlPct(Number(e.target.value || 0))} />
+              <button className="btn" onClick={() => setSlPct(0)}>Zerar</button>
+            </div>
+          </div>
+        </div>
+
+        <div className="threeCols">
+          <div className="cardMini">
+            <div className="cardTitle">Saldo (USDT)</div>
+            <input className="inp" type="number" value={equity} onChange={e => setEquity(Number(e.target.value || 0))} />
+            <div className="muted xs">Equity simulado total</div>
+          </div>
+          <div className="cardMini">
+            <div className="cardTitle">Risco por trade (%)</div>
+            <input className="inp" type="number" value={riskPct} onChange={e => setRiskPct(Number(e.target.value || 0))} />
+            <div className="muted xs">Tamanho sug.: {suggestedQty ? suggestedQty.toFixed(5) : '—'}</div>
+          </div>
+          <div className="cardMini">
+            <div className="cardTitle">USDT p/ referência</div>
+            <input className="inp" type="number" value={qtyInput} onChange={e => setQtyInput(Number(e.target.value || 0))} />
+            <div className="muted xs">Usado só como fallback p/ qty</div>
+          </div>
+        </div>
+
+        <div className="cardMini">
+          <div className="cardTitle">Par</div>
+          <div className="twoCols">
+            <select className="inp" value={symbol} onChange={e => onSymbolChange(e.target.value)}>
+              <option>BTCUSDT</option><option>ETHUSDT</option><option>SOLUSDT</option><option>LINKUSDT</option>
+              <option>BNBUSDT</option><option>XRPUSDT</option><option>DOGEUSDT</option><option>ADAUSDT</option>
+            </select>
+            <button className="btn" onClick={resetAll}>Resetar</button>
+          </div>
+        </div>
+
+        {/* AÇÕES (Comprar/Vender) */}
+        <div className="twoCols" style={{ marginTop: 2 }}>
+          <button className="btn btnBuy" onClick={() => openPosition('LONG')}
+                  title={position?.side === 'SHORT' ? 'Fechar SHORT' : 'Abrir LONG'}>
+            {position?.side === 'SHORT' ? 'Fechar Short' : 'Comprar'}
+          </button>
+          <button className="btn btnSell" onClick={() => openPosition('SHORT')}
+                  title={position?.side === 'LONG' ? 'Fechar LONG' : 'Abrir SHORT'}>
+            {position?.side === 'LONG' ? 'Fechar Long' : 'Vender'}
+          </button>
         </div>
       </div>
 
-      <div className="twoCols" style={{ marginTop: 2 }}>
-        <button className="btn btnBuy" onClick={() => openPosition('LONG')}
-                title={position?.side === 'SHORT' ? 'Fechar SHORT' : 'Abrir LONG'}>
-          {position?.side === 'SHORT' ? 'Fechar Short' : 'Comprar'}
-        </button>
-        <button className="btn btnSell" onClick={() => openPosition('SHORT')}
-                title={position?.side === 'LONG' ? 'Fechar LONG' : 'Abrir SHORT'}>
-          {position?.side === 'LONG' ? 'Fechar Long' : 'Vender'}
-        </button>
-      </div>
-
-      <div className="cardMini">
-        <div className="cardTitle">Histórico recente</div>
-        <div className="histWrap">
+      {/* HISTÓRICO — único bloco, preenche o resto da altura */}
+      <div className="cardMini historyCard" style={{ flex: 1, minHeight: 0 }}>
+        <div className="cardTitle">Histórico</div>
+        <div className="histWrap fill">
           {history.length === 0 && <div className="histRow muted xs">Sem operações ainda.</div>}
           {history.map(tr => (
             <div key={tr.id} className="histRow">
