@@ -282,3 +282,43 @@ body{
 }
 .tvContainer .chartFsBtn:hover,
 .tvContainer .fsBtn:hover { background: rgba(255,255,255,.18); color: #fff; }
+/* ===== FIXES determinísticos por ID ===== */
+
+/* A. Alinhar o botão de tela cheia: mesmo nível da câmera, ~1cm ao lado */
+#tv-wrap { position: relative !important; }
+
+#tv-fs-btn {
+  position: absolute !important;
+  bottom: 12px !important;   /* alinhe com a linha da câmera; ajuste fino 10–14 se precisar */
+  right: 48px !important;    /* ~1 cm da câmera */
+  z-index: 6 !important;
+
+  width: 28px; height: 28px;
+  display: grid; place-items: center;
+  background: rgba(255,255,255,.12);
+  color: #e6e6e6;
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 8px;
+  cursor: pointer;
+}
+#tv-fs-btn:hover { background: rgba(255,255,255,.18); color: #fff; }
+
+/* B. Manter só o header VERDE (o que tem id) e ocultar o duplicado */
+.compactHeader { /* o roxo/duplicado geralmente tem só essa classe */
+  /* nada aqui — deixamos padrão */
+}
+.compactHeader:not(#trade-header) {
+  display: none !important;              /* esconde o duplicado */
+}
+
+/* C. Deixar o “Voltar ao início” VERDE e maior (no header com id) */
+#trade-header a,
+#trade-header button {
+  background: linear-gradient(180deg, rgba(33,243,141,.18), rgba(33,243,141,.08)) !important;
+  color: #1cff80 !important;
+  border: 1px solid rgba(33,243,141,.35) !important;
+  font-size: 14px !important;
+  padding: 12px 18px !important;
+  font-weight: 800 !important;
+  border-radius: 12px !important;
+}
