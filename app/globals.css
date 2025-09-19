@@ -130,3 +130,39 @@ body{
   cursor:pointer;
 }
 .chartFsBtn:hover{background:rgba(255,255,255,.18);color:#fff}
+/* === AJUSTES PONTUAIS (cole NO FINAL de app/globals.css) ================= */
+
+/* 1) Alinhar o ícone de tela cheia na MESMA LINHA da câmera
+      -> ajuste fino por variável, mexa 1px se precisar */
+:root{
+  --fs-top: 32px;  /* se ainda ficar 1px fora, tente 31px ou 33px */
+}
+
+/* 2) “Voltar ao início” VERDE e um pouco MAIOR (sem alterar JSX) */
+.compactHeader a[href="/"]{
+  background: linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10)) !important;
+  color: var(--accent-strong) !important;
+  border: 1px solid rgba(33,243,141,.35) !important;
+  padding: 12px 18px !important;     /* ↑ levemente maior */
+  border-radius: 12px !important;
+  font-weight: 800 !important;
+  font-size: 16px !important;        /* ↑ levemente maior */
+  line-height: 1 !important;
+}
+.compactHeader a[href="/"]:hover{
+  outline: 2px solid var(--accent) !important;
+  box-shadow: 0 0 0 4px rgba(33,243,141,.12) inset !important;
+}
+
+/* 3) Deixar APENAS UM “Histórico”
+   — Opção A (mais comum): esconder o primeiro bloco de histórico (“Histórico recente”)
+   — Se no seu layout a ordem estiver invertida, comente A e descomente a Opção B. */
+
+/* Opção A: esconda o PRIMEIRO historyCard dentro da coluna da direita/abaixo */
+.colB .historyCard:first-of-type{ display:none !important; }
+
+/* Opção B: (use só se a ordem estiver invertida no seu HTML)
+.colB .historyCard:last-of-type{ display:none !important; }
+*/
+
+/* Garantia: quando só existir um bloco de histórico, ele permanece visível */
