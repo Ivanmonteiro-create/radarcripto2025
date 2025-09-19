@@ -241,3 +241,44 @@ body{
 .tvContainer .fsBtn:hover{
   background: rgba(255,255,255,.18); color: #fff;
 }
+/* ==== OVERRIDES PONTUAIS (cole NO FIM de app/globals.css) ==== */
+
+/* 1) Esconde qualquer cabeçalho duplicado que não seja o último (mantém o verde) */
+.tradePanelShell .compactHeader:not(:last-of-type){
+  display: none !important;
+}
+
+/* 1.1) Força o “Voltar ao início” VISÍVEL a ficar VERDE e maior */
+.tradePanelShell .compactHeader:last-of-type a,
+.tradePanelShell .compactHeader:last-of-type button,
+.btn-goBack {
+  background: linear-gradient(180deg, rgba(33,243,141,.18), rgba(33,243,141,.08)) !important;
+  color: #1cff80 !important;
+  border: 1px solid rgba(33,243,141,.35) !important;
+  font-size: 14px !important;
+  padding: 12px 18px !important;
+  font-weight: 800 !important;
+  border-radius: 12px !important;
+}
+
+/* 2) Alinhar o ícone de tela cheia no MESMO nível da câmera do TradingView */
+.tvContainer { position: relative !important; }
+
+/* cobrimos as classes possíveis do seu botão custom: .chartFsBtn ou .fsBtn */
+.tvContainer .chartFsBtn,
+.tvContainer .fsBtn {
+  position: absolute !important;
+  bottom: 12px !important;   /* mesma linha da câmera; ajuste fino 11–13px se necessário */
+  right: 48px !important;    /* ~1 cm para a esquerda da câmera */
+  z-index: 6 !important;
+
+  width: 28px; height: 28px;
+  display: grid; place-items: center;
+  background: rgba(255,255,255,.12);
+  color: #e6e6e6;
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.tvContainer .chartFsBtn:hover,
+.tvContainer .fsBtn:hover { background: rgba(255,255,255,.18); color: #fff; }
