@@ -42,7 +42,7 @@ const LS = {
 };
 
 export default function TradeControls({ symbol, onSymbolChange }: Props) {
-  // ====== inputs/estados (sem tocar em localStorage no render SSR) ======
+  // ====== inputs/estados ======
   const [equity, setEquity] = useState<number>(10000);
   const [riskPct, setRiskPct] = useState<number>(1);
   const [tpPct, setTpPct] = useState<number>(0);
@@ -84,7 +84,7 @@ export default function TradeControls({ symbol, onSymbolChange }: Props) {
     try { window.localStorage.setItem(LS.hist, JSON.stringify(history)); } catch {}
   }, [history]);
 
-  // ====== preço ao vivo (polling leve) ======
+  // ====== preço ao vivo ======
   const [price, setPrice] = useState<number>(0);
   const pollRef = useRef<any>(null);
 
@@ -175,22 +175,27 @@ export default function TradeControls({ symbol, onSymbolChange }: Props) {
     setRiskPct(1); setTpPct(0); setSlPct(0); setQtyInput(1000); setPosition(null);
   };
 
-  // ====== UI (mantendo tudo, só compactando e com um único histórico) ======
+  // ====== UI (um único Histórico; KPIs em linha reta) ======
   return (
     <div
       className="compactPanel compactRoot"
       style={{
         display: 'flex',
         flexDirection: 'column',
-        /* limita para não passar do gráfico; ajuste o 160px se precisar fino */
         maxHeight: 'calc(100vh - 160px)',
         gap: 10
       }}
     >
-      {/* KPIs em uma linha */}
+      {/* KPIs em uma linha ocupando 100% */}
       <div className="kpiGrid">
-        <div className="kpiCard"><div className="kpiLabel">Preço</div><div className="kpiValue">{price ? fmt2(price) : '—'}</div></div>
-        <div className="kpiCard"><div className="kpiLabel">Equity</div><div className="kpiValue">{fmt2(equity)} USDT</div></div>
+        <div className="kpiCard">
+          <div className="kpiLabel">Preço</div>
+          <div className="kpiValue">{price ? fmt2(price) : '—'}</div>
+        </div>
+        <div className="kpiCard">
+          <div className="kpiLabel">Equity</div>
+          <div className="kpiValue">{fmt2(equity)} USDT</div>
+        </div>
         <div className="kpiCard">
           <div className="kpiLabel">PnL flutuante</div>
           <div className="kpiValue" style={{ color: floatPnL >= 0 ? '#1cff80' : '#ff6b6b' }}>
@@ -243,13 +248,13 @@ export default function TradeControls({ symbol, onSymbolChange }: Props) {
           <div className="twoCols">
             <select className="inp" value={symbol} onChange={e => onSymbolChange(e.target.value)}>
               <option>BTCUSDT</option><option>ETHUSDT</option><option>SOLUSDT</option><option>LINKUSDT</option>
-              <option>BNBUSDT</option><option>XRPUSDT</option><option>DOGEUSDT</option><option>ADAUSDT</option>
+              <option>BNBUSDT</option><option>XRPUSDT</option><option>DOGEUSUT</option><option>ADAUSDT</option>
             </select>
             <button className="btn" onClick={resetAll}>Resetar</button>
           </div>
         </div>
 
-        {/* AÇÕES (Comprar/Vender) */}
+        {/* AÇÕES */}
         <div className="twoCols" style={{ marginTop: 2 }}>
           <button className="btn btnBuy" onClick={() => openPosition('LONG')}
                   title={position?.side === 'SHORT' ? 'Fechar SHORT' : 'Abrir LONG'}>
@@ -262,7 +267,7 @@ export default function TradeControls({ symbol, onSymbolChange }: Props) {
         </div>
       </div>
 
-      {/* HISTÓRICO — único bloco, preenche o resto da altura */}
+      {/* HISTÓRICO — único bloco */}
       <div className="cardMini historyCard" style={{ flex: 1, minHeight: 0 }}>
         <div className="cardTitle">Histórico</div>
         <div className="histWrap fill">
