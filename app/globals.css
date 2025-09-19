@@ -1,223 +1,106 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* app/globals.css — VERSÃO B (estável compacta) */
 
-/* ======== Base ======== */
-html,
-body {
-  height: 100%;
-  margin: 0;
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  background: #0b0e11;
-  color: #f1f1f1;
+:root{
+  --bg:#0a0f0d;
+  --panel:#0f1513;
+  --grid:rgba(255,255,255,.06);
+  --text:#d5fbe6;
+  --muted:#8fbfa8;
+  --accent:#21f38d;
+  --accent-strong:#1cff80;
 }
 
-/* ======== Layout ======== */
-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
+  color:var(--text);
+  background-color:var(--bg);
+  background-image:
+    linear-gradient(to right,var(--grid) 1px,transparent 1px),
+    linear-gradient(to bottom,var(--grid) 1px,transparent 1px);
+  background-size:60px 60px;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+/* wrapper mais compacto */
+.wrapper{
+  display:grid;
+  grid-template-columns:300px 1fr 200px;
+  gap:14px;
+  min-height:100dvh;
+  padding:14px;
+  align-items:start;
+}
+@media (max-width:1100px){
+  .wrapper{grid-template-columns:1fr}
+  .rightMenu{position:static}
+}
+.panel{
+  background:radial-gradient(1200px 1200px at -10% -10%,rgba(33,243,141,.06),transparent 40%),var(--panel);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:14px;
+  padding:12px;
 }
 
-button {
-  cursor: pointer;
-}
+/* tickers */
+.tickers{display:grid;grid-template-columns:1fr;gap:10px}
+.tickerCard{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:10px 12px}
+.tickerSymbol{color:var(--text);font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-weight:800}
+.tickerPrice{font-weight:700;font-size:15px;opacity:.95}
+.tickerPrice.green{color:var(--accent-strong)}
 
-/* ======== Navbar ======== */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #111417;
-  padding: 12px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
+/* hero */
+.hero{height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.heroInner{width:min(940px,95%);text-align:center}
+.heroTitle{font-size:clamp(26px,4.5vw,56px);line-height:1.06;margin:8px 0 12px;font-weight:800}
+.heroSubtitle{color:#c9eedc;opacity:.9;max-width:700px;margin:0 auto 22px}
+.liveLineWrap{position:relative;height:64px;margin:18px auto 4px;width:min(720px,100%)}
+.liveLine{position:absolute;inset:0;border-radius:999px;background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+.liveDot{position:absolute;top:50%;width:10px;height:10px;background:var(--accent-strong);border-radius:999px;transform:translate(-50%,-50%);animation:run 2.2s linear infinite}
+@keyframes run{from{left:0%}to{left:100%}}
 
-.navbar a {
-  margin: 0 12px;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-weight: 500;
-}
+/* menu direito */
+.rightMenu{position:sticky;top:14px;height:fit-content}
+.menuList{display:grid;gap:8px}
+.menuBtn{display:block;text-decoration:none;color:var(--text);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);padding:10px 12px;border-radius:12px;text-align:center;font-weight:600}
+.menuBtn.active{outline:2px solid var(--accent);box-shadow:0 0 0 4px rgba(33,243,141,.12) inset;color:var(--accent-strong)}
 
-.navbar a.active {
-  background: #16c784;
-  color: #fff;
-}
+/* utilidades */
+.muted{color:var(--muted)}
+.small{font-size:12px}
 
-.navbar a:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
+/* painel do simulador */
+.compactPanel{padding:12px !important;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px}
+.compactRoot{font-size:13px}
+.compactHeader{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.compactGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;height:100%}
+.colA,.colB{display:flex;flex-direction:column;gap:8px;min-width:0}
+.twoCols{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.threeCols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.lbl{font-size:12px;color:rgba(255,255,255,.7);margin-bottom:2px}
+.xs{font-size:11px}
+.inp{width:100%;height:34px;padding:0 10px;border-radius:10px;background:rgba(255,255,255,.03);color:inherit;border:1px solid rgba(255,255,255,.12)}
+.btn-xs{padding:7px 9px;font-size:12px;border-radius:10px}
+.btnBuy{background:linear-gradient(180deg,rgba(33,243,141,.22),rgba(33,243,141,.10));color:#1cff80;border:1px solid rgba(33,243,141,.35);font-weight:800}
+.btnSell{background:linear-gradient(180deg,rgba(255,76,76,.20),rgba(255,76,76,.08));color:#ff6b6b;border:1px solid rgba(255,76,76,.35);font-weight:800}
+.cardMini{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);border-radius:12px;padding:9px;display:flex;flex-direction:column;gap:8px}
+.cardTitle{font-size:12px;font-weight:800}
+.posGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.historyCard{flex:1;min-height:0;display:flex;flex-direction:column}
+.histWrap{display:grid;gap:6px;max-height:22vh;overflow-y:auto;padding-right:4px}
+.histRow{border:1px solid rgba(255,255,255,.10);border-radius:10px;padding:6px 8px;background:rgba(255,255,255,.03)}
 
-/* ======== Rodapé ======== */
-footer {
-  padding: 16px;
-  text-align: center;
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+/* fullscreen ao lado da câmera */
+.chartFsBtn{
+  position:absolute;
+  top:30px;
+  right:44px;
+  z-index:6;
+  width:28px;height:28px;border-radius:8px;
+  display:grid;place-items:center;
+  background:rgba(255,255,255,.12);
+  color:#e6e6e6;border:1px solid rgba(255,255,255,.25);
+  cursor:pointer;
 }
-
-/* ======== Botões ======== */
-.btn {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  padding: 6px 10px;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-.btnBuy {
-  background: #16c784;
-  color: #fff;
-}
-.btnBuy:hover {
-  background: #0fa871;
-}
-
-.btnSell {
-  background: #ff5a5f;
-  color: #fff;
-}
-.btnSell:hover {
-  background: #e0484e;
-}
-
-/* ======== Inputs ======== */
-.inp {
-  width: 100%;
-  padding: 6px 8px;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.04);
-  color: #fff;
-  font-size: 13px;
-}
-
-.inp:focus {
-  outline: none;
-  border-color: #16c784;
-}
-
-/* ======== Painel Compacto ======== */
-.compactPanel {
-  background: #111417;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 10px;
-  display: flex;
-  flex-direction: column;
-}
-
-.cardMini {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  padding: 8px;
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.cardTitle {
-  font-size: 12px;
-  font-weight: 600;
-  margin-bottom: 4px;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.twoCols {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-.threeCols {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px;
-}
-
-/* ======== Histórico ======== */
-.historyCard {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-.histWrap.fill {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  display: grid;
-  gap: 6px;
-  padding-right: 4px;
-}
-.histRow {
-  border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
-  padding-bottom: 4px;
-}
-
-/* ======== Texto ======== */
-.muted {
-  color: rgba(255, 255, 255, 0.6);
-}
-.xs {
-  font-size: 11px;
-}
-
-/* ======== KPIs (Preço / Equity / PnL em linha) ======== */
-.kpiGrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-.kpiCard {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  padding: 8px;
-}
-.kpiLabel {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.6);
-}
-.kpiValue {
-  font-size: 14px;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-}
-
-/* ======== TradingView Fullscreen Button ======== */
-:root {
-  /* ajuste fino: se ainda ficar 1–2px fora, altere aqui (28–36) */
-  --chart-toolbar-top: 30px;
-  --chart-toolbar-gap: 12px;
-}
-
-.chartFsBtn {
-  position: absolute;
-  top: var(--chart-toolbar-top);
-  right: calc(44px + var(--chart-toolbar-gap));
-  z-index: 6;
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  display: grid;
-  place-items: center;
-  background: rgba(255, 255, 255, 0.12);
-  color: #e6e6e6;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  cursor: pointer;
-}
-.chartFsBtn:hover {
-  background: rgba(255, 255, 255, 0.18);
-  color: #fff;
-}
+.chartFsBtn:hover{background:rgba(255,255,255,.18);color:#fff}
