@@ -296,3 +296,25 @@ section.panel > button[aria-label="Tela cheia"]:hover {
   button.chartFsBtn,
   section.panel > button[aria-label="Tela cheia"] { top: 9px !important; }
 }
+/* ===== PATCH-04 (alinhamento do FS + remoção do histórico duplicado) ===== */
+
+/* 1) Botão de Tela Cheia: forçar alinhamento na MESMA LINHA da câmera
+      Observação: há um inline style vindo do componente (bottom: 0; right: 56px).
+      Por isso, usamos !important para sobrepor SEM alterar JS. */
+.chartFsBtn{
+  position: absolute !important;
+  top: 6px !important;          /* mesma linha da barra (nível da câmera) */
+  right: 44px !important;       /* ~1cm de distância da câmera, sem encostar */
+  bottom: auto !important;      /* anula bottom inline */
+  transform: translateY(0) !important;
+  z-index: 6 !important;        /* garante que fique acima do chart */
+}
+
+/* 2) Remover APENAS o “Histórico” que ficou no meio do painel.
+      O histórico “oficial” (o de baixo) permanece. */
+.compactGrid .colA .histRow,
+.compactGrid .colA .histWrap,
+.compactGrid .colA .historyCard,
+.compactGrid .colA .histCard{
+  display: none !important;
+}
