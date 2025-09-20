@@ -251,3 +251,48 @@ section.panel > button[aria-label="Tela cheia"],
 }
 section.panel > button[aria-label="Tela cheia"]:hover,
 .panel .chartFsBtn:hover{ background: rgba(255,255,255,.18); color:#fff }
+/* === 1) Remover o "Histórico" do meio (classe real .histRow) === */
+/* Oculta histRow que aparece dentro da grade compacta do painel */
+.panel .compactGrid .histRow,
+.panel .colA .histRow,
+.panel .colB .histRow {
+  display: none !important;
+}
+
+/* Garante que o histórico do rodapé (dentro de .histWrap) continue visível */
+.panel .histWrap .histRow { 
+  display: block !important;
+}
+
+/* === 2) Alinhar o botão de Tela Cheia com a câmera === */
+button.chartFsBtn,
+section.panel > button[aria-label="Tela cheia"] {
+  position: absolute !important;
+  top: 8px !important;        /* ajuste fino: mesma linha da câmera em notebooks */
+  bottom: auto !important;    /* anula o inline "bottom:0" */
+  right: 44px !important;     /* ~1 cm à esquerda da câmera */
+  transform: translateY(0) !important;
+  z-index: 6 !important;
+
+  /* mantém o visual atual */
+  width: 28px; height: 28px; border-radius: 8px;
+  display: grid; place-items: center;
+  background: rgba(255,255,255,.12);
+  color: #e6e6e6;
+  border: 1px solid rgba(255,255,255,.25);
+  cursor: pointer;
+}
+button.chartFsBtn:hover,
+section.panel > button[aria-label="Tela cheia"]:hover {
+  background: rgba(255,255,255,.18); color: #fff;
+}
+
+/* Pequeno ajuste responsivo (se ficar 1px fora em telas maiores/menores) */
+@media (max-height: 780px) {
+  button.chartFsBtn,
+  section.panel > button[aria-label="Tela cheia"] { top: 7px !important; }
+}
+@media (min-height: 950px) {
+  button.chartFsBtn,
+  section.panel > button[aria-label="Tela cheia"] { top: 9px !important; }
+}
