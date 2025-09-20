@@ -1,5 +1,5 @@
 /* ===============================
-   app/globals.css  (Opção B + ajustes pontuais)
+   app/globals.css  (Opção B + correções finais)
    =============================== */
 
 /* ---- Tokens ---- */
@@ -59,7 +59,7 @@ body{
   border-radius:12px;
   padding:10px 12px;
 }
-/* (↑) letras um pouco maiores */
+/* letras um pouco maiores */
 .tickerSymbol{ color:var(--text); font-size:14px; letter-spacing:.08em; text-transform:uppercase; font-weight:800 }
 .tickerSymbol.strong{ font-size:16px }
 .tickerPrice{ font-weight:700; font-size:18px; opacity:.95 }
@@ -85,7 +85,7 @@ body{
   background:rgba(255,255,255,.03);
   border:1px solid rgba(255,255,255,.06);
   padding:10px 12px; border-radius:12px; text-align:center; font-weight:600;
-  font-size:14px; /* ↑ maior como antes */
+  font-size:14px; /* ↑ maior, como antes */
 }
 .menuBtn.active{ outline:2px solid var(--accent); box-shadow:0 0 0 4px rgba(33,243,141,.12) inset; color:var(--accent-strong) }
 
@@ -94,16 +94,17 @@ body{
 .small{ font-size:12px }
 
 /* =========================================================
-   SIMULADOR — ajustes pontuais SEM alterar estrutura
+   SIMULADOR — ajustes SEM modificar estrutura/JSX
    ========================================================= */
 
-/* Ícone Tela Cheia — alinhar na MESMA linha da câmera */
+/* (D) Ícone Tela Cheia — MESMA linha da câmera (vence inline) */
 .chartFsBtn{
-  position:absolute;
-  top:0;                 /* alinha com a barra do TV */
-  right:48px;            /* ~1cm ao lado da câmera */
-  transform:translateY(2px); /* ajuste fino para nivelar com a câmera */
-  z-index:6;
+  top:0 !important;                 /* alinha com a barra do TV */
+  bottom:auto !important;           /* remove fixação inferior inline */
+  right:48px !important;            /* ~1cm ao lado da câmera */
+  transform:translateY(2px) !important; /* nivelar com a câmera */
+  z-index:6 !important;
+  position:absolute !important;
   width:28px; height:28px; line-height:28px;
   border-radius:8px;
   display:grid; place-items:center;
@@ -144,27 +145,27 @@ body{
 .btnBuy{ background:linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10)); color:#1cff80; border:1px solid rgba(33,243,141,.35); font-weight:800 }
 .btnSell{ background:linear-gradient(180deg, rgba(255,76,76,.20), rgba(255,76,76,.08)); color:#ff6b6b; border:1px solid rgba(255,76,76,.35); font-weight:800 }
 
-/* ===== Remoções/Forces visuais sem tocar no markup ===== */
+/* (A) Esconder o PRIMEIRO cabeçalho duplicado (violeta) */
+.panel :is(.compactHeader,.controlsHeader,.header):first-of-type{
+  display:none !important;
+}
 
-/* 1) Esconder cabeçalho duplicado (o violeta).
-      Mantém SOMENTE o último .compactHeader dentro do painel de controles. */
-.controlsPanel .compactHeader:first-of-type{ display:none !important }
-
-/* 2) Forçar “Voltar ao início” verde/grande no cabeçalho visível */
-.controlsPanel .compactHeader:last-of-type .btn{
+/* (B) Forçar “Voltar ao início” VERDE no cabeçalho visível (o ÚLTIMO) */
+.panel :is(.compactHeader,.controlsHeader,.header):last-of-type .btn{
   background:linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10)) !important;
   border-color:rgba(33,243,141,.35) !important;
   color:var(--accent-strong) !important;
-  box-shadow:0 0 0 2px rgba(33,243,141,.15) inset;
-  font-size:14px; padding:12px 18px;
+  box-shadow:0 0 0 2px rgba(33,243,141,.15) inset !important;
+  font-size:14px !important;
+  padding:12px 18px !important;
 }
 
-/* 3) Remover “Histórico” extra no meio; manter apenas o ÚLTIMO histórico do painel */
-.controlsPanel .historyCard:not(:last-of-type),
-.controlsPanel .histInline,
-.controlsPanel .history-inline{ display:none !important }
+/* (C) Remover “Histórico” do meio; manter só o ÚLTIMO do painel */
+.panel :is(.historyCard,.histWrap,.history-inline,.histInline):not(:last-of-type){
+  display:none !important;
+}
 
-/* Histórico (o final, mantido) */
+/* Histórico final (mantido) */
 .historyCard{ flex:1; min-height:0; display:flex; flex-direction:column }
 .histWrap.fill{ flex:1; min-height:0; overflow-y:auto; display:grid; gap:6px; padding-right:4px }
 .histRow{ border:1px solid rgba(255,255,255,.10); border-radius:10px; padding:6px 8px; background:rgba(255,255,255,.03) }
