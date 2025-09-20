@@ -210,3 +210,44 @@ section.panel > button[aria-label="Tela cheia"]:hover,
 /* Mantém o Histórico final (rodapé) visível */
 .panel .histWrap:last-of-type,
 .panel .historyCard:last-of-type{ display: block !important; }
+/* ======= FIX: restaurar cards TP/SL + esconder APENAS Histórico do meio ======= */
+
+/* (1) GARANTE que todos os cards normais voltem a aparecer */
+.compactGrid .colA .cardMini,
+.compactGrid .colB .cardMini { display: flex !important; }
+
+/* (2) ESCONDE SOMENTE o “Histórico” do meio (variações de classe comuns) */
+.panel .history-inline,
+.panel .histInline,
+.panel .historyCard-inline,
+.panel .cardMini.history,
+.panel .cardMini.is-history {
+  display: none !important;
+}
+
+/* (remover fallback antigo: não esconder “o 1º card” genérico) */
+.compactGrid .colA .cardMini:nth-of-type(1) { display: flex !important; }
+
+/* Mantém o Histórico final (rodapé) visível */
+.panel .histWrap:last-of-type,
+.panel .historyCard:last-of-type { display: block !important; }
+
+/* ======= FIX: alinhar botão de Tela Cheia exatamente na linha da câmera ======= */
+section.panel > button[aria-label="Tela cheia"],
+.panel .chartFsBtn{
+  position: absolute !important;
+  top: 8px !important;       /* ajuste fino para nivelar com o ícone da câmera */
+  bottom: auto !important;
+  right: 44px !important;    /* ~1 cm à esquerda da câmera em notebooks comuns */
+  transform: translateY(0) !important;
+  z-index: 6 !important;
+  width: 28px; height: 28px; line-height: 28px;
+  border-radius: 8px;
+  display: grid; place-items: center;
+  background: rgba(255,255,255,.12);
+  color: #e6e6e6;
+  border: 1px solid rgba(255,255,255,.25);
+  cursor: pointer;
+}
+section.panel > button[aria-label="Tela cheia"]:hover,
+.panel .chartFsBtn:hover{ background: rgba(255,255,255,.18); color:#fff }
