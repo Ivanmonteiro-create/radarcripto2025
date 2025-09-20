@@ -1,8 +1,8 @@
 /* ===============================
-   app/globals.css  (consolidado)
+   app/globals.css  (base “Opção B” + ajustes)
    =============================== */
 
-/* ---- Cores e tokens ---- */
+/* ---- Tokens ---- */
 :root{
   --bg:#0a0f0d;
   --panel:#0f1513;
@@ -27,7 +27,7 @@ body{
   background-size:60px 60px;
 }
 
-/* ===== Layout base (3 colunas) ===== */
+/* ===== Layout (home) ===== */
 .wrapper{
   display:grid;
   grid-template-columns:300px 1fr 200px;
@@ -42,7 +42,7 @@ body{
   .leftPanel{ order:2 }
 }
 
-/* Painéis genéricos */
+/* Painéis */
 .panel{
   position:relative;
   background:radial-gradient(1200px 1200px at -10% -10%, rgba(33,243,141,.06), transparent 40%), var(--panel);
@@ -51,7 +51,7 @@ body{
   padding:14px;
 }
 
-/* ===== Tickers (home) ===== */
+/* ===== Tickers (coluna esquerda) ===== */
 .tickers{ display:grid; grid-template-columns:1fr; gap:10px }
 .tickerCard{
   background:rgba(255,255,255,.02);
@@ -59,12 +59,13 @@ body{
   border-radius:12px;
   padding:10px 12px;
 }
-.tickerSymbol{ color:var(--text); font-size:13px; letter-spacing:.08em; text-transform:uppercase; font-weight:800 }
-.tickerSymbol.strong{ font-size:15px }
-.tickerPrice{ font-weight:700; font-size:15px; opacity:.95 }
+/* ↑ letras um pouco maiores como solicitado */
+.tickerSymbol{ color:var(--text); font-size:14px; letter-spacing:.08em; text-transform:uppercase; font-weight:800 }
+.tickerSymbol.strong{ font-size:16px }
+.tickerPrice{ font-weight:700; font-size:18px; opacity:.95 }
 .tickerPrice.green{ color:var(--accent-strong); filter:drop-shadow(0 0 6px rgba(33,243,141,.25)) }
 
-/* ===== Hero (home) ===== */
+/* ===== Hero (centro) ===== */
 .hero{ height:100%; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden }
 .heroInner{ width:min(940px,95%); text-align:center }
 .heroTag{ color:var(--muted); letter-spacing:.15em; font-size:12px; text-transform:uppercase }
@@ -84,6 +85,8 @@ body{
   background:rgba(255,255,255,.03);
   border:1px solid rgba(255,255,255,.06);
   padding:10px 12px; border-radius:12px; text-align:center; font-weight:600;
+  /* ↑ letras do menu maiores como antes */
+  font-size:14px;
 }
 .menuBtn.active{ outline:2px solid var(--accent); box-shadow:0 0 0 4px rgba(33,243,141,.12) inset; color:var(--accent-strong) }
 
@@ -92,17 +95,14 @@ body{
 .small{ font-size:12px }
 
 /* =========================================================
-   CONTROLES DO SIMULADOR — apenas ajustes solicitados
-   (sem alterar estrutura/markup existente)
+   CONTROLES DO SIMULADOR — ajustes sem mudar estrutura
    ========================================================= */
 
-/* Botão de tela cheia ao lado da câmera, na MESMA LINHA */
+/* Botão de tela cheia — MESMA LINHA da câmera (ajuste fino no top) */
 .chartFsBtn{
   position:absolute;
-  /* a câmera do TradingView fica ancorada no topo direito; top:6px alinha centro-visual */
-  top:6px;
-  /* distância horizontal para ficar ~1cm ao lado da câmera (o botão da câmera tem ~32px) */
-  right:44px;
+  top:4px;            /* ↓ de 6px para 4px para alinhar com o centro da câmera */
+  right:44px;         /* ~1cm ao lado da câmera */
   z-index:6;
   width:28px; height:28px;
   border-radius:8px;
@@ -111,13 +111,12 @@ body{
   color:#e6e6e6;
   border:1px solid rgba(255,255,255,.25);
   cursor:pointer;
-  /* garante alinhamento visual vertical do ícone dentro do botão */
   line-height:28px;
 }
 .chartFsBtn svg{ display:block; vertical-align:middle }
 .chartFsBtn:hover{ background:rgba(255,255,255,.18); color:#fff }
 
-/* Botões base (mantidos) */
+/* Botões genéricos (mantidos) */
 .btn{
   display:inline-block;
   padding:10px 16px;
@@ -126,28 +125,20 @@ body{
   text-decoration:none;
   font-weight:700;
 }
+.btn-primary{ background:rgba(33,243,141,.15); border-color:rgba(33,243,141,.35); color:#1cff80; font-weight:800 }
+.btnBuy{ background:linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10)); color:#1cff80; border:1px solid rgba(33,243,141,.35); font-weight:800 }
+.btnSell{ background:linear-gradient(180deg, rgba(255,76,76,.20), rgba(255,76,76,.08)); color:#ff6b6b; border:1px solid rgba(255,76,76,.35); font-weight:800 }
 
-/* === “Voltar ao início” — verde e um pouco maior ===
-   Observação: estou apontando por classe específica .backHomeBtn.
-   Se o seu botão usa outra classe/id, mantenha a existente e
-   ADICIONE esta classe no componente. Não muda nada do resto. */
+/* “Voltar ao início” verde/maior (se o componente tiver essa classe) */
 .backHomeBtn{
   background:linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10));
   border-color:rgba(33,243,141,.35);
   color:var(--accent-strong);
   box-shadow:0 0 0 2px rgba(33,243,141,.15) inset;
-  font-size:14px;                 /* “um pouco maior” */
-  padding:12px 18px;              /* idem */
+  font-size:14px;
+  padding:12px 18px;
 }
-.backHomeBtn:hover{
-  outline:2px solid var(--accent);
-  box-shadow:0 0 0 4px rgba(33,243,141,.12) inset;
-}
-
-/* (Mantidos para os outros botões que você já usa) */
-.btn-primary{ background:rgba(33,243,141,.15); border-color:rgba(33,243,141,.35); color:#1cff80; font-weight:800 }
-.btnBuy{ background:linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10)); color:#1cff80; border:1px solid rgba(33,243,141,.35); font-weight:800 }
-.btnSell{ background:linear-gradient(180deg, rgba(255,76,76,.20), rgba(255,76,76,.08)); color:#ff6b6b; border:1px solid rgba(255,76,76,.35); font-weight:800 }
+.backHomeBtn:hover{ outline:2px solid var(--accent); box-shadow:0 0 0 4px rgba(33,243,141,.12) inset }
 
 /* Cartões/inputs do painel (mantidos) */
 .compactPanel { padding:12px !important }
@@ -189,7 +180,9 @@ body{
 .histWrap.fill{ flex:1; min-height:0; overflow-y:auto; display:grid; gap:6px; padding-right:4px }
 .histRow{ border:1px solid rgba(255,255,255,.10); border-radius:10px; padding:6px 8px; background:rgba(255,255,255,.03) }
 
-/* Acessibilidade */
-@media (prefers-reduced-motion:reduce){
-  .liveDot{ animation:none; left:100% }
-}
+/* ===== Remoções visuais sem mexer na estrutura ===== */
+/* Esconde QUALQUER segundo cabeçalho repetido dentro do painel de controles */
+.controlsPanel .compactHeader ~ .compactHeader{ display:none !important }
+/* Esconde possíveis variantes “inline” de histórico que surgem no meio do painel */
+.controlsPanel .histInline,
+.controlsPanel .history-inline{ display:none !important }
