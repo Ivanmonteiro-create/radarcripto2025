@@ -1,5 +1,5 @@
 /* ===============================
-   app/globals.css  (base “Opção B” + ajustes)
+   app/globals.css  (Opção B + ajustes pontuais)
    =============================== */
 
 /* ---- Tokens ---- */
@@ -59,7 +59,7 @@ body{
   border-radius:12px;
   padding:10px 12px;
 }
-/* ↑ letras um pouco maiores como solicitado */
+/* (↑) letras um pouco maiores */
 .tickerSymbol{ color:var(--text); font-size:14px; letter-spacing:.08em; text-transform:uppercase; font-weight:800 }
 .tickerSymbol.strong{ font-size:16px }
 .tickerPrice{ font-weight:700; font-size:18px; opacity:.95 }
@@ -85,8 +85,7 @@ body{
   background:rgba(255,255,255,.03);
   border:1px solid rgba(255,255,255,.06);
   padding:10px 12px; border-radius:12px; text-align:center; font-weight:600;
-  /* ↑ letras do menu maiores como antes */
-  font-size:14px;
+  font-size:14px; /* ↑ maior como antes */
 }
 .menuBtn.active{ outline:2px solid var(--accent); box-shadow:0 0 0 4px rgba(33,243,141,.12) inset; color:var(--accent-strong) }
 
@@ -95,52 +94,28 @@ body{
 .small{ font-size:12px }
 
 /* =========================================================
-   CONTROLES DO SIMULADOR — ajustes sem mudar estrutura
+   SIMULADOR — ajustes pontuais SEM alterar estrutura
    ========================================================= */
 
-/* Botão de tela cheia — MESMA LINHA da câmera (ajuste fino no top) */
+/* Ícone Tela Cheia — alinhar na MESMA linha da câmera */
 .chartFsBtn{
   position:absolute;
-  top:4px;            /* ↓ de 6px para 4px para alinhar com o centro da câmera */
-  right:44px;         /* ~1cm ao lado da câmera */
+  top:0;                 /* alinha com a barra do TV */
+  right:48px;            /* ~1cm ao lado da câmera */
+  transform:translateY(2px); /* ajuste fino para nivelar com a câmera */
   z-index:6;
-  width:28px; height:28px;
+  width:28px; height:28px; line-height:28px;
   border-radius:8px;
   display:grid; place-items:center;
   background:rgba(255,255,255,.12);
   color:#e6e6e6;
   border:1px solid rgba(255,255,255,.25);
   cursor:pointer;
-  line-height:28px;
 }
 .chartFsBtn svg{ display:block; vertical-align:middle }
 .chartFsBtn:hover{ background:rgba(255,255,255,.18); color:#fff }
 
-/* Botões genéricos (mantidos) */
-.btn{
-  display:inline-block;
-  padding:10px 16px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.12);
-  text-decoration:none;
-  font-weight:700;
-}
-.btn-primary{ background:rgba(33,243,141,.15); border-color:rgba(33,243,141,.35); color:#1cff80; font-weight:800 }
-.btnBuy{ background:linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10)); color:#1cff80; border:1px solid rgba(33,243,141,.35); font-weight:800 }
-.btnSell{ background:linear-gradient(180deg, rgba(255,76,76,.20), rgba(255,76,76,.08)); color:#ff6b6b; border:1px solid rgba(255,76,76,.35); font-weight:800 }
-
-/* “Voltar ao início” verde/maior (se o componente tiver essa classe) */
-.backHomeBtn{
-  background:linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10));
-  border-color:rgba(33,243,141,.35);
-  color:var(--accent-strong);
-  box-shadow:0 0 0 2px rgba(33,243,141,.15) inset;
-  font-size:14px;
-  padding:12px 18px;
-}
-.backHomeBtn:hover{ outline:2px solid var(--accent); box-shadow:0 0 0 4px rgba(33,243,141,.12) inset }
-
-/* Cartões/inputs do painel (mantidos) */
+/* Painel compacto (mantido) */
 .compactPanel { padding:12px !important }
 .compactRoot { font-size:13px }
 .compactTitle { font-size:15px; margin:0; font-weight:800 }
@@ -156,33 +131,40 @@ body{
 .green{ color:#1cff80; font-weight:800 }
 
 .inp{
-  width:100%;
-  height:34px;
-  padding:0 10px;
-  border-radius:10px;
-  background:rgba(255,255,255,.03);
-  color:inherit;
-  border:1px solid rgba(255,255,255,.12);
+  width:100%; height:34px; padding:0 10px;
+  border-radius:10px; background:rgba(255,255,255,.03);
+  color:inherit; border:1px solid rgba(255,255,255,.12);
 }
 .inp-disabled{ background:rgba(255,255,255,.08); cursor:not-allowed }
 
-.tickerRow{ display:flex; justify-content:space-between; align-items:center; padding:7px 9px; border:1px solid rgba(255,255,255,.12); border-radius:10px; background:rgba(255,255,255,.04) }
-.cardMini{ border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); border-radius:12px; padding:9px; display:flex; flex-direction:column; gap:8px }
-.cardTitle{ font-size:12px; font-weight:800 }
-.kpiGrid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px }
-.kpiCard{ border:1px solid rgba(255,255,255,.12); border-radius:12px; background:rgba(255,255,255,.04); padding:8px }
-.kpiLabel{ font-size:11px; color:rgba(255,255,255,.6) }
-.kpiValue{ font-size:14px; font-weight:800 }
-.posGrid{ display:grid; grid-template-columns:1fr 1fr; gap:8px }
+.btn{ border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.06); border-radius:10px; color:inherit; }
+.btn:hover{ background:rgba(255,255,255,.12) }
+.btn-xs{ padding:7px 9px; font-size:12px; border-radius:10px }
+.btn-primary{ background:rgba(33,243,141,.15); border-color:rgba(33,243,141,.35); color:#1cff80; font-weight:800 }
+.btnBuy{ background:linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10)); color:#1cff80; border:1px solid rgba(33,243,141,.35); font-weight:800 }
+.btnSell{ background:linear-gradient(180deg, rgba(255,76,76,.20), rgba(255,76,76,.08)); color:#ff6b6b; border:1px solid rgba(255,76,76,.35); font-weight:800 }
 
-/* Histórico (mantido) */
+/* ===== Remoções/Forces visuais sem tocar no markup ===== */
+
+/* 1) Esconder cabeçalho duplicado (o violeta).
+      Mantém SOMENTE o último .compactHeader dentro do painel de controles. */
+.controlsPanel .compactHeader:first-of-type{ display:none !important }
+
+/* 2) Forçar “Voltar ao início” verde/grande no cabeçalho visível */
+.controlsPanel .compactHeader:last-of-type .btn{
+  background:linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10)) !important;
+  border-color:rgba(33,243,141,.35) !important;
+  color:var(--accent-strong) !important;
+  box-shadow:0 0 0 2px rgba(33,243,141,.15) inset;
+  font-size:14px; padding:12px 18px;
+}
+
+/* 3) Remover “Histórico” extra no meio; manter apenas o ÚLTIMO histórico do painel */
+.controlsPanel .historyCard:not(:last-of-type),
+.controlsPanel .histInline,
+.controlsPanel .history-inline{ display:none !important }
+
+/* Histórico (o final, mantido) */
 .historyCard{ flex:1; min-height:0; display:flex; flex-direction:column }
 .histWrap.fill{ flex:1; min-height:0; overflow-y:auto; display:grid; gap:6px; padding-right:4px }
 .histRow{ border:1px solid rgba(255,255,255,.10); border-radius:10px; padding:6px 8px; background:rgba(255,255,255,.03) }
-
-/* ===== Remoções visuais sem mexer na estrutura ===== */
-/* Esconde QUALQUER segundo cabeçalho repetido dentro do painel de controles */
-.controlsPanel .compactHeader ~ .compactHeader{ display:none !important }
-/* Esconde possíveis variantes “inline” de histórico que surgem no meio do painel */
-.controlsPanel .histInline,
-.controlsPanel .history-inline{ display:none !important }
