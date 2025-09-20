@@ -1,6 +1,8 @@
-/* app/globals.css — VERSÃO B (estável) + AJUSTES FINOS */
+/* ===============================
+   app/globals.css  (consolidado)
+   =============================== */
 
-/* ===== Vars ===== */
+/* ---- Cores e tokens ---- */
 :root{
   --bg:#0a0f0d;
   --panel:#0f1513;
@@ -9,170 +11,98 @@
   --muted:#8fbfa8;
   --accent:#21f38d;
   --accent-strong:#1cff80;
-
-  /* alinhamento fino do ícone de fullscreen vs câmera do TV */
-  --fs-top: 30px; /* se ainda ficar 1px fora, ajuste para 29–32 */
 }
 
-*{box-sizing:border-box}
-html,body{height:100%}
+*{ box-sizing:border-box }
+html,body{ height:100% }
+
 body{
   margin:0;
-  font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
   color:var(--text);
   background-color:var(--bg);
   background-image:
-    linear-gradient(to right,var(--grid) 1px,transparent 1px),
-    linear-gradient(to bottom,var(--grid) 1px,transparent 1px);
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
   background-size:60px 60px;
 }
 
-/* ===== Layout Home (3 colunas) ===== */
+/* ===== Layout base (3 colunas) ===== */
 .wrapper{
   display:grid;
   grid-template-columns:300px 1fr 200px;
-  gap:14px;
+  gap:16px;
   min-height:100dvh;
-  padding:14px;
+  padding:16px;
   align-items:start;
 }
 @media (max-width:1100px){
-  .wrapper{grid-template-columns:1fr}
-  .rightMenu{position:static}
+  .wrapper{ grid-template-columns:1fr }
+  .rightMenu{ position:static }
+  .leftPanel{ order:2 }
 }
+
+/* Painéis genéricos */
 .panel{
-  background:radial-gradient(1200px 1200px at -10% -10%,rgba(33,243,141,.06),transparent 40%),var(--panel);
+  position:relative;
+  background:radial-gradient(1200px 1200px at -10% -10%, rgba(33,243,141,.06), transparent 40%), var(--panel);
   border:1px solid rgba(255,255,255,.06);
-  border-radius:14px;
-  padding:12px;
+  border-radius:16px;
+  padding:14px;
 }
 
-/* ===== Tickers ===== */
-.tickers{display:grid;grid-template-columns:1fr;gap:10px}
-.tickerCard{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:10px 12px}
-.tickerSymbol{color:var(--text);font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-weight:800}
-.tickerPrice{font-weight:700;font-size:15px;opacity:.95}
-.tickerPrice.green{color:var(--accent-strong)}
-
-/* ===== Hero ===== */
-.hero{height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
-.heroInner{width:min(940px,95%);text-align:center}
-.heroTitle{font-size:clamp(26px,4.5vw,56px);line-height:1.06;margin:8px 0 12px;font-weight:800}
-.heroSubtitle{color:#c9eedc;opacity:.9;max-width:700px;margin:0 auto 22px}
-.liveLineWrap{position:relative;height:64px;margin:18px auto 4px;width:min(720px,100%)}
-.liveLine{position:absolute;inset:0;border-radius:999px;background:linear-gradient(90deg,transparent,var(--accent),transparent)}
-.liveDot{position:absolute;top:50%;width:10px;height:10px;background:var(--accent-strong);border-radius:999px;transform:translate(-50%,-50%);animation:run 2.2s linear infinite}
-@keyframes run{from{left:0%}to{left:100%}}
-
-/* ===== Menu direito ===== */
-.rightMenu{position:sticky;top:14px;height:fit-content}
-.menuList{display:grid;gap:8px}
-.menuBtn{display:block;text-decoration:none;color:var(--text);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);padding:10px 12px;border-radius:12px;text-align:center;font-weight:600}
-.menuBtn.active{outline:2px solid var(--accent);box-shadow:0 0 0 4px rgba(33,243,141,.12) inset;color:var(--accent-strong)}
-
-/* ===== Utilidades ===== */
-.muted{color:var(--muted)}
-.small{font-size:12px}
-
-/* ===== Painel do simulador ===== */
-.compactPanel{padding:12px !important;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px}
-.compactRoot{font-size:13px}
-.compactHeader{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.compactGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;height:100%}
-.colA,.colB{display:flex;flex-direction:column;gap:8px;min-width:0}
-.twoCols{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.threeCols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
-.lbl{font-size:12px;color:rgba(255,255,255,.7);margin-bottom:2px}
-.xs{font-size:11px}
-.inp{width:100%;height:34px;padding:0 10px;border-radius:10px;background:rgba(255,255,255,.03);color:inherit;border:1px solid rgba(255,255,255,.12)}
-.btn-xs{padding:7px 9px;font-size:12px;border-radius:10px}
-.btnBuy{background:linear-gradient(180deg,rgba(33,243,141,.22),rgba(33,243,141,.10));color:#1cff80;border:1px solid rgba(33,243,141,.35);font-weight:800}
-.btnSell{background:linear-gradient(180deg,rgba(255,76,76,.20),rgba(255,76,76,.08));color:#ff6b6b;border:1px solid rgba(255,76,76,.35);font-weight:800}
-.cardMini{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);border-radius:12px;padding:9px;display:flex;flex-direction:column;gap:8px}
-.cardTitle{font-size:12px;font-weight:800}
-.posGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-
-/* Histórico (único) */
-.historyCard{flex:1;min-height:0;display:flex;flex-direction:column}
-.histWrap{display:grid;gap:6px;max-height:22vh;overflow-y:auto;padding-right:4px}
-.histRow{border:1px solid rgba(255,255,255,.10);border-radius:10px;padding:6px 8px;background:rgba(255,255,255,.03)}
-/* Esconde o 2º “Histórico” quando houver duplicado consecutivo */
-.historyCard + .historyCard{display:none !important}
-
-/* Linha única para as métricas do topo (Preço / Equity / PnL), quando presentes */
-.kpisRow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.kpiCard{border:1px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(255,255,255,.04);padding:8px}
-.kpiLabel{font-size:11px;color:rgba(255,255,255,.6)}
-.kpiValue{font-size:14px;font-weight:800}
-
-/* ===== Botão de “Voltar ao início” no header do painel ===== */
-/* Sem alterar o JSX: estiliza o link do header que aponta para "/" */
-.compactHeader a[href="/"]{
-  background:linear-gradient(180deg,rgba(33,243,141,.22),rgba(33,243,141,.10));
-  color:var(--accent-strong);
-  border:1px solid rgba(33,243,141,.35);
-  padding:10px 16px;
+/* ===== Tickers (home) ===== */
+.tickers{ display:grid; grid-template-columns:1fr; gap:10px }
+.tickerCard{
+  background:rgba(255,255,255,.02);
+  border:1px solid rgba(255,255,255,.06);
   border-radius:12px;
-  font-weight:800;
+  padding:10px 12px;
 }
-.compactHeader a[href="/"]:hover{outline:2px solid var(--accent);box-shadow:0 0 0 4px rgba(33,243,141,.12) inset}
+.tickerSymbol{ color:var(--text); font-size:13px; letter-spacing:.08em; text-transform:uppercase; font-weight:800 }
+.tickerSymbol.strong{ font-size:15px }
+.tickerPrice{ font-weight:700; font-size:15px; opacity:.95 }
+.tickerPrice.green{ color:var(--accent-strong); filter:drop-shadow(0 0 6px rgba(33,243,141,.25)) }
 
-/* ===== Ícone de Tela Cheia — mesma linha da câmera ===== */
+/* ===== Hero (home) ===== */
+.hero{ height:100%; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden }
+.heroInner{ width:min(940px,95%); text-align:center }
+.heroTag{ color:var(--muted); letter-spacing:.15em; font-size:12px; text-transform:uppercase }
+.heroTitle{ font-size:clamp(26px,4.5vw,56px); line-height:1.06; margin:8px 0 12px; font-weight:800 }
+.heroSubtitle{ color:#c9eedc; opacity:.9; max-width:700px; margin:0 auto 22px }
+.liveLineWrap{ position:relative; height:64px; margin:18px auto 4px; width:min(720px,100%) }
+.liveLine{ position:absolute; inset:0; border-radius:999px; background:linear-gradient(90deg,transparent,var(--accent),transparent); filter:drop-shadow(0 0 10px var(--accent)); opacity:.8 }
+.liveDot{ position:absolute; top:50%; width:10px; height:10px; background:var(--accent-strong); border-radius:999px; transform:translate(-50%,-50%); filter:drop-shadow(0 0 10px var(--accent-strong)); animation:run 2.2s linear infinite }
+@keyframes run{ from{left:0%} to{left:100%} }
+@media (prefers-reduced-motion:reduce){ .liveDot{ animation:none; left:100% } }
+
+/* ===== Menu direito (home) ===== */
+.rightMenu{ position:sticky; top:16px; height:fit-content }
+.menuList{ display:grid; gap:8px }
+.menuBtn{
+  display:block; text-decoration:none; color:var(--text);
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.06);
+  padding:10px 12px; border-radius:12px; text-align:center; font-weight:600;
+}
+.menuBtn.active{ outline:2px solid var(--accent); box-shadow:0 0 0 4px rgba(33,243,141,.12) inset; color:var(--accent-strong) }
+
+/* Utilidades */
+.muted{ color:var(--muted) }
+.small{ font-size:12px }
+
+/* =========================================================
+   CONTROLES DO SIMULADOR — apenas ajustes solicitados
+   (sem alterar estrutura/markup existente)
+   ========================================================= */
+
+/* Botão de tela cheia ao lado da câmera, na MESMA LINHA */
 .chartFsBtn{
   position:absolute;
-  top:var(--fs-top);  /* controla o alinhamento vertical */
-  right:44px;        /* ~1 cm da câmera */
-  z-index:6;
-  width:28px;height:28px;border-radius:8px;
-  display:grid;place-items:center;
-  background:rgba(255,255,255,.12);
-  color:#e6e6e6;border:1px solid rgba(255,255,255,.25);
-  cursor:pointer;
-}
-.chartFsBtn:hover{background:rgba(255,255,255,.18);color:#fff}
-/* === AJUSTES PONTUAIS (cole NO FINAL de app/globals.css) ================= */
-
-/* 1) Alinhar o ícone de tela cheia na MESMA LINHA da câmera
-      -> ajuste fino por variável, mexa 1px se precisar */
-:root{
-  --fs-top: 32px;  /* se ainda ficar 1px fora, tente 31px ou 33px */
-}
-
-/* 2) “Voltar ao início” VERDE e um pouco MAIOR (sem alterar JSX) */
-.compactHeader a[href="/"]{
-  background: linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10)) !important;
-  color: var(--accent-strong) !important;
-  border: 1px solid rgba(33,243,141,.35) !important;
-  padding: 12px 18px !important;     /* ↑ levemente maior */
-  border-radius: 12px !important;
-  font-weight: 800 !important;
-  font-size: 16px !important;        /* ↑ levemente maior */
-  line-height: 1 !important;
-}
-.compactHeader a[href="/"]:hover{
-  outline: 2px solid var(--accent) !important;
-  box-shadow: 0 0 0 4px rgba(33,243,141,.12) inset !important;
-}
-
-/* 3) Deixar APENAS UM “Histórico”
-   — Opção A (mais comum): esconder o primeiro bloco de histórico (“Histórico recente”)
-   — Se no seu layout a ordem estiver invertida, comente A e descomente a Opção B. */
-
-/* Opção A: esconda o PRIMEIRO historyCard dentro da coluna da direita/abaixo */
-.colB .historyCard:first-of-type{ display:none !important; }
-
-/* Opção B: (use só se a ordem estiver invertida no seu HTML)
-.colB .historyCard:last-of-type{ display:none !important; }
-*/
-
-/* Garantia: quando só existir um bloco de histórico, ele permanece visível */
-/* ===== OVERRIDES LOCAIS (colar no final do app/globals.css) ===== */
-
-/* 1) Ícone de tela cheia: exatamente na mesma linha da câmera */
-.chartFsBtn{
-  position:absolute;
-  bottom:10px;      /* alinhar pela BASE do widget, igual à câmera */
-  right:44px;       /* ~1 cm à esquerda da câmera; ajuste fino se precisar */
+  /* a câmera do TradingView fica ancorada no topo direito; top:6px alinha centro-visual */
+  top:6px;
+  /* distância horizontal para ficar ~1cm ao lado da câmera (o botão da câmera tem ~32px) */
+  right:44px;
   z-index:6;
   width:28px; height:28px;
   border-radius:8px;
@@ -181,144 +111,85 @@ body{
   color:#e6e6e6;
   border:1px solid rgba(255,255,255,.25);
   cursor:pointer;
+  /* garante alinhamento visual vertical do ícone dentro do botão */
+  line-height:28px;
 }
+.chartFsBtn svg{ display:block; vertical-align:middle }
 .chartFsBtn:hover{ background:rgba(255,255,255,.18); color:#fff }
 
-/* 2) Botão “Voltar ao início” VERDE e ligeiramente maior */
-.btn-goBack{
-  background:linear-gradient(180deg,rgba(33,243,141,.18),rgba(33,243,141,.08)) !important;
-  color:var(--accent-strong) !important;
-  border-color:rgba(33,243,141,.35) !important;
-  font-size:14px !important;
-  padding:12px 18px !important;
-  font-weight:800 !important;
+/* Botões base (mantidos) */
+.btn{
+  display:inline-block;
+  padding:10px 16px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.12);
+  text-decoration:none;
+  font-weight:700;
 }
 
-/* 3) Compacidade suave para caber a 100% de zoom sem rolar a página */
-.tradePanelShell{ max-height:calc(100vh - 24px); overflow:auto; }
-.compactRoot{ font-size:13px; }
-.cardMini{ padding:9px; }
-.inp{ height:34px; }
-/* ===== OVERRIDES PONTUAIS — COLE NO FINAL DE app/globals.css ===== */
-
-/* 1) Se houver dois cabeçalhos no painel, esconda o primeiro e mantenha o último (verde) */
-.tradePanelShell .compactHeader:not(:last-of-type){
-  display: none !important;
+/* === “Voltar ao início” — verde e um pouco maior ===
+   Observação: estou apontando por classe específica .backHomeBtn.
+   Se o seu botão usa outra classe/id, mantenha a existente e
+   ADICIONE esta classe no componente. Não muda nada do resto. */
+.backHomeBtn{
+  background:linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10));
+  border-color:rgba(33,243,141,.35);
+  color:var(--accent-strong);
+  box-shadow:0 0 0 2px rgba(33,243,141,.15) inset;
+  font-size:14px;                 /* “um pouco maior” */
+  padding:12px 18px;              /* idem */
+}
+.backHomeBtn:hover{
+  outline:2px solid var(--accent);
+  box-shadow:0 0 0 4px rgba(33,243,141,.12) inset;
 }
 
-/* 1.1) Garante que o botão “Voltar ao início” do cabeçalho visível esteja VERDE e um pouco maior */
-.tradePanelShell .compactHeader a,
-.btn-goBack{
-  background: linear-gradient(180deg, rgba(33,243,141,.18), rgba(33,243,141,.08)) !important;
-  color: #1cff80 !important;
-  border: 1px solid rgba(33,243,141,.35) !important;
-  font-size: 14px !important;
-  padding: 12px 18px !important;
-  font-weight: 800 !important;
-  border-radius: 12px !important;
+/* (Mantidos para os outros botões que você já usa) */
+.btn-primary{ background:rgba(33,243,141,.15); border-color:rgba(33,243,141,.35); color:#1cff80; font-weight:800 }
+.btnBuy{ background:linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10)); color:#1cff80; border:1px solid rgba(33,243,141,.35); font-weight:800 }
+.btnSell{ background:linear-gradient(180deg, rgba(255,76,76,.20), rgba(255,76,76,.08)); color:#ff6b6b; border:1px solid rgba(255,76,76,.35); font-weight:800 }
+
+/* Cartões/inputs do painel (mantidos) */
+.compactPanel { padding:12px !important }
+.compactRoot { font-size:13px }
+.compactTitle { font-size:15px; margin:0; font-weight:800 }
+.compactHeader { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px }
+.compactGrid { display:grid; grid-template-columns:1fr 1fr; gap:10px; height:100% }
+.colA,.colB{ display:flex; flex-direction:column; gap:8px; min-width:0 }
+.twoCols{ display:grid; grid-template-columns:1fr 1fr; gap:8px }
+.threeCols{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px }
+
+.lbl{ font-size:12px; color:rgba(255,255,255,.7); margin-bottom:2px }
+.xs{ font-size:11px }
+.muted.xs{ font-size:11px; color:rgba(255,255,255,.55) }
+.green{ color:#1cff80; font-weight:800 }
+
+.inp{
+  width:100%;
+  height:34px;
+  padding:0 10px;
+  border-radius:10px;
+  background:rgba(255,255,255,.03);
+  color:inherit;
+  border:1px solid rgba(255,255,255,.12);
 }
+.inp-disabled{ background:rgba(255,255,255,.08); cursor:not-allowed }
 
-/* 2) Alinhar o ícone de tela cheia (qualquer classe usada) ao nível da câmera do TradingView */
-.tvContainer{ position: relative !important; }  /* o contêiner do gráfico precisa ser relativo */
+.tickerRow{ display:flex; justify-content:space-between; align-items:center; padding:7px 9px; border:1px solid rgba(255,255,255,.12); border-radius:10px; background:rgba(255,255,255,.04) }
+.cardMini{ border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.04); border-radius:12px; padding:9px; display:flex; flex-direction:column; gap:8px }
+.cardTitle{ font-size:12px; font-weight:800 }
+.kpiGrid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px }
+.kpiCard{ border:1px solid rgba(255,255,255,.12); border-radius:12px; background:rgba(255,255,255,.04); padding:8px }
+.kpiLabel{ font-size:11px; color:rgba(255,255,255,.6) }
+.kpiValue{ font-size:14px; font-weight:800 }
+.posGrid{ display:grid; grid-template-columns:1fr 1fr; gap:8px }
 
-.tvContainer .chartFsBtn,
-.tvContainer .fsBtn{
-  position: absolute !important;
-  top: auto !important;
-  bottom: 12px !important;   /* mesma linha da câmera (ajuste fino: 11–13 se precisar) */
-  right: 48px !important;    /* ~1 cm à esquerda da câmera */
-  z-index: 6 !important;
+/* Histórico (mantido) */
+.historyCard{ flex:1; min-height:0; display:flex; flex-direction:column }
+.histWrap.fill{ flex:1; min-height:0; overflow-y:auto; display:grid; gap:6px; padding-right:4px }
+.histRow{ border:1px solid rgba(255,255,255,.10); border-radius:10px; padding:6px 8px; background:rgba(255,255,255,.03) }
 
-  width: 28px; height: 28px;
-  display: grid; place-items: center;
-  background: rgba(255,255,255,.12);
-  color: #e6e6e6;
-  border: 1px solid rgba(255,255,255,.25);
-  border-radius: 8px;
-  cursor: pointer;
-}
-.tvContainer .chartFsBtn:hover,
-.tvContainer .fsBtn:hover{
-  background: rgba(255,255,255,.18); color: #fff;
-}
-/* ==== OVERRIDES PONTUAIS (cole NO FIM de app/globals.css) ==== */
-
-/* 1) Esconde qualquer cabeçalho duplicado que não seja o último (mantém o verde) */
-.tradePanelShell .compactHeader:not(:last-of-type){
-  display: none !important;
-}
-
-/* 1.1) Força o “Voltar ao início” VISÍVEL a ficar VERDE e maior */
-.tradePanelShell .compactHeader:last-of-type a,
-.tradePanelShell .compactHeader:last-of-type button,
-.btn-goBack {
-  background: linear-gradient(180deg, rgba(33,243,141,.18), rgba(33,243,141,.08)) !important;
-  color: #1cff80 !important;
-  border: 1px solid rgba(33,243,141,.35) !important;
-  font-size: 14px !important;
-  padding: 12px 18px !important;
-  font-weight: 800 !important;
-  border-radius: 12px !important;
-}
-
-/* 2) Alinhar o ícone de tela cheia no MESMO nível da câmera do TradingView */
-.tvContainer { position: relative !important; }
-
-/* cobrimos as classes possíveis do seu botão custom: .chartFsBtn ou .fsBtn */
-.tvContainer .chartFsBtn,
-.tvContainer .fsBtn {
-  position: absolute !important;
-  bottom: 12px !important;   /* mesma linha da câmera; ajuste fino 11–13px se necessário */
-  right: 48px !important;    /* ~1 cm para a esquerda da câmera */
-  z-index: 6 !important;
-
-  width: 28px; height: 28px;
-  display: grid; place-items: center;
-  background: rgba(255,255,255,.12);
-  color: #e6e6e6;
-  border: 1px solid rgba(255,255,255,.25);
-  border-radius: 8px;
-  cursor: pointer;
-}
-.tvContainer .chartFsBtn:hover,
-.tvContainer .fsBtn:hover { background: rgba(255,255,255,.18); color: #fff; }
-/* ===== FIXES determinísticos por ID ===== */
-
-/* A. Alinhar o botão de tela cheia: mesmo nível da câmera, ~1cm ao lado */
-#tv-wrap { position: relative !important; }
-
-#tv-fs-btn {
-  position: absolute !important;
-  bottom: 12px !important;   /* alinhe com a linha da câmera; ajuste fino 10–14 se precisar */
-  right: 48px !important;    /* ~1 cm da câmera */
-  z-index: 6 !important;
-
-  width: 28px; height: 28px;
-  display: grid; place-items: center;
-  background: rgba(255,255,255,.12);
-  color: #e6e6e6;
-  border: 1px solid rgba(255,255,255,.25);
-  border-radius: 8px;
-  cursor: pointer;
-}
-#tv-fs-btn:hover { background: rgba(255,255,255,.18); color: #fff; }
-
-/* B. Manter só o header VERDE (o que tem id) e ocultar o duplicado */
-.compactHeader { /* o roxo/duplicado geralmente tem só essa classe */
-  /* nada aqui — deixamos padrão */
-}
-.compactHeader:not(#trade-header) {
-  display: none !important;              /* esconde o duplicado */
-}
-
-/* C. Deixar o “Voltar ao início” VERDE e maior (no header com id) */
-#trade-header a,
-#trade-header button {
-  background: linear-gradient(180deg, rgba(33,243,141,.18), rgba(33,243,141,.08)) !important;
-  color: #1cff80 !important;
-  border: 1px solid rgba(33,243,141,.35) !important;
-  font-size: 14px !important;
-  padding: 12px 18px !important;
-  font-weight: 800 !important;
-  border-radius: 12px !important;
+/* Acessibilidade */
+@media (prefers-reduced-motion:reduce){
+  .liveDot{ animation:none; left:100% }
 }
