@@ -169,3 +169,44 @@ body{
 .historyCard{ flex:1; min-height:0; display:flex; flex-direction:column }
 .histWrap.fill{ flex:1; min-height:0; overflow-y:auto; display:grid; gap:6px; padding-right:4px }
 .histRow{ border:1px solid rgba(255,255,255,.10); border-radius:10px; padding:6px 8px; background:rgba(255,255,255,.03) }
+/* ======= PATCH: alinhamento do botão Tela Cheia + esconder Histórico duplicado ======= */
+
+/* Alinhar o ícone de Tela Cheia com a câmera (mesma linha, ~1cm à esquerda) */
+section.panel > button[aria-label="Tela cheia"],
+.panel .chartFsBtn{
+  position: absolute !important;
+  /* a barra do TradingView fica a 0px do topo do chart; o ícone de câmera costuma
+     renderizar com ~6px de offset vertical. Usamos 6px para nivelar. */
+  top: 6px !important;
+  bottom: auto !important;
+  right: 44px !important;   /* ~1cm em muitos laptops */
+  transform: translateY(0) !important;
+  z-index: 6 !important;
+  width: 28px; height: 28px; line-height: 28px;
+  border-radius: 8px;
+  display: grid; place-items: center;
+  background: rgba(255,255,255,.12);
+  color: #e6e6e6;
+  border: 1px solid rgba(255,255,255,.25);
+  cursor: pointer;
+}
+section.panel > button[aria-label="Tela cheia"]:hover,
+.panel .chartFsBtn:hover{ background: rgba(255,255,255,.18); color:#fff }
+
+/* Esconder o HISTÓRICO “do meio”, manter só o último do painel */
+.panel .history-inline,
+.panel .histInline,
+.panel .historyCard-inline,
+.panel .histWrap:not(:last-of-type),
+.panel .cardMini.history,
+.panel .cardMini.is-history {
+  display: none !important;
+}
+
+/* Fallback genérico: se o “Histórico” do meio for um cardMini na primeira coluna,
+   esconda somente o PRIMEIRO card de histórico que aparecer antes do rodapé. */
+.compactGrid .colA .cardMini:nth-of-type(1){ display: none !important; }
+
+/* Mantém o Histórico final (rodapé) visível */
+.panel .histWrap:last-of-type,
+.panel .historyCard:last-of-type{ display: block !important; }
