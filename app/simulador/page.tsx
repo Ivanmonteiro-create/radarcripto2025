@@ -1,9 +1,12 @@
 'use client';
-
+import { useLayoutFixes } from './layout-fixes';
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-
+export default function PaginaDoSimulador() {
+  useLayoutFixes();   // <<< adicione esta linha
+  // ...resto do seu componente permanece igual...
+}
 // Gráfico (TradingView) sem SSR
 const TVChart = dynamic(() => import('@/components/TradingViewWidget'), { ssr: false });
 
