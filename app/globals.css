@@ -373,3 +373,21 @@ section.panel .colB > .historyCard,
 section.panel .historyCard.fill {
   display: block !important;
 }
+/* Força alinhamento do FS e oculta histórico do miolo (idempotente) */
+section.panel button[aria-label*="Tela cheia"],
+section.panel button[title*="Tela cheia"],
+section.panel .chartFsBtn {
+  position: absolute !important;
+  top: 8px !important;
+  right: 44px !important;
+  bottom: auto !important;
+  transform: none !important;
+  z-index: 6;
+}
+
+section.panel .compactGrid .histRow,
+section.panel .compactGrid .histWrap,
+section.panel .compactGrid .historyCard,
+section.panel .compactGrid .histCard {
+  display: none !important;
+}
