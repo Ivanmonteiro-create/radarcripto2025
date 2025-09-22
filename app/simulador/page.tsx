@@ -128,3 +128,57 @@ export default function SimuladorPage() {
     </main>
   );
 }
+// --- HOTFIX: alinhar FS e esconder histórico do miolo sem mexer na estrutura ---
+import { useEffect } from "react";
+
+function useHotfixLayout() {
+  useEffect(() => {
+    const fixFsBtn = () => {
+      const btn = document.querySelector(
+        'section.panel button[aria-label*="Tela cheia"], section.panel button[title*="Tela cheia"], section.panel .chartFsBtn'
+      ) as HTMLElement | null;
+      if (btn) {
+        btn.style.position = "absolute";
+        btn.style.top = "8px";
+        btn.style.right = "44px";
+        btn.style.bottom = "";      // remove posicionamento por bottom
+        btn.style.transform = "none";
+        btn.style.zIndex = "6";
+      }
+    };
+
+    const hideMidHistory = () => {
+      document
+        .querySelectorAll(
+          "section.panel .compactGrid .histRow, section.panel .compactGrid .histWrap, section.panel .compactGrid .historyCard, section.panel .compactGrid .histCard"
+        )
+        .forEach((el) => ((el as HTMLElement).style.display = "none"));
+    };
+
+    // roda agora e nas mudanças de layout
+    const runAll = () => {
+      fixFsBtn();
+      hideMidHistory();
+    };
+    runAll();
+
+    const obs = new MutationObserver(runAll);
+    obs.observe(document.body, {
+      subtree: true,
+      attributes: true,
+      childList: true,
+      attributeFilter: ["class", "style"],
+    });
+    window.addEventListener("resize", runAll);
+
+    return () => {
+      obs.disconnect();
+      window.removeEventListener("resize", runAll);
+    };
+  }, []);
+}
+
+export default function PaginaDoSimulador() {
+  useHotfixLayout();
+  // ... resto do seu componente exatamente como já está ...
+}
