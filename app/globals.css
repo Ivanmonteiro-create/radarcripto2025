@@ -345,3 +345,31 @@ section.panel .btn-primary {
   color: #1cff80 !important;
   border-color: rgba(33,243,141,.35) !important;
 }
+/* ===== HOTFIX ISOLADO (não altera estrutura) ===== */
+
+/* Botão de Tela Cheia: forçar alinhamento na MESMA LINHA da câmera */
+section.panel button[aria-label*="Tela cheia"],
+section.panel button[title*="Tela cheia"],
+section.panel .chartFsBtn {
+  position: absolute !important;
+  top: 8px !important;        /* mesma linha da barra do TV/câmera */
+  right: 44px !important;     /* ~1 cm da câmera */
+  bottom: auto !important;    /* neutraliza inline do componente */
+  transform: none !important;
+  z-index: 6;
+}
+
+/* Ocultar SOMENTE o “Histórico” do MIolo (dentro do grid compacto) */
+section.panel .compactGrid .histRow,
+section.panel .compactGrid .histWrap,
+section.panel .compactGrid .historyCard,
+section.panel .compactGrid .histCard {
+  display: none !important;
+}
+
+/* Garantir que o Histórico final (de baixo) continue visível */
+section.panel > .historyCard,
+section.panel .colB > .historyCard,
+section.panel .historyCard.fill {
+  display: block !important;
+}
