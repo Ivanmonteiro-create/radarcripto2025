@@ -226,3 +226,46 @@ section.panel button[aria-label*="Tela cheia"]{
 }
 
 .historyCard { margin-top: auto; } /* empurra para o final */
+/* ====== NO SCROLL em 100% zoom ====== */
+html, body { height: 100%; overflow: hidden; }  /* sem barras globais */
+
+/* Painéis do simulador ocupam a viewport inteira sem rolar */
+main { overflow: hidden; }
+.panel { overflow: hidden; }
+
+/* O grid dos controles não cria rolagem */
+.compactPanel { overflow: hidden; }
+.historyCard .histWrap { max-height: none; overflow: hidden; }
+
+/* Esconde qualquer barra residual (webkit/Firefox) */
+* { scrollbar-width: none; }
+*::-webkit-scrollbar { width: 0; height: 0; }
+
+/* ====== Botão de Tela Cheia – alinhar na MESMA linha da câmera ====== */
+section.panel button[aria-label*="Tela cheia"],
+section.panel button[title*="Tela cheia"],
+section.panel .chartFsBtn {
+  position: absolute !important;
+  top: 4px !important;      /* subimos um pouco (estava levemente abaixo) */
+  right: 44px !important;   /* ~1 cm da câmera */
+  bottom: auto !important;
+  transform: none !important;
+  z-index: 6 !important;
+  width: 28px; height: 28px; line-height: 28px;
+  border-radius: 8px;
+  display: grid; place-items: center;
+  background: rgba(255,255,255,.12);
+  color: #e6e6e6;
+  border: 1px solid rgba(255,255,255,.25);
+  cursor: pointer;
+}
+section.panel button[aria-label*="Tela cheia"]:hover,
+section.panel .chartFsBtn:hover { background: rgba(255,255,255,.18); color:#fff; }
+
+/* ====== Histórico ÚNICO só no rodapé ====== */
+.compactGrid .colA .historyCard,
+.compactGrid .colA .histWrap,
+.compactGrid .colA .histRow,
+.compactGrid .colA .cardMini.history,
+.compactGrid .colA .cardMini.is-history { display: none !important; }
+.historyCard { margin-top: auto; }
