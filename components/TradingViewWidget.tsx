@@ -1,8 +1,9 @@
 // components/TradingViewWidget.tsx
 "use client";
+
 import { useEffect, useRef } from "react";
 
-type Props = { symbol?: string }; // ex.: "BINANCE:BTCUSDT"
+type Props = { symbol?: string }; // Ex.: "BINANCE:BTCUSDT"
 
 export default function TradingViewWidget({ symbol = "BINANCE:BTCUSDT" }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -11,18 +12,16 @@ export default function TradingViewWidget({ symbol = "BINANCE:BTCUSDT" }: Props)
     const wrap = wrapRef.current;
     if (!wrap) return;
 
-    // limpa iframe anterior
+    // 🔄 Limpa iframe anterior antes de renderizar novo
     wrap.innerHTML = "";
 
-    // 🔑 parâmetros corretos para mostrar a BARRA LATERAL:
-    // - hide_side_toolbar = "false"   ← mostra as ferramentas (linhas, régua, etc.)
-    // - hide_top_toolbar  = "false"   ← mantém a barra superior (intervalos, indicadores)
+    // 🔑 Parâmetros do widget TradingView
     const params = new URLSearchParams({
       frameElementId: "tv_embed",
       symbol,
       interval: "60",
-      hide_side_toolbar: "false", // ✅ barra lateral visível
-      hide_top_toolbar: "false",
+      hide_side_toolbar: "false", // ✅ mostra barra lateral (ferramentas de desenho)
+      hide_top_toolbar: "false",  // ✅ mantém barra superior (intervalos, indicadores)
       allow_symbol_change: "1",
       saveimage: "0",
       hideideas: "1",
@@ -41,8 +40,19 @@ export default function TradingViewWidget({ symbol = "BINANCE:BTCUSDT" }: Props)
 
     wrap.appendChild(iframe);
 
-    return () => { if (wrap.contains(iframe)) wrap.removeChild(iframe); };
+    // 🔙 Cleanup
+    return () => {
+      if (wrap.contains(iframe)) wrap.removeChild(iframe);
+    };
   }, [symbol]);
 
-  return <div ref={wrapRef} style={{ width: "100%", height: "100%" }} />;
+  return (
+    <div
+      ref={wrapRef}
+      style={{
+        width: "100%",
+        height: "100%",
+      }}
+    />
+  );
 }
