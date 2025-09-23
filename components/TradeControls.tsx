@@ -1,37 +1,4 @@
-'use client';
-
-import React, { useMemo, useState } from 'react';
-
-type Props = {
-  symbol: string;
-  onSymbolChange: (s: string) => void;
-};
-
-export default function TradeControls({ symbol, onSymbolChange }: Props) {
-  // Estados principais (base B)
-  const [balance, setBalance] = useState<number>(10000);
-  const [riskPct, setRiskPct] = useState<number>(1);
-  const [tpPct, setTpPct] = useState<number | ''>('');
-  const [slPct, setSlPct] = useState<number | ''>('');
-  const [qtyRef, setQtyRef] = useState<number>(1000);
-
-  // Histórico ÚNICO
-  const [history, setHistory] = useState<
-    { side: 'BUY' | 'SELL'; symbol: string; price: number; ts: number }[]
-  >([]);
-
-  // Mock de preço “ao vivo” (placeholder — você pode conectar ao chart via evento)
-  const price = useMemo(() => 116823.69, []);
-
-  const sizeSuggestion = useMemo(
-    () => (balance * (riskPct / 100)).toFixed(4),
-    [balance, riskPct]
-  );
-
-  const handleBuy = () => {
-    setHistory((h) => [{ side: 'BUY', symbol, price, ts: Date.now() }, ...h]);
-  };
-  const handleSell = () => {
+ = () => {
     setHistory((h) => [{ side: 'SELL', symbol, price, ts: Date.now() }, ...h]);
   };
   const handleReset = () => {
