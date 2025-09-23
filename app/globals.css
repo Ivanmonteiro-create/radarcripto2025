@@ -421,3 +421,40 @@ section.panel .chartFsBtn:hover { background: rgba(255,255,255,.18); color:#fff;
 .compactGrid .colA .cardMini.history,
 .compactGrid .colA .cardMini.is-history { display: none !important; }
 .historyCard { margin-top: auto; }
+/* ==== Ajustes finos: subir conteúdo e ocupar o topo do painel ==== */
+.tradePanelShell { padding-top: 8px !important; }
+.compactHeader { margin-bottom: 6px !important; }
+.compactGrid   { align-content: start !important; }
+.cardMini      { margin-top: 0 !important; }
+
+/* ==== PARES RÁPIDOS (PA …) ==== */
+.pairsRow{
+  display: grid;
+  grid-auto-flow: column;
+  gap: 6px;
+  align-items: center;
+  justify-content: start;
+  overflow-x: auto; /* se ficar muita sigla em telas pequenas, rola só os chips */
+  padding-top: 4px;
+}
+.chip{
+  border: 1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.06);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.chip:hover{ background: rgba(255,255,255,.12); }
+.chip-active{
+  background: linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10));
+  border-color: rgba(33,243,141,.35);
+  color: #1cff80;
+  font-weight: 800;
+}
+
+/* micro-ajustes visuais para eliminar respiros */
+.twoCols{ gap: 8px !important; }
+.threeCols{ gap: 8px !important; }
