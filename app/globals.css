@@ -284,3 +284,44 @@ section.panel button[aria-label*="Tela cheia"]{
 .panel .historyCard .histRow{
   display: block !important;
 }
+/* ===== Cabeçalho do painel ===== */
+.tcHeader{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+.tcTitle{ font-size:20px; font-weight:900; margin:0 }
+.tcHeaderActions{ display:flex; align-items:center; gap:8px }
+
+/* Botão Tela Cheia (clássico) no início do cabeçalho */
+.chartFsBtn--header{
+  width:36px; height:36px; border-radius:10px; line-height:1;
+  display:grid; place-items:center; padding:0;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.18);
+  color:#e6e6e6;
+  margin-right:4px;  /* pequeno espaço antes do título */
+}
+.chartFsBtn--header:hover{ background:rgba(255,255,255,.14); color:#fff }
+
+/* Botão “Voltar ao início” com presença */
+.tcBackBtn{ padding:12px 16px; font-weight:800; border-radius:12px }
+
+/* Preenchimento confortável do painel */
+.tradePanelShell{ max-height:calc(100vh - 24px); overflow:auto }
+.compactGrid{ display:grid; grid-template-columns:minmax(280px,1fr) minmax(240px,1fr); gap:12px }
+.twoCols{ display:grid; grid-template-columns:1fr 1fr; gap:10px }
+.threeCols{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px }
+@media (max-width:1280px){ .threeCols{ grid-template-columns:1fr 1fr } }
+.cardMini{ display:flex; flex-direction:column; gap:8px }
+.inp{ height:36px; font-size:15px }
+.btn{ padding:10px 12px; border-radius:10px; font-size:15px }
+.btn.btnBuy,.btn.btnSell{ font-weight:800 }
+
+/* ===== Histórico: manter só o de baixo ===== */
+.panel .historyCard:not(:last-of-type),
+.panel .histWrap:not(:last-of-type),
+.panel .histRow:not(:last-of-type){ display:none!important; }
+
+/* Garante o último histórico visível */
+.panel .historyCard:last-of-type,
+.panel .historyCard:last-of-type .histWrap,
+.panel .historyCard:last-of-type .histRow{ display:block!important; }
