@@ -5,25 +5,20 @@ import React, { useMemo, useState } from 'react';
 type Props = {
   symbol: string;
   onSymbolChange: (s: string) => void;
-  onFullscreen?: () => void; // <-- NOVO: deixa o botão FS opcional
+  onFullscreen?: () => void;
 };
 
 export default function TradeControls({ symbol, onSymbolChange, onFullscreen }: Props) {
-  // Estados principais (base B)
   const [balance, setBalance] = useState<number>(10000);
   const [riskPct, setRiskPct] = useState<number>(1);
   const [tpPct, setTpPct] = useState<number | ''>('');
   const [slPct, setSlPct] = useState<number | ''>('');
   const [qtyRef, setQtyRef] = useState<number>(1000);
-
-  // Histórico ÚNICO
   const [history, setHistory] = useState<
     { side: 'BUY' | 'SELL'; symbol: string; price: number; ts: number }[]
   >([]);
 
-  // Mock de preço “ao vivo” (placeholder)
   const price = useMemo(() => 116823.69, []);
-
   const sizeSuggestion = useMemo(
     () => (balance * (riskPct / 100)).toFixed(4),
     [balance, riskPct]
@@ -43,30 +38,27 @@ export default function TradeControls({ symbol, onSymbolChange, onFullscreen }: 
     <div
       className="panel compactPanel compactRoot tradePanelShell"
       style={{
-        position: 'relative',
         display: 'flex',
         flexDirection: 'column',
-        /* Mantém tudo visível; se faltar espaço, rola apenas o painel */
-        maxHeight: 'calc(100vh - 24px)',
-        overflow: 'auto',
+        justifyContent: 'space-between',
+        height: '100%',
+        paddingTop: 8,
       }}
     >
-      {/* ===== Cabeçalho (título + botão FS opcional) ===== */}
+      {/* ===== Título + Botão FS ===== */}
       <div
         className="compactHeader"
         style={{
-          marginBottom: 10,
+          marginBottom: 8,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: 8,
         }}
       >
         <h3 className="compactTitle" style={{ margin: 0 }}>
           Controles de Trade
         </h3>
 
-        {/* Botão de Tela Cheia só aparece se a prop existir */}
         {onFullscreen && (
           <button
             type="button"
@@ -74,36 +66,13 @@ export default function TradeControls({ symbol, onSymbolChange, onFullscreen }: 
             aria-label="Tela cheia"
             title="Tela cheia (F) / Sair (X)"
             className="chartFsBtn"
-            style={{
-              position: 'relative',
-              top: 0,
-              right: 0,
-              width: 28,
-              height: 28,
-              lineHeight: '28px',
-              borderRadius: 8,
-              display: 'grid',
-              placeItems: 'center',
-              background: 'rgba(255,255,255,.12)',
-              color: '#e6e6e6',
-              border: '1px solid rgba(255,255,255,.25)',
-              cursor: 'pointer',
-            }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d="M9 3H3v6M15 3h6v6M9 21H3v-6M15 21h6v-6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            ⛶
           </button>
         )}
       </div>
 
-      {/* Faixa superior (Preço / Equity / PnL / Par) */}
+      {/* ===== Faixa Preço / Equity / PnL / Par ===== */}
       <div className="cardMini" style={{ marginBottom: 10 }}>
         <div className="twoCols">
           <div>
@@ -140,9 +109,15 @@ export default function TradeControls({ symbol, onSymbolChange, onFullscreen }: 
         </div>
       </div>
 
-      {/* Grid principal */}
-      <div className="compactGrid">
-        {/* COLUNA A */}
+      {/* ===== Botão Voltar ao início ===== */}
+      <div style={{ marginBottom: 10 }}>
+        <a href="/" className="btn btn-goBack" style={{ width: '100%' }}>
+          Voltar ao início
+        </a>
+      </div>
+
+      {/* ===== Controles principais ===== */}
+      <div className="compactGrid" style={{ flexGrow: 1 }}>
         <div className="colA">
           {/* TP / SL */}
           <div className="twoCols">
@@ -219,7 +194,7 @@ export default function TradeControls({ symbol, onSymbolChange, onFullscreen }: 
             </div>
           </div>
 
-          {/* Ações */}
+          {/* Botões Comprar/Vender */}
           <div className="twoCols">
             <button className="btn btnBuy" onClick={handleBuy}>
               Comprar
@@ -232,24 +207,21 @@ export default function TradeControls({ symbol, onSymbolChange, onFullscreen }: 
             Resetar
           </button>
         </div>
+      </div>
 
-        {/* COLUNA B */}
-        <div className="colB">
-          {/* Histórico ÚNICO */}
-          <div className="cardMini historyCard" style={{ minHeight: 0 }}>
-            <div className="cardTitle">Histórico</div>
-            <div className="histWrap">
-              {history.length === 0 && (
-                <div className="histRow">Sem operações ainda.</div>
-              )}
-              {history.map((h, i) => (
-                <div className="histRow" key={i}>
-                  {new Date(h.ts).toLocaleString('pt-BR')} — {h.side} {h.symbol} @{' '}
-                  {h.price.toLocaleString('pt-BR')}
-                </div>
-              ))}
+      {/* ===== Histórico vai para o rodapé ===== */}
+      <div className="cardMini historyCard" style={{ marginTop: 12 }}>
+        <div className="cardTitle">Histórico</div>
+        <div className="histWrap">
+          {history.length === 0 && (
+            <div className="histRow">Sem operações ainda.</div>
+          )}
+          {history.map((h, i) => (
+            <div className="histRow" key={i}>
+              {new Date(h.ts).toLocaleString('pt-BR')} — {h.side} {h.symbol} @{' '}
+              {h.price.toLocaleString('pt-BR')}
             </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>
