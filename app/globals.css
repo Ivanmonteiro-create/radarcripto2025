@@ -165,3 +165,13 @@ section.panel .historyCard:last-of-type,
 section.panel .histWrap:last-of-type {
   display: block !important;
 }
+/* FS: alinhar com a câmera (mesma linha) */
+section.panel .chartFsBtn,
+section.panel button[aria-label*="Tela cheia"]{
+  position: absolute !important;
+  bottom: 44px !important;   /* <<< alinha pela base, mesma linha da câmera */
+  top: auto !important;
+  right: 44px !important;    /* ~1 cm da câmera */
+  transform: none !important;
+  z-index: 6 !important;
+}
