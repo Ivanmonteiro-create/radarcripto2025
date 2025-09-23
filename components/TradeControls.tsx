@@ -8,21 +8,19 @@ type Props = {
 };
 
 export default function TradeControls({ symbol, onSymbolChange }: Props) {
-  // Estados principais
   const [balance, setBalance] = useState<number>(10000);
   const [riskPct, setRiskPct] = useState<number>(1);
   const [tpPct, setTpPct] = useState<number | ''>('');
   const [slPct, setSlPct] = useState<number | ''>('');
   const [qtyRef, setQtyRef] = useState<number>(1000);
 
-  // Histórico ÚNICO
+  // Histórico único
   const [history, setHistory] = useState<
     { side: 'BUY' | 'SELL'; symbol: string; price: number; ts: number }[]
   >([]);
 
-  // Mock de preço “ao vivo”
+  // Mock de preço
   const price = useMemo(() => 116823.69, []);
-
   const sizeSuggestion = useMemo(
     () => (balance * (riskPct / 100)).toFixed(4),
     [balance, riskPct]
@@ -40,55 +38,57 @@ export default function TradeControls({ symbol, onSymbolChange }: Props) {
     <div
       className="compactPanel compactRoot"
       style={{
-        position: 'relative',
         display: 'flex',
         flexDirection: 'column',
+        justifyContent: 'space-between',
         gap: 12,
-        maxHeight: 'calc(100vh - 110px)', // deixa sobrar só o necessário
-        overflow: 'auto',
+        height: '100%', // ocupa altura total do painel
       }}
     >
-      {/* Faixa superior (Preço / Equity / PnL / Par) */}
-      <div className="cardMini">
-        <div className="twoCols">
-          <div>
-            <div className="lbl">Preço</div>
-            <div className="green">{price.toLocaleString('pt-BR')}</div>
+      {/* Conteúdo principal (colA e colB sem histórico) */}
+      <div className="compactGrid" style={{ flex: 1 }}>
+        {/* COLUNA A — centralizada */}
+        <div
+          className="colA"
+          style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 12 }}
+        >
+          {/* Faixa superior */}
+          <div className="cardMini">
+            <div className="twoCols">
+              <div>
+                <div className="lbl">Preço</div>
+                <div className="green">{price.toLocaleString('pt-BR')}</div>
+              </div>
+              <div>
+                <div className="lbl">Equity</div>
+                <div>10000.00 USDT</div>
+              </div>
+            </div>
+            <div className="twoCols">
+              <div>
+                <div className="lbl">PNL flutuante</div>
+                <div>0.00 USDT (0.00%)</div>
+              </div>
+              <div>
+                <div className="lbl">Par</div>
+                <select
+                  className="inp"
+                  value={symbol}
+                  onChange={(e) => onSymbolChange(e.target.value)}
+                >
+                  <option>BTCUSDT</option>
+                  <option>ETHUSDT</option>
+                  <option>SOLUSDT</option>
+                  <option>BNBUSDT</option>
+                  <option>XRPUSDT</option>
+                  <option>ADAUSDT</option>
+                  <option>LINKUSDT</option>
+                  <option>DOGEUSDT</option>
+                </select>
+              </div>
+            </div>
           </div>
-          <div>
-            <div className="lbl">Equity</div>
-            <div>10000.00 USDT</div>
-          </div>
-        </div>
-        <div className="twoCols">
-          <div>
-            <div className="lbl">PNL flutuante</div>
-            <div>0.00 USDT (0.00%)</div>
-          </div>
-          <div>
-            <div className="lbl">Par</div>
-            <select
-              className="inp"
-              value={symbol}
-              onChange={(e) => onSymbolChange(e.target.value)}
-            >
-              <option>BTCUSDT</option>
-              <option>ETHUSDT</option>
-              <option>SOLUSDT</option>
-              <option>BNBUSDT</option>
-              <option>XRPUSDT</option>
-              <option>ADAUSDT</option>
-              <option>LINKUSDT</option>
-              <option>DOGEUSDT</option>
-            </select>
-          </div>
-        </div>
-      </div>
 
-      {/* Grid principal */}
-      <div className="compactGrid">
-        {/* COLUNA A */}
-        <div className="colA">
           {/* TP / SL */}
           <div className="twoCols">
             <div className="cardMini">
@@ -178,23 +178,23 @@ export default function TradeControls({ symbol, onSymbolChange }: Props) {
           </button>
         </div>
 
-        {/* COLUNA B */}
-        <div className="colB">
-          {/* Histórico ÚNICO */}
-          <div className="cardMini historyCard" style={{ minHeight: 0 }}>
-            <div className="cardTitle">Histórico</div>
-            <div className="histWrap">
-              {history.length === 0 && (
-                <div className="histRow">Sem operações ainda.</div>
-              )}
-              {history.map((h, i) => (
-                <div className="histRow" key={i}>
-                  {new Date(h.ts).toLocaleString('pt-BR')} — {h.side} {h.symbol} @{' '}
-                  {h.price.toLocaleString('pt-BR')}
-                </div>
-              ))}
+        {/* COLUNA B (vazia, usada só para alinhar o grid) */}
+        <div className="colB" />
+      </div>
+
+      {/* Histórico ÚNICO no rodapé */}
+      <div className="cardMini historyCard" style={{ flexShrink: 0 }}>
+        <div className="cardTitle">Histórico</div>
+        <div className="histWrap">
+          {history.length === 0 && (
+            <div className="histRow">Sem operações ainda.</div>
+          )}
+          {history.map((h, i) => (
+            <div className="histRow" key={i}>
+              {new Date(h.ts).toLocaleString('pt-BR')} — {h.side} {h.symbol} @{' '}
+              {h.price.toLocaleString('pt-BR')}
             </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>
