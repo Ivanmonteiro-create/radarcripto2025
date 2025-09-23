@@ -1,90 +1,80 @@
 'use client';
 
+import Link from 'next/link';
 import React, { useMemo, useState } from 'react';
 
 type Props = {
   symbol: string;
   onSymbolChange: (s: string) => void;
+  onFullscreen?: () => void; // novo: aciona FS do chart
 };
 
-export default function TradeControls({ symbol, onSymbolChange }: Props) {
+export default function TradeControls({ symbol, onSymbolChange, onFullscreen }: Props) {
+  /* Base B */
   const [balance, setBalance] = useState<number>(10000);
   const [riskPct, setRiskPct] = useState<number>(1);
   const [tpPct, setTpPct] = useState<number | ''>('');
   const [slPct, setSlPct] = useState<number | ''>('');
   const [qtyRef, setQtyRef] = useState<number>(1000);
-
   const [history, setHistory] = useState<
     { side: 'BUY' | 'SELL'; symbol: string; price: number; ts: number }[]
   >([]);
 
-  const price = useMemo(() => 116823.69, []);
-  const sizeSuggestion = useMemo(
-    () => (balance * (riskPct / 100)).toFixed(4),
-    [balance, riskPct]
-  );
+  // Mock de preço (pode ligar ao gráfico depois)
+  const price = useMemo(() => 112843.69, []);
+  const sizeSuggestion = useMemo(() => (balance * (riskPct / 100)).toFixed(4), [balance, riskPct]);
 
-  const handleBuy  = () => setHistory(h => [{ side:'BUY',  symbol, price, ts:Date.now() }, ...h]);
-  const handleSell = () => setHistory(h => [{ side:'SELL', symbol, price, ts:Date.now() }, ...h]);
+  const handleBuy = () => setHistory(h => [{ side: 'BUY', symbol, price, ts: Date.now() }, ...h]);
+  const handleSell = () => setHistory(h => [{ side: 'SELL', symbol, price, ts: Date.now() }, ...h]);
   const handleReset = () => setHistory([]);
 
   return (
-    <div
-      className="compactPanel compactRoot"
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        gap: 12,
-        height: '100%',
-        overflow: 'hidden',      // sem rolagem aqui
-      }}
-    >
-      {/* GRID PRINCIPAL (centralizado) */}
-      <div className="compactGrid" style={{ flex: 1, minHeight: 0, alignItems: 'center' }}>
-        {/* COLUNA A */}
-        <div
-          className="colA"
-          style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 12 }}
+    <div className="tcShell">
+      {/* Cabeçalho em LINHA + botão Tela Cheia no canto direito */}
+      <header className="tcHeader">
+        <h3>Controles de Trade</h3>
+        <button
+          type="button"
+          aria-label="Tela cheia"
+          title="Tela cheia (F) / Sair (X)"
+          className="fsBtn"
+          onClick={onFullscreen}
         >
-          {/* Faixa superior */}
-          <div className="cardMini">
-            <div className="twoCols">
-              <div>
-                <div className="lbl">Preço</div>
-                <div className="green">{price.toLocaleString('pt-BR')}</div>
-              </div>
-              <div>
-                <div className="lbl">Equity</div>
-                <div>10000.00 USDT</div>
-              </div>
-            </div>
-            <div className="twoCols">
-              <div>
-                <div className="lbl">PNL flutuante</div>
-                <div>0.00 USDT (0.00%)</div>
-              </div>
-              <div>
-                <div className="lbl">Par</div>
-                <select
-                  className="inp"
-                  value={symbol}
-                  onChange={(e) => onSymbolChange(e.target.value)}
-                >
-                  <option>BTCUSDT</option>
-                  <option>ETHUSDT</option>
-                  <option>SOLUSDT</option>
-                  <option>BNBUSDT</option>
-                  <option>XRPUSDT</option>
-                  <option>ADAUSDT</option>
-                  <option>LINKUSDT</option>
-                  <option>DOGEUSDT</option>
-                </select>
-              </div>
-            </div>
-          </div>
+          {/* ícone tradicional: “open/close” cantos */}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M9 3H3v6M15 3h6v6M9 21H3v-6M15 21h6v-6"
+              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+      </header>
 
-          {/* TP / SL */}
+      {/* Métricas + Voltar ao início (desce para esta faixa) */}
+      <div className="cardMini">
+        <div className="twoCols">
+          <div>
+            <div className="lbl">Preço</div>
+            <div className="green">{price.toLocaleString('pt-BR')}</div>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Link href="/" className="btn btn-primary bigGoBack">Voltar ao início</Link>
+          </div>
+        </div>
+        <div className="twoCols">
+          <div>
+            <div className="lbl">Equity</div>
+            <div>10000.00 USDT</div>
+          </div>
+          <div>
+            <div className="lbl">PNL flutuante</div>
+            <div>0.00 USDT (0.00%)</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Grade principal (sem scroll lateral/vertical no painel) */}
+      <div className="compactGrid">
+        {/* COL A */}
+        <div className="colA">
           <div className="twoCols">
             <div className="cardMini">
               <div className="cardTitle">Take Profit (%)</div>
@@ -114,44 +104,33 @@ export default function TradeControls({ symbol, onSymbolChange }: Props) {
             </div>
           </div>
 
-          {/* Saldo / Risco / USDT ref */}
           <div className="threeCols">
             <div className="cardMini">
               <div className="cardTitle">Saldo (USDT)</div>
               <input
-                className="inp"
-                type="number"
-                min={0}
-                value={balance}
-                onChange={(e) => setBalance(Number(e.target.value))}
+                className="inp" type="number" min={0}
+                value={balance} onChange={(e) => setBalance(Number(e.target.value))}
               />
               <div className="xs muted">Equity simulado total</div>
             </div>
             <div className="cardMini">
               <div className="cardTitle">Risco por trade (%)</div>
               <input
-                className="inp"
-                type="number"
-                min={0}
-                value={riskPct}
-                onChange={(e) => setRiskPct(Number(e.target.value))}
+                className="inp" type="number" min={0}
+                value={riskPct} onChange={(e) => setRiskPct(Number(e.target.value))}
               />
               <div className="xs muted">Tamanho sug.: {sizeSuggestion}</div>
             </div>
             <div className="cardMini">
               <div className="cardTitle">USDT p/ referência</div>
               <input
-                className="inp"
-                type="number"
-                min={0}
-                value={qtyRef}
-                onChange={(e) => setQtyRef(Number(e.target.value))}
+                className="inp" type="number" min={0}
+                value={qtyRef} onChange={(e) => setQtyRef(Number(e.target.value))}
               />
               <div className="xs muted">Usado só como fallback p/ qty</div>
             </div>
           </div>
 
-          {/* Ações */}
           <div className="twoCols">
             <button className="btn btnBuy" onClick={handleBuy}>Comprar</button>
             <button className="btn btnSell" onClick={handleSell}>Vender</button>
@@ -159,20 +138,37 @@ export default function TradeControls({ symbol, onSymbolChange }: Props) {
           <button className="btn" onClick={handleReset}>Resetar</button>
         </div>
 
-        {/* COLUNA B vazia (mantém grid equilibrado) */}
-        <div className="colB" />
-      </div>
+        {/* COL B */}
+        <div className="colB">
+          <div className="cardMini">
+            <div className="cardTitle">Par</div>
+            <select className="inp" value={symbol} onChange={(e) => onSymbolChange(e.target.value)}>
+              <option>BTCUSDT</option>
+              <option>ETHUSDT</option>
+              <option>SOLUSDT</option>
+              <option>BNBUSDT</option>
+              <option>XRPUSDT</option>
+              <option>ADAUSDT</option>
+              <option>LINKUSDT</option>
+              <option>DOGEUSDT</option>
+            </select>
+          </div>
 
-      {/* Histórico único no rodapé (sem rolagem) */}
-      <div className="cardMini historyCard" style={{ flexShrink: 0 }}>
-        <div className="cardTitle">Histórico</div>
-        <div className="histWrap" style={{ maxHeight: 'none', overflow: 'hidden' }}>
-          {history.length === 0 && <div className="histRow">Sem operações ainda.</div>}
-          {history.map((h, i) => (
-            <div className="histRow" key={i}>
-              {new Date(h.ts).toLocaleString('pt-BR')} — {h.side} {h.symbol} @ {h.price.toLocaleString('pt-BR')}
+          {/* Histórico ÚNICO (sempre no rodapé) */}
+          <div className="cardMini historyCard fill">
+            <div className="cardTitle">Histórico</div>
+            <div className="histWrap fill">
+              {history.length === 0 && (
+                <div className="histRow muted xs">Sem operações ainda.</div>
+              )}
+              {history.map((h, i) => (
+                <div className="histRow" key={i}>
+                  {new Date(h.ts).toLocaleString('pt-BR')} — {h.side} {h.symbol} @{' '}
+                  {h.price.toLocaleString('pt-BR')}
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
       </div>
     </div>
