@@ -1,16 +1,13 @@
 'use client';
-import { useLayoutFixes } from './layout-fixes';
+
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-export default function PaginaDoSimulador() {
-  useLayoutFixes();   // <<< adicione esta linha
-  // ...resto do seu componente permanece igual...
-}
+
 // Gráfico (TradingView) sem SSR
 const TVChart = dynamic(() => import('@/components/TradingViewWidget'), { ssr: false });
 
-// Painel de controles (sem cabeçalho/rodapé/Histórico internos)
+// Painel de controles
 import TradeControls from '@/components/TradeControls';
 
 export default function SimuladorPage() {
@@ -70,10 +67,6 @@ export default function SimuladorPage() {
           title="Tela cheia (F) / Sair (X)"
           onClick={toggleFs}
           className="chartFsBtn"
-          style={{
-            bottom: 0,     // ↓ baixei para alinhar pela base da barra do TV
-            right: 56      // distância lateral para a câmera (~1–2 cm visuais)
-          }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M9 3H3v6M15 3h6v6M9 21H3v-6M15 21h6v-6"
@@ -102,12 +95,12 @@ export default function SimuladorPage() {
           }}
         >
           <h2 style={{ fontSize: 20, fontWeight: 900, margin: 0 }}>Controles de Trade</h2>
-          <Link href="/" className="btn btn-primary" style={{ padding: '10px 14px', borderRadius: 10 }}>
+          <Link href="/" className="btn btn-primary btn-green" style={{ padding: '10px 14px', borderRadius: 10 }}>
             Voltar ao início
           </Link>
         </header>
 
-        {/* Controles (sem títulos/rodapés/Histórico duplicados) */}
+        {/* Controles (mantém seu componente original) */}
         <div className="tcRoot">
           <TradeControls symbol={symbol} onSymbolChange={onSymbolChange} />
         </div>
@@ -120,68 +113,53 @@ export default function SimuladorPage() {
           </div>
         </div>
 
-        {/* Ajustes finos locais para legibilidade (mantém tudo o resto igual) */}
+        {/* Ajustes finos locais (sem alterar sua estrutura) */}
         <style jsx global>{`
+          /* 1) Alinhar o botão de Tela Cheia à câmera (mesma linha, ~1–2cm) */
+          section.panel button.chartFsBtn {
+            position: absolute !important;
+            top: 8px !important;     /* mesma linha do header do TV */
+            right: 44px !important;  /* afastado ~1–2cm do botão da câmera */
+            bottom: auto !important;
+            transform: none !important;
+            z-index: 6;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: rgba(0,0,0,.35);
+            border: 1px solid rgba(255,255,255,.08);
+            color: #fff;
+            cursor: pointer;
+          }
+
+          /* 2) Esconder qualquer "Histórico" duplicado que apareça no miolo do painel */
+          section.panel .compactGrid .histRow,
+          section.panel .compactGrid .histWrap,
+          section.panel .compactGrid .historyCard,
+          section.panel .compactGrid .histCard {
+            display: none !important;
+          }
+
+          /* 3) Botões do TradeControls um pouco maiores */
           .tcRoot .btn { font-size: 15px; padding: 10px 12px; border-radius: 10px; }
           .tcRoot .btn.btnBuy, .tcRoot .btn.btnSell { font-weight: 800; }
           .tcRoot .inp { height: 36px; font-size: 15px; }
           .tcRoot .cardMini .cardTitle { font-size: 13px; }
+
+          /* 4) Forçar verde no "Voltar ao início" (caso algum tema tente trocar) */
+          .btn-green {
+            background: #12b886 !important;   /* verde */
+            color: #0b1f17 !important;
+            border-color: rgba(16,185,129,.35) !important;
+          }
+          .btn-green:hover {
+            filter: brightness(1.05);
+          }
         `}</style>
       </aside>
     </main>
   );
-}
-// --- HOTFIX: alinhar FS e esconder histórico do miolo sem mexer na estrutura ---
-import { useEffect } from "react";
-
-function useHotfixLayout() {
-  useEffect(() => {
-    const fixFsBtn = () => {
-      const btn = document.querySelector(
-        'section.panel button[aria-label*="Tela cheia"], section.panel button[title*="Tela cheia"], section.panel .chartFsBtn'
-      ) as HTMLElement | null;
-      if (btn) {
-        btn.style.position = "absolute";
-        btn.style.top = "8px";
-        btn.style.right = "44px";
-        btn.style.bottom = "";      // remove posicionamento por bottom
-        btn.style.transform = "none";
-        btn.style.zIndex = "6";
-      }
-    };
-
-    const hideMidHistory = () => {
-      document
-        .querySelectorAll(
-          "section.panel .compactGrid .histRow, section.panel .compactGrid .histWrap, section.panel .compactGrid .historyCard, section.panel .compactGrid .histCard"
-        )
-        .forEach((el) => ((el as HTMLElement).style.display = "none"));
-    };
-
-    // roda agora e nas mudanças de layout
-    const runAll = () => {
-      fixFsBtn();
-      hideMidHistory();
-    };
-    runAll();
-
-    const obs = new MutationObserver(runAll);
-    obs.observe(document.body, {
-      subtree: true,
-      attributes: true,
-      childList: true,
-      attributeFilter: ["class", "style"],
-    });
-    window.addEventListener("resize", runAll);
-
-    return () => {
-      obs.disconnect();
-      window.removeEventListener("resize", runAll);
-    };
-  }, []);
-}
-
-export default function PaginaDoSimulador() {
-  useHotfixLayout();
-  // ... resto do seu componente exatamente como já está ...
 }
