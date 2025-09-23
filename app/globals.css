@@ -1,8 +1,3 @@
-/* ===============================
-   app/globals.css  (Opção B consolidada)
-   =============================== */
-
-/* ---- Tokens ---- */
 :root{
   --bg:#0a0f0d;
   --panel:#0f1513;
@@ -15,7 +10,6 @@
 
 *{ box-sizing:border-box }
 html,body{ height:100% }
-
 body{
   margin:0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
@@ -27,22 +21,6 @@ body{
   background-size:60px 60px;
 }
 
-/* ===== Layout (home) ===== */
-.wrapper{
-  display:grid;
-  grid-template-columns:300px 1fr 200px;
-  gap:16px;
-  min-height:100dvh;
-  padding:16px;
-  align-items:start;
-}
-@media (max-width:1100px){
-  .wrapper{ grid-template-columns:1fr }
-  .rightMenu{ position:static }
-  .leftPanel{ order:2 }
-}
-
-/* Painéis */
 .panel{
   position:relative;
   background:radial-gradient(1200px 1200px at -10% -10%, rgba(33,243,141,.06), transparent 40%), var(--panel);
@@ -51,64 +29,51 @@ body{
   padding:14px;
 }
 
-/* ===== Tickers (coluna esquerda) ===== */
-.tickers{ display:grid; grid-template-columns:1fr; gap:10px }
-.tickerCard{
-  background:rgba(255,255,255,.02);
-  border:1px solid rgba(255,255,255,.06);
-  border-radius:12px;
-  padding:10px 12px;
+/* ===== SIMULADOR ===== */
+
+.tradePanel{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  /* sem rolagem no painel */
+  max-height:calc(100dvh - 32px);
+  overflow:hidden;
 }
-.tickerSymbol{ color:var(--text); font-size:14px; letter-spacing:.08em; text-transform:uppercase; font-weight:800 }
-.tickerSymbol.strong{ font-size:16px }
-.tickerPrice{ font-weight:700; font-size:18px; opacity:.95 }
-.tickerPrice.green{ color:var(--accent-strong); filter:drop-shadow(0 0 6px rgba(33,243,141,.25)) }
 
-/* ===== Hero (centro) ===== */
-.hero{ height:100%; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden }
-.heroInner{ width:min(940px,95%); text-align:center }
-.heroTag{ color:var(--muted); letter-spacing:.15em; font-size:12px; text-transform:uppercase }
-.heroTitle{ font-size:clamp(26px,4.5vw,56px); line-height:1.06; margin:8px 0 12px; font-weight:800 }
-.heroSubtitle{ color:#c9eedc; opacity:.9; max-width:700px; margin:0 auto 22px }
-.liveLineWrap{ position:relative; height:64px; margin:18px auto 4px; width:min(720px,100%) }
-.liveLine{ position:absolute; inset:0; border-radius:999px; background:linear-gradient(90deg,transparent,var(--accent),transparent); filter:drop-shadow(0 0 10px var(--accent)); opacity:.8 }
-.liveDot{ position:absolute; top:50%; width:10px; height:10px; background:var(--accent-strong); border-radius:999px; transform:translate(-50%,-50%); filter:drop-shadow(0 0 10px var(--accent-strong)); animation:run 2.2s linear infinite }
-@keyframes run{ from{left:0%} to{left:100%} }
-@media (prefers-reduced-motion:reduce){ .liveDot{ animation:none; left:100% } }
-
-/* ===== Menu direito (home) ===== */
-.rightMenu{ position:sticky; top:16px; height:fit-content }
-.menuList{ display:grid; gap:8px }
-.menuBtn{
-  display:block; text-decoration:none; color:var(--text);
-  background:rgba(255,255,255,.03);
-  border:1px solid rgba(255,255,255,.06);
-  padding:10px 12px; border-radius:12px; text-align:center; font-weight:600;
-  font-size:14px; /* maior, como antes */
+/* Cabeçalho em linha + FS no canto */
+.tcShell{ display:flex; flex-direction:column; gap:12px; height:100% }
+.tcHeader{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:2px 2px 0 2px;
 }
-.menuBtn.active{ outline:2px solid var(--accent); box-shadow:0 0 0 4px rgba(33,243,141,.12) inset; color:var(--accent-strong) }
+.tcHeader h3{ margin:0; font-size:20px; font-weight:900 }
+.fsBtn{
+  width:30px; height:30px; border-radius:8px;
+  display:grid; place-items:center;
+  background:rgba(255,255,255,.12);
+  color:#e6e6e6; border:1px solid rgba(255,255,255,.25);
+  cursor:pointer;
+}
+.fsBtn:hover{ background:rgba(255,255,255,.18); color:#fff }
 
-/* Utilidades */
-.muted{ color:var(--muted) }
-.small{ font-size:12px }
+.bigGoBack{
+  padding:10px 14px; border-radius:12px; font-weight:800;
+  background:linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10));
+  border:1px solid rgba(33,243,141,.35);
+  color:var(--accent-strong);
+}
 
-/* =========================================================
-   SIMULADOR — ajustes visuais (sem alterar JSX)
-   ========================================================= */
-
-/* Painel compacto */
-.compactPanel { padding:12px !important }
-.compactRoot { font-size:13px }
-.compactTitle { font-size:15px; margin:0; font-weight:800 }
-.compactHeader { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px }
-.compactGrid { display:grid; grid-template-columns:1fr 1fr; gap:10px; height:100% }
+.compactGrid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; height:100% }
 .colA,.colB{ display:flex; flex-direction:column; gap:8px; min-width:0 }
+.cardMini{
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:12px; padding:10px;
+}
+.cardTitle{ font-weight:700; font-size:13px; margin-bottom:6px }
 .twoCols{ display:grid; grid-template-columns:1fr 1fr; gap:8px }
-.threeCols{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px }
-
-.lbl{ font-size:12px; color:rgba(255,255,255,.7); margin-bottom:2px }
-.xs{ font-size:11px }
-.muted.xs{ font-size:11px; color:rgba(255,255,255,.55) }
+.threeCols{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px }
+.lbl{ font-size:12px; color:rgba(255,255,255,.7) }
 .green{ color:#1cff80; font-weight:800 }
 
 .inp{
@@ -116,156 +81,24 @@ body{
   border-radius:10px; background:rgba(255,255,255,.03);
   color:inherit; border:1px solid rgba(255,255,255,.12);
 }
-.inp-disabled{ background:rgba(255,255,255,.08); cursor:not-allowed }
 
 .btn{ border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.06); border-radius:10px; color:inherit; }
 .btn:hover{ background:rgba(255,255,255,.12) }
-.btn-xs{ padding:7px 9px; font-size:12px; border-radius:10px }
-.btn-primary{ background:rgba(33,243,141,.15); border-color:rgba(33,243,141,.35); color:#1cff80; font-weight:800 }
 .btnBuy{ background:linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10)); color:#1cff80; border:1px solid rgba(33,243,141,.35); font-weight:800 }
-.btnSell{ background:linear-gradient(180deg, rgba(255,76,76,.20), rgba(255,76,76,.08)); color:#ff6b6b; border:1px solid rgba(255,255,255,.35); font-weight:800 }
+.btnSell{ background:linear-gradient(180deg, rgba(255,76,76,.20), rgba(255,76,76,.08)); color:#ff6b6b; border:1px solid rgba(255,76,76,.35); font-weight:800 }
 
-/* === Voltar ao início (verde, maior) === */
-.panel .compactHeader .btn{
-  background:linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10)) !important;
-  border-color:rgba(33,243,141,.35) !important;
-  color:var(--accent-strong) !important;
-  box-shadow:0 0 0 2px rgba(33,243,141,.15) inset !important;
-  font-size:14px !important;
-  padding:12px 18px !important;
-}
+/* Histórico só no rodapé; rolável interno (não o painel) */
+.historyCard.fill{ flex:1; min-height:0; display:flex; flex-direction:column }
+.histWrap.fill{ flex:1; min-height:0; overflow:auto; display:grid; gap:6px; padding-right:4px }
+.histRow{ border:1px solid rgba(255,255,255,.10); border-radius:10px; padding:6px 8px; background:rgba(255,255,255,.03) }
 
-/* === Botão de Tela Cheia: MESMA linha da câmera === */
-section.panel button[aria-label*="Tela cheia"],
-section.panel button[title*="Tela cheia"],
-section.panel .chartFsBtn {
-  position: absolute !important;
-  top: 8px !important;        /* alinhado à câmera */
-  right: 44px !important;     /* ~1 cm à esquerda da câmera */
-  bottom: auto !important;
-  transform: none !important;
-  z-index: 6;
-  width: 28px; height: 28px; border-radius: 8px;
-  display: grid; place-items: center;
-  background: rgba(255,255,255,.12);
-  color: #e6e6e6;
-  border: 1px solid rgba(255,255,255,.25);
-  cursor: pointer;
-}
-section.panel .chartFsBtn:hover { background: rgba(255,255,255,.18); color:#fff }
-
-/* === Esconder histórico duplicado (meio), manter só o último === */
-section.panel .compactGrid .histRow,
-section.panel .compactGrid .histWrap,
-section.panel .compactGrid .historyCard,
-section.panel .compactGrid .histCard {
-  display: none !important;
-}
-section.panel .historyCard:last-of-type,
-section.panel .histWrap:last-of-type {
-  display: block !important;
-}
-/* FS: alinhar com a câmera (mesma linha) */
-section.panel .chartFsBtn,
-section.panel button[aria-label*="Tela cheia"]{
-  position: absolute !important;
-  bottom: 44px !important;   /* <<< alinha pela base, mesma linha da câmera */
-  top: auto !important;
-  right: 44px !important;    /* ~1 cm da câmera */
-  transform: none !important;
-  z-index: 6 !important;
-}
-/* ===== Cabeçalho do painel ===== */
-.tcHeader{
-  display:flex; align-items:center; justify-content:space-between; gap:12px;
-}
-.tcTitle{ font-size:20px; font-weight:900; margin:0 }
-.tcHeaderActions{ display:flex; align-items:center; gap:8px }
-
-/* Botão Tela Cheia (clássico) no início do cabeçalho */
-.chartFsBtn--header{
-  width:36px; height:36px; border-radius:10px; line-height:1;
-  display:grid; place-items:center; padding:0;
-  background:rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.18);
-  color:#e6e6e6;
-  margin-right:4px;  /* pequeno espaço antes do título */
-}
-.chartFsBtn--header:hover{ background:rgba(255,255,255,.14); color:#fff }
-
-/* Botão “Voltar ao início” com presença */
-.tcBackBtn{ padding:12px 16px; font-weight:800; border-radius:12px }
-
-/* Preenchimento confortável do painel */
-.tradePanelShell{ max-height:calc(100vh - 24px); overflow:auto }
-.compactGrid{ display:grid; grid-template-columns:minmax(280px,1fr) minmax(240px,1fr); gap:12px }
-.twoCols{ display:grid; grid-template-columns:1fr 1fr; gap:10px }
-.threeCols{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px }
-@media (max-width:1280px){ .threeCols{ grid-template-columns:1fr 1fr } }
-.cardMini{ display:flex; flex-direction:column; gap:8px }
-.inp{ height:36px; font-size:15px }
-.btn{ padding:10px 12px; border-radius:10px; font-size:15px }
-.btn.btnBuy,.btn.btnSell{ font-weight:800 }
-
-/* ===== Histórico: manter só o de baixo ===== */
-.panel .historyCard:not(:last-of-type),
-.panel .histWrap:not(:last-of-type),
-.panel .histRow:not(:last-of-type){ display:none!important; }
-
-/* Garante o último histórico visível */
-.panel .historyCard:last-of-type,
-.panel .historyCard:last-of-type .histWrap,
-.panel .historyCard:last-of-type .histRow{ display:block!important; }
-/* Forçar histórico apenas no rodapé */
-.compactGrid .colA .historyCard,
-.compactGrid .colA .histWrap,
+/* Garantes auxiliares: não mostrar qualquer “histórico do meio” que apareça */
 .compactGrid .colA .histRow,
-.compactGrid .colA .cardMini.history,
-.compactGrid .colA .cardMini.is-history {
-  display: none !important;
-}
-
-.historyCard { margin-top: auto; } /* empurra para o final */
-/* ====== NO SCROLL em 100% zoom ====== */
-html, body { height: 100%; overflow: hidden; }  /* sem barras globais */
-
-/* Painéis do simulador ocupam a viewport inteira sem rolar */
-main { overflow: hidden; }
-.panel { overflow: hidden; }
-
-/* O grid dos controles não cria rolagem */
-.compactPanel { overflow: hidden; }
-.historyCard .histWrap { max-height: none; overflow: hidden; }
-
-/* Esconde qualquer barra residual (webkit/Firefox) */
-* { scrollbar-width: none; }
-*::-webkit-scrollbar { width: 0; height: 0; }
-
-/* ====== Botão de Tela Cheia – alinhar na MESMA linha da câmera ====== */
-section.panel button[aria-label*="Tela cheia"],
-section.panel button[title*="Tela cheia"],
-section.panel .chartFsBtn {
-  position: absolute !important;
-  top: 4px !important;      /* subimos um pouco (estava levemente abaixo) */
-  right: 44px !important;   /* ~1 cm da câmera */
-  bottom: auto !important;
-  transform: none !important;
-  z-index: 6 !important;
-  width: 28px; height: 28px; line-height: 28px;
-  border-radius: 8px;
-  display: grid; place-items: center;
-  background: rgba(255,255,255,.12);
-  color: #e6e6e6;
-  border: 1px solid rgba(255,255,255,.25);
-  cursor: pointer;
-}
-section.panel button[aria-label*="Tela cheia"]:hover,
-section.panel .chartFsBtn:hover { background: rgba(255,255,255,.18); color:#fff; }
-
-/* ====== Histórico ÚNICO só no rodapé ====== */
-.compactGrid .colA .historyCard,
 .compactGrid .colA .histWrap,
-.compactGrid .colA .histRow,
-.compactGrid .colA .cardMini.history,
-.compactGrid .colA .cardMini.is-history { display: none !important; }
-.historyCard { margin-top: auto; }
+.compactGrid .colA .historyCard,
+.compactGrid .colA .histCard{ display:none !important }
+
+/* Pequenos ajustes responsivos */
+@media (max-width:1180px){
+  .compactGrid{ grid-template-columns:1fr; }
+}
