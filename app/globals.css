@@ -216,3 +216,13 @@ section.panel button[aria-label*="Tela cheia"]{
 .panel .historyCard:last-of-type,
 .panel .historyCard:last-of-type .histWrap,
 .panel .historyCard:last-of-type .histRow{ display:block!important; }
+/* Forçar histórico apenas no rodapé */
+.compactGrid .colA .historyCard,
+.compactGrid .colA .histWrap,
+.compactGrid .colA .histRow,
+.compactGrid .colA .cardMini.history,
+.compactGrid .colA .cardMini.is-history {
+  display: none !important;
+}
+
+.historyCard { margin-top: auto; } /* empurra para o final */
