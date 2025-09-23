@@ -14,24 +14,18 @@ export default function TradeControls({ symbol, onSymbolChange }: Props) {
   const [slPct, setSlPct] = useState<number | ''>('');
   const [qtyRef, setQtyRef] = useState<number>(1000);
 
-  // Histórico único
   const [history, setHistory] = useState<
     { side: 'BUY' | 'SELL'; symbol: string; price: number; ts: number }[]
   >([]);
 
-  // Mock de preço
   const price = useMemo(() => 116823.69, []);
   const sizeSuggestion = useMemo(
     () => (balance * (riskPct / 100)).toFixed(4),
     [balance, riskPct]
   );
 
-  const handleBuy = () => {
-    setHistory((h) => [{ side: 'BUY', symbol, price, ts: Date.now() }, ...h]);
-  };
-  const handleSell = () => {
-    setHistory((h) => [{ side: 'SELL', symbol, price, ts: Date.now() }, ...h]);
-  };
+  const handleBuy  = () => setHistory(h => [{ side:'BUY',  symbol, price, ts:Date.now() }, ...h]);
+  const handleSell = () => setHistory(h => [{ side:'SELL', symbol, price, ts:Date.now() }, ...h]);
   const handleReset = () => setHistory([]);
 
   return (
@@ -42,12 +36,13 @@ export default function TradeControls({ symbol, onSymbolChange }: Props) {
         flexDirection: 'column',
         justifyContent: 'space-between',
         gap: 12,
-        height: '100%', // ocupa altura total do painel
+        height: '100%',
+        overflow: 'hidden',      // sem rolagem aqui
       }}
     >
-      {/* Conteúdo principal (colA e colB sem histórico) */}
-      <div className="compactGrid" style={{ flex: 1 }}>
-        {/* COLUNA A — centralizada */}
+      {/* GRID PRINCIPAL (centralizado) */}
+      <div className="compactGrid" style={{ flex: 1, minHeight: 0, alignItems: 'center' }}>
+        {/* COLUNA A */}
         <div
           className="colA"
           style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 12 }}
@@ -99,13 +94,9 @@ export default function TradeControls({ symbol, onSymbolChange }: Props) {
                   type="number"
                   placeholder="%"
                   value={tpPct === '' ? '' : tpPct}
-                  onChange={(e) =>
-                    setTpPct(e.target.value === '' ? '' : Number(e.target.value))
-                  }
+                  onChange={(e) => setTpPct(e.target.value === '' ? '' : Number(e.target.value))}
                 />
-                <button className="btn" onClick={() => setTpPct('')}>
-                  Zerar
-                </button>
+                <button className="btn" onClick={() => setTpPct('')}>Zerar</button>
               </div>
             </div>
             <div className="cardMini">
@@ -116,13 +107,9 @@ export default function TradeControls({ symbol, onSymbolChange }: Props) {
                   type="number"
                   placeholder="%"
                   value={slPct === '' ? '' : slPct}
-                  onChange={(e) =>
-                    setSlPct(e.target.value === '' ? '' : Number(e.target.value))
-                  }
+                  onChange={(e) => setSlPct(e.target.value === '' ? '' : Number(e.target.value))}
                 />
-                <button className="btn" onClick={() => setSlPct('')}>
-                  Zerar
-                </button>
+                <button className="btn" onClick={() => setSlPct('')}>Zerar</button>
               </div>
             </div>
           </div>
@@ -166,33 +153,24 @@ export default function TradeControls({ symbol, onSymbolChange }: Props) {
 
           {/* Ações */}
           <div className="twoCols">
-            <button className="btn btnBuy" onClick={handleBuy}>
-              Comprar
-            </button>
-            <button className="btn btnSell" onClick={handleSell}>
-              Vender
-            </button>
+            <button className="btn btnBuy" onClick={handleBuy}>Comprar</button>
+            <button className="btn btnSell" onClick={handleSell}>Vender</button>
           </div>
-          <button className="btn" onClick={handleReset}>
-            Resetar
-          </button>
+          <button className="btn" onClick={handleReset}>Resetar</button>
         </div>
 
-        {/* COLUNA B (vazia, usada só para alinhar o grid) */}
+        {/* COLUNA B vazia (mantém grid equilibrado) */}
         <div className="colB" />
       </div>
 
-      {/* Histórico ÚNICO no rodapé */}
+      {/* Histórico único no rodapé (sem rolagem) */}
       <div className="cardMini historyCard" style={{ flexShrink: 0 }}>
         <div className="cardTitle">Histórico</div>
-        <div className="histWrap">
-          {history.length === 0 && (
-            <div className="histRow">Sem operações ainda.</div>
-          )}
+        <div className="histWrap" style={{ maxHeight: 'none', overflow: 'hidden' }}>
+          {history.length === 0 && <div className="histRow">Sem operações ainda.</div>}
           {history.map((h, i) => (
             <div className="histRow" key={i}>
-              {new Date(h.ts).toLocaleString('pt-BR')} — {h.side} {h.symbol} @{' '}
-              {h.price.toLocaleString('pt-BR')}
+              {new Date(h.ts).toLocaleString('pt-BR')} — {h.side} {h.symbol} @ {h.price.toLocaleString('pt-BR')}
             </div>
           ))}
         </div>
