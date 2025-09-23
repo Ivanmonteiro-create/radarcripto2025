@@ -1,5 +1,5 @@
 /* ===============================
-   app/globals.css  (Opção B + correções finais)
+   app/globals.css  (Opção B consolidada)
    =============================== */
 
 /* ---- Tokens ---- */
@@ -59,7 +59,6 @@ body{
   border-radius:12px;
   padding:10px 12px;
 }
-/* letras um pouco maiores */
 .tickerSymbol{ color:var(--text); font-size:14px; letter-spacing:.08em; text-transform:uppercase; font-weight:800 }
 .tickerSymbol.strong{ font-size:16px }
 .tickerPrice{ font-weight:700; font-size:18px; opacity:.95 }
@@ -85,7 +84,7 @@ body{
   background:rgba(255,255,255,.03);
   border:1px solid rgba(255,255,255,.06);
   padding:10px 12px; border-radius:12px; text-align:center; font-weight:600;
-  font-size:14px; /* ↑ maior, como antes */
+  font-size:14px; /* maior, como antes */
 }
 .menuBtn.active{ outline:2px solid var(--accent); box-shadow:0 0 0 4px rgba(33,243,141,.12) inset; color:var(--accent-strong) }
 
@@ -94,29 +93,10 @@ body{
 .small{ font-size:12px }
 
 /* =========================================================
-   SIMULADOR — ajustes SEM modificar estrutura/JSX
+   SIMULADOR — ajustes visuais (sem alterar JSX)
    ========================================================= */
 
-/* (D) Ícone Tela Cheia — MESMA linha da câmera (vence inline) */
-.chartFsBtn{
-  top:0 !important;                 /* alinha com a barra do TV */
-  bottom:auto !important;           /* remove fixação inferior inline */
-  right:48px !important;            /* ~1cm ao lado da câmera */
-  transform:translateY(2px) !important; /* nivelar com a câmera */
-  z-index:6 !important;
-  position:absolute !important;
-  width:28px; height:28px; line-height:28px;
-  border-radius:8px;
-  display:grid; place-items:center;
-  background:rgba(255,255,255,.12);
-  color:#e6e6e6;
-  border:1px solid rgba(255,255,255,.25);
-  cursor:pointer;
-}
-.chartFsBtn svg{ display:block; vertical-align:middle }
-.chartFsBtn:hover{ background:rgba(255,255,255,.18); color:#fff }
-
-/* Painel compacto (mantido) */
+/* Painel compacto */
 .compactPanel { padding:12px !important }
 .compactRoot { font-size:13px }
 .compactTitle { font-size:15px; margin:0; font-weight:800 }
@@ -143,15 +123,10 @@ body{
 .btn-xs{ padding:7px 9px; font-size:12px; border-radius:10px }
 .btn-primary{ background:rgba(33,243,141,.15); border-color:rgba(33,243,141,.35); color:#1cff80; font-weight:800 }
 .btnBuy{ background:linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10)); color:#1cff80; border:1px solid rgba(33,243,141,.35); font-weight:800 }
-.btnSell{ background:linear-gradient(180deg, rgba(255,76,76,.20), rgba(255,76,76,.08)); color:#ff6b6b; border:1px solid rgba(255,76,76,.35); font-weight:800 }
+.btnSell{ background:linear-gradient(180deg, rgba(255,76,76,.20), rgba(255,76,76,.08)); color:#ff6b6b; border:1px solid rgba(255,255,255,.35); font-weight:800 }
 
-/* (A) Esconder o PRIMEIRO cabeçalho duplicado (violeta) */
-.panel :is(.compactHeader,.controlsHeader,.header):first-of-type{
-  display:none !important;
-}
-
-/* (B) Forçar “Voltar ao início” VERDE no cabeçalho visível (o ÚLTIMO) */
-.panel :is(.compactHeader,.controlsHeader,.header):last-of-type .btn{
+/* === Voltar ao início (verde, maior) === */
+.panel .compactHeader .btn{
   background:linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10)) !important;
   border-color:rgba(33,243,141,.35) !important;
   color:var(--accent-strong) !important;
@@ -160,121 +135,16 @@ body{
   padding:12px 18px !important;
 }
 
-/* (C) Remover “Histórico” do meio; manter só o ÚLTIMO do painel */
-.panel :is(.historyCard,.histWrap,.history-inline,.histInline):not(:last-of-type){
-  display:none !important;
-}
-
-/* Histórico final (mantido) */
-.historyCard{ flex:1; min-height:0; display:flex; flex-direction:column }
-.histWrap.fill{ flex:1; min-height:0; overflow-y:auto; display:grid; gap:6px; padding-right:4px }
-.histRow{ border:1px solid rgba(255,255,255,.10); border-radius:10px; padding:6px 8px; background:rgba(255,255,255,.03) }
-/* ======= PATCH: alinhamento do botão Tela Cheia + esconder Histórico duplicado ======= */
-
-/* Alinhar o ícone de Tela Cheia com a câmera (mesma linha, ~1cm à esquerda) */
-section.panel > button[aria-label="Tela cheia"],
-.panel .chartFsBtn{
+/* === Botão de Tela Cheia: MESMA linha da câmera === */
+section.panel button[aria-label*="Tela cheia"],
+section.panel button[title*="Tela cheia"],
+section.panel .chartFsBtn {
   position: absolute !important;
-  /* a barra do TradingView fica a 0px do topo do chart; o ícone de câmera costuma
-     renderizar com ~6px de offset vertical. Usamos 6px para nivelar. */
-  top: 6px !important;
-  bottom: auto !important;
-  right: 44px !important;   /* ~1cm em muitos laptops */
-  transform: translateY(0) !important;
-  z-index: 6 !important;
-  width: 28px; height: 28px; line-height: 28px;
-  border-radius: 8px;
-  display: grid; place-items: center;
-  background: rgba(255,255,255,.12);
-  color: #e6e6e6;
-  border: 1px solid rgba(255,255,255,.25);
-  cursor: pointer;
-}
-section.panel > button[aria-label="Tela cheia"]:hover,
-.panel .chartFsBtn:hover{ background: rgba(255,255,255,.18); color:#fff }
-
-/* Esconder o HISTÓRICO “do meio”, manter só o último do painel */
-.panel .history-inline,
-.panel .histInline,
-.panel .historyCard-inline,
-.panel .histWrap:not(:last-of-type),
-.panel .cardMini.history,
-.panel .cardMini.is-history {
-  display: none !important;
-}
-
-/* Fallback genérico: se o “Histórico” do meio for um cardMini na primeira coluna,
-   esconda somente o PRIMEIRO card de histórico que aparecer antes do rodapé. */
-.compactGrid .colA .cardMini:nth-of-type(1){ display: none !important; }
-
-/* Mantém o Histórico final (rodapé) visível */
-.panel .histWrap:last-of-type,
-.panel .historyCard:last-of-type{ display: block !important; }
-/* ======= FIX: restaurar cards TP/SL + esconder APENAS Histórico do meio ======= */
-
-/* (1) GARANTE que todos os cards normais voltem a aparecer */
-.compactGrid .colA .cardMini,
-.compactGrid .colB .cardMini { display: flex !important; }
-
-/* (2) ESCONDE SOMENTE o “Histórico” do meio (variações de classe comuns) */
-.panel .history-inline,
-.panel .histInline,
-.panel .historyCard-inline,
-.panel .cardMini.history,
-.panel .cardMini.is-history {
-  display: none !important;
-}
-
-/* (remover fallback antigo: não esconder “o 1º card” genérico) */
-.compactGrid .colA .cardMini:nth-of-type(1) { display: flex !important; }
-
-/* Mantém o Histórico final (rodapé) visível */
-.panel .histWrap:last-of-type,
-.panel .historyCard:last-of-type { display: block !important; }
-
-/* ======= FIX: alinhar botão de Tela Cheia exatamente na linha da câmera ======= */
-section.panel > button[aria-label="Tela cheia"],
-.panel .chartFsBtn{
-  position: absolute !important;
-  top: 8px !important;       /* ajuste fino para nivelar com o ícone da câmera */
-  bottom: auto !important;
-  right: 44px !important;    /* ~1 cm à esquerda da câmera em notebooks comuns */
-  transform: translateY(0) !important;
-  z-index: 6 !important;
-  width: 28px; height: 28px; line-height: 28px;
-  border-radius: 8px;
-  display: grid; place-items: center;
-  background: rgba(255,255,255,.12);
-  color: #e6e6e6;
-  border: 1px solid rgba(255,255,255,.25);
-  cursor: pointer;
-}
-section.panel > button[aria-label="Tela cheia"]:hover,
-.panel .chartFsBtn:hover{ background: rgba(255,255,255,.18); color:#fff }
-/* === 1) Remover o "Histórico" do meio (classe real .histRow) === */
-/* Oculta histRow que aparece dentro da grade compacta do painel */
-.panel .compactGrid .histRow,
-.panel .colA .histRow,
-.panel .colB .histRow {
-  display: none !important;
-}
-
-/* Garante que o histórico do rodapé (dentro de .histWrap) continue visível */
-.panel .histWrap .histRow { 
-  display: block !important;
-}
-
-/* === 2) Alinhar o botão de Tela Cheia com a câmera === */
-button.chartFsBtn,
-section.panel > button[aria-label="Tela cheia"] {
-  position: absolute !important;
-  top: 8px !important;        /* ajuste fino: mesma linha da câmera em notebooks */
-  bottom: auto !important;    /* anula o inline "bottom:0" */
+  top: 8px !important;        /* alinhado à câmera */
   right: 44px !important;     /* ~1 cm à esquerda da câmera */
-  transform: translateY(0) !important;
-  z-index: 6 !important;
-
-  /* mantém o visual atual */
+  bottom: auto !important;
+  transform: none !important;
+  z-index: 6;
   width: 28px; height: 28px; border-radius: 8px;
   display: grid; place-items: center;
   background: rgba(255,255,255,.12);
@@ -282,112 +152,16 @@ section.panel > button[aria-label="Tela cheia"] {
   border: 1px solid rgba(255,255,255,.25);
   cursor: pointer;
 }
-button.chartFsBtn:hover,
-section.panel > button[aria-label="Tela cheia"]:hover {
-  background: rgba(255,255,255,.18); color: #fff;
-}
+section.panel .chartFsBtn:hover { background: rgba(255,255,255,.18); color:#fff }
 
-/* Pequeno ajuste responsivo (se ficar 1px fora em telas maiores/menores) */
-@media (max-height: 780px) {
-  button.chartFsBtn,
-  section.panel > button[aria-label="Tela cheia"] { top: 7px !important; }
-}
-@media (min-height: 950px) {
-  button.chartFsBtn,
-  section.panel > button[aria-label="Tela cheia"] { top: 9px !important; }
-}
-/* ===== PATCH-04 (alinhamento do FS + remoção do histórico duplicado) ===== */
-
-/* 1) Botão de Tela Cheia: forçar alinhamento na MESMA LINHA da câmera
-      Observação: há um inline style vindo do componente (bottom: 0; right: 56px).
-      Por isso, usamos !important para sobrepor SEM alterar JS. */
-.chartFsBtn{
-  position: absolute !important;
-  top: 6px !important;          /* mesma linha da barra (nível da câmera) */
-  right: 44px !important;       /* ~1cm de distância da câmera, sem encostar */
-  bottom: auto !important;      /* anula bottom inline */
-  transform: translateY(0) !important;
-  z-index: 6 !important;        /* garante que fique acima do chart */
-}
-
-/* 2) Remover APENAS o “Histórico” que ficou no meio do painel.
-      O histórico “oficial” (o de baixo) permanece. */
-.compactGrid .colA .histRow,
-.compactGrid .colA .histWrap,
-.compactGrid .colA .historyCard,
-.compactGrid .colA .histCard{
-  display: none !important;
-}
-/* ===== HOTFIX — NÃO MUDAR A ESTRUTURA, APENAS AJUSTES VISUAIS ===== */
-
-/* 1) Botão de tela cheia: força alinhar ao lado da câmera, na MESMA LINHA */
-section.panel button[aria-label="Tela cheia"] {
-  position: absolute !important;
-  top: 6px !important;           /* mesma linha da câmera */
-  right: 44px !important;        /* ~1 cm da câmera, ajuste fino se quiser */
-  bottom: auto !important;       /* neutraliza inline bottom */
-  transform: none !important;
-  z-index: 6;                    /* fica acima do canvas do TV */
-}
-
-/* 2) Histórico duplicado do MEIO: esconde apenas o da coluna de entradas,
-      preservando o histórico final (o de baixo) */
-section.panel .compactGrid .histRow { 
-  display: none !important;      /* some o “histórico” que fica no miolo */
-}
-section.panel .historyCard .histRow {
-  display: block !important;     /* garante o histórico de baixo visível */
-}
-
-/* (Opcional, só para garantir) – cabeçalho verde do “Voltar ao início” */
-section.panel .btn-primary {
-  background: linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10)) !important;
-  color: #1cff80 !important;
-  border-color: rgba(33,243,141,.35) !important;
-}
-/* ===== HOTFIX ISOLADO (não altera estrutura) ===== */
-
-/* Botão de Tela Cheia: forçar alinhamento na MESMA LINHA da câmera */
-section.panel button[aria-label*="Tela cheia"],
-section.panel button[title*="Tela cheia"],
-section.panel .chartFsBtn {
-  position: absolute !important;
-  top: 8px !important;        /* mesma linha da barra do TV/câmera */
-  right: 44px !important;     /* ~1 cm da câmera */
-  bottom: auto !important;    /* neutraliza inline do componente */
-  transform: none !important;
-  z-index: 6;
-}
-
-/* Ocultar SOMENTE o “Histórico” do MIolo (dentro do grid compacto) */
+/* === Esconder histórico duplicado (meio), manter só o último === */
 section.panel .compactGrid .histRow,
 section.panel .compactGrid .histWrap,
 section.panel .compactGrid .historyCard,
 section.panel .compactGrid .histCard {
   display: none !important;
 }
-
-/* Garantir que o Histórico final (de baixo) continue visível */
-section.panel > .historyCard,
-section.panel .colB > .historyCard,
-section.panel .historyCard.fill {
+section.panel .historyCard:last-of-type,
+section.panel .histWrap:last-of-type {
   display: block !important;
-}
-/* Força alinhamento do FS e oculta histórico do miolo (idempotente) */
-section.panel button[aria-label*="Tela cheia"],
-section.panel button[title*="Tela cheia"],
-section.panel .chartFsBtn {
-  position: absolute !important;
-  top: 8px !important;
-  right: 44px !important;
-  bottom: auto !important;
-  transform: none !important;
-  z-index: 6;
-}
-
-section.panel .compactGrid .histRow,
-section.panel .compactGrid .histWrap,
-section.panel .compactGrid .historyCard,
-section.panel .compactGrid .histCard {
-  display: none !important;
 }
