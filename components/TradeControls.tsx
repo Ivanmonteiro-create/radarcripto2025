@@ -9,6 +9,7 @@ type Props = {
 };
 
 export default function TradeControls({ symbol, onSymbolChange, onFullscreen }: Props) {
+  // Estados
   const [balance, setBalance] = useState<number>(10000);
   const [riskPct, setRiskPct] = useState<number>(1);
   const [tpPct, setTpPct] = useState<number | ''>('');
@@ -18,21 +19,16 @@ export default function TradeControls({ symbol, onSymbolChange, onFullscreen }: 
     { side: 'BUY' | 'SELL'; symbol: string; price: number; ts: number }[]
   >([]);
 
+  // Mock de preço
   const price = useMemo(() => 116823.69, []);
   const sizeSuggestion = useMemo(
     () => (balance * (riskPct / 100)).toFixed(4),
     [balance, riskPct]
   );
 
-  const handleBuy = () => {
-    setHistory((h) => [{ side: 'BUY', symbol, price, ts: Date.now() }, ...h]);
-  };
-  const handleSell = () => {
-    setHistory((h) => [{ side: 'SELL', symbol, price, ts: Date.now() }, ...h]);
-  };
-  const handleReset = () => {
-    setHistory([]);
-  };
+  const handleBuy = () => setHistory((h) => [{ side: 'BUY', symbol, price, ts: Date.now() }, ...h]);
+  const handleSell = () => setHistory((h) => [{ side: 'SELL', symbol, price, ts: Date.now() }, ...h]);
+  const handleReset = () => setHistory([]);
 
   return (
     <div
@@ -40,25 +36,14 @@ export default function TradeControls({ symbol, onSymbolChange, onFullscreen }: 
       style={{
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between',
         height: '100%',
+        gap: 10,
         paddingTop: 8,
       }}
     >
-      {/* ===== Título + Botão FS ===== */}
-      <div
-        className="compactHeader"
-        style={{
-          marginBottom: 8,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <h3 className="compactTitle" style={{ margin: 0 }}>
-          Controles de Trade
-        </h3>
-
+      {/* Título + tela cheia (se for usado aqui) */}
+      <div className="compactHeader" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <h3 className="compactTitle" style={{ margin: 0 }}>Controles de Trade</h3>
         {onFullscreen && (
           <button
             type="button"
@@ -72,8 +57,16 @@ export default function TradeControls({ symbol, onSymbolChange, onFullscreen }: 
         )}
       </div>
 
-      {/* ===== Faixa Preço / Equity / PnL / Par ===== */}
-      <div className="cardMini" style={{ marginBottom: 10 }}>
+      {/* ===== Card topo (Preço / Equity / PnL / Par)
+               AGORA com o "Voltar ao início" no topo-direito do card ===== */}
+      <div className="cardMini" style={{ marginBottom: 0 }}>
+        {/* Barra superior do card: deixa o botão acima de Equity */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+          <a href="/" className="btn btn-primary" style={{ padding: '10px 16px', borderRadius: 10, fontWeight: 800 }}>
+            Voltar ao início
+          </a>
+        </div>
+
         <div className="twoCols">
           <div>
             <div className="lbl">Preço</div>
@@ -84,7 +77,7 @@ export default function TradeControls({ symbol, onSymbolChange, onFullscreen }: 
             <div>10000.00 USDT</div>
           </div>
         </div>
-        <div className="twoCols">
+        <div className="twoCols" style={{ marginTop: 6 }}>
           <div>
             <div className="lbl">PNL flutuante</div>
             <div>0.00 USDT (0.00%)</div>
@@ -109,14 +102,7 @@ export default function TradeControls({ symbol, onSymbolChange, onFullscreen }: 
         </div>
       </div>
 
-      {/* ===== Botão Voltar ao início ===== */}
-      <div style={{ marginBottom: 10 }}>
-        <a href="/" className="btn btn-goBack" style={{ width: '100%' }}>
-          Voltar ao início
-        </a>
-      </div>
-
-      {/* ===== Controles principais ===== */}
+      {/* ===== Grid principal (desce e nivela com USDT ref) ===== */}
       <div className="compactGrid" style={{ flexGrow: 1 }}>
         <div className="colA">
           {/* TP / SL */}
@@ -129,13 +115,9 @@ export default function TradeControls({ symbol, onSymbolChange, onFullscreen }: 
                   type="number"
                   placeholder="%"
                   value={tpPct === '' ? '' : tpPct}
-                  onChange={(e) =>
-                    setTpPct(e.target.value === '' ? '' : Number(e.target.value))
-                  }
+                  onChange={(e) => setTpPct(e.target.value === '' ? '' : Number(e.target.value))}
                 />
-                <button className="btn" onClick={() => setTpPct('')}>
-                  Zerar
-                </button>
+                <button className="btn" onClick={() => setTpPct('')}>Zerar</button>
               </div>
             </div>
             <div className="cardMini">
@@ -146,18 +128,14 @@ export default function TradeControls({ symbol, onSymbolChange, onFullscreen }: 
                   type="number"
                   placeholder="%"
                   value={slPct === '' ? '' : slPct}
-                  onChange={(e) =>
-                    setSlPct(e.target.value === '' ? '' : Number(e.target.value))
-                  }
+                  onChange={(e) => setSlPct(e.target.value === '' ? '' : Number(e.target.value))}
                 />
-                <button className="btn" onClick={() => setSlPct('')}>
-                  Zerar
-                </button>
+                <button className="btn" onClick={() => setSlPct('')}>Zerar</button>
               </div>
             </div>
           </div>
 
-          {/* Saldo / Risco / USDT ref */}
+          {/* Saldo / Risco / USDT ref (nivelados) */}
           <div className="threeCols">
             <div className="cardMini">
               <div className="cardTitle">Saldo (USDT)</div>
@@ -194,32 +172,23 @@ export default function TradeControls({ symbol, onSymbolChange, onFullscreen }: 
             </div>
           </div>
 
-          {/* Botões Comprar/Vender */}
+          {/* Ações */}
           <div className="twoCols">
-            <button className="btn btnBuy" onClick={handleBuy}>
-              Comprar
-            </button>
-            <button className="btn btnSell" onClick={handleSell}>
-              Vender
-            </button>
+            <button className="btn btnBuy" onClick={handleBuy}>Comprar</button>
+            <button className="btn btnSell" onClick={handleSell}>Vender</button>
           </div>
-          <button className="btn" onClick={handleReset}>
-            Resetar
-          </button>
+          <button className="btn" onClick={handleReset}>Resetar</button>
         </div>
       </div>
 
-      {/* ===== Histórico vai para o rodapé ===== */}
-      <div className="cardMini historyCard" style={{ marginTop: 12 }}>
+      {/* ===== Histórico no rodapé ===== */}
+      <div className="cardMini historyCard" style={{ marginTop: 6 }}>
         <div className="cardTitle">Histórico</div>
         <div className="histWrap">
-          {history.length === 0 && (
-            <div className="histRow">Sem operações ainda.</div>
-          )}
+          {history.length === 0 && <div className="histRow">Sem operações ainda.</div>}
           {history.map((h, i) => (
             <div className="histRow" key={i}>
-              {new Date(h.ts).toLocaleString('pt-BR')} — {h.side} {h.symbol} @{' '}
-              {h.price.toLocaleString('pt-BR')}
+              {new Date(h.ts).toLocaleString('pt-BR')} — {h.side} {h.symbol} @ {h.price.toLocaleString('pt-BR')}
             </div>
           ))}
         </div>
