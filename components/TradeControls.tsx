@@ -5,9 +5,10 @@ import React, { useMemo, useState } from 'react';
 type Props = {
   symbol: string;
   onSymbolChange: (s: string) => void;
+  onFullscreen?: () => void; // <-- NOVO: deixa o botão FS opcional
 };
 
-export default function TradeControls({ symbol, onSymbolChange }: Props) {
+export default function TradeControls({ symbol, onSymbolChange, onFullscreen }: Props) {
   // Estados principais (base B)
   const [balance, setBalance] = useState<number>(10000);
   const [riskPct, setRiskPct] = useState<number>(1);
@@ -20,7 +21,7 @@ export default function TradeControls({ symbol, onSymbolChange }: Props) {
     { side: 'BUY' | 'SELL'; symbol: string; price: number; ts: number }[]
   >([]);
 
-  // Mock de preço “ao vivo”
+  // Mock de preço “ao vivo” (placeholder)
   const price = useMemo(() => 116823.69, []);
 
   const sizeSuggestion = useMemo(
@@ -45,23 +46,65 @@ export default function TradeControls({ symbol, onSymbolChange }: Props) {
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
-        /* sobe o conteúdo: menos padding e nada de espaço morto */
-        paddingTop: 8,
-        gap: 10,
+        /* Mantém tudo visível; se faltar espaço, rola apenas o painel */
+        maxHeight: 'calc(100vh - 24px)',
+        overflow: 'auto',
       }}
     >
-      {/* ===== ÚNICO cabeçalho (ele já está escondido no layout externo) ===== */}
-      <div className="compactHeader" style={{ marginBottom: 6 }}>
+      {/* ===== Cabeçalho (título + botão FS opcional) ===== */}
+      <div
+        className="compactHeader"
+        style={{
+          marginBottom: 10,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 8,
+        }}
+      >
         <h3 className="compactTitle" style={{ margin: 0 }}>
           Controles de Trade
         </h3>
-        <a href="/" className="btn btn-goBack">
-          Voltar ao início
-        </a>
+
+        {/* Botão de Tela Cheia só aparece se a prop existir */}
+        {onFullscreen && (
+          <button
+            type="button"
+            onClick={onFullscreen}
+            aria-label="Tela cheia"
+            title="Tela cheia (F) / Sair (X)"
+            className="chartFsBtn"
+            style={{
+              position: 'relative',
+              top: 0,
+              right: 0,
+              width: 28,
+              height: 28,
+              lineHeight: '28px',
+              borderRadius: 8,
+              display: 'grid',
+              placeItems: 'center',
+              background: 'rgba(255,255,255,.12)',
+              color: '#e6e6e6',
+              border: '1px solid rgba(255,255,255,.25)',
+              cursor: 'pointer',
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M9 3H3v6M15 3h6v6M9 21H3v-6M15 21h6v-6"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* Faixa superior (Preço / Equity / PnL / Par) */}
-      <div className="cardMini" style={{ marginBottom: 6 }}>
+      <div className="cardMini" style={{ marginBottom: 10 }}>
         <div className="twoCols">
           <div>
             <div className="lbl">Preço</div>
@@ -98,7 +141,7 @@ export default function TradeControls({ symbol, onSymbolChange }: Props) {
       </div>
 
       {/* Grid principal */}
-      <div className="compactGrid" style={{ alignContent: 'start' }}>
+      <div className="compactGrid">
         {/* COLUNA A */}
         <div className="colA">
           {/* TP / SL */}
@@ -176,33 +219,6 @@ export default function TradeControls({ symbol, onSymbolChange }: Props) {
             </div>
           </div>
 
-          {/* NOVO: PARES RÁPIDOS (“PA …”) — preenche o espaço e deixa tudo alinhado */}
-          <div className="cardMini" style={{ paddingTop: 8, paddingBottom: 8 }}>
-            <div className="cardTitle">Pares rápidos (PA / USDT)</div>
-            <div className="pairsRow">
-              {[
-                'BTCUSDT',
-                'ETHUSDT',
-                'SOLUSDT',
-                'BNBUSDT',
-                'XRPUSDT',
-                'ADAUSDT',
-                'LINKUSDT',
-                'DOGEUSDT',
-              ].map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  className={`chip ${symbol === p ? 'chip-active' : ''}`}
-                  onClick={() => onSymbolChange(p)}
-                  title={`PA ${p.replace('USDT', '')}`}
-                >
-                  PA {p.replace('USDT', '')}
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Ações */}
           <div className="twoCols">
             <button className="btn btnBuy" onClick={handleBuy}>
@@ -219,7 +235,7 @@ export default function TradeControls({ symbol, onSymbolChange }: Props) {
 
         {/* COLUNA B */}
         <div className="colB">
-          {/* Histórico ÚNICO (rodapé do painel) */}
+          {/* Histórico ÚNICO */}
           <div className="cardMini historyCard" style={{ minHeight: 0 }}>
             <div className="cardTitle">Histórico</div>
             <div className="histWrap">
