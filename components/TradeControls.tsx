@@ -1,4 +1,37 @@
- = () => {
+'use client';
+
+import React, { useMemo, useState } from 'react';
+
+type Props = {
+  symbol: string;
+  onSymbolChange: (s: string) => void;
+};
+
+export default function TradeControls({ symbol, onSymbolChange }: Props) {
+  // Estados principais
+  const [balance, setBalance] = useState<number>(10000);
+  const [riskPct, setRiskPct] = useState<number>(1);
+  const [tpPct, setTpPct] = useState<number | ''>('');
+  const [slPct, setSlPct] = useState<number | ''>('');
+  const [qtyRef, setQtyRef] = useState<number>(1000);
+
+  // Histórico único
+  const [history, setHistory] = useState<
+    { side: 'BUY' | 'SELL'; symbol: string; price: number; ts: number }[]
+  >([]);
+
+  // Mock de preço (pode ligar à API depois)
+  const price = useMemo(() => 116823.69, []);
+
+  const sizeSuggestion = useMemo(
+    () => (balance * (riskPct / 100)).toFixed(4),
+    [balance, riskPct]
+  );
+
+  const handleBuy = () => {
+    setHistory((h) => [{ side: 'BUY', symbol, price, ts: Date.now() }, ...h]);
+  };
+  const handleSell = () => {
     setHistory((h) => [{ side: 'SELL', symbol, price, ts: Date.now() }, ...h]);
   };
   const handleReset = () => {
@@ -12,12 +45,11 @@
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
-        /* Mantém tudo visível em 100% zoom; se faltar espaço, rola apenas o painel */
         maxHeight: 'calc(100vh - 24px)',
         overflow: 'auto',
       }}
     >
-      {/* ===== ÚNICO cabeçalho ===== */}
+      {/* ===== Cabeçalho ===== */}
       <div className="compactHeader" style={{ marginBottom: 10 }}>
         <h3 className="compactTitle" style={{ margin: 0 }}>
           Controles de Trade
@@ -27,7 +59,7 @@
         </a>
       </div>
 
-      {/* Faixa superior (Preço / Equity / PnL / Par) */}
+      {/* ===== Faixa superior (Preço / Equity / PnL / Par) ===== */}
       <div className="cardMini" style={{ marginBottom: 10 }}>
         <div className="twoCols">
           <div>
@@ -36,7 +68,7 @@
           </div>
           <div>
             <div className="lbl">Equity</div>
-            <div>10000.00 USDT</div>
+            <div>{balance.toFixed(2)} USDT</div>
           </div>
         </div>
         <div className="twoCols">
@@ -64,7 +96,7 @@
         </div>
       </div>
 
-      {/* Grid principal */}
+      {/* ===== Grid principal ===== */}
       <div className="compactGrid">
         {/* COLUNA A */}
         <div className="colA">
@@ -159,7 +191,7 @@
 
         {/* COLUNA B */}
         <div className="colB">
-          {/* Histórico ÚNICO */}
+          {/* Histórico único */}
           <div className="cardMini historyCard" style={{ minHeight: 0 }}>
             <div className="cardTitle">Histórico</div>
             <div className="histWrap">
