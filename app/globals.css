@@ -175,3 +175,37 @@ section.panel button[aria-label*="Tela cheia"]{
   transform: none !important;
   z-index: 6 !important;
 }
+/* O painel ocupa a altura útil e rola só dentro dele se precisar */
+.tradePanelShell{
+  max-height: calc(100vh - 24px);
+  overflow: auto;
+}
+
+/* Grades mais “respiráveis” e que quebram bonito em telas menores */
+.compactGrid{
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(240px, 1fr);
+  gap: 12px;
+}
+.twoCols{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.threeCols{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 10px;
+}
+
+/* Em telas mais estreitas, a fileira de 3 cards vira duas colunas para não “apertar” */
+@media (max-width: 1280px){
+  .threeCols{ grid-template-columns: 1fr 1fr; }
+}
+
+/* Cards sempre com coluna flex para não sobrar preto */
+.cardMini{ display:flex; flex-direction:column; gap:8px; }
+
+/* Inputs e botões com tamanho confortável */
+.inp{ height: 36px; font-size: 15px; }
+.btn{ padding: 10px 12px; border-radius: 10px; font-size: 15px; }
+.btn.btnBuy,.btn.btnSell{ font-weight: 800; }
+
+/* Linha de preço/PNL/Equity/Par bem distribuída, sem espaços mortos */
+.cardMini .twoCols > div{ min-width: 0; }
