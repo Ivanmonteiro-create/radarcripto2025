@@ -5,7 +5,7 @@ import React, { useMemo, useState } from 'react';
 type Props = {
   symbol: string;
   onSymbolChange: (s: string) => void;
-  onFullscreen?: () => void;
+  onFullscreen?: () => void; // callback do F/X vindo da página
 };
 
 export default function TradeControls({ symbol, onSymbolChange, onFullscreen }: Props) {
@@ -14,6 +14,7 @@ export default function TradeControls({ symbol, onSymbolChange, onFullscreen }: 
   const [tpPct, setTpPct] = useState<number | ''>('');
   const [slPct, setSlPct] = useState<number | ''>('');
   const [qtyRef, setQtyRef] = useState<number>(1000);
+
   const [history, setHistory] = useState<
     { side: 'BUY' | 'SELL'; symbol: string; price: number; ts: number }[]
   >([]);
@@ -47,11 +48,14 @@ export default function TradeControls({ symbol, onSymbolChange, onFullscreen }: 
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          gap: 8,
         }}
       >
         <h3 className="compactTitle" style={{ margin: 0 }}>
           Controles de Trade
         </h3>
+
+        {/* Ícone clássico “expand” (quadrado com cantos) */}
         {onFullscreen && (
           <button
             type="button"
@@ -59,8 +63,24 @@ export default function TradeControls({ symbol, onSymbolChange, onFullscreen }: 
             aria-label="Tela cheia"
             title="Tela cheia (F) / Sair (X)"
             className="chartFsBtn"
+            style={{ width: 28, height: 28, display: 'grid', placeItems: 'center' }}
           >
-            ⛶
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+            >
+              {/* cantos para “expandir” */}
+              <path
+                d="M9 3H3v6M15 3h6v6M9 21H3v-6M15 21h6v-6"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </button>
         )}
       </div>
@@ -74,15 +94,15 @@ export default function TradeControls({ symbol, onSymbolChange, onFullscreen }: 
           flexGrow: 1,
         }}
       >
-        {/* Linha 1 */}
+        {/* Linha 1 — invertida: Preço (esq) | Voltar ao início (dir) */}
+        <div>
+          <div className="lbl">Preço</div>
+          <div className="green">{price.toLocaleString('pt-BR')}</div>
+        </div>
         <div>
           <a href="/" className="btn btn-primary" style={{ width: '100%' }}>
             Voltar ao início
           </a>
-        </div>
-        <div>
-          <div className="lbl">Preço</div>
-          <div className="green">{price.toLocaleString('pt-BR')}</div>
         </div>
 
         {/* Linha 2 */}
