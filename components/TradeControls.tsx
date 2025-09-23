@@ -5,51 +5,55 @@ import React, { useMemo, useState } from 'react';
 type Props = {
   symbol: string;
   onSymbolChange: (s: string) => void;
-  // Callbacks opcionais — a página decide se grava histórico
-  onBuy?: () => void;
-  onSell?: () => void;
-  onReset?: () => void;
-  // Preço "ao vivo" para mostrar no topo do painel
-  livePrice?: number;
 };
 
-export default function TradeControls({
-  symbol,
-  onSymbolChange,
-  onBuy,
-  onSell,
-  onReset,
-  livePrice = 116823.69,
-}: Props) {
-  // Estados principais do painel
+export default function TradeControls({ symbol, onSymbolChange }: Props) {
+  // Estados principais
   const [balance, setBalance] = useState<number>(10000);
   const [riskPct, setRiskPct] = useState<number>(1);
   const [tpPct, setTpPct] = useState<number | ''>('');
   const [slPct, setSlPct] = useState<number | ''>('');
   const [qtyRef, setQtyRef] = useState<number>(1000);
 
+  // Histórico ÚNICO
+  const [history, setHistory] = useState<
+    { side: 'BUY' | 'SELL'; symbol: string; price: number; ts: number }[]
+  >([]);
+
+  // Mock de preço “ao vivo”
+  const price = useMemo(() => 116823.69, []);
+
   const sizeSuggestion = useMemo(
     () => (balance * (riskPct / 100)).toFixed(4),
     [balance, riskPct]
   );
 
+  const handleBuy = () => {
+    setHistory((h) => [{ side: 'BUY', symbol, price, ts: Date.now() }, ...h]);
+  };
+  const handleSell = () => {
+    setHistory((h) => [{ side: 'SELL', symbol, price, ts: Date.now() }, ...h]);
+  };
+  const handleReset = () => setHistory([]);
+
   return (
     <div
-      className="panel compactPanel compactRoot tradePanelShell"
+      className="compactPanel compactRoot"
       style={{
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
-        maxHeight: 'calc(100vh - 24px)',
+        gap: 12,
+        maxHeight: 'calc(100vh - 110px)', // deixa sobrar só o necessário
         overflow: 'auto',
       }}
     >
       {/* Faixa superior (Preço / Equity / PnL / Par) */}
-      <div className="cardMini" style={{ marginBottom: 10 }}>
+      <div className="cardMini">
         <div className="twoCols">
           <div>
             <div className="lbl">Preço</div>
-            <div className="green">{livePrice.toLocaleString('pt-BR')}</div>
+            <div className="green">{price.toLocaleString('pt-BR')}</div>
           </div>
           <div>
             <div className="lbl">Equity</div>
@@ -83,7 +87,7 @@ export default function TradeControls({
 
       {/* Grid principal */}
       <div className="compactGrid">
-        {/* COLUNA A – entradas e ações */}
+        {/* COLUNA A */}
         <div className="colA">
           {/* TP / SL */}
           <div className="twoCols">
@@ -162,20 +166,36 @@ export default function TradeControls({
 
           {/* Ações */}
           <div className="twoCols">
-            <button className="btn btnBuy" onClick={onBuy}>
+            <button className="btn btnBuy" onClick={handleBuy}>
               Comprar
             </button>
-            <button className="btn btnSell" onClick={onSell}>
+            <button className="btn btnSell" onClick={handleSell}>
               Vender
             </button>
           </div>
-          <button className="btn" onClick={onReset}>
+          <button className="btn" onClick={handleReset}>
             Resetar
           </button>
         </div>
 
-        {/* COLUNA B – (vazia por enquanto; sem Histórico interno) */}
-        <div className="colB" />
+        {/* COLUNA B */}
+        <div className="colB">
+          {/* Histórico ÚNICO */}
+          <div className="cardMini historyCard" style={{ minHeight: 0 }}>
+            <div className="cardTitle">Histórico</div>
+            <div className="histWrap">
+              {history.length === 0 && (
+                <div className="histRow">Sem operações ainda.</div>
+              )}
+              {history.map((h, i) => (
+                <div className="histRow" key={i}>
+                  {new Date(h.ts).toLocaleString('pt-BR')} — {h.side} {h.symbol} @{' '}
+                  {h.price.toLocaleString('pt-BR')}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
