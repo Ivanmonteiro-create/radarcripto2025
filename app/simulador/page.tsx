@@ -36,7 +36,7 @@ export default function SimuladorPage() {
     <main
       style={{
         display: 'grid',
-        gridTemplateColumns: '1fr 360px', // leve folga p/ caber 100% zoom
+        gridTemplateColumns: '1fr 360px',
         gap: 12,
         minHeight: '100dvh',
         padding: 16,
@@ -57,7 +57,7 @@ export default function SimuladorPage() {
         <TradeControls
           symbol={symbol}
           onSymbolChange={onSymbolChange}
-          onFullscreen={toggleFs}   // botão FS agora mora no cabeçalho do painel
+          onFullscreen={toggleFs}
         />
       </aside>
     </main>
