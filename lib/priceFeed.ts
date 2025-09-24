@@ -1,15 +1,11 @@
 // lib/priceFeed.ts
-// Cliente mínimo de preços em tempo real (Binance trade stream).
-// Mantém 1 conexão por símbolo (ex.: "BTCUSDT") e notifica assinantes.
-
 type Listener = (price: number) => void;
 
 class PriceFeed {
   private sockets = new Map<string, WebSocket>();
   private listeners = new Map<string, Set<Listener>>();
 
-  private toStream(symbol: string) {
-    // Binance usa minúsculas no stream
+  private stream(symbol: string) {
     return `${symbol.toLowerCase()}@trade`;
   }
 
@@ -19,13 +15,12 @@ class PriceFeed {
     this.listeners.get(key)!.add(cb);
 
     if (!this.sockets.has(key)) {
-      const url = `wss://stream.binance.com:9443/ws/${this.toStream(key)}`;
+      const url = `wss://stream.binance.com:9443/ws/${this.stream(key)}`;
       const ws = new WebSocket(url);
 
       ws.onmessage = (ev) => {
         try {
           const data = JSON.parse(ev.data);
-          // preço negociado (trade)
           const p = Number(data?.p ?? data?.price);
           if (!p || isNaN(p)) return;
           this.listeners.get(key)?.forEach((fn) => fn(p));
@@ -33,17 +28,17 @@ class PriceFeed {
       };
 
       ws.onclose = () => {
-        // tentativa simples de reconexão
+        // se ainda há ouvintes, tenta reconectar
         this.sockets.delete(key);
         if (this.listeners.get(key)?.size) {
-          setTimeout(() => this.subscribe(key, () => {}), 1000);
+          setTimeout(() => this.open(key), 1000);
         }
       };
 
+      (ws as any)._symbolKey = key;
       this.sockets.set(key, ws);
     }
 
-    // função de unsubscribe
     return () => {
       const set = this.listeners.get(key);
       if (!set) return;
@@ -57,6 +52,27 @@ class PriceFeed {
         }
       }
     };
+  }
+
+  private open(key: string) {
+    if (this.sockets.has(key)) return;
+    const url = `wss://stream.binance.com:9443/ws/${this.stream(key)}`;
+    const ws = new WebSocket(url);
+    ws.onmessage = (ev) => {
+      try {
+        const data = JSON.parse(ev.data);
+        const p = Number(data?.p ?? data?.price);
+        if (!p || isNaN(p)) return;
+        this.listeners.get(key)?.forEach((fn) => fn(p));
+      } catch {}
+    };
+    ws.onclose = () => {
+      this.sockets.delete(key);
+      if (this.listeners.get(key)?.size) {
+        setTimeout(() => this.open(key), 1000);
+      }
+    };
+    this.sockets.set(key, ws);
   }
 }
 
