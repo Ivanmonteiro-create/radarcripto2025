@@ -5,22 +5,25 @@ import { BRAND_NAME } from '@/lib/brand';
 
 export default function SobrePage() {
   return (
-    <main className="panel aboutClassic">
-      <header className="aboutTop">
-        <span className="aboutKicker">SOBRE</span>
-        <Link href="/" className="btn btn-primary aboutBackBtn">Voltar ao início</Link>
-      </header>
+    <main className="aboutHero panel">
+      {/* Faixa superior */}
+      <div className="aboutHeroTop">
+        <span className="aboutTag">SOBRE</span>
+        <Link href="/" className="btn btn-primary aboutBack">Voltar ao início</Link>
+      </div>
 
-      <div className="aboutHead">
-        <h1 className="aboutTitle">SOBRE O {BRAND_NAME.toUpperCase()}</h1>
-        <p className="aboutSubtitle">
+      {/* Título grande com gradiente (estilo da “segunda foto”) */}
+      <header className="aboutHeroHead">
+        <h1 className="aboutHeroTitle">SOBRE O {BRAND_NAME.toUpperCase()}</h1>
+        <p className="aboutHeroSub">
           {BRAND_NAME} é onde você erra, aprende e evolui. Treine no Spot ou no Futuro
           com saldo virtual e prepare-se para ganhar confiança no mercado real.
         </p>
-      </div>
+      </header>
 
-      <section className="aboutGrid">
-        <article className="aboutCard">
+      {/* Três cartões à esquerda (vidro com glow), como no layout antigo */}
+      <section className="aboutHeroGrid">
+        <article className="aboutCardGlass">
           <div className="aboutCardTitle">Errar sem riscos</div>
           <p className="aboutCardText">
             Simulador com <strong>10.000 USDT</strong> virtuais para testar ideias
@@ -28,7 +31,7 @@ export default function SobrePage() {
           </p>
         </article>
 
-        <article className="aboutCard">
+        <article className="aboutCardGlass">
           <div className="aboutCardTitle">Aprender de verdade</div>
           <p className="aboutCardText">
             Pratique <strong>Spot</strong> e <strong>Futuros</strong> com as mesmas
@@ -36,7 +39,7 @@ export default function SobrePage() {
           </p>
         </article>
 
-        <article className="aboutCard">
+        <article className="aboutCardGlass">
           <div className="aboutCardTitle">Evoluir sempre</div>
           <p className="aboutCardText">
             Ganhe confiança antes de operar no real. Ajuste estratégias e acompanhe
