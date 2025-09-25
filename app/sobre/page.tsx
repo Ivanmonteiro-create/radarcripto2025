@@ -2,7 +2,6 @@
 import Link from "next/link";
 
 function ChipIcon({ children, hue = 140 }: { children: React.ReactNode; hue?: number }) {
-  // hue 140 ≈ verde; mude para dar variações leves nos chips
   return (
     <div
       aria-hidden
@@ -12,8 +11,7 @@ function ChipIcon({ children, hue = 140 }: { children: React.ReactNode; hue?: nu
         borderRadius: 12,
         display: "grid",
         placeItems: "center",
-        background:
-          `linear-gradient(180deg, hsla(${hue},70%,42%,.22), hsla(${hue},70%,28%,.12))`,
+        background: `linear-gradient(180deg, hsla(${hue},70%,42%,.22), hsla(${hue},70%,28%,.12))`,
         border: `1px solid hsla(${hue},70%,52%,.35)`,
         boxShadow: `0 0 0 2px hsla(${hue},70%,42%,.10) inset, 0 10px 30px hsla(${hue},70%,24%,.25)`,
         fontSize: 20,
@@ -37,24 +35,22 @@ export default function SobrePage() {
         gap: 14,
       }}
     >
-      {/* Fundo chamativo (camadas) */}
+      {/* Fundo chamativo */}
       <div
         aria-hidden
         style={{
           position: "absolute",
           inset: 0,
           pointerEvents: "none",
-          // grade + brilho radial suave
-          background:
-            `radial-gradient(1200px 600px at 15% -10%, rgba(33,243,141,.10), transparent 55%),
-             radial-gradient(800px 600px at 100% 120%, rgba(33,243,141,.10), transparent 60%)`,
+          background: `radial-gradient(1200px 600px at 15% -10%, rgba(33,243,141,.10), transparent 55%),
+                       radial-gradient(800px 600px at 100% 120%, rgba(33,243,141,.10), transparent 60%)`,
           maskImage:
             "linear-gradient(to bottom, rgba(0,0,0,.9), rgba(0,0,0,.7) 40%, rgba(0,0,0,.9))",
           zIndex: 0,
         }}
       />
 
-      {/* Cabeçalho fino + Voltar */}
+      {/* Cabeçalho */}
       <header
         className="panel"
         style={{
@@ -69,21 +65,27 @@ export default function SobrePage() {
       >
         <div
           style={{
-            color: "var(--muted)",
+            fontSize: 16, // aumentado
+            fontWeight: 900,
+            letterSpacing: ".15em",
             textTransform: "uppercase",
-            letterSpacing: ".18em",
-            fontSize: 11,
+            color: "var(--accent-strong)",
+            textShadow: "0 0 6px rgba(33,243,141,0.6), 0 0 12px rgba(33,243,141,0.35)",
           }}
         >
-          Sobre
+          SOBRE
         </div>
 
-        <Link href="/" className="btn btn-primary" style={{ padding: "10px 14px", borderRadius: 10, fontWeight: 800 }}>
+        <Link
+          href="/"
+          className="btn btn-primary"
+          style={{ padding: "10px 14px", borderRadius: 10, fontWeight: 800 }}
+        >
           Voltar ao início
         </Link>
       </header>
 
-      {/* Hero mais forte */}
+      {/* Hero */}
       <section
         className="panel"
         style={{
@@ -94,7 +96,6 @@ export default function SobrePage() {
           zIndex: 1,
         }}
       >
-        {/* brilho sutil atrás do título */}
         <div
           aria-hidden
           style={{
@@ -111,13 +112,13 @@ export default function SobrePage() {
         <h1
           style={{
             margin: 0,
-            fontSize: 34,         // ↑ maior para chamar atenção
+            fontSize: 34,
             fontWeight: 900,
             letterSpacing: "-0.01em",
             textTransform: "uppercase",
           }}
         >
-          Sobre o <span style={{ color: "var(--accent-strong)" }}>RadarCrypto</span>
+          Sobre o <span style={{ color: "var(--accent-strong)" }}>Radacrypto</span>
         </h1>
         <p
           style={{
@@ -128,13 +129,13 @@ export default function SobrePage() {
             lineHeight: 1.45,
           }}
         >
-          <strong>RadarCrypto</strong>: onde você erra, aprende e evolui.
-          Treine no <strong>Spot</strong> ou no <strong>Futuro</strong> com saldo virtual
-          e prepare-se para ganhar confiança no mercado real.
+          <strong>Radacrypto</strong>: onde você erra, aprende e evolui. Treine no{" "}
+          <strong>Spot</strong> ou no <strong>Futuro</strong> com saldo virtual e
+          prepare-se para ganhar confiança no mercado real.
         </p>
       </section>
 
-      {/* Cartões mais vivos */}
+      {/* Cartões */}
       <section
         className="cards"
         style={{
@@ -151,7 +152,7 @@ export default function SobrePage() {
             display: "grid",
             gap: 12,
             padding: 14,
-            borderColor: "rgba(33,243,141,.28)",           // borda mais presente
+            borderColor: "rgba(33,243,141,.28)",
             boxShadow: "0 0 0 1px rgba(33,243,141,.10) inset",
           }}
         >
@@ -206,10 +207,10 @@ export default function SobrePage() {
         </article>
       </section>
 
-      {/* Fechamento curto */}
+      {/* Fechamento */}
       <section className="panel" style={{ padding: 14, textAlign: "center", zIndex: 1 }}>
         <p style={{ margin: 0, fontSize: 14 }}>
-          O RadarCrypto é mais que um simulador — é a sua{" "}
+          O Radacrypto é mais que um simulador — é a sua{" "}
           <strong>escola de trading</strong>.
         </p>
       </section>
