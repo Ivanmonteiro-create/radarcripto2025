@@ -1,71 +1,62 @@
-/* ===== SOBRE v2 (layout da “foto anterior”) ===== */
-.aboutV2-root{
-  position:relative; max-width:1200px; margin:0 auto; padding:16px 18px;
-  overflow:hidden;
-}
-.aboutV2-top{
-  display:flex; align-items:center; justify-content:space-between;
-  gap:12px; margin-bottom:12px;
-}
-.aboutV2-tag{
-  font-size:12px; letter-spacing:.22em; color:var(--muted);
-  padding:6px 10px; border:1px solid rgba(255,255,255,.10);
-  border-radius:999px; background:rgba(255,255,255,.03);
-}
-.aboutV2-back{ padding:10px 14px; border-radius:10px; font-weight:800 }
+// app/sobre/page.tsx
+'use client';
 
-/* grid com 3 colunas (cards | título | vazio) */
-.aboutV2-hero{
-  position:relative;
-  display:grid;
-  grid-template-columns: 340px 1fr 180px;
-  gap: 18px;
-  min-height: 60vh;
-}
-@media (max-width: 1100px){
-  .aboutV2-hero{ grid-template-columns:1fr; }
-}
+import Link from 'next/link';
+import { BRAND_NAME } from '@/lib/brand';
 
-/* Cards empilhados (vidro) */
-.aboutV2-cards{ display:grid; gap:12px; align-content:start; }
-.aboutV2-card{
-  border-radius:14px; padding:14px;
-  background:
-    radial-gradient(900px 900px at -20% -20%, rgba(33,243,141,.08), transparent 40%),
-    rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.10);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 8px 26px rgba(0,0,0,.25);
-}
-.aboutV2-cardTitle{
-  color:var(--accent-strong); font-weight:900; margin-bottom:6px; letter-spacing:.01em;
-}
-.aboutV2-cardText{ margin:0; opacity:.95 }
+export default function SobrePage() {
+  return (
+    <main className="max-w-5xl mx-auto px-6 py-12">
+      {/* Tag e botão no topo */}
+      <div className="flex items-center justify-between mb-8">
+        <span className="text-xs tracking-widest text-gray-400 border border-gray-700 rounded-full px-3 py-1">
+          SOBRE
+        </span>
+        <Link
+          href="/"
+          className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded-lg transition"
+        >
+          Voltar ao início
+        </Link>
+      </div>
 
-/* Centro: título gigante com gradiente + subtítulo */
-.aboutV2-center{
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  text-align:center; padding:8px 10px; position:relative;
-}
-.aboutV2-title{
-  margin:0;
-  font-weight:1000; letter-spacing:.02em;
-  font-size: clamp(32px, 6vw, 76px);
-  background: linear-gradient(180deg,#dfffe9 0%, #1cff80 100%);
-  -webkit-background-clip:text; background-clip:text;
-  -webkit-text-fill-color:transparent;
-  text-shadow: 0 6px 28px rgba(33,243,141,.18);
-}
-.aboutV2-sub{
-  margin:12px auto 0; max-width: 760px;
-  color:#c9eedc; opacity:.9; font-size: clamp(14px,1.6vw,18px);
-}
+      {/* Título + subtítulo */}
+      <div className="text-center mb-12">
+        <h1 className="text-4xl md:text-6xl font-extrabold bg-gradient-to-b from-green-100 to-green-500 bg-clip-text text-transparent drop-shadow-lg">
+          SOBRE O {BRAND_NAME.toUpperCase()}
+        </h1>
+        <p className="mt-4 text-gray-300 max-w-2xl mx-auto">
+          {BRAND_NAME} é onde você erra, aprende e evolui. Treine no Spot ou no Futuro
+          com saldo virtual e prepare-se para ganhar confiança no mercado real.
+        </p>
+      </div>
 
-/* coluna direita fica vazia (respiro visual) */
-.aboutV2-right{}
+      {/* Cards */}
+      <div className="grid md:grid-cols-3 gap-6">
+        <div className="bg-white/5 border border-white/10 rounded-xl p-6 shadow-lg backdrop-blur">
+          <h3 className="text-green-400 font-bold mb-2">Errar sem riscos</h3>
+          <p className="text-gray-300">
+            Simulador com <strong>10.000 USDT</strong> virtuais para testar ideias sem
+            arriscar dinheiro real.
+          </p>
+        </div>
 
-/* brilho suave de fundo (ajuda a “separar” como na foto antiga) */
-.aboutV2-root::before{
-  content:""; position:absolute; inset:-40%;
-  background: radial-gradient(60% 60% at 70% 10%, rgba(33,243,141,.06), transparent 60%);
-  pointer-events:none;
+        <div className="bg-white/5 border border-white/10 rounded-xl p-6 shadow-lg backdrop-blur">
+          <h3 className="text-green-400 font-bold mb-2">Aprender de verdade</h3>
+          <p className="text-gray-300">
+            Pratique <strong>Spot</strong> e <strong>Futuros</strong> com as mesmas
+            noções de risco do dia a dia.
+          </p>
+        </div>
+
+        <div className="bg-white/5 border border-white/10 rounded-xl p-6 shadow-lg backdrop-blur">
+          <h3 className="text-green-400 font-bold mb-2">Evoluir sempre</h3>
+          <p className="text-gray-300">
+            Ganhe confiança antes de operar no real. Ajuste estratégias e acompanhe sua
+            evolução no histórico.
+          </p>
+        </div>
+      </div>
+    </main>
+  );
 }
