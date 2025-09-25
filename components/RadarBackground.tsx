@@ -2,112 +2,134 @@
 
 import { useEffect, useRef } from 'react';
 
-type Props = {
-  className?: string;
-  style?: React.CSSProperties;
-  /** velocidade do feixe (0.3~1.2 fica legal) */
-  speed?: number;
-};
-
-export default function RadarBackground({ className, style, speed = 0.6 }: Props) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const rafRef = useRef<number | null>(null);
+export default function RadarBackground() {
+  const ref = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
+    const canvas = ref.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    let raf = 0;
 
-    const fit = () => {
-      const parent = canvas.parentElement;
-      const w = (parent?.clientWidth || window.innerWidth);
-      const h = (parent?.clientHeight || window.innerHeight);
-      canvas.width = Math.floor(w * dpr);
-      canvas.height = Math.floor(h * dpr);
-      canvas.style.width = `${w}px`;
-      canvas.style.height = `${h}px`;
+    // pega o verde do tema (globals.css -> --accent)
+    const css = getComputedStyle(document.documentElement);
+    const ACCENT = (css.getPropertyValue('--accent') || '#21f38d').trim();
+    const ACCENT_STRONG = (css.getPropertyValue('--accent-strong') || '#1cff80').trim();
+
+    const resize = () => {
+      const dpr = Math.max(1, window.devicePixelRatio || 1);
+      const { clientWidth: w, clientHeight: h } = canvas.parentElement || canvas;
+      canvas.width = Math.max(1, w) * dpr;
+      canvas.height = Math.max(1, h) * dpr;
+      canvas.style.width = `${Math.max(1, w)}px`;
+      canvas.style.height = `${Math.max(1, h)}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
-    fit();
-    let angle = 0;
+    resize();
+    const onResize = () => resize();
+    window.addEventListener('resize', onResize);
 
-    const draw = () => {
-      // largura/altura em CSS pixels
-      const w = canvas.width / dpr;
-      const h = canvas.height / dpr;
+    let angle = 0; // em radianos
+    const speed = 0.9; // rad/s (mais suave)
 
-      // fundo sutil
+    const draw = (ts: number) => {
+      const t = ts / 1000;
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+
+      // limpar
       ctx.clearRect(0, 0, w, h);
-      const bg = ctx.createLinearGradient(0, 0, w, h);
-      bg.addColorStop(0, 'rgba(33,243,141,0.05)');
-      bg.addColorStop(1, 'rgba(33,243,141,0.02)');
-      ctx.fillStyle = bg;
+
+      // centro e raio principal (radar maior, centralizado)
+      const cx = w / 2;
+      const cy = h / 2;
+      const r = Math.min(w, h) * 0.46;
+
+      // leve vinheta para dar profundidade
+      const vignette = ctx.createRadialGradient(cx, cy, r * 0.2, cx, cy, r * 1.2);
+      vignette.addColorStop(0, 'rgba(0,0,0,0)');
+      vignette.addColorStop(1, 'rgba(0,0,0,0.45)');
+      ctx.fillStyle = vignette;
       ctx.fillRect(0, 0, w, h);
 
-      // grade
-      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-      ctx.lineWidth = 1;
-      const step = 60;
-      for (let x = 0; x <= w; x += step) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
-      }
-      for (let y = 0; y <= h; y += step) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
-      }
-
-      // radar
-      const cx = w * 0.75;
-      const cy = h * 0.5;
-      const r = Math.min(w, h) * 0.45;
-
+      // grade circular (anéis)
       ctx.save();
       ctx.translate(cx, cy);
-
-      // anéis
-      ctx.strokeStyle = 'rgba(33,243,141,0.18)';
-      for (let rr = r; rr > 0; rr -= r / 4) {
-        ctx.beginPath(); ctx.arc(0, 0, rr, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+      ctx.lineWidth = 1;
+      const rings = 5;
+      for (let i = 1; i <= rings; i++) {
+        ctx.beginPath();
+        ctx.arc(0, 0, (r / rings) * i, 0, Math.PI * 2);
+        ctx.stroke();
       }
-
-      // feixe
-      const sweep = Math.PI / 8;
-      const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
-      grad.addColorStop(0, 'rgba(33,243,141,0.35)');
-      grad.addColorStop(1, 'rgba(33,243,141,0)');
-      ctx.fillStyle = grad;
+      // cruz central
       ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.arc(0, 0, r, angle, angle + sweep, false);
-      ctx.closePath();
-      ctx.fill();
+      ctx.moveTo(-r, 0);
+      ctx.lineTo(r, 0);
+      ctx.moveTo(0, -r);
+      ctx.lineTo(0, r);
+      ctx.stroke();
 
+      // ponto central
+      ctx.fillStyle = ACCENT_STRONG;
+      ctx.beginPath();
+      ctx.arc(0, 0, 3, 0, Math.PI * 2);
+      ctx.fill();
       ctx.restore();
 
-      angle += (speed / 180) * Math.PI; // ~deg/frame
-      rafRef.current = requestAnimationFrame(draw);
+      // “sweep” (setor que roda)
+      angle = (angle + speed * (1 / 60)) % (Math.PI * 2);
+
+      const sweepWidth = Math.PI / 10; // largura angular do feixe
+      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+      grad.addColorStop(0, `${ACCENT}22`);
+      grad.addColorStop(0.4, `${ACCENT}18`);
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, r, angle - sweepWidth, angle + sweepWidth, false);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+
+      // borda externa com leve brilho
+      ctx.save();
+      ctx.strokeStyle = ACCENT;
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.6;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+
+      raf = requestAnimationFrame(draw);
     };
 
-    const onResize = () => fit();
-
-    window.addEventListener('resize', onResize);
-    rafRef.current = requestAnimationFrame(draw);
+    raf = requestAnimationFrame(draw);
 
     return () => {
+      cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
-      if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
     };
-  }, [speed]);
+  }, []);
 
   return (
     <canvas
-      ref={canvasRef}
-      className={className}
-      style={{ position: 'absolute', inset: 0, ...style }}
+      ref={ref}
+      style={{
+        display: 'block',
+        width: '100%',
+        height: '100%',
+      }}
       aria-hidden="true"
     />
   );
