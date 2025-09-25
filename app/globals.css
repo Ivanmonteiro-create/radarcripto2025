@@ -700,3 +700,114 @@ section.panel .chartFsBtn:hover { background: rgba(255,255,255,.18); color:#fff;
   font-size: 14px;
   margin: 8px 0;
 }
+/* =============================
+   FALE COM A GENTE — estilos
+   ============================= */
+.contactRoot{
+  overflow: hidden;
+  padding: 22px;
+  min-height: 100dvh;
+}
+
+/* botão no topo direito */
+.backTopRight{
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 800;
+}
+
+/* camada do radar */
+.radarLayer{
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/* conteúdo acima do radar */
+.contactContent{
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* cabeçalho */
+.eyebrow{
+  color: var(--muted);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+.contactTitle{
+  margin: 0 0 6px;
+  font-size: clamp(26px, 4.2vw, 44px);
+  font-weight: 900;
+  color: #dfffea;
+  text-shadow: 0 0 14px rgba(33,243,141,.18);
+}
+.contactSubtitle{
+  margin: 0 0 18px;
+  color: #cfeede;
+  opacity: .9;
+}
+
+/* grid dos cards */
+.contactGrid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 980px){
+  .contactGrid{ grid-template-columns: 1fr; }
+}
+
+/* card com contorno/glow verdes (matching “Sobre”) */
+.contactCard{
+  background: rgba(255,255,255,.02);
+  border: 1px solid rgba(33,243,141,.35);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow:
+    0 0 0 1px rgba(33,243,141,.12) inset,
+    0 0 36px rgba(33,243,141,.10);
+}
+.cardHead{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.badge{
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  border: 1px solid rgba(33,243,141,.35);
+  background: linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10));
+  color: #1cff80;
+  font-weight: 800;
+}
+.cardText{ margin: 0 0 10px; color: #d5fbe6; opacity: .92; }
+
+.field{ display: grid; gap: 6px; margin-bottom: 10px; }
+.fakeInput{
+  height: 36px;
+  display: grid; align-items: center;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.05);
+  color: #e7fff3;
+}
+.actions .btn{ width: 100%; }
+
+/* deixa os botões combinando com o tema */
+.contactCard .btn{
+  background: linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10));
+  border: 1px solid rgba(33,243,141,.35);
+  color: #1cff80;
+  font-weight: 800;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.contactCard .btn:disabled{ opacity: .6; cursor: not-allowed; }
