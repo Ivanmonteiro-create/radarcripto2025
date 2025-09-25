@@ -1,218 +1,89 @@
-// app/sobre/page.tsx
-import Link from "next/link";
+'use client';
 
-function ChipIcon({ children, hue = 140 }: { children: React.ReactNode; hue?: number }) {
-  return (
-    <div
-      aria-hidden
-      style={{
-        width: 40,
-        height: 40,
-        borderRadius: 12,
-        display: "grid",
-        placeItems: "center",
-        background: `linear-gradient(180deg, hsla(${hue},70%,42%,.22), hsla(${hue},70%,28%,.12))`,
-        border: `1px solid hsla(${hue},70%,52%,.35)`,
-        boxShadow: `0 0 0 2px hsla(${hue},70%,42%,.10) inset, 0 10px 30px hsla(${hue},70%,24%,.25)`,
-        fontSize: 20,
-        color: "var(--accent-strong)",
-      }}
-    >
-      {children}
-    </div>
-  );
-}
+import Link from 'next/link';
+import { BRAND_NAME } from '@/lib/brand';
 
 export default function SobrePage() {
   return (
-    <main
-      className="sobrePage"
-      style={{
-        minHeight: "100dvh",
-        position: "relative",
-        padding: 16,
-        display: "grid",
-        gap: 14,
-      }}
-    >
-      {/* Fundo chamativo */}
-      <div
-        aria-hidden
-        style={{
-          position: "absolute",
-          inset: 0,
-          pointerEvents: "none",
-          background: `radial-gradient(1200px 600px at 15% -10%, rgba(33,243,141,.10), transparent 55%),
-                       radial-gradient(800px 600px at 100% 120%, rgba(33,243,141,.10), transparent 60%)`,
-          maskImage:
-            "linear-gradient(to bottom, rgba(0,0,0,.9), rgba(0,0,0,.7) 40%, rgba(0,0,0,.9))",
-          zIndex: 0,
-        }}
-      />
-
-      {/* Cabeçalho */}
-      <header
-        className="panel"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr auto",
-          alignItems: "center",
-          gap: 10,
-          padding: 14,
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
+    <main className="wrapper" style={{ gridTemplateColumns: '1fr', paddingTop: 24 }}>
+      <section className="panel" style={{ position: 'relative' }}>
+        {/* Título chamativo */}
         <div
           style={{
-            fontSize: 16, // aumentado
-            fontWeight: 900,
-            letterSpacing: ".15em",
-            textTransform: "uppercase",
-            color: "var(--accent-strong)",
-            textShadow: "0 0 6px rgba(33,243,141,0.6), 0 0 12px rgba(33,243,141,0.35)",
+            display: 'grid',
+            gridTemplateColumns: '1fr auto',
+            alignItems: 'center',
+            marginBottom: 16,
           }}
         >
-          SOBRE
+          <h1
+            style={{
+              margin: 0,
+              fontSize: 'clamp(28px, 5vw, 56px)',
+              lineHeight: 1.04,
+              fontWeight: 900,
+              letterSpacing: '.02em',
+              textTransform: 'uppercase',
+              background:
+                'linear-gradient(90deg,#c9eedc 0%, #1cff80 45%, #7bffc3 100%)',
+              WebkitBackgroundClip: 'text',
+              backgroundClip: 'text',
+              color: 'transparent',
+              filter: 'drop-shadow(0 4px 18px rgba(33,243,141,.18))',
+            }}
+          >
+            Sobre o {BRAND_NAME}
+          </h1>
+
+          <Link href="/" className="btn btn-primary" style={{ padding: '12px 18px', borderRadius: 12 }}>
+            Voltar ao início
+          </Link>
         </div>
 
-        <Link
-          href="/"
-          className="btn btn-primary"
-          style={{ padding: "10px 14px", borderRadius: 10, fontWeight: 800 }}
-        >
-          Voltar ao início
-        </Link>
-      </header>
+        {/* Subtítulo curto */}
+        <p style={{ marginTop: 0, marginBottom: 20, opacity: 0.9, maxWidth: 900 }}>
+          {BRAND_NAME}: onde você erra, aprende e evolui. Treine no Spot ou no Futuro com
+          saldo virtual e prepare-se para ganhar confiança no mercado real.
+        </p>
 
-      {/* Hero */}
-      <section
-        className="panel"
-        style={{
-          position: "relative",
-          overflow: "hidden",
-          padding: "22px 16px",
-          textAlign: "center",
-          zIndex: 1,
-        }}
-      >
+        {/* Cards */}
         <div
-          aria-hidden
           style={{
-            position: "absolute",
-            insetInline: "15%",
-            top: -80,
-            height: 200,
-            borderRadius: 999,
-            background:
-              "radial-gradient(closest-side, rgba(33,243,141,.22), rgba(33,243,141,0))",
-            filter: "blur(24px)",
-          }}
-        />
-        <h1
-          style={{
-            margin: 0,
-            fontSize: 34,
-            fontWeight: 900,
-            letterSpacing: "-0.01em",
-            textTransform: "uppercase",
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, minmax(260px, 1fr))',
+            gap: 14,
           }}
         >
-          Sobre o <span style={{ color: "var(--accent-strong)" }}>Radacrypto</span>
-        </h1>
-        <p
-          style={{
-            margin: "8px auto 0",
-            color: "var(--muted)",
-            fontSize: 16,
-            maxWidth: 860,
-            lineHeight: 1.45,
-          }}
-        >
-          <strong>Radacrypto</strong>: onde você erra, aprende e evolui. Treine no{" "}
-          <strong>Spot</strong> ou no <strong>Futuro</strong> com saldo virtual e
-          prepare-se para ganhar confiança no mercado real.
-        </p>
-      </section>
+          {/* Errar sem riscos */}
+          <article className="panel" style={{ padding: 16 }}>
+            <div style={{ fontWeight: 800, color: '#1cff80', marginBottom: 8 }}>
+              Errar sem riscos
+            </div>
+            <p style={{ margin: 0, opacity: 0.9 }}>
+              Simulador com 10.000 USDT virtuais para testar ideias sem expor dinheiro real.
+            </p>
+          </article>
 
-      {/* Cartões */}
-      <section
-        className="cards"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, minmax(260px, 1fr))",
-          gap: 14,
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        <article
-          className="panel"
-          style={{
-            display: "grid",
-            gap: 12,
-            padding: 14,
-            borderColor: "rgba(33,243,141,.28)",
-            boxShadow: "0 0 0 1px rgba(33,243,141,.10) inset",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <ChipIcon hue={140}>🧪</ChipIcon>
-            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 900 }}>Errar sem riscos</h2>
-          </div>
-          <p style={{ margin: 0, color: "var(--muted)", fontSize: 14, lineHeight: 1.5 }}>
-            Simulador com <strong>10.000 USDT</strong> virtuais para testar ideias sem
-            arriscar dinheiro real.
-          </p>
-        </article>
+          {/* Aprender de verdade */}
+          <article className="panel" style={{ padding: 16 }}>
+            <div style={{ fontWeight: 800, color: '#1cff80', marginBottom: 8 }}>
+              Aprender de verdade
+            </div>
+            <p style={{ margin: 0, opacity: 0.9 }}>
+              Pratique Spot e Futuro com as mesmas regras e noções de risco aplicadas ao dia a dia.
+            </p>
+          </article>
 
-        <article
-          className="panel"
-          style={{
-            display: "grid",
-            gap: 12,
-            padding: 14,
-            borderColor: "rgba(33,243,141,.28)",
-            boxShadow: "0 0 0 1px rgba(33,243,141,.10) inset",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <ChipIcon hue={150}>📈</ChipIcon>
-            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 900 }}>Aprender de verdade</h2>
-          </div>
-          <p style={{ margin: 0, color: "var(--muted)", fontSize: 14, lineHeight: 1.5 }}>
-            Pratique <strong>Spot</strong> e <strong>Futuro</strong> com noções de risco
-            aplicadas ao dia a dia e métricas claras.
-          </p>
-        </article>
-
-        <article
-          className="panel"
-          style={{
-            display: "grid",
-            gap: 12,
-            padding: 14,
-            borderColor: "rgba(33,243,141,.28)",
-            boxShadow: "0 0 0 1px rgba(33,243,141,.10) inset",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <ChipIcon hue={160}>🚀</ChipIcon>
-            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 900 }}>Evoluir sempre</h2>
-          </div>
-          <p style={{ margin: 0, color: "var(--muted)", fontSize: 14, lineHeight: 1.5 }}>
-            Ganhe <strong>confiança</strong> antes de operar no real. Ajuste estratégias
-            e acompanhe sua evolução no histórico.
-          </p>
-        </article>
-      </section>
-
-      {/* Fechamento */}
-      <section className="panel" style={{ padding: 14, textAlign: "center", zIndex: 1 }}>
-        <p style={{ margin: 0, fontSize: 14 }}>
-          O Radacrypto é mais que um simulador — é a sua{" "}
-          <strong>escola de trading</strong>.
-        </p>
+          {/* Evoluir sempre */}
+          <article className="panel" style={{ padding: 16 }}>
+            <div style={{ fontWeight: 800, color: '#1cff80', marginBottom: 8 }}>
+              Evoluir sempre
+            </div>
+            <p style={{ margin: 0, opacity: 0.9 }}>
+              Ganhe confiança antes de operar no real. Ajuste estratégias e acompanhe sua evolução no histórico.
+            </p>
+          </article>
+        </div>
       </section>
     </main>
   );
