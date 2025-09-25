@@ -1,20 +1,15 @@
 // app/planos/page.tsx
 import Link from "next/link";
 
-type Feature = {
-  text: string;
-  soon?: boolean;     // mostra "em breve"
-  locked?: boolean;   // mostra cadeado
-};
-
+type Feature = { text: string; soon?: boolean; locked?: boolean };
 type Plano = {
   slug: string;
   titulo: string;
   subtitulo: string;
   preco: string;
-  por: string;        // /mês, /ano, etc.
-  destaque?: string;  // badge (ex: "MAIS POPULAR")
-  acoesLabel: string; // texto do botão principal
+  por: string;
+  destaque?: string;
+  acoesLabel: string;
   recursos: Feature[];
 };
 
@@ -96,14 +91,14 @@ function IconOk() {
       aria-hidden
       style={{
         display: "inline-block",
-        width: 16,
-        height: 16,
+        width: 14,
+        height: 14,
         borderRadius: 4,
         border: "1px solid rgba(255,255,255,.25)",
-        marginRight: 8,
+        marginRight: 6,
         textAlign: "center",
-        lineHeight: "14px",
-        fontSize: 12,
+        lineHeight: "12px",
+        fontSize: 10,
         color: "#1cff80",
       }}
     >
@@ -111,24 +106,23 @@ function IconOk() {
     </span>
   );
 }
-
 function IconLock() {
   return (
     <span
       aria-hidden
+      title="Em breve"
       style={{
         display: "inline-block",
-        width: 16,
-        height: 16,
+        width: 14,
+        height: 14,
         borderRadius: 4,
         border: "1px solid rgba(255,255,255,.25)",
-        marginRight: 8,
+        marginRight: 6,
         textAlign: "center",
-        lineHeight: "14px",
-        fontSize: 12,
+        lineHeight: "12px",
+        fontSize: 10,
         color: "rgba(255,255,255,.75)",
       }}
-      title="Em breve"
     >
       🔒
     </span>
@@ -137,141 +131,94 @@ function IconLock() {
 
 export default function PlanosPage() {
   return (
-    <main
-      style={{
-        minHeight: "100dvh",
-        padding: 16,
-        display: "grid",
-        gap: 16,
-      }}
-    >
-      {/* Barra superior: título + botão Voltar ao início (à direita) */}
-      <header
-        className="panel"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr auto",
-          alignItems: "center",
-          gap: 12,
-        }}
-      >
+    <main className="pricingPage" style={{ minHeight: "100dvh", padding: 12, display: "grid", gap: 12 }}>
+      {/* Top bar com botão à DIREITA */}
+      <header className="panel" style={{ display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center", gap: 10, padding: 12 }}>
         <div>
-          <div
-            style={{
-              color: "var(--muted)",
-              textTransform: "uppercase",
-              letterSpacing: ".12em",
-              fontSize: 12,
-            }}
-          >
-            Planos
-          </div>
+          <div className="pp-eyebrow">Planos</div>
         </div>
-
-        <Link href="/" className="btn btn-primary" style={{ padding: "10px 14px", borderRadius: 10 }}>
-          Voltar ao início
-        </Link>
+        <Link href="/" className="btn btn-primary pp-back">Voltar ao início</Link>
       </header>
 
-      {/* Título da seção */}
-      <section
-        className="panel"
-        style={{
-          textAlign: "center",
-          paddingBlock: 18,
-        }}
-      >
-        <h1 style={{ margin: 0, fontSize: 28, fontWeight: 900 }}>
-          Escolha seu caminho no RadarCrypto
-        </h1>
-        <p style={{ margin: "6px 0 0", color: "var(--muted)" }}>
+      {/* Título */}
+      <section className="panel" style={{ textAlign: "center", paddingBlock: 14 }}>
+        <h1 className="pp-title">Escolha seu caminho no RadarCrypto</h1>
+        <p className="pp-sub">
           Comece no Spot com 10.000 USDT simulados. Evolua para Gestão de Risco, Futuros e Robôs conforme o plano.
         </p>
       </section>
 
-      {/* Cards */}
-      <section
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, minmax(240px, 1fr))",
-          gap: 16,
-        }}
-      >
+      {/* Cards compactados */}
+      <section className="pp-grid">
         {planos.map((p) => (
-          <article key={p.slug} className="panel" style={{ display: "grid", gap: 12 }}>
-            {/* badge opcional */}
-            {p.destaque && (
-              <div
-                style={{
-                  alignSelf: "start",
-                  justifySelf: "start",
-                  fontSize: 12,
-                  padding: "6px 10px",
-                  borderRadius: 999,
-                  border: "1px solid rgba(33,243,141,.35)",
-                  background: "rgba(33,243,141,.12)",
-                  color: "var(--accent-strong)",
-                  fontWeight: 800,
-                }}
-              >
-                {p.destaque}
-              </div>
-            )}
+          <article key={p.slug} className="panel pp-card">
+            {p.destaque && <div className="pp-badge">{p.destaque}</div>}
 
             <div>
-              <div style={{ color: "var(--muted)", fontSize: 12 }}>{p.subtitulo}</div>
-              <h2 style={{ margin: "2px 0 0", fontSize: 22, fontWeight: 900 }}>{p.titulo}</h2>
+              <div className="pp-subtitle">{p.subtitulo}</div>
+              <h2 className="pp-cardTitle">{p.titulo}</h2>
             </div>
 
-            {/* preço */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "baseline",
-                gap: 8,
-                marginTop: 2,
-              }}
-            >
-              <div style={{ fontSize: 28, fontWeight: 900 }}>{p.preco}</div>
-              <div style={{ color: "var(--muted)", fontSize: 12 }}>{p.por}</div>
+            <div className="pp-priceRow">
+              <div className="pp-price">{p.preco}</div>
+              <div className="pp-per">{p.por}</div>
             </div>
 
-            {/* lista de recursos */}
-            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 8 }}>
+            <ul className="pp-list">
               {p.recursos.map((f, i) => (
-                <li key={i} style={{ display: "flex", alignItems: "center" }}>
+                <li key={i} className="pp-item">
                   {f.locked || f.soon ? <IconLock /> : <IconOk />}
-                  <span style={{ fontSize: 14 }}>
-                    {f.text}{" "}
-                    {f.soon && (
-                      <span
-                        style={{
-                          fontSize: 11,
-                          marginLeft: 6,
-                          padding: "2px 6px",
-                          borderRadius: 999,
-                          background: "rgba(255,255,255,.08)",
-                          border: "1px solid rgba(255,255,255,.18)",
-                          color: "rgba(255,255,255,.75)",
-                        }}
-                      >
-                        em breve
-                      </span>
-                    )}
+                  <span className="pp-itemText">
+                    {f.text}
+                    {f.soon && <span className="pp-soon">em breve</span>}
                   </span>
                 </li>
               ))}
             </ul>
 
-            {/* ações */}
-            <div style={{ display: "grid", gap: 8, marginTop: 4 }}>
-              <button className="btn btn-primary" style={{ padding: "12px 14px", borderRadius: 12 }}>
-                {p.acoesLabel}
-              </button>
+            <div>
+              <button className="btn btn-primary pp-cta">{p.acoesLabel}</button>
             </div>
           </article>
         ))}
       </section>
+
+      {/* CSS compacto local */}
+      <style jsx global>{`
+        .pricingPage .pp-eyebrow { color: var(--muted); text-transform: uppercase; letter-spacing: .12em; font-size: 11px; }
+        .pricingPage .pp-back { padding: 8px 12px; border-radius: 10px; font-size: 13px; }
+
+        .pricingPage .pp-title { margin: 0; font-size: 24px; font-weight: 900; }
+        .pricingPage .pp-sub { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+
+        .pricingPage .pp-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(230px, 1fr)); /* ↓ menor largura mínima */
+          gap: 12px;
+        }
+        .pricingPage .pp-card { display: grid; gap: 10px; padding: 12px; } /* ↓ padding */
+        .pricingPage .pp-badge {
+          align-self: start; justify-self: start;
+          font-size: 11px; padding: 4px 8px; border-radius: 999px;
+          border: 1px solid rgba(33,243,141,.35); background: rgba(33,243,141,.12);
+          color: var(--accent-strong); font-weight: 800;
+        }
+        .pricingPage .pp-subtitle { color: var(--muted); font-size: 12px; }
+        .pricingPage .pp-cardTitle { margin: 2px 0 0; font-size: 18px; font-weight: 900; } /* ↓ título */
+        .pricingPage .pp-priceRow { display: flex; align-items: baseline; gap: 6px; }
+        .pricingPage .pp-price { font-size: 22px; font-weight: 900; }  /* ↓ preço */
+        .pricingPage .pp-per { color: var(--muted); font-size: 11px; }
+
+        .pricingPage .pp-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; } /* ↓ espaçamento da lista */
+        .pricingPage .pp-item { display: flex; align-items: center; }
+        .pricingPage .pp-itemText { font-size: 13px; } /* ↓ texto item */
+        .pricingPage .pp-soon {
+          font-size: 10px; margin-left: 6px; padding: 1px 6px; border-radius: 999px;
+          background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.18); color: rgba(255,255,255,.75);
+        }
+
+        .pricingPage .pp-cta { padding: 9px 12px; border-radius: 10px; font-size: 13px; } /* ↓ CTA */
+      `}</style>
     </main>
   );
 }
