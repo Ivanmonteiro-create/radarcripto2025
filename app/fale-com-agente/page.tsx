@@ -1,54 +1,101 @@
-'use client';
-
+// app/fale-com-a-gente/page.tsx
 import Link from 'next/link';
 import RadarBackground from '@/components/RadarBackground';
 
 export default function FalePage() {
   return (
-    <main className="withBg" style={{ position: 'relative' }}>
-      <RadarBackground />
+    <main style={{ position: 'relative', minHeight: '100dvh' }}>
+      {/* Fundo animado (canvas) */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 0, opacity: 0.9 }}>
+        <RadarBackground />
+      </div>
 
-      <header style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-        <Link href="/" className="menuBtn">Voltar ao início</Link>
-      </header>
-
-      <h1 className="pageTitle">Fale com a gente</h1>
-      <p className="muted" style={{ maxWidth: 680, marginBottom: 24 }}>
-        Quer falar com nossa equipe? Estamos finalizando os canais oficiais. Em breve você poderá
-        chamar no WhatsApp ou enviar um e-mail.
-      </p>
-
-      <div className="contactGrid">
-        <section className="contactCard">
-          <div className="contactTitle">WhatsApp (em breve)</div>
-          <p className="muted small" style={{ marginTop: 6 }}>
-            Atenderemos pelo WhatsApp Business; assim que o número dedicado estiver ativo, o botão
-            ficará disponível aqui.
+      {/* Conteúdo */}
+      <section
+        className="panel"
+        style={{
+          position: 'relative',
+          zIndex: 1,
+          maxWidth: 1100,
+          margin: '0 auto',
+          padding: 18,
+        }}
+      >
+        <header style={{ marginBottom: 16 }}>
+          <div
+            className="small muted"
+            style={{
+              letterSpacing: '.18em',
+              textTransform: 'uppercase',
+              marginBottom: 6,
+            }}
+          >
+            Fale com a gente
+          </div>
+          <h1 style={{ margin: 0, fontSize: 28, fontWeight: 900 }}>
+            Quer falar com nossa equipe?
+          </h1>
+          <p className="muted" style={{ marginTop: 8 }}>
+            Estamos finalizando os canais oficiais. Em breve você poderá chamar no
+            WhatsApp ou enviar um e-mail para suporte.
           </p>
-          <button className="btn" disabled style={{ width: '100%', cursor: 'not-allowed', opacity: .65 }}>
-            Abrir WhatsApp
-          </button>
-        </section>
+        </header>
 
-        <section className="contactCard">
-          <div className="contactTitle">E-mail (em breve)</div>
-          <p className="muted small" style={{ marginTop: 6 }}>
-            Teremos um endereço <strong>atendimento@radarcripto.space</strong> para suporte e dúvidas.
-          </p>
-          <button className="btn" disabled style={{ width: '100%', cursor: 'not-allowed', opacity: .65 }}>
-            Enviar e-mail
-          </button>
-        </section>
+        {/* GRID 2 colunas */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: 16,
+          }}
+        >
+          {/* Cartão – WhatsApp */}
+          <div className="cardMini" style={{ background: 'rgba(0,0,0,.15)', borderRadius: 12, padding: 14, border: '1px solid rgba(255,255,255,.08)' }}>
+            <div className="small" style={{ fontWeight: 800, marginBottom: 6 }}>
+              WhatsApp <span className="muted">(em breve)</span>
+            </div>
+            <p className="muted" style={{ marginTop: 0 }}>
+              Atenderemos por WhatsApp Business assim que o número dedicado estiver ativo.
+            </p>
 
-        <section className="contactCard">
-          <div className="contactTitle">Site</div>
-          <p className="muted small" style={{ marginTop: 6 }}>
-            <strong>radarcripto.space</strong>
-          </p>
-          <Link href="https://www.radarcripto.space" target="_blank" className="btn" style={{ width: '100%' }}>
-            Abrir site
-          </Link>
-        </section>
+            <div className="lbl" style={{ marginTop: 10 }}>Site:</div>
+            <div className="inp inp-disabled" style={{ display: 'flex', alignItems: 'center' }}>
+              radarcripto.space
+            </div>
+
+            <div style={{ marginTop: 12 }}>
+              <button className="btn inp-disabled" disabled style={{ width: '100%' }}>
+                Abrir WhatsApp
+              </button>
+            </div>
+          </div>
+
+          {/* Cartão – E-mail */}
+          <div className="cardMini" style={{ background: 'rgba(0,0,0,.15)', borderRadius: 12, padding: 14, border: '1px solid rgba(255,255,255,.08)' }}>
+            <div className="small" style={{ fontWeight: 800, marginBottom: 6 }}>
+              E-mail <span className="muted">(em breve)</span>
+            </div>
+            <p className="muted" style={{ marginTop: 0 }}>
+              Teremos um endereço <span style={{ fontWeight: 700 }}>@radarcripto.space</span> para suporte e dúvidas.
+            </p>
+
+            <div className="lbl" style={{ marginTop: 10 }}>Endereço</div>
+            <div className="inp inp-disabled" style={{ display: 'flex', alignItems: 'center' }}>
+              suporte@radarcripto.space
+            </div>
+
+            <div style={{ marginTop: 12 }}>
+              <button className="btn inp-disabled" disabled style={{ width: '100%' }}>
+                Enviar e-mail
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Botão flutuante “Voltar ao início” */}
+      <div style={{ position: 'fixed', right: 16, bottom: 16, zIndex: 2 }}>
+        <Link href="/" className="btn btn-primary">Voltar ao início</Link>
       </div>
     </main>
   );
