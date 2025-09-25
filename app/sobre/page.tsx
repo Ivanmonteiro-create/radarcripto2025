@@ -5,47 +5,55 @@ import { BRAND_NAME } from '@/lib/brand';
 
 export default function SobrePage() {
   return (
-    <main className="aboutHero panel">
-      {/* Faixa superior */}
-      <div className="aboutHeroTop">
-        <span className="aboutTag">SOBRE</span>
-        <Link href="/" className="btn btn-primary aboutBack">Voltar ao início</Link>
+    <main className="panel aboutV2-root">
+      {/* Top bar */}
+      <div className="aboutV2-top">
+        <span className="aboutV2-tag">SOBRE</span>
+        <Link href="/" className="btn btn-primary aboutV2-back">Voltar ao início</Link>
       </div>
 
-      {/* Título grande com gradiente (estilo da “segunda foto”) */}
-      <header className="aboutHeroHead">
-        <h1 className="aboutHeroTitle">SOBRE O {BRAND_NAME.toUpperCase()}</h1>
-        <p className="aboutHeroSub">
-          {BRAND_NAME} é onde você erra, aprende e evolui. Treine no Spot ou no Futuro
-          com saldo virtual e prepare-se para ganhar confiança no mercado real.
-        </p>
-      </header>
+      {/* Hero */}
+      <section className="aboutV2-hero">
+        {/* Coluna esquerda: 3 cards empilhados */}
+        <div className="aboutV2-cards">
+          <article className="aboutV2-card">
+            <div className="aboutV2-cardTitle">Errar sem riscos</div>
+            <p className="aboutV2-cardText">
+              Simulador com <strong>10.000 USDT</strong> virtuais para testar ideias sem
+              arriscar dinheiro real.
+            </p>
+          </article>
 
-      {/* Três cartões à esquerda (vidro com glow), como no layout antigo */}
-      <section className="aboutHeroGrid">
-        <article className="aboutCardGlass">
-          <div className="aboutCardTitle">Errar sem riscos</div>
-          <p className="aboutCardText">
-            Simulador com <strong>10.000 USDT</strong> virtuais para testar ideias
-            sem arriscar dinheiro real.
-          </p>
-        </article>
+          <article className="aboutV2-card">
+            <div className="aboutV2-cardTitle">Aprender de verdade</div>
+            <p className="aboutV2-cardText">
+              Pratique <strong>Spot</strong> e <strong>Futuros</strong> com as mesmas
+              noções de risco aplicadas ao dia a dia.
+            </p>
+          </article>
 
-        <article className="aboutCardGlass">
-          <div className="aboutCardTitle">Aprender de verdade</div>
-          <p className="aboutCardText">
-            Pratique <strong>Spot</strong> e <strong>Futuros</strong> com as mesmas
-            regras e noções de risco aplicadas ao dia a dia.
-          </p>
-        </article>
+          <article className="aboutV2-card">
+            <div className="aboutV2-cardTitle">Evoluir sempre</div>
+            <p className="aboutV2-cardText">
+              Ganhe confiança antes de operar no real. Ajuste estratégias e acompanhe sua
+              evolução no histórico.
+            </p>
+          </article>
+        </div>
 
-        <article className="aboutCardGlass">
-          <div className="aboutCardTitle">Evoluir sempre</div>
-          <p className="aboutCardText">
-            Ganhe confiança antes de operar no real. Ajuste estratégias e acompanhe
-            sua evolução no histórico.
+        {/* Centro: título grande + subtítulo */}
+        <div className="aboutV2-center">
+          <h1 className="aboutV2-title">
+            SOBRE O {BRAND_NAME.toUpperCase()}
+          </h1>
+          <p className="aboutV2-sub">
+            {BRAND_NAME} é onde você erra, aprende e evolui. Treine no Spot ou no Futuro
+            com saldo virtual e prepare-se para ganhar confiança no mercado real.
           </p>
-        </article>
+        </div>
+
+        {/* Direita vazia (para respirar) — o botão de voltar já está na top bar */}
+        <div className="aboutV2-right" />
       </section>
     </main>
   );
