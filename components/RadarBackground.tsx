@@ -2,17 +2,16 @@
 
 import { useEffect, useRef } from 'react';
 
-type Props = { className?: string };
+type Props = {
+  className?: string;
+  style?: React.CSSProperties;
+  /** velocidade do feixe (0.3~1.2 fica legal) */
+  speed?: number;
+};
 
-/**
- * Fundo “radar” animado com grid e feixe em canvas.
- * Seguro para Client Components e sem SSR.
- */
-export default function RadarBackground({ className }: Props) {
-  // ✅ IMPORTANTE: todos os useRef com valor inicial
+export default function RadarBackground({ className, style, speed = 0.6 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const rafRef = useRef<number>(0);
-  const angleRef = useRef<number>(0);
+  const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -21,96 +20,95 @@ export default function RadarBackground({ className }: Props) {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let running = true;
-
     const dpr = Math.max(1, window.devicePixelRatio || 1);
-    const resize = () => {
-      const w = canvas.clientWidth;
-      const h = canvas.clientHeight;
+
+    const fit = () => {
+      const parent = canvas.parentElement;
+      const w = (parent?.clientWidth || window.innerWidth);
+      const h = (parent?.clientHeight || window.innerHeight);
       canvas.width = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
-      // Ajusta transform para desenhar em “unidades CSS”
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
-    resize();
-    const onResize = () => resize();
-    window.addEventListener('resize', onResize);
+    fit();
+    let angle = 0;
 
-    const GRID = 60;
+    const draw = () => {
+      // largura/altura em CSS pixels
+      const w = canvas.width / dpr;
+      const h = canvas.height / dpr;
 
-    function drawGrid() {
-      const w = canvas.clientWidth;
-      const h = canvas.clientHeight;
-      ctx.save();
-      ctx.globalAlpha = 0.15;
-      ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-      ctx.lineWidth = 1;
-
-      ctx.beginPath();
-      for (let x = 0; x <= w; x += GRID) {
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, h);
-      }
-      for (let y = 0; y <= h; y += GRID) {
-        ctx.moveTo(0, y);
-        ctx.lineTo(w, y);
-      }
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    function animate() {
-      if (!running) return;
-
-      const w = canvas.clientWidth;
-      const h = canvas.clientHeight;
-
+      // fundo sutil
       ctx.clearRect(0, 0, w, h);
-      drawGrid();
+      const bg = ctx.createLinearGradient(0, 0, w, h);
+      bg.addColorStop(0, 'rgba(33,243,141,0.05)');
+      bg.addColorStop(1, 'rgba(33,243,141,0.02)');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
 
-      // Feixe “radar”
+      // grade
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.lineWidth = 1;
+      const step = 60;
+      for (let x = 0; x <= w; x += step) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+      }
+      for (let y = 0; y <= h; y += step) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+      }
+
+      // radar
       const cx = w * 0.75;
-      const cy = h * 0.35;
-      const r = Math.min(w, h) * 0.6;
+      const cy = h * 0.5;
+      const r = Math.min(w, h) * 0.45;
 
-      angleRef.current += 0.01;
-      const a = angleRef.current;
+      ctx.save();
+      ctx.translate(cx, cy);
 
-      const grad = ctx.createRadialGradient(cx, cy, r * 0.1, cx, cy, r);
-      grad.addColorStop(0, 'rgba(33,243,141,0.18)');
-      grad.addColorStop(1, 'rgba(33,243,141,0.0)');
+      // anéis
+      ctx.strokeStyle = 'rgba(33,243,141,0.18)';
+      for (let rr = r; rr > 0; rr -= r / 4) {
+        ctx.beginPath(); ctx.arc(0, 0, rr, 0, Math.PI * 2); ctx.stroke();
+      }
+
+      // feixe
+      const sweep = Math.PI / 8;
+      const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
+      grad.addColorStop(0, 'rgba(33,243,141,0.35)');
+      grad.addColorStop(1, 'rgba(33,243,141,0)');
       ctx.fillStyle = grad;
-
       ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.arc(cx, cy, r, a, a + Math.PI / 8);
+      ctx.moveTo(0, 0);
+      ctx.arc(0, 0, r, angle, angle + sweep, false);
       ctx.closePath();
       ctx.fill();
 
-      rafRef.current = requestAnimationFrame(animate);
-    }
+      ctx.restore();
 
-    rafRef.current = requestAnimationFrame(animate);
+      angle += (speed / 180) * Math.PI; // ~deg/frame
+      rafRef.current = requestAnimationFrame(draw);
+    };
+
+    const onResize = () => fit();
+
+    window.addEventListener('resize', onResize);
+    rafRef.current = requestAnimationFrame(draw);
 
     return () => {
-      running = false;
-      cancelAnimationFrame(rafRef.current);
       window.removeEventListener('resize', onResize);
+      if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
     };
-  }, []);
+  }, [speed]);
 
   return (
     <canvas
       ref={canvasRef}
       className={className}
-      style={{
-        position: 'absolute',
-        inset: 0,
-        width: '100%',
-        height: '100%',
-        pointerEvents: 'none',
-      }}
+      style={{ position: 'absolute', inset: 0, ...style }}
+      aria-hidden="true"
     />
   );
 }
