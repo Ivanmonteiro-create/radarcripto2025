@@ -3,141 +3,176 @@
 import { useEffect, useRef } from 'react';
 
 type Props = {
-  /** diâmetro do radar em px (em desktop) */
-  size?: number;
-  /** opacidade do feixe (0–1) */
-  beamAlpha?: number;
-  /** velocidade do sweep (maior = mais rápido) */
-  speed?: number;
+  /** linhas radiais do grid */
+  sectors?: number;
+  /** círculos concêntricos */
+  rings?: number;
+  /** velocidade do feixe (radianos por segundo) */
+  sweepSpeed?: number;
+  /** largura do feixe em graus */
+  beamWidthDeg?: number;
+  /** cor principal */
+  accent?: string;
+  /** opacidade global do canvas */
+  opacity?: number;
+  /** classe extra opcional */
+  className?: string;
 };
 
 export default function RadarBackground({
-  size = 760,
-  beamAlpha = 0.35,   // ✅ mais sutil
-  speed = 0.015,
+  sectors = 8,
+  rings = 5,
+  sweepSpeed = 0.9,     // mais rápido que antes
+  beamWidthDeg = 55,     // feixe um pouco mais largo
+  accent = '#21f38d',
+  opacity = 1,
+  className,
 }: Props) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const rafRef = useRef<number | null>(null);
+  const ref = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
+    const canvas = ref.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // resize helper
-    const resize = () => {
-      // ocupa toda a seção e mantém definição alta
-      const rect = canvas.parentElement?.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const w = Math.floor((rect?.width || size) * dpr);
-      const h = Math.floor((rect?.height || size) * dpr);
-      canvas.width = w;
-      canvas.height = h;
-      canvas.style.width = '100%';
-      canvas.style.height = '100%';
-    };
-    resize();
-    window.addEventListener('resize', resize);
+    let raf = 0;
+    let running = true;
 
-    // paleta
-    const green = '#21f38d';
-    const grid = 'rgba(255,255,255,0.08)';
+    const DPR = Math.max(1, window.devicePixelRatio || 1);
 
-    let angle = 0;
+    function resize() {
+      const parent = canvas.parentElement;
+      if (!parent) return;
 
-    const draw = () => {
-      const w = canvas.width;
-      const h = canvas.height;
-      const cx = w / 2;
-      const cy = h / 2;
-      const r = Math.min(w, h) * 0.44;
+      const { width, height } = parent.getBoundingClientRect();
+      canvas.width = Math.floor(width * DPR);
+      canvas.height = Math.floor(height * DPR);
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    }
 
-      ctx.clearRect(0, 0, w, h);
-
-      // leve vinheta
-      const g = ctx.createRadialGradient(cx, cy, r * 0.2, cx, cy, r * 1.2);
-      g.addColorStop(0, 'rgba(0,0,0,0)');
-      g.addColorStop(1, 'rgba(0,0,0,0.45)');
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, w, h);
-
-      // círculos do radar
+    function drawGrid(cx: number, cy: number, r: number) {
       ctx.save();
       ctx.translate(cx, cy);
-      ctx.strokeStyle = grid;
-      ctx.lineWidth = 1;
-      for (let i = 1; i <= 4; i++) {
+
+      // círculos
+      for (let i = 1; i <= rings; i++) {
+        const rr = (i / rings) * r;
         ctx.beginPath();
-        ctx.arc(0, 0, (r * i) / 4, 0, Math.PI * 2);
+        ctx.arc(0, 0, rr, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(33,243,141,0.25)`;
+        ctx.lineWidth = 1;
         ctx.stroke();
       }
-      // cruz central
-      ctx.beginPath(); ctx.moveTo(-r, 0); ctx.lineTo(r, 0); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(0, -r); ctx.lineTo(0, r); ctx.stroke();
 
-      // círculo externo com brilho
-      ctx.shadowColor = green;
-      ctx.shadowBlur = 18;
-      ctx.strokeStyle = green;
-      ctx.lineWidth = 2;
+      // linhas radiais
+      for (let i = 0; i < sectors; i++) {
+        const ang = (i / sectors) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(ang) * r, Math.sin(ang) * r);
+        ctx.strokeStyle = `rgba(33,243,141,0.18)`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // círculo externo “glow”
       ctx.beginPath();
       ctx.arc(0, 0, r, 0, Math.PI * 2);
+      const grd = ctx.createRadialGradient(0, 0, r * 0.7, 0, 0, r);
+      grd.addColorStop(0, 'rgba(33,243,141,0.0)');
+      grd.addColorStop(1, 'rgba(33,243,141,0.35)');
+      ctx.strokeStyle = grd;
+      ctx.lineWidth = 2;
       ctx.stroke();
-      ctx.restore();
 
-      // feixe (sweep)
+      ctx.restore();
+    }
+
+    let t0 = performance.now();
+
+    function loop(t: number) {
+      if (!running) return;
+
+      const dt = (t - t0) / 1000;
+      t0 = t;
+
+      const { width, height } = canvas.getBoundingClientRect();
+      ctx.clearRect(0, 0, width, height);
+      ctx.globalAlpha = opacity;
+
+      const cx = width / 2;
+      const cy = height / 2;
+      const r = Math.min(width, height) * 0.42;
+
+      // GRID
+      drawGrid(cx, cy, r);
+
+      // FEIXE
+      const beamWidthRad = (beamWidthDeg * Math.PI) / 180;
+      // ângulo atual (cresce com o tempo)
+      const angle = ((t / 1000) * sweepSpeed) % (Math.PI * 2);
+
       ctx.save();
       ctx.translate(cx, cy);
-      const sweep = Math.PI / 12; // ~15°
-      const from = angle;
-      const to = angle + sweep;
+
+      // cone do feixe com gradiente — bem brilhante
       const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
-      grad.addColorStop(0, `rgba(33,243,141,${beamAlpha})`);
-      grad.addColorStop(1, 'rgba(33,243,141,0)');
+      grad.addColorStop(0, `${accent}CC`);  // mais forte no centro
+      grad.addColorStop(1, `${accent}00`);  // some no limite
 
       ctx.fillStyle = grad;
       ctx.beginPath();
       ctx.moveTo(0, 0);
-      ctx.arc(0, 0, r, from, to, false);
+      ctx.arc(0, 0, r, angle - beamWidthRad / 2, angle + beamWidthRad / 2);
       ctx.closePath();
       ctx.fill();
 
-      // linha central do feixe – mais visível
-      ctx.strokeStyle = `rgba(33,243,141,0.9)`;
-      ctx.shadowColor = green;
-      ctx.shadowBlur = 9;
-      ctx.lineWidth = 2;
+      // linha do feixe (raio) – mais “acesa”
       ctx.beginPath();
       ctx.moveTo(0, 0);
-      ctx.lineTo(r * Math.cos(angle + sweep / 2), r * Math.sin(angle + sweep / 2));
+      ctx.lineTo(Math.cos(angle) * r, Math.sin(angle) * r);
+      ctx.strokeStyle = `${accent}`;
+      ctx.lineWidth = 2;
+      ctx.shadowColor = accent;
+      ctx.shadowBlur = 18; // brilho
       ctx.stroke();
+
       ctx.restore();
 
-      // anima
-      angle = (angle + speed) % (Math.PI * 2);
-      rafRef.current = requestAnimationFrame(draw);
+      raf = requestAnimationFrame(loop);
+    }
+
+    const onResize = () => {
+      resize();
     };
 
-    rafRef.current = requestAnimationFrame(draw);
+    resize();
+    raf = requestAnimationFrame(loop);
+    window.addEventListener('resize', onResize);
 
     return () => {
-      window.removeEventListener('resize', resize);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      running = false;
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', onResize);
     };
-  }, [size, beamAlpha, speed]);
+  }, [sectors, rings, sweepSpeed, beamWidthDeg, accent, opacity]);
 
   return (
     <canvas
-      ref={canvasRef}
+      ref={ref}
+      className={className}
+      aria-hidden
       style={{
         position: 'absolute',
         inset: 0,
         width: '100%',
         height: '100%',
-        zIndex: 0, // atrás do conteúdo
         pointerEvents: 'none',
+        mixBlendMode: 'screen',
       }}
     />
   );
