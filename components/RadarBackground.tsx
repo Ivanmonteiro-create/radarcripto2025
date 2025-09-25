@@ -1,29 +1,23 @@
+// components/RadarBackground.tsx
 'use client';
 
 import { useEffect, useRef } from 'react';
 
 type Props = {
-  /** linhas radiais do grid */
   sectors?: number;
-  /** círculos concêntricos */
   rings?: number;
-  /** velocidade do feixe (radianos por segundo) */
-  sweepSpeed?: number;
-  /** largura do feixe em graus */
-  beamWidthDeg?: number;
-  /** cor principal */
+  sweepSpeed?: number;   // rad/s
+  beamWidthDeg?: number; // largura do feixe em graus
   accent?: string;
-  /** opacidade global do canvas */
   opacity?: number;
-  /** classe extra opcional */
   className?: string;
 };
 
 export default function RadarBackground({
   sectors = 8,
   rings = 5,
-  sweepSpeed = 0.9,     // mais rápido que antes
-  beamWidthDeg = 55,     // feixe um pouco mais largo
+  sweepSpeed = 0.9,
+  beamWidthDeg = 55,
   accent = '#21f38d',
   opacity = 1,
   className,
@@ -42,44 +36,50 @@ export default function RadarBackground({
 
     const DPR = Math.max(1, window.devicePixelRatio || 1);
 
-    function resize() {
-      const parent = canvas.parentElement;
-      if (!parent) return;
+    // Lê tamanho de forma segura (prefere o pai; cai para o próprio canvas)
+    const readSize = () => {
+      const parent = canvas.parentElement as HTMLElement | null;
+      const w = (parent?.clientWidth ?? canvas.clientWidth ?? 0);
+      const h = (parent?.clientHeight ?? canvas.clientHeight ?? 0);
+      return { width: Math.max(1, w), height: Math.max(1, h) };
+    };
 
-      const { width, height } = parent.getBoundingClientRect();
+    const resize = () => {
+      const { width, height } = readSize();
+      // aplica DPI
       canvas.width = Math.floor(width * DPR);
       canvas.height = Math.floor(height * DPR);
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    }
+    };
 
-    function drawGrid(cx: number, cy: number, r: number) {
+    const drawGrid = (cx: number, cy: number, r: number) => {
       ctx.save();
       ctx.translate(cx, cy);
 
-      // círculos
+      // círculos concêntricos
       for (let i = 1; i <= rings; i++) {
         const rr = (i / rings) * r;
         ctx.beginPath();
         ctx.arc(0, 0, rr, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(33,243,141,0.25)`;
+        ctx.strokeStyle = 'rgba(33,243,141,0.25)';
         ctx.lineWidth = 1;
         ctx.stroke();
       }
 
-      // linhas radiais
+      // setores radiais
       for (let i = 0; i < sectors; i++) {
         const ang = (i / sectors) * Math.PI * 2;
         ctx.beginPath();
         ctx.moveTo(0, 0);
         ctx.lineTo(Math.cos(ang) * r, Math.sin(ang) * r);
-        ctx.strokeStyle = `rgba(33,243,141,0.18)`;
+        ctx.strokeStyle = 'rgba(33,243,141,0.18)';
         ctx.lineWidth = 1;
         ctx.stroke();
       }
 
-      // círculo externo “glow”
+      // aro externo com glow
       ctx.beginPath();
       ctx.arc(0, 0, r, 0, Math.PI * 2);
       const grd = ctx.createRadialGradient(0, 0, r * 0.7, 0, 0, r);
@@ -90,17 +90,18 @@ export default function RadarBackground({
       ctx.stroke();
 
       ctx.restore();
-    }
+    };
 
     let t0 = performance.now();
 
-    function loop(t: number) {
+    const loop = (t: number) => {
       if (!running) return;
 
-      const dt = (t - t0) / 1000;
-      t0 = t;
+      // garante que ainda existe
+      if (!ref.current) return;
 
-      const { width, height } = canvas.getBoundingClientRect();
+      const { width, height } = readSize();
+      // limpa área “CSS pixels” (ctx já está com transform de DPR)
       ctx.clearRect(0, 0, width, height);
       ctx.globalAlpha = opacity;
 
@@ -108,22 +109,23 @@ export default function RadarBackground({
       const cy = height / 2;
       const r = Math.min(width, height) * 0.42;
 
-      // GRID
+      // grade
       drawGrid(cx, cy, r);
 
-      // FEIXE
+      // feixe
+      const dt = (t - t0) / 1000;
+      t0 = t;
+
       const beamWidthRad = (beamWidthDeg * Math.PI) / 180;
-      // ângulo atual (cresce com o tempo)
       const angle = ((t / 1000) * sweepSpeed) % (Math.PI * 2);
 
       ctx.save();
       ctx.translate(cx, cy);
 
-      // cone do feixe com gradiente — bem brilhante
+      // cone com gradiente
       const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, r);
-      grad.addColorStop(0, `${accent}CC`);  // mais forte no centro
-      grad.addColorStop(1, `${accent}00`);  // some no limite
-
+      grad.addColorStop(0, `${accent}CC`);
+      grad.addColorStop(1, `${accent}00`);
       ctx.fillStyle = grad;
       ctx.beginPath();
       ctx.moveTo(0, 0);
@@ -131,41 +133,40 @@ export default function RadarBackground({
       ctx.closePath();
       ctx.fill();
 
-      // linha do feixe (raio) – mais “acesa”
+      // raio “aceso”
       ctx.beginPath();
       ctx.moveTo(0, 0);
       ctx.lineTo(Math.cos(angle) * r, Math.sin(angle) * r);
-      ctx.strokeStyle = `${accent}`;
+      ctx.strokeStyle = accent;
       ctx.lineWidth = 2;
       ctx.shadowColor = accent;
-      ctx.shadowBlur = 18; // brilho
+      ctx.shadowBlur = 18;
       ctx.stroke();
 
       ctx.restore();
 
       raf = requestAnimationFrame(loop);
-    }
-
-    const onResize = () => {
-      resize();
     };
+
+    // Observa tamanho do container para redimensionar com segurança
+    const ro = new ResizeObserver(() => resize());
+    ro.observe(canvas.parentElement ?? canvas);
 
     resize();
     raf = requestAnimationFrame(loop);
-    window.addEventListener('resize', onResize);
 
     return () => {
       running = false;
       cancelAnimationFrame(raf);
-      window.removeEventListener('resize', onResize);
+      ro.disconnect();
     };
   }, [sectors, rings, sweepSpeed, beamWidthDeg, accent, opacity]);
 
   return (
     <canvas
       ref={ref}
-      className={className}
       aria-hidden
+      className={className}
       style={{
         position: 'absolute',
         inset: 0,
