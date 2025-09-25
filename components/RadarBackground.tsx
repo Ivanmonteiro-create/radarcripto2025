@@ -2,192 +2,115 @@
 
 import { useEffect, useRef } from 'react';
 
-type Props = {
-  /** 0 a 1 – controla a “força” do efeito (opacidade geral) */
-  intensity?: number;
-  /** velocidade da varredura (segundos por rotação) */
-  rotationSeconds?: number;
-  /** deixa o canvas estático para quem prefere reduzir movimento */
-  respectReducedMotion?: boolean;
-  /** diminui partículas/efeito em mobile low-end */
-  lowPowerMode?: boolean;
-  /** cor principal do radar (neon) */
-  color?: string; // default '#1cff80'
-};
+type Props = { className?: string };
 
 /**
- * RadarBackground
- * Canvas de fundo com círculos concêntricos + varredura (sweep) + pontos sutis.
- * Absolutamente não interfere no conteúdo (fica em z-index: 0).
+ * Fundo “radar” animado com grid e feixe em canvas.
+ * Seguro para Client Components e sem SSR.
  */
-export default function RadarBackground({
-  intensity = 0.12,
-  rotationSeconds = 14,
-  respectReducedMotion = true,
-  lowPowerMode = false,
-  color = '#1cff80',
-}: Props) {
+export default function RadarBackground({ className }: Props) {
+  // ✅ IMPORTANTE: todos os useRef com valor inicial
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const rafRef = useRef<number>();
-  const lastTsRef = useRef<number>(0);
+  const rafRef = useRef<number>(0);
   const angleRef = useRef<number>(0);
 
   useEffect(() => {
-    const canvas = canvasRef.current!;
-    const ctx = canvas.getContext('2d', { alpha: true })!;
-    let dpr = Math.max(1, window.devicePixelRatio || 1);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let running = true;
+
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
     const resize = () => {
-      const rect = canvas.parentElement?.getBoundingClientRect();
-      const w = Math.floor((rect?.width || window.innerWidth) * dpr);
-      const h = Math.floor((rect?.height || window.innerHeight) * dpr);
-      if (canvas.width !== w || canvas.height !== h) {
-        canvas.width = w;
-        canvas.height = h;
-      }
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      // Ajusta transform para desenhar em “unidades CSS”
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
     resize();
-    window.addEventListener('resize', resize);
+    const onResize = () => resize();
+    window.addEventListener('resize', onResize);
 
-    const prefersReduced =
-      respectReducedMotion &&
-      typeof window !== 'undefined' &&
-      window.matchMedia &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const GRID = 60;
 
-    // partículas: quantidade ajustada
-    const DOTS = lowPowerMode ? 20 : 40;
+    function drawGrid() {
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      ctx.save();
+      ctx.globalAlpha = 0.15;
+      ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+      ctx.lineWidth = 1;
 
-    // desenha uma cena do radar
-    const draw = (ts: number) => {
-      const { width: W, height: H } = canvas;
-      const cx = W / 2;
-      const cy = H / 2;
-      // fundo transparente
-      ctx.clearRect(0, 0, W, H);
-
-      // glow muito leve no centro
-      const radial = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(W, H) * 0.6);
-      radial.addColorStop(0, hexWithAlpha(color, 0.05 * intensity));
-      radial.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = radial;
-      ctx.fillRect(0, 0, W, H);
-
-      // círculos concêntricos
-      const ringCount = 6;
-      ctx.lineWidth = 1 * dpr;
-      for (let i = 1; i <= ringCount; i++) {
-        const r = (Math.min(W, H) / 2) * (i / ringCount);
-        ctx.beginPath();
-        ctx.arc(cx, cy, r, 0, Math.PI * 2);
-        ctx.strokeStyle = hexWithAlpha(color, 0.22 * intensity * (1 - i / (ringCount + 1)));
-        ctx.stroke();
-      }
-
-      // “cruz” muito sutil (eixo X/Y)
       ctx.beginPath();
-      ctx.moveTo(0, cy);
-      ctx.lineTo(W, cy);
-      ctx.moveTo(cx, 0);
-      ctx.lineTo(cx, H);
-      ctx.strokeStyle = hexWithAlpha('#ffffff', 0.04 * intensity);
-      ctx.lineWidth = 1 * dpr;
+      for (let x = 0; x <= w; x += GRID) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+      }
+      for (let y = 0; y <= h; y += GRID) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+      }
       ctx.stroke();
+      ctx.restore();
+    }
 
-      // partículas (pings) discretas
-      for (let i = 0; i < DOTS; i++) {
-        const a = (i / DOTS) * Math.PI * 2;
-        const r = (Math.min(W, H) / 2) * (0.25 + (i % 10) / 12);
-        const x = cx + Math.cos(a) * r;
-        const y = cy + Math.sin(a) * r;
-        const size = 1 * dpr;
-        ctx.fillStyle = hexWithAlpha('#ffffff', 0.03 * intensity);
-        ctx.fillRect(x, y, size, size);
-      }
+    function animate() {
+      if (!running) return;
 
-      // varredura (sweep)
-      if (!prefersReduced) {
-        const delta = (ts - lastTsRef.current) || 16;
-        lastTsRef.current = ts;
-        const perMs = (Math.PI * 2) / (rotationSeconds * 1000);
-        angleRef.current = (angleRef.current + perMs * delta) % (Math.PI * 2);
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
 
-        // desenha um setor com gradiente angular (mais forte na frente, some atrás)
-        const sweepWidth = Math.PI / 10; // ~18°
-        const start = angleRef.current - sweepWidth;
-        const end = angleRef.current + sweepWidth;
+      ctx.clearRect(0, 0, w, h);
+      drawGrid();
 
-        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(W, H));
-        grad.addColorStop(0.0, hexWithAlpha(color, 0.30 * intensity));
-        grad.addColorStop(0.2, hexWithAlpha(color, 0.18 * intensity));
-        grad.addColorStop(1.0, 'rgba(0,0,0,0)');
+      // Feixe “radar”
+      const cx = w * 0.75;
+      const cy = h * 0.35;
+      const r = Math.min(w, h) * 0.6;
 
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.arc(cx, cy, Math.max(W, H), start, end, false);
-        ctx.closePath();
-        ctx.fillStyle = grad;
-        ctx.fill();
+      angleRef.current += 0.01;
+      const a = angleRef.current;
 
-        // “linha” de varredura
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.arc(cx, cy, Math.max(W, H), end - 0.002, end + 0.002, false);
-        ctx.closePath();
-        ctx.fillStyle = hexWithAlpha(color, 0.5 * intensity);
-        ctx.fill();
-        ctx.restore();
-      }
+      const grad = ctx.createRadialGradient(cx, cy, r * 0.1, cx, cy, r);
+      grad.addColorStop(0, 'rgba(33,243,141,0.18)');
+      grad.addColorStop(1, 'rgba(33,243,141,0.0)');
+      ctx.fillStyle = grad;
 
-      rafRef.current = requestAnimationFrame(draw);
-    };
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, r, a, a + Math.PI / 8);
+      ctx.closePath();
+      ctx.fill();
 
-    // controla pausa quando aba não estiver ativa
-    const onVis = () => {
-      if (document.hidden) {
-        if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      } else {
-        lastTsRef.current = performance.now();
-        rafRef.current = requestAnimationFrame(draw);
-      }
-    };
-    document.addEventListener('visibilitychange', onVis);
+      rafRef.current = requestAnimationFrame(animate);
+    }
 
-    // start
-    lastTsRef.current = performance.now();
-    rafRef.current = requestAnimationFrame(draw);
+    rafRef.current = requestAnimationFrame(animate);
 
     return () => {
-      window.removeEventListener('resize', resize);
-      document.removeEventListener('visibilitychange', onVis);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      running = false;
+      cancelAnimationFrame(rafRef.current);
+      window.removeEventListener('resize', onResize);
     };
-  }, [color, intensity, lowPowerMode, respectReducedMotion, rotationSeconds]);
+  }, []);
 
   return (
     <canvas
       ref={canvasRef}
-      className="bgCanvas"
-      aria-hidden="true"
-      style={{ opacity: clamp(intensity, 0, 1) }}
+      className={className}
+      style={{
+        position: 'absolute',
+        inset: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
+      }}
     />
   );
-}
-
-function hexWithAlpha(hex: string, alpha: number) {
-  // aceita #rgb, #rrggbb
-  const c = hex.replace('#', '');
-  const bigint =
-    c.length === 3
-      ? parseInt(c.split('').map((x) => x + x).join(''), 16)
-      : parseInt(c, 16);
-  const r = (bigint >> 16) & 255;
-  const g = (bigint >> 8) & 255;
-  const b = bigint & 255;
-  return `rgba(${r},${g},${b},${alpha})`;
-}
-function clamp(v: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, v));
 }
