@@ -1,62 +1,140 @@
 // app/sobre/page.tsx
-'use client';
+import Link from "next/link";
 
-import Link from 'next/link';
-import { BRAND_NAME } from '@/lib/brand';
+function Icon({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      aria-hidden
+      style={{
+        width: 38,
+        height: 38,
+        borderRadius: 12,
+        display: "grid",
+        placeItems: "center",
+        background: "rgba(255,255,255,.08)",
+        border: "1px solid rgba(255,255,255,.18)",
+        boxShadow: "0 1px 0 rgba(255,255,255,.08) inset",
+        fontSize: 20,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
 
 export default function SobrePage() {
   return (
-    <main className="max-w-5xl mx-auto px-6 py-12">
-      {/* Tag e botão no topo */}
-      <div className="flex items-center justify-between mb-8">
-        <span className="text-xs tracking-widest text-gray-400 border border-gray-700 rounded-full px-3 py-1">
-          SOBRE
-        </span>
-        <Link
-          href="/"
-          className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded-lg transition"
-        >
+    <main
+      className="sobrePage"
+      style={{ minHeight: "100dvh", padding: 12, display: "grid", gap: 12 }}
+    >
+      {/* Topo com CTA para voltar */}
+      <header
+        className="panel"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr auto",
+          alignItems: "center",
+          gap: 10,
+          padding: 12,
+        }}
+      >
+        <div>
+          <div
+            style={{
+              color: "var(--muted)",
+              textTransform: "uppercase",
+              letterSpacing: ".12em",
+              fontSize: 11,
+            }}
+          >
+            Sobre
+          </div>
+        </div>
+        <Link href="/" className="btn btn-primary" style={{ padding: "8px 12px", borderRadius: 10, fontWeight: 800 }}>
           Voltar ao início
         </Link>
-      </div>
+      </header>
 
-      {/* Título + subtítulo */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-6xl font-extrabold bg-gradient-to-b from-green-100 to-green-500 bg-clip-text text-transparent drop-shadow-lg">
-          SOBRE O {BRAND_NAME.toUpperCase()}
+      {/* Herói curto e direto */}
+      <section
+        className="panel"
+        style={{ textAlign: "center", paddingBlock: 16, paddingInline: 12 }}
+      >
+        <h1
+          style={{
+            margin: 0,
+            fontSize: 26,
+            fontWeight: 900,
+            letterSpacing: "-0.01em",
+          }}
+        >
+          Sobre o RadarCrypto
         </h1>
-        <p className="mt-4 text-gray-300 max-w-2xl mx-auto">
-          {BRAND_NAME} é onde você erra, aprende e evolui. Treine no Spot ou no Futuro
-          com saldo virtual e prepare-se para ganhar confiança no mercado real.
+        <p
+          style={{
+            margin: "6px auto 0",
+            color: "var(--muted)",
+            fontSize: 14,
+            maxWidth: 780,
+          }}
+        >
+          <strong>RadarCrypto</strong>: onde você erra, aprende e evolui.
+          Treine no <strong>Spot</strong> ou no <strong>Futuro</strong> com
+          saldo virtual e prepare-se para ganhar confiança no mercado real.
         </p>
-      </div>
+      </section>
 
-      {/* Cards */}
-      <div className="grid md:grid-cols-3 gap-6">
-        <div className="bg-white/5 border border-white/10 rounded-xl p-6 shadow-lg backdrop-blur">
-          <h3 className="text-green-400 font-bold mb-2">Errar sem riscos</h3>
-          <p className="text-gray-300">
-            Simulador com <strong>10.000 USDT</strong> virtuais para testar ideias sem
-            arriscar dinheiro real.
+      {/* Três cartões ilustrativos e objetivos */}
+      <section
+        className="cards"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, minmax(220px, 1fr))",
+          gap: 12,
+        }}
+      >
+        <article className="panel" style={{ display: "grid", gap: 10, padding: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <Icon>🧪</Icon>
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 900 }}>Errar sem riscos</h2>
+          </div>
+          <p style={{ margin: 0, color: "var(--muted)", fontSize: 14, lineHeight: 1.4 }}>
+            Simulador com <strong>10.000 USDT</strong> virtuais para testar
+            ideias sem colocar dinheiro real em risco.
           </p>
-        </div>
+        </article>
 
-        <div className="bg-white/5 border border-white/10 rounded-xl p-6 shadow-lg backdrop-blur">
-          <h3 className="text-green-400 font-bold mb-2">Aprender de verdade</h3>
-          <p className="text-gray-300">
-            Pratique <strong>Spot</strong> e <strong>Futuros</strong> com as mesmas
-            noções de risco do dia a dia.
+        <article className="panel" style={{ display: "grid", gap: 10, padding: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <Icon>📈</Icon>
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 900 }}>Aprender de verdade</h2>
+          </div>
+          <p style={{ margin: 0, color: "var(--muted)", fontSize: 14, lineHeight: 1.4 }}>
+            Pratique <strong>Spot</strong> e <strong>Futuro</strong> com
+            métricas claras e noções de gestão de risco aplicadas ao dia a dia.
           </p>
-        </div>
+        </article>
 
-        <div className="bg-white/5 border border-white/10 rounded-xl p-6 shadow-lg backdrop-blur">
-          <h3 className="text-green-400 font-bold mb-2">Evoluir sempre</h3>
-          <p className="text-gray-300">
-            Ganhe confiança antes de operar no real. Ajuste estratégias e acompanhe sua
-            evolução no histórico.
+        <article className="panel" style={{ display: "grid", gap: 10, padding: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <Icon>🚀</Icon>
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 900 }}>Evoluir sempre</h2>
+          </div>
+          <p style={{ margin: 0, color: "var(--muted)", fontSize: 14, lineHeight: 1.4 }}>
+            Ganhe <strong>confiança</strong> antes de operar no real. Treine,
+            ajuste estratégias e veja sua evolução no histórico.
           </p>
-        </div>
-      </div>
+        </article>
+      </section>
+
+      {/* Fechamento curto */}
+      <section className="panel" style={{ padding: 12, textAlign: "center" }}>
+        <p style={{ margin: 0, fontSize: 14 }}>
+          O RadarCrypto é mais que um simulador — é a sua{" "}
+          <strong>escola de trading</strong>.
+        </p>
+      </section>
     </main>
   );
 }
