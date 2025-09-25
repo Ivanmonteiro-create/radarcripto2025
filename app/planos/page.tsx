@@ -1,4 +1,5 @@
 // app/planos/page.tsx
+"use client";
 import Link from "next/link";
 
 type Feature = { text: string; soon?: boolean; locked?: boolean };
