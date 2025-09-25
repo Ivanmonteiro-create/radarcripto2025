@@ -7,6 +7,13 @@ export default function PlanosPage() {
   return (
     <main className="wrapper">
       <section className="panel" style={{ gridColumn: "1 / -1" }}>
+        {/* Botão global no topo */}
+        <div style={{ marginBottom: "24px" }}>
+          <Link href="/" className="btn btn-primary">
+            Voltar ao início
+          </Link>
+        </div>
+
         <h1 style={{ textAlign: "center", marginBottom: "24px" }}>
           Escolha seu Plano
         </h1>
@@ -34,9 +41,6 @@ export default function PlanosPage() {
             <p className="chip-active" style={{ marginTop: "10px" }}>
               Fundadores
             </p>
-            <Link href="/" className="btn btn-primary" style={{ marginTop: "16px", display: "block" }}>
-              Voltar ao início
-            </Link>
           </div>
 
           {/* Trader */}
@@ -52,9 +56,6 @@ export default function PlanosPage() {
             <p className="chip-active" style={{ marginTop: "10px" }}>
               Preço promocional — Fundadores
             </p>
-            <Link href="/" className="btn btn-primary" style={{ marginTop: "16px", display: "block" }}>
-              Voltar ao início
-            </Link>
           </div>
 
           {/* Pro */}
@@ -70,9 +71,6 @@ export default function PlanosPage() {
             <p className="chip-active" style={{ marginTop: "10px" }}>
               Preço promocional — Fundadores
             </p>
-            <Link href="/" className="btn btn-primary" style={{ marginTop: "16px", display: "block" }}>
-              Voltar ao início
-            </Link>
           </div>
 
           {/* Elite */}
@@ -88,9 +86,6 @@ export default function PlanosPage() {
             <p className="chip-active" style={{ marginTop: "10px" }}>
               Preço promocional — Fundadores
             </p>
-            <Link href="/" className="btn btn-primary" style={{ marginTop: "16px", display: "block" }}>
-              Voltar ao início
-            </Link>
           </div>
         </div>
       </section>
