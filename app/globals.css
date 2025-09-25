@@ -634,3 +634,69 @@ section.panel .chartFsBtn:hover { background: rgba(255,255,255,.18); color:#fff;
   background: radial-gradient(60% 60% at 70% 10%, rgba(33,243,141,.06), transparent 60%);
   pointer-events:none;
 }
+/* ===== Radar Canvas base ===== */
+.bgCanvas{
+  position:absolute;
+  inset:0;
+  z-index:0;          /* fica atrás do conteúdo */
+  pointer-events:none; /* não bloqueia cliques */
+  filter: saturate(110%);
+}
+
+/* Wrapper simples para páginas de conteúdo único */
+.wrapperSingle{
+  min-height: 100dvh;
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+/* Card da página com background ativo */
+.card.withBg{
+  position:relative;
+  width:min(1100px, 96vw);
+  background: rgba(15,21,19,.92);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius: 18px;
+  padding: 24px;
+  overflow: hidden; /* oculta o canvas nas bordas arredondadas */
+}
+
+/* Garante que conteúdo fique acima do canvas */
+.card.withBg > * { position: relative; z-index: 1; }
+
+.pageTitle{
+  margin: 0 0 8px;
+  font-size: clamp(20px, 3.6vw, 42px);
+  font-weight: 900;
+  color: #d5fbe6;
+  text-shadow: 0 2px 16px rgba(33,243,141,.10);
+}
+
+.contactGrid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+@media (max-width: 900px){
+  .contactGrid{ grid-template-columns: 1fr; }
+}
+
+.contactCard{
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 14px;
+  padding: 14px;
+}
+.contactTitle{
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #d5fbe6;
+}
+.contactRow{
+  font-size: 14px;
+  margin: 8px 0;
+}
