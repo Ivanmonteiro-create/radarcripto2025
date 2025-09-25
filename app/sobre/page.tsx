@@ -12,8 +12,7 @@ function ChipIcon({ children, hue = 140 }: { children: React.ReactNode; hue?: nu
         borderRadius: 12,
         display: "grid",
         placeItems: "center",
-        background:
-          `linear-gradient(180deg, hsla(${hue},70%,42%,.22), hsla(${hue},70%,28%,.12))`,
+        background: `linear-gradient(180deg, hsla(${hue},70%,42%,.22), hsla(${hue},70%,28%,.12))`,
         border: `1px solid hsla(${hue},70%,52%,.35)`,
         boxShadow: `0 0 0 2px hsla(${hue},70%,42%,.10) inset, 0 10px 30px hsla(${hue},70%,24%,.25)`,
         fontSize: 20,
@@ -44,7 +43,6 @@ export default function SobrePage() {
           position: "absolute",
           inset: 0,
           pointerEvents: "none",
-          // grade + brilho radial suave
           background:
             `radial-gradient(1200px 600px at 15% -10%, rgba(33,243,141,.10), transparent 55%),
              radial-gradient(800px 600px at 100% 120%, rgba(33,243,141,.10), transparent 60%)`,
@@ -67,18 +65,25 @@ export default function SobrePage() {
           zIndex: 1,
         }}
       >
+        {/* SOBRE – maior e com tom de verde */}
         <div
           style={{
-            color: "var(--muted)",
+            color: "var(--accent-strong)",
             textTransform: "uppercase",
             letterSpacing: ".18em",
-            fontSize: 11,
+            fontSize: 13,                 // ↑ levemente maior
+            fontWeight: 800,
+            textShadow: "0 0 10px rgba(33,243,141,.35)", // brilho sutil
           }}
         >
-          Sobre
+          SOBRE
         </div>
 
-        <Link href="/" className="btn btn-primary" style={{ padding: "10px 14px", borderRadius: 10, fontWeight: 800 }}>
+        <Link
+          href="/"
+          className="btn btn-primary"
+          style={{ padding: "10px 14px", borderRadius: 10, fontWeight: 800 }}
+        >
           Voltar ao início
         </Link>
       </header>
@@ -111,13 +116,13 @@ export default function SobrePage() {
         <h1
           style={{
             margin: 0,
-            fontSize: 34,         // ↑ maior para chamar atenção
+            fontSize: 36,         // ↑ um pouco maior
             fontWeight: 900,
             letterSpacing: "-0.01em",
             textTransform: "uppercase",
           }}
         >
-          Sobre o <span style={{ color: "var(--accent-strong)" }}>RadarCrypto</span>
+          Sobre o <span style={{ color: "var(--accent-strong)" }}>RadarCripto</span>
         </h1>
         <p
           style={{
@@ -128,7 +133,7 @@ export default function SobrePage() {
             lineHeight: 1.45,
           }}
         >
-          <strong>RadarCrypto</strong>: onde você erra, aprende e evolui.
+          <strong>RadarCripto</strong>: onde você erra, aprende e evolui.
           Treine no <strong>Spot</strong> ou no <strong>Futuro</strong> com saldo virtual
           e prepare-se para ganhar confiança no mercado real.
         </p>
@@ -151,7 +156,7 @@ export default function SobrePage() {
             display: "grid",
             gap: 12,
             padding: 14,
-            borderColor: "rgba(33,243,141,.28)",           // borda mais presente
+            borderColor: "rgba(33,243,141,.28)",
             boxShadow: "0 0 0 1px rgba(33,243,141,.10) inset",
           }}
         >
@@ -209,7 +214,7 @@ export default function SobrePage() {
       {/* Fechamento curto */}
       <section className="panel" style={{ padding: 14, textAlign: "center", zIndex: 1 }}>
         <p style={{ margin: 0, fontSize: 14 }}>
-          O RadarCrypto é mais que um simulador — é a sua{" "}
+          O RadarCripto é mais que um simulador — é a sua{" "}
           <strong>escola de trading</strong>.
         </p>
       </section>
