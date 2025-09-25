@@ -1,12 +1,11 @@
-// app/fale-com-a-gente/page.tsx
 import Link from 'next/link';
 import RadarBackground from '@/components/RadarBackground';
 
 export default function FalePage() {
   return (
     <main style={{ position: 'relative', minHeight: '100dvh' }}>
-      {/* Fundo animado (canvas) */}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 0, opacity: 0.9 }}>
+      {/* Fundo animado */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 0, opacity: 0.95 }}>
         <RadarBackground />
       </div>
 
@@ -36,12 +35,11 @@ export default function FalePage() {
             Quer falar com nossa equipe?
           </h1>
           <p className="muted" style={{ marginTop: 8 }}>
-            Estamos finalizando os canais oficiais. Em breve você poderá chamar no
-            WhatsApp ou enviar um e-mail para suporte.
+            Estamos finalizando os canais oficiais. Em breve você poderá chamar no WhatsApp
+            ou enviar um e-mail para suporte.
           </p>
         </header>
 
-        {/* GRID 2 colunas */}
         <div
           style={{
             display: 'grid',
@@ -49,7 +47,7 @@ export default function FalePage() {
             gap: 16,
           }}
         >
-          {/* Cartão – WhatsApp */}
+          {/* WhatsApp */}
           <div className="cardMini" style={{ background: 'rgba(0,0,0,.15)', borderRadius: 12, padding: 14, border: '1px solid rgba(255,255,255,.08)' }}>
             <div className="small" style={{ fontWeight: 800, marginBottom: 6 }}>
               WhatsApp <span className="muted">(em breve)</span>
@@ -70,7 +68,7 @@ export default function FalePage() {
             </div>
           </div>
 
-          {/* Cartão – E-mail */}
+          {/* E-mail */}
           <div className="cardMini" style={{ background: 'rgba(0,0,0,.15)', borderRadius: 12, padding: 14, border: '1px solid rgba(255,255,255,.08)' }}>
             <div className="small" style={{ fontWeight: 800, marginBottom: 6 }}>
               E-mail <span className="muted">(em breve)</span>
@@ -93,8 +91,8 @@ export default function FalePage() {
         </div>
       </section>
 
-      {/* Botão flutuante “Voltar ao início” */}
-      <div style={{ position: 'fixed', right: 16, bottom: 16, zIndex: 2 }}>
+      {/* Voltar ao início — FIXO no canto superior direito */}
+      <div style={{ position: 'fixed', right: 16, top: 16, zIndex: 2 }}>
         <Link href="/" className="btn btn-primary">Voltar ao início</Link>
       </div>
     </main>
