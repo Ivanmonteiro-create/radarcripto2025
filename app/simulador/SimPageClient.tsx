@@ -13,7 +13,6 @@ export default function SimPageClient() {
   const [symbol, setSymbol] = useState<Pair>('BTCUSDT');
   const livePrice = useLivePrice(symbol);
 
-  // ===== Fullscreen gráfico =====
   const chartPanelRef = useRef<HTMLDivElement | null>(null);
   const [isFs, setIsFs] = useState(false);
 
@@ -31,7 +30,6 @@ export default function SimPageClient() {
   const exitFs = () => { if (document.fullscreenElement) void document.exitFullscreen(); };
   const toggleFs = () => (document.fullscreenElement ? exitFs() : enterFs());
 
-  // atalhos: F entra / X sai
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const k = e.key.toLowerCase();
@@ -48,11 +46,10 @@ export default function SimPageClient() {
       style={{
         gridTemplateColumns: '1fr 380px',
         alignItems: 'stretch',
-        // para posicionar o “Voltar ao início” no canto direito da página
         position: 'relative'
       }}
     >
-      {/* ====== BOTÃO GLOBAL: canto direito da página ====== */}
+      {/* Voltar ao início — canto direito da página */}
       {!isFs && (
         <a
           href="/"
@@ -61,7 +58,7 @@ export default function SimPageClient() {
             position: 'absolute',
             top: 8,
             right: 8,
-            zIndex: 20,
+            zIndex: 50,
             padding: '10px 14px',
             borderRadius: 12,
             fontWeight: 800,
@@ -71,7 +68,7 @@ export default function SimPageClient() {
         </a>
       )}
 
-      {/* ================== GRÁFICO ================== */}
+      {/* GRÁFICO */}
       <section
         ref={chartPanelRef}
         className="panel"
@@ -83,7 +80,7 @@ export default function SimPageClient() {
           </div>
         )}
 
-        {/* Botão de Tela Cheia — canto superior-direito na “linha da câmera” */}
+        {/* Tela cheia — canto superior-direito, acima da “câmera” */}
         {!isFs && (
           <button
             aria-label="Tela cheia"
@@ -91,9 +88,9 @@ export default function SimPageClient() {
             onClick={toggleFs}
             style={{
               position: 'absolute',
-              top: 2,            // bem encostado “na linha da câmera”
-              right: 44,         // ~1cm da câmera
-              zIndex: 6,
+              top: 4,       // SUBA/DESÇA se quiser ajustar fino
+              right: 8,     // CHEGA MAIS NA BORDA
+              zIndex: 40,   // acima de overlays do TV
               width: 28, height: 28, borderRadius: 8,
               display: 'grid', placeItems: 'center',
               background: 'rgba(255,255,255,.12)',
@@ -106,41 +103,21 @@ export default function SimPageClient() {
           </button>
         )}
 
-        {/* Overlay para esconder o quadradinho do TV (ocultar legenda) quando em FS */}
-        {isFs && (
-          <div
-            aria-hidden
-            style={{
-              position: 'absolute',
-              top: 4, right: 8,
-              width: 56, height: 32,
-              background: 'transparent',
-              zIndex: 7,
-              pointerEvents: 'none'
-            }}
-          />
-        )}
-
+        {/* Em FS, não mostramos nada extra (atalhos F / X ativos) */}
         <div style={{ height: isFs ? '100vh' : '72vh', minHeight: 520 }}>
           <TradingViewWidget
-            symbol={symbol}
+            symbol={`BINANCE:${symbol}`}
             interval="1"
             theme="dark"
             autosize
-            height={undefined}
           />
         </div>
       </section>
 
-      {/* ================== CONTROLES ================== */}
+      {/* CONTROLES */}
       <section
         className="panel compactPanel"
-        style={{
-          display: 'grid',
-          alignContent: 'start',
-          gap: 10,
-          minHeight: '78vh'
-        }}
+        style={{ display: 'grid', alignContent: 'start', gap: 10, minHeight: '78vh' }}
       >
         <TradeControls
           symbol={symbol}
