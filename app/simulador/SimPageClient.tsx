@@ -14,7 +14,7 @@ export default function SimPageClient() {
   const [symbol, setSymbol] = useState<Pair>('BTCUSDT');
   const livePrice = useLivePrice(symbol);
 
-  // Tela cheia do painel do GRÁFICO
+  // --- Tela cheia do painel do GRÁFICO ---
   const chartPanelRef = useRef<HTMLDivElement | null>(null);
   const [isFs, setIsFs] = useState(false);
 
@@ -27,24 +27,23 @@ export default function SimPageClient() {
   const toggleFullscreen = () => {
     const el = chartPanelRef.current;
     if (!el) return;
-    if (!document.fullscreenElement) el.requestFullscreen().catch(() => {});
-    else document.exitFullscreen().catch(() => {});
+    if (!document.fullscreenElement) void el.requestFullscreen();
+    else void document.exitFullscreen();
   };
 
   return (
     <main
       className="wrapper"
-      // controles mais estreitos para caber em 100% zoom
-      style={{ gridTemplateColumns: '1fr 400px', alignItems: 'stretch' }}
+      // gráfico grande + coluna de controles mais estreita
+      style={{ gridTemplateColumns: '1fr 380px', alignItems: 'stretch' }}
     >
-      {/* ------- Painel do GRÁFICO ------- */}
+      {/* --------- GRÁFICO --------- */}
       <section className="panel" ref={chartPanelRef} style={{ position: 'relative', minHeight: '78vh' }}>
-        {/* Cabeçalho simples do gráfico */}
         <div className="compactHeader" style={{ marginBottom: 8 }}>
           <h2 className="compactTitle" style={{ margin: 0 }}>Gráfico — {symbol}</h2>
         </div>
 
-        {/* Botão TELA CHEIA no topo direito do painel do gráfico (acima da “câmera”) */}
+        {/* Tela cheia: acima da “câmera”, canto superior-direito */}
         <button
           aria-label="Tela cheia"
           title="Tela cheia"
@@ -52,7 +51,7 @@ export default function SimPageClient() {
           style={{
             position: 'absolute',
             top: 4,
-            right: 44,         // ~1cm da “câmera” do TV
+            right: 44,    // ~1 cm da “câmera”
             zIndex: 5,
             width: 28,
             height: 28,
@@ -79,7 +78,7 @@ export default function SimPageClient() {
         </div>
       </section>
 
-      {/* ------- Painel CONTROLES ------- */}
+      {/* --------- CONTROLES --------- */}
       <section className="panel compactPanel">
         <TradeControls
           symbol={symbol}
