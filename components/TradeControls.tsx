@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { getEngine } from "@/lib/tradeEngine";
 import { exportTradesCSV } from "@/lib/csv";
-import { priceFeed } from "@/lib/priceFeed"; // export nomeado
+import { priceFeed } from "@/lib/priceFeed";
 
 type Pair =
   | "BTCUSDT" | "ETHUSDT" | "BNBUSDT" | "SOLUSDT"
@@ -13,12 +13,24 @@ type Props = {
   symbol: Pair;
   onSymbolChange?: (s: Pair) => void;
   livePrice?: number;
+  /** deixe false para evitar duplicidade do botão */
+  showBack?: boolean;
 };
 
-const fmt2 = (n: number | undefined) =>
+const pairs: Pair[] = [
+  "BTCUSDT","ETHUSDT","BNBUSDT","SOLUSDT",
+  "ADAUSDT","XRPUSDT","DOGEUSDT","LINKUSDT",
+];
+
+const fmt2 = (n?: number) =>
   n === undefined ? "-" : n.toLocaleString("en-US", { maximumFractionDigits: 2 });
 
-export default function TradeControls({ symbol, onSymbolChange, livePrice }: Props) {
+export default function TradeControls({
+  symbol,
+  onSymbolChange,
+  livePrice,
+  showBack = false
+}: Props) {
   const engine = useMemo(() => getEngine(), []);
   const [mark, setMark] = useState<number | undefined>(livePrice);
   const [riskPct, setRiskPct] = useState(1);
@@ -32,7 +44,7 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
     engine.snapshot(symbol, mark ?? 0)
   );
 
-  // preço (assina se não vier por prop)
+  // preço ao vivo (assina somente se não vier por prop)
   useEffect(() => {
     if (livePrice !== undefined) {
       setMark(livePrice);
@@ -95,25 +107,39 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
   const exportCSV = () => exportTradesCSV(engine.getHistory());
 
   return (
-    <section className="panel compactPanel compactRoot tradePanelShell">
-      {/* header — APENAS UM “Voltar ao início” */}
-      <div className="compactHeader">
+    <section
+      className="panel compactPanel compactRoot"
+      style={{
+        // trava um “gutter” interno para não encostar nas laterais
+        padding: 14,
+      }}
+    >
+      {/* Cabeçalho: sem duplicidade de botão */}
+      <div className="compactHeader" style={{ marginBottom: 10 }}>
         <h3 className="compactTitle">Controles de Trade</h3>
-        <button
-          className="btn btn-xs tcBackBtn"
-          onClick={() => (window.location.href = "/")}
-        >
-          Voltar ao início
-        </button>
+        {showBack && (
+          <button
+            className="btn btn-xs tcBackBtn"
+            onClick={() => (window.location.href = "/")}
+          >
+            Voltar ao início
+          </button>
+        )}
       </div>
 
-      {/* GRID PRINCIPAL: colunas A (inputs/ações) e B (métricas) */}
-      <div className="compactGrid">
-        {/* ===== Coluna A: parâmetros e ações ===== */}
-        <div className="colA">
-          {/* Par + preço ao vivo */}
+      {/* GRID 2 colunas fixas (A: parâmetros/ações | B: métricas) */}
+      <div
+        className="compactGrid"
+        style={{
+          gridTemplateColumns: "minmax(300px, 1fr) minmax(340px, 1fr)",
+          gap: 12,
+        }}
+      >
+        {/* ===== Coluna A ===== */}
+        <div className="colA" style={{ display: "grid", gap: 10 }}>
+          {/* Par + Preço */}
           <div className="cardMini">
-            <label className="lbl">Par</label>
+            <label className="lbl">Par / Preço ao vivo</label>
             <div className="twoCols">
               <select
                 className="inp"
@@ -121,16 +147,18 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
                 onChange={(e) => onSymbolChange?.(e.target.value as Pair)}
               >
                 {pairs.map((p) => (
-                  <option key={p} value={p}>{p}</option>
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
                 ))}
               </select>
               <div className="fakeInput">{mark ? mark.toFixed(2) : "-"}</div>
             </div>
           </div>
 
-          {/* Risco % e tamanho calculado */}
+          {/* Risco (%) e Tamanho USDT */}
           <div className="cardMini">
-            <label className="lbl">Risco por trade (%)</label>
+            <label className="lbl">Risco por trade (%) / Tamanho (USDT)</label>
             <div className="twoCols">
               <input
                 className="inp"
@@ -146,9 +174,9 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
             </div>
           </div>
 
-          {/* TP / SL (preço) */}
+          {/* TP e SL (preços) */}
           <div className="cardMini">
-            <label className="lbl">Take Profit / Stop Loss</label>
+            <label className="lbl">Take Profit / Stop Loss (preço)</label>
             <div className="twoCols">
               <input
                 className="inp"
@@ -171,29 +199,36 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
             </div>
           </div>
 
-          {/* Botões Comprar/Vender */}
+          {/* Botões de ação */}
           <div className="twoCols">
-            <button className="btn btnBuy" onClick={buy}>Comprar</button>
-            <button className="btn btnSell" onClick={sell}>Vender</button>
+            <button className="btn btnBuy" onClick={buy}>
+              Comprar
+            </button>
+            <button className="btn btnSell" onClick={sell}>
+              Vender
+            </button>
           </div>
 
-          {/* Resetar/Exportar */}
+          {/* Reset / Exportar */}
           <div className="twoCols">
-            <button className="btn" onClick={resetHist}>Resetar histórico</button>
-            <button className="btn" onClick={exportCSV}>Exportar CSV</button>
+            <button className="btn" onClick={resetHist}>
+              Resetar histórico
+            </button>
+            <button className="btn" onClick={exportCSV}>
+              Exportar CSV
+            </button>
           </div>
         </div>
 
-        {/* ===== Coluna B: métricas e infos ===== */}
-        <div className="colB">
-          {/* Linha 1 */}
+        {/* ===== Coluna B ===== */}
+        <div className="colB" style={{ display: "grid", gap: 10 }}>
           <div className="threeCols">
             <Metric label="PNL" value={fmt2(snap.pnl)} />
             <Metric label="Equity" value={fmt2(snap.equity)} />
             <Metric label="Saldo (USDT)" value={fmt2(snap.balance)} />
           </div>
-          {/* Linha 2 */}
-          <div className="threeCols" style={{ marginTop: 8 }}>
+
+          <div className="threeCols">
             <Metric
               label="Tamanho de posição"
               value={snap.position ? fmt2(snap.position.qty) : "-"}
@@ -207,8 +242,8 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
               value={spreadBps !== undefined ? spreadBps.toFixed(1) : "-"}
             />
           </div>
-          {/* Linha 3 */}
-          <div className="threeCols" style={{ marginTop: 8 }}>
+
+          <div className="threeCols">
             <Metric label="Preço ao vivo" value={mark ? mark.toFixed(2) : "-"} />
             <Metric label="Volume 24h (USDT)" value={vol24h ? fmt2(vol24h) : "-"} />
             <Metric
@@ -230,8 +265,3 @@ function Metric({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
-
-const pairs: Pair[] = [
-  "BTCUSDT","ETHUSDT","BNBUSDT","SOLUSDT",
-  "ADAUSDT","XRPUSDT","DOGEUSDT","LINKUSDT",
-];
