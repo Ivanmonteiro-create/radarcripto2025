@@ -21,25 +21,31 @@ export default function TradingViewWidget({ symbol }: Props) {
 
     const config = {
       autosize: true,
-      symbol,                    // "BINANCE:BTCUSDT"
+      symbol,                  // ex.: "BINANCE:BTCUSDT"
       interval: '1',
       timezone: 'Etc/UTC',
       theme: 'dark',
       style: '1',
       locale: 'br',
-      hide_legend: false,        // ← volta a mostrar a legenda/símbolos
-      enable_publishing: false,
-      allow_symbol_change: false,
-      save_image: true,
-      withdateranges: true,
-      // Mantemos os botões padrão; NÃO desabilitamos “indicadores”
+
+      /* >>> GARANTE AS BARRAS/INDICADORES VISÍVEIS <<< */
+      hide_top_toolbar: false,
+      hide_side_toolbar: false,   // ← barra lateral (desenhos/ícones)
+      hide_legend: false,         // ← mantém legenda/símbolos
+      studies: [],
+
+      /* Não usamos o botão nativo de FS: teremos nosso botão próprio */
       disabled_features: [
         'header_symbol_search',
         'header_compare',
         'header_saveload',
-        'header_fullscreen_button', // usamos nosso botão próprio
+        'header_fullscreen_button',
       ],
-      studies: [],
+
+      allow_symbol_change: false,
+      enable_publishing: false,
+      save_image: true,
+      withdateranges: true,
       container_id: 'tv-container',
     };
 
