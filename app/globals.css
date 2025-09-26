@@ -270,3 +270,58 @@ main, .panel, .compactPanel { overflow:hidden }
   color:#1cff80; font-weight:800; border-radius:10px; padding:10px 12px;
 }
 .contactCard .btn:disabled{ opacity:.6; cursor:not-allowed }
+/* ====== SIMULADOR: Grid e alturas estáveis ====== */
+.simShell{
+  display: grid;
+  grid-template-columns: minmax(640px, 1fr) 420px; /* gráfico | painel */
+  gap: 16px;
+  align-items: start;
+  padding: 16px;
+  min-height: 100dvh;
+}
+
+@media (max-width: 1100px){
+  .simShell{ grid-template-columns: 1fr; }
+}
+
+/* Painel do gráfico com zero “aperto” */
+.chartBox{ padding: 8px; }
+.chartWrap{
+  position: relative;
+  height: calc(100vh - 140px);  /* ocupa bem a tela */
+  min-height: 560px;            /* garante altura mínima */
+  width: 100%;
+  overflow: hidden;
+}
+
+/* Garante que o widget ocupe tudo que dermos */
+.chartWrap > *{
+  position: absolute;
+  inset: 0;
+}
+
+/* Painel de controles rola internamente se precisar */
+.tradePanelShell{
+  max-height: calc(100vh - 180px);
+  overflow: auto;
+}
+
+/* Deixa o botão “Voltar ao início” com presença (verde) */
+.tcBackBtn{
+  background: linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10));
+  border: 1px solid rgba(33,243,141,.35);
+  color: #1cff80;
+  font-weight: 800;
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+/* Mantém o botão de Tela Cheia alinhado com a câmera (seu seletor antigo) */
+section.panel button[aria-label*="Tela cheia"],
+section.panel button[title*="Tela cheia"],
+section.panel .chartFsBtn{
+  position: absolute !important;
+  top: 4px !important;
+  right: 44px !important;
+  z-index: 6 !important;
+}
