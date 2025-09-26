@@ -1,23 +1,36 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import TradingViewWidget from '@/components/TradingViewWidget';
-import TradeControls from '@/components/TradeControls';
+import { useState } from "react";
+import TradingViewWidget from "@/components/TradingViewWidget";
+import TradeControls from "@/components/TradeControls";
 
 export default function SimPageClient() {
-  const [symbol, setSymbol] = useState('BINANCE:BTCUSDT');
+  // Par inicial — ajuste se quiser outro
+  const [symbol, setSymbol] = useState("BTCUSDT");
 
   return (
-    <div className="wrapper">
-      <section className="panel" style={{ gridColumn: '1 / span 2', minHeight: 520 }}>
-        {/* ✅ só passa o símbolo, sem onSymbolChange */}
-        <TradingViewWidget symbol={symbol} />
+    <main className="simShell">
+      {/* PAINEL DO GRÁFICO */}
+      <section className="panel chartBox">
+        <div className="chartWrap">
+          {/* O componente deve preencher 100% do contêiner */}
+          <TradingViewWidget symbol={symbol} />
+        </div>
       </section>
 
+      {/* PAINEL DE CONTROLES */}
       <section className="panel compactPanel">
-        {/* ✅ aqui sim, os controles podem alterar o símbolo */}
-        <TradeControls symbol={symbol} onSymbolChange={setSymbol} />
+        <div className="tcHeader">
+          <h2 className="compactTitle">Controles de Trade</h2>
+          <a href="/" className="btn tcBackBtn">Voltar ao início</a>
+        </div>
+
+        <div className="tradePanelShell">
+          {/* Se o seu TradeControls aceita troca de par via callback, passe onChangeSymbol={setSymbol}.
+             Se NÃO aceitar, deixe só symbol={symbol} como abaixo. */}
+          <TradeControls symbol={symbol} />
+        </div>
       </section>
-    </div>
+    </main>
   );
 }
