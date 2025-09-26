@@ -13,6 +13,17 @@ export type Pair =
   | "DOGEUSDT"
   | "LINKUSDT";
 
+/** Registro simples para o histórico */
+export type TradeSide = "BUY" | "SELL";
+export type TradeRecord = {
+  ts: number;           // epoch ms
+  side: TradeSide;
+  symbol: Pair;
+  price: number;
+  sizeUSDT: number;
+  pnl?: number;
+};
+
 const PAIRS: Pair[] = [
   "BTCUSDT",
   "ETHUSDT",
@@ -55,6 +66,9 @@ type Props = {
 
   onResetHistory?: () => void;
   onExportCSV?: () => void;
+
+  /** Histórico a ser exibido no rodapé (opcional) */
+  history?: TradeRecord[];
 };
 
 export default function TradeControls({
@@ -68,6 +82,7 @@ export default function TradeControls({
   onSell,
   onResetHistory,
   onExportCSV,
+  history = [],
 }: Props) {
   const [riskPct, setRiskPct] = useState<number>(1);
   const [sizeUSDT, setSizeUSDT] = useState<number>(100_000);
@@ -86,7 +101,6 @@ export default function TradeControls({
 
   const handleBuy = () =>
     onBuy?.({ symbol, price: livePrice, sizeUSDT, riskPct, tpPrice, slPrice });
-
   const handleSell = () =>
     onSell?.({ symbol, price: livePrice, sizeUSDT, riskPct, tpPrice, slPrice });
 
@@ -94,19 +108,12 @@ export default function TradeControls({
     <div className="tcRoot">
       <div className="tcHead">
         <h3 className="tcTitle">Controles de Trade</h3>
-        {/* o “Voltar ao início” fica fora, na página */}
+        {/* “Voltar ao início” fica na página; aqui só o painel */}
       </div>
 
-      {/* 
-        Grid geral:
-        2 colunas (esq/dir) para os campos principais
-        + 3 faixas de base ocupando toda a largura:
-          - tp/sl
-          - buy/sell
-          - reset/export
-      */}
+      {/* 2 colunas + três faixas base + histórico ocupando largura total */}
       <div className="tcGrid">
-        {/* ====== COLUNA ESQUERDA ====== */}
+        {/* ===== COLUNA ESQUERDA ===== */}
         <div className="col">
           <label className="lbl">Par</label>
           <select
@@ -145,7 +152,7 @@ export default function TradeControls({
           />
         </div>
 
-        {/* ====== COLUNA DIREITA ====== */}
+        {/* ===== COLUNA DIREITA ===== */}
         <div className="col">
           <label className="lbl">PNL</label>
           <input className="inp inp-disabled" disabled value={fmt(pnl)} />
@@ -164,7 +171,7 @@ export default function TradeControls({
           />
         </div>
 
-        {/* ====== FAIXA BASE 1: TP / SL ====== */}
+        {/* ===== FAIXA 1: TP / SL ===== */}
         <div className="row twoCols">
           <div>
             <label className="lbl">TP (preço)</label>
@@ -198,7 +205,7 @@ export default function TradeControls({
           </div>
         </div>
 
-        {/* ====== FAIXA BASE 2: Comprar / Vender ====== */}
+        {/* ===== FAIXA 2: Comprar / Vender ===== */}
         <div className="row twoCols">
           <button className="btn btnBuy" onClick={handleBuy}>
             Comprar
@@ -208,7 +215,7 @@ export default function TradeControls({
           </button>
         </div>
 
-        {/* ====== FAIXA BASE 3: Resetar / Exportar ====== */}
+        {/* ===== FAIXA 3: Resetar / Exportar ===== */}
         <div className="row twoCols">
           <button className="btn" onClick={() => onResetHistory?.()}>
             Resetar histórico
@@ -216,6 +223,42 @@ export default function TradeControls({
           <button className="btn" onClick={() => onExportCSV?.()}>
             Exportar CSV
           </button>
+        </div>
+
+        {/* ===== RODAPÉ: HISTÓRICO ===== */}
+        <div className="row histCard">
+          <div className="histHead">
+            <span className="histTitle">Histórico</span>
+            <span className="muted xs">
+              {history.length ? `${history.length} operações` : "Sem operações ainda."}
+            </span>
+          </div>
+
+          {history.length > 0 && (
+            <div className="histTable">
+              <div className="histRow histRow--head">
+                <span>Data</span>
+                <span>Side</span>
+                <span>Par</span>
+                <span>Preço</span>
+                <span>Tam. (USDT)</span>
+                <span>PNL</span>
+              </div>
+
+              {history.slice(-15).reverse().map((h) => (
+                <div key={h.ts + "-" + h.side} className="histRow">
+                  <span>{new Date(h.ts).toLocaleString()}</span>
+                  <span className={h.side === "BUY" ? "green" : "red"}>
+                    {h.side}
+                  </span>
+                  <span>{h.symbol}</span>
+                  <span>{fmt(h.price, 4)}</span>
+                  <span>{fmt(h.sizeUSDT, 0)}</span>
+                  <span>{typeof h.pnl === "number" ? fmt(h.pnl, 2) : "-"}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -228,6 +271,8 @@ export default function TradeControls({
           display: grid;
           grid-auto-rows: min-content;
           gap: 10px;
+          /* ajuda a “grudar” no rodapé visual do painel */
+          height: 100%;
         }
         .tcHead {
           display: flex;
@@ -241,7 +286,6 @@ export default function TradeControls({
           font-weight: 900;
         }
 
-        /* Grid geral: 2 colunas + 3 linhas base ocupando toda a largura */
         .tcGrid {
           display: grid;
           grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -259,14 +303,45 @@ export default function TradeControls({
         .row {
           grid-column: 1 / -1; /* ocupa as duas colunas */
         }
-
         .twoCols {
           display: grid;
           grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
           gap: 10px;
         }
 
-        /* inputs/botões – integram com seu tema (globals.css) */
+        /* Histórico */
+        .histCard {
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid rgba(255, 255, 255, 0.07);
+          border-radius: 12px;
+          padding: 10px;
+        }
+        .histHead {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 6px;
+        }
+        .histTitle {
+          font-weight: 800;
+        }
+        .histTable {
+          display: grid;
+          gap: 6px;
+        }
+        .histRow {
+          display: grid;
+          grid-template-columns: 1.6fr 0.6fr 0.9fr 1fr 1fr 0.8fr;
+          gap: 6px;
+          font-size: 13px;
+          align-items: center;
+        }
+        .histRow--head {
+          opacity: 0.7;
+          font-weight: 700;
+        }
+
+        /* Tema inputs / botões (coeso com seu globals.css) */
         .lbl {
           font-size: 12px;
           color: rgba(255, 255, 255, 0.7);
@@ -317,12 +392,14 @@ export default function TradeControls({
           font-weight: 800;
         }
 
+        .green { color: #1cff80; font-weight: 800 }
+        .red   { color: #ff6b6b; font-weight: 800 }
+
         @media (max-width: 1100px) {
-          .tcGrid {
-            grid-template-columns: 1fr;
-          }
-          .row {
-            grid-column: auto;
+          .tcGrid { grid-template-columns: 1fr; }
+          .row { grid-column: auto; }
+          .histRow {
+            grid-template-columns: 1.4fr .6fr .8fr .8fr .8fr .7fr;
           }
         }
       `}</style>
