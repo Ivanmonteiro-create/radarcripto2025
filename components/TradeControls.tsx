@@ -1,4 +1,3 @@
-// /components/TradeControls.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -19,22 +18,22 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
   const [stopLoss, setStopLoss] = useState<string>('');
   const [takeProfit, setTakeProfit] = useState<string>('');
 
-  // estilos compactos para ficar 100% visível no zoom 100
-  const compact: React.CSSProperties = { gap: 10, fontSize: 13 };
-  const inp: React.CSSProperties = { height: 32, fontSize: 13, padding: '0 10px', width: '100%' };
-  const fake: React.CSSProperties = { height: 32, display: 'grid', alignItems: 'center', padding: '0 10px' };
+  // tamanhos ↑ para ocupar bem a coluna, mas sem quebrar no zoom 100%
+  const compact: React.CSSProperties = { gap: 12, fontSize: 14 };
+  const inp: React.CSSProperties = { height: 38, fontSize: 14, padding: '0 12px', width: '100%' };
+  const fake: React.CSSProperties = { height: 38, display: 'grid', alignItems: 'center', padding: '0 12px' };
 
   return (
     <div className="compactRoot" style={{ display: 'grid', ...compact }}>
-      {/* Cabeçalho com botão no canto direito */}
-      <div className="tcHeader" style={{ gap: 10 }}>
+      {/* Cabeçalho com “Voltar ao início” no canto direito */}
+      <div className="tcHeader" style={{ gap: 12 }}>
         <h3 className="compactTitle" style={{ margin: 0 }}>Controles de Trade</h3>
-        <div className="tcHeaderActions" style={{ marginLeft: 'auto' }}>
-          <a href="/" className="btn tcBackBtn">Voltar ao início</a>
-        </div>
+        <a href="/" className="btn tcBackBtn" style={{ marginLeft: 'auto' }}>
+          Voltar ao início
+        </a>
       </div>
 
-      {/* Linha 1: Par + PNL (direita) */}
+      {/* Linha 1: Par + PNL */}
       <div className="twoCols" style={compact}>
         <div>
           <div className="lbl">Par</div>
