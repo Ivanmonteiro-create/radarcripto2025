@@ -16,7 +16,6 @@ export default function SimPageClient() {
   const chartPanelRef = useRef<HTMLDivElement | null>(null);
   const [isFs, setIsFs] = useState(false);
 
-  // Sincroniza estado de FS
   useEffect(() => {
     const onChange = () => setIsFs(Boolean(document.fullscreenElement));
     document.addEventListener('fullscreenchange', onChange);
@@ -31,7 +30,6 @@ export default function SimPageClient() {
   const exitFs = () => { if (document.fullscreenElement) void document.exitFullscreen(); };
   const toggleFs = () => (document.fullscreenElement ? exitFs() : enterFs());
 
-  // Atalhos: F (entra) / X (sai)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const k = e.key.toLowerCase();
@@ -44,11 +42,16 @@ export default function SimPageClient() {
 
   return (
     <main
-      className="wrapper"
+      /* Full-bleed: sem padding, sem gap, altura total */
       style={{
+        display: 'grid',
         gridTemplateColumns: '1fr 380px',
+        gap: 0,
+        padding: 0,
+        height: '100dvh',
         alignItems: 'stretch',
         position: 'relative',
+        overflow: 'hidden',
       }}
     >
       {/* Voltar ao início — canto direito superior */}
@@ -70,11 +73,17 @@ export default function SimPageClient() {
         </a>
       )}
 
-      {/* Gráfico */}
+      {/* Gráfico (painel sem raio, colado às bordas) */}
       <section
         ref={chartPanelRef}
         className="panel"
-        style={{ position: 'relative', minHeight: '78vh' }}
+        style={{
+          position: 'relative',
+          minHeight: '100%',
+          height: '100%',
+          borderRadius: 0,               // ← sem cantos arredondados
+          borderRight: '1px solid rgba(255,255,255,.06)', // separador sutil
+        }}
       >
         {!isFs && (
           <div className="compactHeader" style={{ marginBottom: 8 }}>
@@ -84,7 +93,7 @@ export default function SimPageClient() {
           </div>
         )}
 
-        {/* Botão Tela Cheia — “acima da câmera” */}
+        {/* Botão Tela Cheia — mantém posição atual */}
         {!isFs && (
           <button
             aria-label="Tela cheia"
@@ -92,8 +101,7 @@ export default function SimPageClient() {
             onClick={toggleFs}
             style={{
               position: 'absolute',
-              /* ajuste fino: suba/abaixe 2–4px se precisar alinhar no seu monitor */
-              bottom: 86,        // ← acima da câmera
+              bottom: 86,
               right: 8,
               zIndex: 40,
               width: 28,
@@ -114,15 +122,23 @@ export default function SimPageClient() {
           </button>
         )}
 
-        <div style={{ height: isFs ? '100vh' : '72vh', minHeight: 520 }}>
+        <div style={{ height: 'calc(100% - 0px)', minHeight: 520 }}>
           <TradingViewWidget symbol={`BINANCE:${symbol}`} />
         </div>
       </section>
 
-      {/* Controles */}
+      {/* Controles (sem raio, encostado à borda direita e em toda a altura) */}
       <section
         className="panel compactPanel"
-        style={{ display: 'grid', alignContent: 'start', gap: 10, minHeight: '78vh' }}
+        style={{
+          display: 'grid',
+          alignContent: 'start',
+          gap: 10,
+          minHeight: '100%',
+          height: '100%',
+          borderRadius: 0,               // ← sem cantos arredondados
+          borderLeft: '1px solid rgba(255,255,255,.06)', // garante continuidade
+        }}
       >
         <TradeControls
           symbol={symbol}
