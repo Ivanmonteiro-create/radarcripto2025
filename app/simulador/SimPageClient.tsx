@@ -1,119 +1,103 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
-import TradeControls from "@/components/TradeControls";
 
-/**
- * ATENÇÃO:
- * Este componente presume que você já tem o widget do TradingView
- * como um componente reutilizável. Mantive o nome abaixo igual ao
- * que você vinha usando; ajuste se seu arquivo tiver outro nome.
- */
-const TradingViewEmbedWidget = dynamic(
-  () => import("@/components/TradingViewEmbedWidget"),
+// IMPORT CORRETO do seu widget existente
+const TradingViewWidget = dynamic(
+  () => import("@/components/TradingViewWidget"),
   { ssr: false }
 );
 
-export default function SimPageClient() {
-  // símbolo atual (mantém o padrão que você já usa, ex.: "BTCUSDT")
-  const [symbol, setSymbol] = useState("BTCUSDT");
+// Seus controles (mantém como já existe no projeto)
+import TradeControls from "@/components/TradeControls";
 
-  // --- Tela cheia ---
+type Props = {
+  // mantido vazio para uso futuro se necessário
+};
+
+export default function SimPageClient(_: Props) {
+  // Símbolo padrão — o TradeControls pode alterar isso
+  const [symbol, setSymbol] = useState<string>("BTCUSDT");
+
+  // Ref do contêiner do gráfico para o modo tela cheia
   const chartWrapRef = useRef<HTMLDivElement | null>(null);
-  const [isFull, setIsFull] = useState(false);
 
-  // trava scroll de fundo quando em tela cheia (evita page “mexer”)
-  useEffect(() => {
-    if (isFull) {
-      const prev = document.documentElement.style.overflow;
-      document.documentElement.style.overflow = "hidden";
-      return () => {
-        document.documentElement.style.overflow = prev;
-      };
-    }
-  }, [isFull]);
-
-  const toggleFullscreen = () => setIsFull(v => !v);
+  const goFullscreen = useCallback(() => {
+    const el = chartWrapRef.current;
+    if (!el) return;
+    const anyEl = el as any;
+    (el.requestFullscreen ||
+      anyEl.webkitRequestFullscreen ||
+      anyEl.mozRequestFullScreen ||
+      anyEl.msRequestFullscreen)?.call(el);
+  }, []);
 
   return (
-    <main className="wrapper" style={{ alignItems: "stretch", gap: 16 }}>
-      {/* COLUNA ESQUERDA: gráfico ocupa 2/3 em desktop */}
-      <section
-        className={`panel`}
-        style={{
-          gridColumn: "1 / span 2",
-          display: "grid",
-          gridTemplateRows: "auto 1fr",
-          position: "relative",
-        }}
-      >
-        {/* WRAPPER do gráfico — é ele que entra/saí de FS */}
+    <main
+      className="wrapper"
+      style={{
+        // grid 2:1 — gráfico grande como antes
+        gridTemplateColumns: "minmax(600px, 2fr) minmax(360px, 1fr)",
+        alignItems: "stretch",
+      }}
+    >
+      {/* COLUNA ESQUERDA — GRÁFICO */}
+      <section className="panel" style={{ padding: 12, display: "grid", gridTemplateRows: "auto 1fr" }}>
+        {/* Cabeçalho do painel com botão Tela Cheia */}
         <div
-          ref={chartWrapRef}
-          className={isFull ? "chartFS" : ""}
+          className="tcHeader"
           style={{
-            position: "relative",
-            height: isFull ? "100dvh" : "72vh",
-            borderRadius: isFull ? 0 : 12,
-            overflow: "hidden",
+            marginBottom: 8,
           }}
         >
-          {/* Botão Tela Cheia (usa as regras que já estão no globals.css) */}
-          <button
-            type="button"
-            aria-label="Tela cheia"
-            className="chartFsBtn"
-            onClick={toggleFullscreen}
-            title={isFull ? "Sair da tela cheia" : "Tela cheia"}
-          >
-            {isFull ? "⤢" : "⤢"}
-          </button>
+          <h2 className="tcTitle">Gráfico — {symbol}</h2>
 
-          {/* TradingView — exatamente como já estava, só pegando o símbolo do estado */}
-          <TradingViewEmbedWidget
-            symbol={symbol}
-            // passe outros props que você já usa (interval, theme etc.)
-          />
+          <div className="tcHeaderActions">
+            {/* Botão Tela Cheia (ativo) */}
+            <button
+              type="button"
+              title="Tela cheia"
+              aria-label="Tela cheia"
+              className="chartFsBtn--header"
+              onClick={goFullscreen}
+            >
+              ⤢
+            </button>
+          </div>
+        </div>
+
+        {/* Área do gráfico (vira fullscreen) */}
+        <div
+          ref={chartWrapRef}
+          style={{
+            position: "relative",
+            borderRadius: 12,
+            overflow: "hidden",
+            border: "1px solid rgba(255,255,255,.08)",
+          }}
+        >
+          <TradingViewWidget symbol={symbol} />
         </div>
       </section>
 
-      {/* COLUNA DIREITA: controles compactos */}
+      {/* COLUNA DIREITA — CONTROLES */}
       <section className="panel compactPanel tradePanelShell">
-        <div className="compactRoot">
-          {/* Título/ações no topo (mantém seu “Voltar ao início” vindo de dentro do TradeControls) */}
-          {/* ATENÇÃO: o TradeControls já renderiza o cabeçalho/botões; não duplicamos aqui */}
+        <div className="tcHeader" style={{ marginBottom: 10 }}>
+          <h2 className="tcTitle">Controles de Trade</h2>
+          {/* “Voltar ao início” segue estilos globais verdes */}
+          <a href="/" className="btn tcBackBtn">Voltar ao início</a>
+        </div>
+
+        <div className="compactGrid">
+          {/* O seu componente já exibe preço, equity, etc.
+              e aceita troca de símbolo. Mantemos o contrato: */}
           <TradeControls
-            // PROPS EXISTENTES no seu componente (mantidos)
             symbol={symbol}
-            onSymbolChange={setSymbol} // habilita o selector/pares rápidos sem quebrar o TV
-            mode="spot"               // mantém SPOT para o plano Starter
-            compact                    // se o componente aceitar; caso não, ele ignora
+            onSymbolChange={(s: string) => setSymbol(s)}
           />
         </div>
       </section>
-
-      <style jsx>{`
-        /* container em tela cheia */
-        .chartFS {
-          position: fixed !important;
-          inset: 0 !important;
-          z-index: 50 !important;
-          background: #0a0f0d;
-        }
-
-        /* grid responsivo (gráfico 2 colunas, controles 1) */
-        @media (min-width: 1100px) {
-          main.wrapper {
-            grid-template-columns: 2fr 1fr;
-          }
-        }
-        @media (max-width: 1099px) {
-          section.panel:nth-of-type(1) {
-            grid-column: 1 / -1;
-          }
-        }
-      `}</style>
     </main>
   );
 }
