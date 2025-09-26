@@ -18,20 +18,14 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
   const [stopLoss, setStopLoss] = useState<string>('');
   const [takeProfit, setTakeProfit] = useState<string>('');
 
-  // tamanhos ↑ para ocupar bem a coluna, mas sem quebrar no zoom 100%
   const compact: React.CSSProperties = { gap: 12, fontSize: 14 };
   const inp: React.CSSProperties = { height: 38, fontSize: 14, padding: '0 12px', width: '100%' };
   const fake: React.CSSProperties = { height: 38, display: 'grid', alignItems: 'center', padding: '0 12px' };
 
   return (
     <div className="compactRoot" style={{ display: 'grid', ...compact }}>
-      {/* Cabeçalho com “Voltar ao início” no canto direito */}
-      <div className="tcHeader" style={{ gap: 12 }}>
-        <h3 className="compactTitle" style={{ margin: 0 }}>Controles de Trade</h3>
-        <a href="/" className="btn tcBackBtn" style={{ marginLeft: 'auto' }}>
-          Voltar ao início
-        </a>
-      </div>
+      {/* Cabeçalho simples (sem o back aqui) */}
+      <h3 className="compactTitle" style={{ margin: 0 }}>Controles de Trade</h3>
 
       {/* Linha 1: Par + PNL */}
       <div className="twoCols" style={compact}>
@@ -108,7 +102,7 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
         </div>
       </div>
 
-      {/* Ações (sempre visíveis no 100%) */}
+      {/* Ações */}
       <div className="twoCols" style={compact}>
         <button className="btn btnBuy">Comprar</button>
         <button className="btn btnSell">Vender</button>
