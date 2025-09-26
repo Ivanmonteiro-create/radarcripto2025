@@ -14,7 +14,7 @@ export default function SimPageClient() {
   const [symbol, setSymbol] = useState<Pair>('BTCUSDT');
   const livePrice = useLivePrice(symbol);
 
-  // tela cheia do painel do gráfico
+  // Tela cheia
   const chartPanelRef = useRef<HTMLDivElement | null>(null);
   const [isFs, setIsFs] = useState(false);
 
@@ -34,11 +34,7 @@ export default function SimPageClient() {
   return (
     <main
       className="wrapper"
-      style={{
-        // 1fr (gráfico) | 420px (controles)
-        gridTemplateColumns: '1fr 420px',
-        alignItems: 'stretch',
-      }}
+      style={{ gridTemplateColumns: '1fr 420px', alignItems: 'stretch' }}
     >
       {/* Painel do gráfico */}
       <section className="panel" ref={chartPanelRef} style={{ position: 'relative', minHeight: '78vh' }}>
@@ -47,7 +43,7 @@ export default function SimPageClient() {
             Gráfico — {symbol}
           </h2>
 
-          {/* Botão de tela cheia: colchetes [ ] */}
+          {/* Tela cheia (▢/▣) */}
           <button
             aria-label="Tela cheia"
             title="Tela cheia"
@@ -63,11 +59,8 @@ export default function SimPageClient() {
           >
             {isFs ? '▣' : '▢'}
           </button>
-
-          <a href="/" className="btn tcBackBtn">Voltar ao início</a>
         </div>
 
-        {/* TradingView */}
         <div style={{ height: '72vh', minHeight: 520 }}>
           <TradingViewWidget
             symbol={symbol}
@@ -79,7 +72,7 @@ export default function SimPageClient() {
         </div>
       </section>
 
-      {/* Painel único dos controles */}
+      {/* Painel único de controles */}
       <section className="panel compactPanel">
         <TradeControls
           symbol={symbol}
