@@ -1,50 +1,79 @@
-// components/TradingViewWidget.tsx
-"use client";
+'use client';
 
-import React, { useMemo } from "react";
+import React, { useEffect, useRef } from 'react';
 
 type Props = {
-  /** Ex.: "BTCUSDT" (sem o "BINANCE:"; eu adiciono) */
-  symbol: string;
-  interval?: string; // "1" | "3" | "5" | "15" | "60" | "240" | "D" | "W"
-  theme?: "light" | "dark";
+  symbol: string;                    // ex: "BTCUSDT"
+  interval?: '1' | '3' | '5' | '15' | '30' | '60' | '120' | '240' | 'D' | 'W';
+  theme?: 'light' | 'dark';
   autosize?: boolean;
-  height?: number;
+  height?: number;                   // usado se autosize = false
 };
 
+/**
+ * Iframe oficial do TradingView (embed). Funciona apenas no cliente.
+ * Não usa next/dynamic aqui — o próprio componente já é "use client".
+ */
 export default function TradingViewWidget({
   symbol,
-  interval = "1",
-  theme = "dark",
+  interval = '1',
+  theme = 'dark',
   autosize = true,
   height = 560,
 }: Props) {
-  const src = useMemo(() => {
-    const p = new URLSearchParams({
-      symbol: `BINANCE:${symbol}`,
-      interval,
-      theme,
-      style: "1",
-      locale: "br",
-      hide_side_toolbar: "0",
-      hide_top_toolbar: "0",
-      allow_symbol_change: "1",
-      withdateranges: "1",
-      studies: "",
-      support_host: "https://www.tradingview.com",
-    });
-    return `https://s.tradingview.com/widgetembed/?${p.toString()}`;
-  }, [symbol, interval, theme]);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // garante que estamos no browser
+    if (typeof window === 'undefined') return;
+
+    // injeta o script do TradingView uma única vez por montagem
+    const script = document.createElement('script');
+    script.src = 'https://s3.tradingview.com/tv.js';
+    script.async = true;
+
+    script.onload = () => {
+      // @ts-ignore - lib externa no window
+      if (window.TradingView && containerRef.current) {
+        // limpa container antes de reinicializar
+        containerRef.current.innerHTML = '';
+
+        // @ts-ignore
+        new window.TradingView.widget({
+          symbol: `BINANCE:${symbol}`,
+          interval,
+          theme,
+          locale: 'br',
+          container_id: containerRef.current,
+          autosize,
+          height: autosize ? undefined : height,
+          hide_side_toolbar: false,
+          allow_symbol_change: true,
+          studies: [],
+        });
+      }
+    };
+
+    document.body.appendChild(script);
+    return () => {
+      // remove o script e o conteúdo do container ao desmontar
+      try {
+        document.body.removeChild(script);
+      } catch {}
+      if (containerRef.current) containerRef.current.innerHTML = '';
+    };
+  }, [symbol, interval, theme, autosize, height]);
 
   return (
-    <div style={{ width: "100%", height: autosize ? "100%" : height }}>
-      <iframe
-        title={`Gráfico — ${symbol}`}
-        src={src}
-        style={{ width: "100%", height: "100%", border: 0, borderRadius: 12, background: "transparent" }}
-        allowTransparency
-        loading="lazy"
-      />
+    <div
+      className="panel"
+      style={{
+        height: autosize ? '100%' : height,
+        minHeight: autosize ? 520 : undefined,
+        overflow: 'hidden',
+      }}
+    >
+      <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
     </div>
   );
 }
