@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 
-/** ==== Pares (8) – com LINKUSDT (no lugar da DOT) e DOGEUSDT incluso ==== */
+/** ===== Pares (8) ===== */
 export type Pair =
   | "BTCUSDT"
   | "ETHUSDT"
@@ -24,24 +24,18 @@ const PAIRS: Pair[] = [
   "LINKUSDT",
 ];
 
-/** ==== Tipagem de props – flexível para não quebrar o build ==== */
+/** ===== Props ===== */
 type Props = {
-  /** Par atual (vem da página) */
   symbol: Pair;
-
-  /** Troca de par (devolve um Pair; se sua página aceitar string, faça o cast lá) */
   onSymbolChange?: (s: Pair) => void;
 
-  /** Preço ao vivo (se não vier, mostramos “–”) */
   livePrice?: number;
 
-  /** Leituras do simulador (se existirem) */
   pnl?: number;
   equity?: number;
   balance?: number;
 
-  /** Ações (opcionais) */
-  onBuy?: (params: {
+  onBuy?: (p: {
     symbol: Pair;
     price?: number;
     sizeUSDT: number;
@@ -50,7 +44,7 @@ type Props = {
     slPrice?: number;
   }) => void;
 
-  onSell?: (params: {
+  onSell?: (p: {
     symbol: Pair;
     price?: number;
     sizeUSDT: number;
@@ -75,81 +69,61 @@ export default function TradeControls({
   onResetHistory,
   onExportCSV,
 }: Props) {
-  /* ======= estados locais: risco, tamanho, tp/sl ======= */
   const [riskPct, setRiskPct] = useState<number>(1);
   const [sizeUSDT, setSizeUSDT] = useState<number>(100_000);
   const [tpPrice, setTpPrice] = useState<number | undefined>();
   const [slPrice, setSlPrice] = useState<number | undefined>();
 
-  /* ======= derivado simples para “tamanho de posição” ======= */
   const positionSize = useMemo(() => {
-    // regra simples de exemplo: posição = sizeUSDT / (livePrice ou 1 para evitar NaN)
     const px = livePrice && livePrice > 0 ? livePrice : 1;
     return sizeUSDT / px;
   }, [sizeUSDT, livePrice]);
 
-  const pretty = (n?: number) =>
-    typeof n === "number" && isFinite(n) ? n.toLocaleString("en-US") : "-";
+  const fmt = (n?: number, maxFrac = 2) =>
+    typeof n === "number" && isFinite(n)
+      ? n.toLocaleString("en-US", { maximumFractionDigits: maxFrac })
+      : "-";
 
-  /* ======= ações ======= */
-  const handleBuy = () => {
-    onBuy?.({
-      symbol,
-      price: livePrice,
-      sizeUSDT,
-      riskPct,
-      tpPrice,
-      slPrice,
-    });
-  };
-  const handleSell = () => {
-    onSell?.({
-      symbol,
-      price: livePrice,
-      sizeUSDT,
-      riskPct,
-      tpPrice,
-      slPrice,
-    });
-  };
+  const handleBuy = () =>
+    onBuy?.({ symbol, price: livePrice, sizeUSDT, riskPct, tpPrice, slPrice });
 
-  /* ======= UI ======= */
+  const handleSell = () =>
+    onSell?.({ symbol, price: livePrice, sizeUSDT, riskPct, tpPrice, slPrice });
+
   return (
-    <div className="tcRoot compactPanel compactRoot">
-      <div className="tcHeader">
+    <div className="tcRoot">
+      <div className="tcHead">
         <h3 className="tcTitle">Controles de Trade</h3>
-        {/* O botão “Voltar ao início” fica fora deste componente na página */}
+        {/* o “Voltar ao início” fica fora, na página */}
       </div>
 
-      <div className="tcForm twoCols">
-        {/* ==== COLUNA ESQUERDA ==== */}
+      {/* 
+        Grid geral:
+        2 colunas (esq/dir) para os campos principais
+        + 3 faixas de base ocupando toda a largura:
+          - tp/sl
+          - buy/sell
+          - reset/export
+      */}
+      <div className="tcGrid">
+        {/* ====== COLUNA ESQUERDA ====== */}
         <div className="col">
-          {/* Par */}
           <label className="lbl">Par</label>
-          <div className="field">
-            <select
-              className="inp"
-              value={symbol}
-              onChange={(e) => onSymbolChange?.(e.target.value as Pair)}
-            >
-              {PAIRS.map((p) => (
-                <option key={p} value={p}>
-                  {p}
-                </option>
-              ))}
-            </select>
-          </div>
+          <select
+            className="inp"
+            value={symbol}
+            onChange={(e) => onSymbolChange?.(e.target.value as Pair)}
+          >
+            {PAIRS.map((p) => (
+              <option key={p} value={p}>
+                {p}
+              </option>
+            ))}
+          </select>
 
-          {/* Preço ao vivo */}
           <label className="lbl">Preço ao vivo</label>
-          <input
-            className="inp inp-disabled"
-            disabled
-            value={pretty(livePrice)}
-            readOnly
-          />
+          <input className="inp inp-disabled" disabled value={fmt(livePrice)} />
 
-          {/* Risco por trade (%) */}
           <label className="lbl">Risco por trade (%)</label>
           <input
             className="inp"
@@ -160,7 +134,6 @@ export default function TradeControls({
             onChange={(e) => setRiskPct(Number(e.target.value))}
           />
 
-          {/* Tamanho (USDT) */}
           <label className="lbl">Tamanho (USDT)</label>
           <input
             className="inp"
@@ -170,97 +143,79 @@ export default function TradeControls({
             value={sizeUSDT}
             onChange={(e) => setSizeUSDT(Number(e.target.value))}
           />
-
-          {/* Botões principais */}
-          <div className="twoCols" style={{ marginTop: 8 }}>
-            <button className="btn btnBuy" onClick={handleBuy}>
-              Comprar
-            </button>
-            <button className="btn btnSell" onClick={handleSell}>
-              Vender
-            </button>
-          </div>
-
-          {/* Ações secundárias */}
-          <div className="twoCols" style={{ marginTop: 8 }}>
-            <button className="btn" onClick={() => onResetHistory?.()}>
-              Resetar histórico
-            </button>
-            <button className="btn" onClick={() => onExportCSV?.()}>
-              Exportar CSV
-            </button>
-          </div>
         </div>
 
-        {/* ==== COLUNA DIREITA ==== */}
+        {/* ====== COLUNA DIREITA ====== */}
         <div className="col">
-          {/* PNL */}
           <label className="lbl">PNL</label>
-          <input className="inp inp-disabled" disabled value={pretty(pnl)} />
+          <input className="inp inp-disabled" disabled value={fmt(pnl)} />
 
-          {/* Equity */}
           <label className="lbl">Equity</label>
-          <input
-            className="inp inp-disabled"
-            disabled
-            value={pretty(equity)}
-          />
+          <input className="inp inp-disabled" disabled value={fmt(equity)} />
 
-          {/* Saldo (USDT) */}
           <label className="lbl">Saldo (USDT)</label>
-          <input
-            className="inp inp-disabled"
-            disabled
-            value={pretty(balance)}
-          />
+          <input className="inp inp-disabled" disabled value={fmt(balance)} />
 
-          {/* Tamanho de posição (read-only, derivado) */}
           <label className="lbl">Tamanho de posição</label>
           <input
             className="inp inp-disabled"
             disabled
-            value={
-              isFinite(positionSize)
-                ? positionSize.toLocaleString("en-US", {
-                    maximumFractionDigits: 6,
-                  })
-                : "-"
-            }
+            value={isFinite(positionSize) ? fmt(positionSize, 6) : "-"}
           />
+        </div>
 
-          {/* TP / SL (preço) */}
-          <div className="twoCols" style={{ marginTop: 8 }}>
-            <div>
-              <label className="lbl">TP (preço)</label>
-              <input
-                className="inp"
-                type="number"
-                step={0.01}
-                value={tpPrice ?? ""}
-                onChange={(e) =>
-                  setTpPrice(
-                    e.target.value === "" ? undefined : Number(e.target.value)
-                  )
-                }
-                placeholder="TP (preço)"
-              />
-            </div>
-            <div>
-              <label className="lbl">SL (preço)</label>
-              <input
-                className="inp"
-                type="number"
-                step={0.01}
-                value={slPrice ?? ""}
-                onChange={(e) =>
-                  setSlPrice(
-                    e.target.value === "" ? undefined : Number(e.target.value)
-                  )
-                }
-                placeholder="SL (preço)"
-              />
-            </div>
+        {/* ====== FAIXA BASE 1: TP / SL ====== */}
+        <div className="row twoCols">
+          <div>
+            <label className="lbl">TP (preço)</label>
+            <input
+              className="inp"
+              type="number"
+              step={0.01}
+              value={tpPrice ?? ""}
+              onChange={(e) =>
+                setTpPrice(
+                  e.target.value === "" ? undefined : Number(e.target.value)
+                )
+              }
+              placeholder="TP (preço)"
+            />
           </div>
+          <div>
+            <label className="lbl">SL (preço)</label>
+            <input
+              className="inp"
+              type="number"
+              step={0.01}
+              value={slPrice ?? ""}
+              onChange={(e) =>
+                setSlPrice(
+                  e.target.value === "" ? undefined : Number(e.target.value)
+                )
+              }
+              placeholder="SL (preço)"
+            />
+          </div>
+        </div>
+
+        {/* ====== FAIXA BASE 2: Comprar / Vender ====== */}
+        <div className="row twoCols">
+          <button className="btn btnBuy" onClick={handleBuy}>
+            Comprar
+          </button>
+          <button className="btn btnSell" onClick={handleSell}>
+            Vender
+          </button>
+        </div>
+
+        {/* ====== FAIXA BASE 3: Resetar / Exportar ====== */}
+        <div className="row twoCols">
+          <button className="btn" onClick={() => onResetHistory?.()}>
+            Resetar histórico
+          </button>
+          <button className="btn" onClick={() => onExportCSV?.()}>
+            Exportar CSV
+          </button>
         </div>
       </div>
 
@@ -270,20 +225,104 @@ export default function TradeControls({
           border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 14px;
           padding: 14px;
-        }
-        .tcForm {
           display: grid;
-          grid-template-columns: 1fr 1fr;
+          grid-auto-rows: min-content;
+          gap: 10px;
+        }
+        .tcHead {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
           gap: 12px;
         }
+        .tcTitle {
+          margin: 0;
+          font-size: 18px;
+          font-weight: 900;
+        }
+
+        /* Grid geral: 2 colunas + 3 linhas base ocupando toda a largura */
+        .tcGrid {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+          grid-auto-rows: min-content;
+          gap: 12px;
+        }
+
         .col {
           display: grid;
           grid-auto-rows: min-content;
           gap: 8px;
+          min-width: 0;
         }
+
+        .row {
+          grid-column: 1 / -1; /* ocupa as duas colunas */
+        }
+
+        .twoCols {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+          gap: 10px;
+        }
+
+        /* inputs/botões – integram com seu tema (globals.css) */
+        .lbl {
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.7);
+          margin-bottom: 2px;
+        }
+        .inp {
+          width: 100%;
+          height: 36px;
+          padding: 0 10px;
+          border-radius: 10px;
+          background: rgba(255, 255, 255, 0.03);
+          color: inherit;
+          border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+        .inp-disabled {
+          background: rgba(255, 255, 255, 0.08);
+          cursor: not-allowed;
+        }
+        .btn {
+          border: 1px solid rgba(255, 255, 255, 0.18);
+          background: rgba(255, 255, 255, 0.06);
+          border-radius: 10px;
+          color: inherit;
+          padding: 10px 12px;
+          font-size: 15px;
+        }
+        .btn:hover {
+          background: rgba(255, 255, 255, 0.12);
+        }
+        .btnBuy {
+          background: linear-gradient(
+            180deg,
+            rgba(33, 243, 141, 0.22),
+            rgba(33, 243, 141, 0.1)
+          );
+          border-color: rgba(33, 243, 141, 0.35);
+          color: #1cff80;
+          font-weight: 800;
+        }
+        .btnSell {
+          background: linear-gradient(
+            180deg,
+            rgba(255, 76, 76, 0.2),
+            rgba(255, 76, 76, 0.08)
+          );
+          color: #ff6b6b;
+          border: 1px solid rgba(255, 255, 255, 0.35);
+          font-weight: 800;
+        }
+
         @media (max-width: 1100px) {
-          .tcForm {
+          .tcGrid {
             grid-template-columns: 1fr;
+          }
+          .row {
+            grid-column: auto;
           }
         }
       `}</style>
