@@ -55,7 +55,7 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
     setSnap(engine.snapshot(symbol, entry));
   }, [mark, riskPct, stopLoss, symbol, engine]);
 
-  // spread e vol 24h (Binance)
+  // spread e vol 24h
   useEffect(() => {
     let cancel = false;
     (async () => {
@@ -87,23 +87,24 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
   const exportCSV = () => exportTradesCSV(engine.getHistory());
 
   return (
-    <section className="panel compactPanel compactRoot" style={{ padding: 14 }}>
-      <div className="compactHeader" style={{ marginBottom: 10 }}>
+    <section className="panel compactPanel compactRoot" style={{ padding: 12 }}>
+      <div className="compactHeader" style={{ marginBottom: 8 }}>
         <h3 className="compactTitle">Controles de Trade</h3>
       </div>
 
-      {/* 2 COLUNAS — tudo empilhado (um card por linha) */}
+      {/* === GRADE PRINCIPAL: 2 colunas iguais === */}
       <div
         className="compactGrid"
         style={{
-          gridTemplateColumns: "minmax(320px, 1fr) minmax(360px, 1fr)",
-          gap: 12,
-          alignItems: "start"
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",   // LADO A LADO EM PARTES IGUAIS
+          gap: 10,
+          alignItems: "start",
+          width: "100%"
         }}
       >
-        {/* ===== COLUNA ESQUERDA: PARÂMETROS & AÇÕES ===== */}
-        <div className="colA" style={{ display: "grid", gap: 10 }}>
-          {/* Par */}
+        {/* ===== COLUNA ESQUERDA (parâmetros + ações) ===== */}
+        <div className="colA" style={{ display: "grid", gap: 8 }}>
           <Card label="Par">
             <select
               className="inp"
@@ -114,12 +115,10 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
             </select>
           </Card>
 
-          {/* Preço ao vivo */}
           <Card label="Preço ao vivo">
             <div className="fakeInput">{mark ? mark.toFixed(2) : "-"}</div>
           </Card>
 
-          {/* Risco por trade (%) */}
           <Card label="Risco por trade (%)">
             <input
               className="inp"
@@ -131,12 +130,10 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
             />
           </Card>
 
-          {/* Tamanho (USDT) */}
           <Card label="Tamanho (USDT)">
             <div className="fakeInput">{sizeUSDT ? `${fmt2(sizeUSDT)} USDT` : "-"}</div>
           </Card>
 
-          {/* TP */}
           <Card label="Take Profit (preço)">
             <input
               className="inp"
@@ -149,7 +146,6 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
             />
           </Card>
 
-          {/* SL */}
           <Card label="Stop Loss (preço)">
             <input
               className="inp"
@@ -162,21 +158,20 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
             />
           </Card>
 
-          {/* Botões de ação */}
-          <div className="twoCols">
+          {/* AÇÕES */}
+          <div className="twoCols" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
             <button className="btn btnBuy" onClick={buy}>Comprar</button>
             <button className="btn btnSell" onClick={sell}>Vender</button>
           </div>
 
-          {/* Reset / Exportar */}
-          <div className="twoCols">
+          <div className="twoCols" style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8 }}>
             <button className="btn" onClick={resetHist}>Resetar histórico</button>
             <button className="btn" onClick={exportCSV}>Exportar CSV</button>
           </div>
         </div>
 
-        {/* ===== COLUNA DIREITA: MÉTRICAS ===== */}
-        <div className="colB" style={{ display: "grid", gap: 10 }}>
+        {/* ===== COLUNA DIREITA (métricas) ===== */}
+        <div className="colB" style={{ display: "grid", gap: 8 }}>
           <Metric label="PNL" value={fmt2(snap.pnl)} />
           <Metric label="Equity" value={fmt2(snap.equity)} />
           <Metric label="Saldo (USDT)" value={fmt2(snap.balance)} />
@@ -191,6 +186,7 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
   );
 }
 
+/* === Componentes de UI mínimos (cards) === */
 function Card({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="cardMini" style={{ display: "grid", gap: 6 }}>
@@ -199,7 +195,6 @@ function Card({ label, children }: { label: string; children: React.ReactNode })
     </div>
   );
 }
-
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="cardMini" style={{ display: "grid", gap: 6 }}>
