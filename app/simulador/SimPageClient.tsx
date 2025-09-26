@@ -10,10 +10,12 @@ export default function SimPageClient() {
   return (
     <div className="wrapper">
       <section className="panel" style={{ gridColumn: '1 / span 2', minHeight: 520 }}>
-        <TradingViewWidget symbol={symbol} onSymbolChange={setSymbol} />
+        {/* ✅ só passa o símbolo, sem onSymbolChange */}
+        <TradingViewWidget symbol={symbol} />
       </section>
 
       <section className="panel compactPanel">
+        {/* ✅ aqui sim, os controles podem alterar o símbolo */}
         <TradeControls symbol={symbol} onSymbolChange={setSymbol} />
       </section>
     </div>
