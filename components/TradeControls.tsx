@@ -4,7 +4,7 @@ import React from 'react';
 
 type Pair =
   | 'BTCUSDT' | 'ETHUSDT' | 'BNBUSDT' | 'SOLUSDT'
-  | 'ADAUSDT' | 'XRPUSDT' | 'DOGEUSDT' | 'LINKUSDT'; // ← DOT removido, LINK adicionado
+  | 'ADAUSDT' | 'XRPUSDT' | 'DOGEUSDT' | 'LINKUSDT';
 
 type Props = {
   symbol: Pair;
@@ -17,7 +17,7 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
     <div className="compactRoot" style={{ display: 'grid', gap: 10 }}>
       <div className="compactHeader" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h3 className="compactTitle" style={{ margin: 0 }}>Controles de Trade</h3>
-        <span className="badge">Plano: Free</span>
+        {/* Badge “Plano: Free” removido a pedido */}
       </div>
 
       {/* Par + Preço ao vivo */}
