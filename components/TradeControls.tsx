@@ -1,10 +1,9 @@
-// components/TradeControls.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { getEngine } from "@/lib/tradeEngine";
 import { exportTradesCSV } from "@/lib/csv";
-import priceFeed from "@/lib/priceFeed"; // seu singleton existente (já está no projeto)
+import { priceFeed } from "@/lib/priceFeed"; // ✅ corrigido: export nomeado
 
 type Pair =
   | "BTCUSDT" | "ETHUSDT" | "BNBUSDT" | "SOLUSDT"
@@ -13,22 +12,20 @@ type Pair =
 type Props = {
   symbol: Pair;
   onSymbolChange?: (s: Pair) => void;
-  // livePrice é opcional (se vier da página). Se não vier, o controls assina o feed.
   livePrice?: number;
 };
 
-// util
 const fmt2 = (n: number | undefined) =>
   (n === undefined ? "-" : n.toLocaleString("en-US", { maximumFractionDigits: 2 }));
 
 export default function TradeControls({ symbol, onSymbolChange, livePrice }: Props) {
   const engine = useMemo(() => getEngine(), []);
   const [mark, setMark] = useState<number | undefined>(livePrice);
-  const [riskPct, setRiskPct] = useState(1);            // 1% padrão
+  const [riskPct, setRiskPct] = useState(1);
   const [takeProfit, setTakeProfit] = useState<number | "">("");
   const [stopLoss, setStopLoss] = useState<number | "">("");
   const [sizeUSDT, setSizeUSDT] = useState<number>(0);
-  const [spreadBps, setSpreadBps] = useState<number | undefined>(); // bps
+  const [spreadBps, setSpreadBps] = useState<number | undefined>();
   const [vol24h, setVol24h] = useState<number | undefined>();
   const [snap, setSnap] = useState(() => engine.snapshot(symbol, mark ?? 0));
 
@@ -39,35 +36,33 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
     return () => unsub?.();
   }, [symbol, livePrice]);
 
-  // Atualiza métricas derivadas: tamanho de posição, snapshot, vol/spread
+  // Atualiza métricas derivadas
   useEffect(() => {
     const entry = mark ?? 0;
-    const stop = typeof stopLoss === "number" ? stopLoss : entry * 0.99; // fallback
+    const stop = typeof stopLoss === "number" ? stopLoss : entry * 0.99;
     const notional = engine.calcPositionSizeUSD(riskPct, entry, stop);
     setSizeUSDT(Number.isFinite(notional) ? Math.max(0, Math.floor(notional)) : 0);
     setSnap(engine.snapshot(symbol, entry));
   }, [mark, riskPct, stopLoss, symbol, engine]);
 
-  // 24h volume + spread (via Binance públicos)
+  // Volume 24h + Spread da Binance
   useEffect(() => {
     let cancel = false;
-    const base = symbol.replace("USDT", "");
-    const binanceSym = symbol; // já está no formato
     (async () => {
       try {
         const [vRes, sRes] = await Promise.all([
-          fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${binanceSym}`),
-          fetch(`https://api.binance.com/api/v3/ticker/bookTicker?symbol=${binanceSym}`),
+          fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`),
+          fetch(`https://api.binance.com/api/v3/ticker/bookTicker?symbol=${symbol}`),
         ]);
         if (!vRes.ok || !sRes.ok) return;
         const v = await vRes.json();
         const b = await sRes.json();
         if (cancel) return;
-        const vol = Number(v.quoteVolume); // em USDT
+        const vol = Number(v.quoteVolume);
         const bid = Number(b.bidPrice);
         const ask = Number(b.askPrice);
         const mid = (bid + ask) / 2;
-        const sp = ((ask - bid) / mid) * 10_000; // bps
+        const sp = ((ask - bid) / mid) * 10_000;
         setVol24h(vol);
         setSpreadBps(sp);
       } catch {}
@@ -83,12 +78,10 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
   };
   const sell = () => {
     if (!mark) return;
-    // se tiver posição aberta, vender zera; senão é short “simulado” de venda spot -> aqui mantemos SELL como realização parcial/total do que houver
     const pos = engine.getPosition(symbol);
     if (pos && pos.qty > 0) {
       engine.close(symbol, mark);
     } else {
-      // sem posição -> apenas ignora para spot
       return;
     }
     setSnap(engine.snapshot(symbol, mark));
@@ -99,7 +92,6 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
   };
   const exportCSV = () => exportTradesCSV(engine.getHistory());
 
-  // UI: (mantém as classes que você já usa no globals.css)
   return (
     <div className="compactPanel compactRoot">
       <div className="compactHeader">
@@ -112,7 +104,6 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
       <div className="compactGrid">
         {/* Coluna A */}
         <div className="colA">
-          {/* Par + preço ao vivo */}
           <div className="cardMini">
             <label className="lbl">Par</label>
             <div className="twoCols">
@@ -127,7 +118,6 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
             </div>
           </div>
 
-          {/* Risco % e Tamanho por trade */}
           <div className="cardMini">
             <label className="lbl">Risco por trade (%)</label>
             <div className="twoCols">
@@ -143,7 +133,6 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
             </div>
           </div>
 
-          {/* TP / SL */}
           <div className="cardMini">
             <label className="lbl">Take Profit / Stop Loss</label>
             <div className="twoCols">
@@ -164,7 +153,6 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
             </div>
           </div>
 
-          {/* Botões */}
           <div className="twoCols">
             <button className="btn btnBuy" onClick={buy}>Comprar</button>
             <button className="btn btnSell" onClick={sell}>Vender</button>
@@ -178,7 +166,6 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
 
         {/* Coluna B */}
         <div className="colB">
-          {/* Métricas (PNL/Equity/Posição) */}
           <div className="threeCols">
             <Metric label="PNL" value={fmt2(snap.pnl)} />
             <Metric label="Equity" value={fmt2(snap.equity)} />
