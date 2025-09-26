@@ -7,8 +7,6 @@ type Props = {
   symbol: string;
   onSymbolChange: (s: string) => void;
   livePrice?: number;
-  onToggleFullscreen: () => void; // novo: controla FS do gráfico
-  isFullscreen: boolean;          // novo: estado visual do FS
 };
 
 const PAIRS = [
@@ -16,87 +14,74 @@ const PAIRS = [
   'ADAUSDT', 'XRPUSDT', 'DOGEUSDT', 'DOTUSDT',
 ] as const;
 
-export default function TradeControls({
-  symbol, onSymbolChange, livePrice,
-  onToggleFullscreen, isFullscreen
-}: Props) {
-
-  // placeholders (prontos pra ligar na lógica depois)
+export default function TradeControls({ symbol, onSymbolChange, livePrice }: Props) {
+  // placeholders (prontos para ligar depois)
   const [riskPct, setRiskPct] = useState<number>(1);
   const [stopLoss, setStopLoss] = useState<string>('');
   const [takeProfit, setTakeProfit] = useState<string>('');
 
-  return (
-    <div className="compactRoot" style={{ display: 'grid', gap: 12 }}>
-      {/* Cabeçalho do painel:
-         - Voltar ao início perto do título (mais ao centro)
-         - Tela cheia no topo direito */}
-      <div className="tcHeader">
-        <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-          <h3 className="compactTitle" style={{ margin:0 }}>Controles de Trade</h3>
-          <a href="/" className="btn tcBackBtn">Voltar ao início</a>
-        </div>
+  // estilos compactos para caber em 100% zoom
+  const compact: React.CSSProperties = { gap: 10, fontSize: 13 };
+  const inp: React.CSSProperties = { height: 32, fontSize: 13, padding: '0 10px' };
+  const fake: React.CSSProperties = { height: 32, display: 'grid', alignItems: 'center', padding: '0 10px' };
 
-        <button
-          aria-label="Tela cheia"
-          title="Tela cheia"
-          onClick={onToggleFullscreen}
-          className="chartFsBtn--header"
-          style={{
-            width: 36, height: 36, borderRadius: 10, lineHeight: 1,
-            display: 'grid', placeItems: 'center',
-            background: 'rgba(255,255,255,.08)',
-            border: '1px solid rgba(255,255,255,.18)',
-            color: '#e6e6e6'
-          }}
-        >
-          {isFullscreen ? '▣' : '▢'}
-        </button>
+  return (
+    <div className="compactRoot" style={{ display: 'grid', ...compact }}>
+      {/* Cabeçalho: título à esquerda e Voltar ao início à DIREITA */}
+      <div className="tcHeader">
+        <h3 className="compactTitle" style={{ margin: 0 }}>Controles de Trade</h3>
+        <a href="/" className="btn tcBackBtn">Voltar ao início</a>
       </div>
 
-      {/* Par & preço ao vivo */}
-      <div className="twoCols">
+      {/* Par & Preço ao vivo */}
+      <div className="twoCols" style={compact}>
         <div>
           <div className="lbl">Par</div>
-          <select className="inp" value={symbol} onChange={(e) => onSymbolChange(e.target.value)}>
+          <select
+            className="inp"
+            style={inp}
+            value={symbol}
+            onChange={(e) => onSymbolChange(e.target.value)}
+          >
             {PAIRS.map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
         </div>
 
         <div>
           <div className="lbl">Preço ao vivo</div>
-          <div className="fakeInput">
+          <div className="fakeInput" style={fake}>
             {livePrice ? livePrice.toLocaleString('en-US', { maximumFractionDigits: 6 }) : '—'}
           </div>
         </div>
       </div>
 
       {/* Indicadores principais */}
-      <div className="threeCols">
+      <div className="threeCols" style={compact}>
         <div className="cardMini">
           <div className="lbl">PNL</div>
-          <div className="fakeInput">—</div>
+          <div className="fakeInput" style={fake}>—</div>
         </div>
         <div className="cardMini">
           <div className="lbl">Saldo (USDT)</div>
-          <div className="fakeInput">100,000.00</div>
+          <div className="fakeInput" style={fake}>100,000.00</div>
         </div>
         <div className="cardMini">
           <div className="lbl">Equity</div>
-          <div className="fakeInput">—</div>
+          <div className="fakeInput" style={fake}>—</div>
         </div>
       </div>
 
-      {/* Parâmetros de trade (sem “Preço de entrada”) */}
-      <div className="threeCols">
+      {/* Parâmetros (sem “Preço de entrada”) */}
+      <div className="threeCols" style={compact}>
         <div className="cardMini">
           <div className="lbl">Tamanho da posição</div>
-          <div className="fakeInput">—</div>
+          <div className="fakeInput" style={fake}>—</div>
         </div>
         <div className="cardMini">
           <div className="lbl">Risco por trade (%)</div>
           <input
             className="inp"
+            style={inp}
             type="number"
             min={0}
             step="0.25"
@@ -106,42 +91,42 @@ export default function TradeControls({
         </div>
         <div className="cardMini">
           <div className="lbl">Take Profit</div>
-          <input className="inp" value={takeProfit} onChange={(e) => setTakeProfit(e.target.value)} />
+          <input className="inp" style={inp} value={takeProfit} onChange={(e) => setTakeProfit(e.target.value)} />
         </div>
       </div>
 
-      <div className="twoCols">
+      <div className="twoCols" style={compact}>
         <div className="cardMini">
           <div className="lbl">Stop Loss</div>
-          <input className="inp" value={stopLoss} onChange={(e) => setStopLoss(e.target.value)} />
+          <input className="inp" style={inp} value={stopLoss} onChange={(e) => setStopLoss(e.target.value)} />
         </div>
         <div className="cardMini">
           <div className="lbl">Variação 24h</div>
-          <div className="fakeInput">—</div>
+          <div className="fakeInput" style={fake}>—</div>
         </div>
       </div>
 
-      {/* Linha extra pra preencher o layout e abrir espaço pra futuros dados */}
-      <div className="twoCols">
+      {/* Linha extra para preencher a grade */}
+      <div className="twoCols" style={compact}>
         <div className="cardMini">
           <div className="lbl">Volume 24h</div>
-          <div className="fakeInput">—</div>
+          <div className="fakeInput" style={fake}>—</div>
         </div>
         <div className="cardMini">
           <div className="lbl">Spread</div>
-          <div className="fakeInput">—</div>
+          <div className="fakeInput" style={fake}>—</div>
         </div>
       </div>
 
       {/* Ações */}
-      <div className="twoCols">
-        <button className="btn btnBuy" onClick={() => alert('Comprar (TODO)')}>Comprar</button>
-        <button className="btn btnSell" onClick={() => alert('Vender (TODO)')}>Vender</button>
+      <div className="twoCols" style={compact}>
+        <button className="btn btnBuy">Comprar</button>
+        <button className="btn btnSell">Vender</button>
       </div>
 
-      <div className="twoCols">
-        <button className="btn" onClick={() => alert('Resetar histórico (TODO)')}>Resetar histórico</button>
-        <button className="btn" onClick={() => alert('Exportar CSV (TODO)')}>Exportar CSV</button>
+      <div className="twoCols" style={compact}>
+        <button className="btn">Resetar histórico</button>
+        <button className="btn">Exportar CSV</button>
       </div>
     </div>
   );
