@@ -1,8 +1,19 @@
-// Server Component simples que apenas renderiza o cliente.
-// Não usa next/dynamic aqui (evita o erro de "ssr:false não permitido").
+// app/simulador/page.tsx
+import Link from "next/link";
+import SimPageClient from "./SimPageClient";
 
-import SimPageClient from './SimPageClient';
+export const metadata = {
+  title: "Simulador | RadarCrypto",
+};
 
 export default function Page() {
-  return <SimPageClient />;
+  // A page é “fina”: só orquestra. Nada de dynamic/ssr:false aqui.
+  return (
+    <main className="aboutV2-root" style={{ paddingTop: 12 }}>
+      <Link href="/" className="btn backTopRight tcBackBtn">
+        Voltar ao início
+      </Link>
+      <SimPageClient />
+    </main>
+  );
 }
