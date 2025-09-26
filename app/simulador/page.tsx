@@ -2,5 +2,6 @@
 import SimPageClient from "./SimPageClient";
 
 export default function Page() {
-  return <SimPageClient />;
+  // símbolo inicial padrão
+  return <SimPageClient initialSymbol="BTCUSDT" />;
 }
