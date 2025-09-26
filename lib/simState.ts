@@ -1,62 +1,67 @@
 // lib/simState.ts
-export type Plan = 'free' | 'trader' | 'pro' | 'elite';
+export type Side = 'LONG' | 'SHORT';
 
-export type TradeHist = {
+export type PlanTier = 'FREE' | 'TRADER' | 'PRO' | 'ELITE';
+
+export type Position = {
+  side: Side;
+  symbol: string;
+  qty: number;           // quantidade em moeda (ex.: BTC)
+  entryPrice: number;    // preço médio de entrada
+  ts: number;            // timestamp de abertura
+  tpPct?: number | null; // % opcional
+  slPct?: number | null; // % opcional
+};
+
+export type TradeFill = {
+  kind: 'OPEN' | 'CLOSE' | 'SL' | 'TP';
   side: 'BUY' | 'SELL';
   symbol: string;
   price: number;
+  qty: number;
+  pnl?: number;          // PnL realizado em USDT (apenas no CLOSE/SL/TP)
   ts: number;
 };
 
 export type SimState = {
-  symbol: string;
-  balance: number;
-  riskPct: number;
-  tpPct: number | '';
-  slPct: number | '';
-  qtyRef: number;
-  history: TradeHist[];
+  plan: PlanTier;
+  balance: number;       // saldo em USDT
+  history: TradeFill[];
+  position?: Position | null;
 };
 
-const SIM_KEY = 'rc.sim.v1';
-const PLAN_KEY = 'rc.plan.v1';
+const KEY = 'rc-sim-v1';
 
-export function loadPlan(): Plan {
-  if (typeof window === 'undefined') return 'free';
-  const url = new URL(window.location.href);
-  const q = (url.searchParams.get('plan') || '').toLowerCase() as Plan | '';
-  const fromQuery: Plan | null = q && ['free','trader','pro','elite'].includes(q) ? q : null;
-
-  const stored = (localStorage.getItem(PLAN_KEY) || '') as Plan | '';
-  const fromStore: Plan | null = stored && ['free','trader','pro','elite'].includes(stored) ? stored : null;
-
-  const plan = fromQuery ?? fromStore ?? 'free';
-  try { localStorage.setItem(PLAN_KEY, plan); } catch {}
-  return plan;
-}
-
-export function setPlan(plan: Plan) {
-  try { localStorage.setItem(PLAN_KEY, plan); } catch {}
-}
-
-export function loadSimState(): SimState | null {
-  if (typeof window === 'undefined') return null;
+export function loadSimState(): SimState {
   try {
-    const raw = localStorage.getItem(SIM_KEY);
-    if (!raw) return null;
-    const obj = JSON.parse(raw);
-    return obj as SimState;
-  } catch {
-    return null;
-  }
+    const raw = typeof window !== 'undefined' ? window.localStorage.getItem(KEY) : null;
+    if (raw) {
+      const obj = JSON.parse(raw) as SimState;
+      // sanity defaults
+      obj.plan ||= 'FREE';
+      obj.balance = Number(obj.balance ?? 10_000);
+      obj.history ||= [];
+      return obj;
+    }
+  } catch {}
+  return {
+    plan: 'FREE',
+    balance: 10_000,
+    history: [],
+    position: null,
+  };
 }
 
-let saveTimer: number | null = null;
-export function saveSimState(s: SimState) {
-  if (typeof window === 'undefined') return;
-  // debounce ~200ms para evitar gravar a cada tecla
-  if (saveTimer) window.clearTimeout(saveTimer);
-  saveTimer = window.setTimeout(() => {
-    try { localStorage.setItem(SIM_KEY, JSON.stringify(s)); } catch {}
-  }, 200);
+export function saveSimState(state: SimState) {
+  try {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(KEY, JSON.stringify(state));
+    }
+  } catch {}
+}
+
+// util PnL não realizado
+export function calcUnrealizedPnl(pos: Position, price: number): number {
+  const diff = pos.side === 'LONG' ? (price - pos.entryPrice) : (pos.entryPrice - price);
+  return diff * pos.qty;
 }
