@@ -14,7 +14,7 @@ export default function SimPageClient() {
   const [symbol, setSymbol] = useState<Pair>('BTCUSDT');
   const livePrice = useLivePrice(symbol);
 
-  // --- Tela cheia do painel do GRÁFICO ---
+  // -------- Tela cheia do painel do GRÁFICO --------
   const chartPanelRef = useRef<HTMLDivElement | null>(null);
   const [isFs, setIsFs] = useState(false);
 
@@ -24,50 +24,72 @@ export default function SimPageClient() {
     return () => document.removeEventListener('fullscreenchange', onChange);
   }, []);
 
-  const toggleFullscreen = () => {
+  const enterFs = () => {
     const el = chartPanelRef.current;
-    if (!el) return;
-    if (!document.fullscreenElement) void el.requestFullscreen();
-    else void document.exitFullscreen();
+    if (!el || document.fullscreenElement) return;
+    void el.requestFullscreen();
   };
+  const exitFs = () => { if (document.fullscreenElement) void document.exitFullscreen(); };
+  const toggleFs = () => (document.fullscreenElement ? exitFs() : enterFs());
+
+  // atalhos: F entra, X sai
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() === 'f') { e.preventDefault(); enterFs(); }
+      if (e.key.toLowerCase() === 'x') { e.preventDefault(); exitFs(); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   return (
     <main
       className="wrapper"
-      // gráfico grande + coluna de controles mais estreita
-      style={{ gridTemplateColumns: '1fr 380px', alignItems: 'stretch' }}
+      style={{ gridTemplateColumns: '1fr 360px', alignItems: 'stretch' }}
     >
       {/* --------- GRÁFICO --------- */}
-      <section className="panel" ref={chartPanelRef} style={{ position: 'relative', minHeight: '78vh' }}>
-        <div className="compactHeader" style={{ marginBottom: 8 }}>
-          <h2 className="compactTitle" style={{ margin: 0 }}>Gráfico — {symbol}</h2>
-        </div>
+      <section
+        ref={chartPanelRef}
+        className="panel"
+        style={{
+          position: 'relative',
+          minHeight: '78vh',
+          // quando em fullscreen, o próprio elemento vira viewport
+          // e o conteúdo ocupa 100%
+        }}
+      >
+        {/* Cabeçalho do painel (escondido em FS para liberar área) */}
+        {!isFs && (
+          <div className="compactHeader" style={{ marginBottom: 8 }}>
+            <h2 className="compactTitle" style={{ margin: 0 }}>Gráfico — {symbol}</h2>
+          </div>
+        )}
 
-        {/* Tela cheia: acima da “câmera”, canto superior-direito */}
+        {/* Botão de Tela Cheia — alinhado acima da “câmera” */}
         <button
           aria-label="Tela cheia"
           title="Tela cheia"
-          onClick={toggleFullscreen}
+          onClick={toggleFs}
           style={{
             position: 'absolute',
             top: 4,
-            right: 44,    // ~1 cm da “câmera”
-            zIndex: 5,
-            width: 28,
-            height: 28,
-            borderRadius: 8,
-            display: 'grid',
-            placeItems: 'center',
+            right: 44,          // ~1 cm da “câmera”
+            zIndex: 6,
+            width: 28, height: 28, borderRadius: 8,
+            display: 'grid', placeItems: 'center',
             background: 'rgba(255,255,255,.12)',
             color: '#e6e6e6',
             border: '1px solid rgba(255,255,255,.25)',
             cursor: 'pointer'
           }}
         >
-          {isFs ? '▣' : '▢'}
+          {isFs ? '✕' : '▢'}
         </button>
 
-        <div style={{ height: '72vh', minHeight: 520 }}>
+        <div
+          // em FS, o contêiner vai a 100% da altura do elemento full
+          style={{ height: isFs ? '100vh' : '72vh', minHeight: 520 }}
+        >
           <TradingViewWidget
             symbol={symbol}
             interval="1"
