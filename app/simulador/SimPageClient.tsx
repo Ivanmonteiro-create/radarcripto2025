@@ -14,7 +14,7 @@ export default function SimPageClient() {
   const [symbol, setSymbol] = useState<Pair>('BTCUSDT');
   const livePrice = useLivePrice(symbol);
 
-  // Tela cheia (aplicada ao painel do gráfico)
+  // Tela cheia do painel do GRÁFICO
   const chartPanelRef = useRef<HTMLDivElement | null>(null);
   const [isFs, setIsFs] = useState(false);
 
@@ -34,17 +34,39 @@ export default function SimPageClient() {
   return (
     <main
       className="wrapper"
-      // Painel de controles um pouco mais largo
-      style={{ gridTemplateColumns: '1fr 480px', alignItems: 'stretch' }}
+      // controles mais estreitos para caber em 100% zoom
+      style={{ gridTemplateColumns: '1fr 400px', alignItems: 'stretch' }}
     >
-      {/* Painel do gráfico */}
+      {/* ------- Painel do GRÁFICO ------- */}
       <section className="panel" ref={chartPanelRef} style={{ position: 'relative', minHeight: '78vh' }}>
+        {/* Cabeçalho simples do gráfico */}
         <div className="compactHeader" style={{ marginBottom: 8 }}>
-          <h2 className="compactTitle" style={{ marginRight: 'auto' }}>
-            Gráfico — {symbol}
-          </h2>
-          {/* (REMOVIDO) Tela cheia aqui; agora o botão fica no painel de controles */}
+          <h2 className="compactTitle" style={{ margin: 0 }}>Gráfico — {symbol}</h2>
         </div>
+
+        {/* Botão TELA CHEIA no topo direito do painel do gráfico (acima da “câmera”) */}
+        <button
+          aria-label="Tela cheia"
+          title="Tela cheia"
+          onClick={toggleFullscreen}
+          style={{
+            position: 'absolute',
+            top: 4,
+            right: 44,         // ~1cm da “câmera” do TV
+            zIndex: 5,
+            width: 28,
+            height: 28,
+            borderRadius: 8,
+            display: 'grid',
+            placeItems: 'center',
+            background: 'rgba(255,255,255,.12)',
+            color: '#e6e6e6',
+            border: '1px solid rgba(255,255,255,.25)',
+            cursor: 'pointer'
+          }}
+        >
+          {isFs ? '▣' : '▢'}
+        </button>
 
         <div style={{ height: '72vh', minHeight: 520 }}>
           <TradingViewWidget
@@ -57,14 +79,12 @@ export default function SimPageClient() {
         </div>
       </section>
 
-      {/* Painel único de controles — recebe o toggleFullscreen pra exibir o botão no topo direito */}
+      {/* ------- Painel CONTROLES ------- */}
       <section className="panel compactPanel">
         <TradeControls
           symbol={symbol}
           onSymbolChange={(s: string) => setSymbol(s as Pair)}
           livePrice={livePrice}
-          onToggleFullscreen={toggleFullscreen}
-          isFullscreen={isFs}
         />
       </section>
     </main>
