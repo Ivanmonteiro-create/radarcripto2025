@@ -1,79 +1,57 @@
-'use client';
-
-import React, { useEffect, useRef } from 'react';
-
-type Props = {
-  symbol: string;                    // ex: "BTCUSDT"
-  interval?: '1' | '3' | '5' | '15' | '30' | '60' | '120' | '240' | 'D' | 'W';
-  theme?: 'light' | 'dark';
-  autosize?: boolean;
-  height?: number;                   // usado se autosize = false
-};
+// components/TradingViewWidget.tsx
+"use client";
 
 /**
- * Iframe oficial do TradingView (embed). Funciona apenas no cliente.
- * Não usa next/dynamic aqui — o próprio componente já é "use client".
+ * Widget IFRAME oficial do TradingView.
+ * Mantém o visual e comportamento do seu projeto anterior.
+ * Não usa next/dynamic aqui; é 100% client component.
  */
+import { useMemo } from "react";
+
+type Props = {
+  symbol: string;             // ex.: "BTCUSDT"
+  interval?: "1" | "3" | "5" | "15" | "30" | "60";
+  theme?: "dark" | "light";
+  height?: number;
+  autosize?: boolean;
+};
+
 export default function TradingViewWidget({
   symbol,
-  interval = '1',
-  theme = 'dark',
-  autosize = true,
-  height = 560,
+  interval = "1",
+  theme = "dark",
+  height = 520,
+  autosize = false,
 }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // garante que estamos no browser
-    if (typeof window === 'undefined') return;
-
-    // injeta o script do TradingView uma única vez por montagem
-    const script = document.createElement('script');
-    script.src = 'https://s3.tradingview.com/tv.js';
-    script.async = true;
-
-    script.onload = () => {
-      // @ts-ignore - lib externa no window
-      if (window.TradingView && containerRef.current) {
-        // limpa container antes de reinicializar
-        containerRef.current.innerHTML = '';
-
-        // @ts-ignore
-        new window.TradingView.widget({
-          symbol: `BINANCE:${symbol}`,
-          interval,
-          theme,
-          locale: 'br',
-          container_id: containerRef.current,
-          autosize,
-          height: autosize ? undefined : height,
-          hide_side_toolbar: false,
-          allow_symbol_change: true,
-          studies: [],
-        });
-      }
-    };
-
-    document.body.appendChild(script);
-    return () => {
-      // remove o script e o conteúdo do container ao desmontar
-      try {
-        document.body.removeChild(script);
-      } catch {}
-      if (containerRef.current) containerRef.current.innerHTML = '';
-    };
-  }, [symbol, interval, theme, autosize, height]);
+  const src = useMemo(() => {
+    // Iframe embed oficial do TradingView (lightweight chart)
+    const params = new URLSearchParams({
+      symbol: `BINANCE:${symbol}`,
+      interval,
+      theme,
+      style: "1",
+      locale: "br",
+      hide_top_toolbar: "0",
+      hide_legend: "0",
+      withdateranges: "1",
+      saveimage: "0",
+      studies: "",
+      enable_publishing: "0",
+      allow_symbol_change: "1",
+      calendar: "0",
+    });
+    return `https://s.tradingview.com/widgetembed/?${params.toString()}`;
+  }, [symbol, interval, theme]);
 
   return (
-    <div
-      className="panel"
-      style={{
-        height: autosize ? '100%' : height,
-        minHeight: autosize ? 520 : undefined,
-        overflow: 'hidden',
-      }}
-    >
-      <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
+    <div style={{ width: "100%", height }}>
+      <iframe
+        title={`TV-${symbol}`}
+        src={src}
+        style={{ width: "100%", height: "100%", border: 0, borderRadius: 12 }}
+        allow="fullscreen"
+        sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation"
+      />
     </div>
   );
 }
