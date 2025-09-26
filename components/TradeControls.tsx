@@ -1,125 +1,157 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import type { Plan, SimState, TradeHist } from '@/lib/simState';
-import { loadSimState, saveSimState } from '@/lib/simState';
-import { useLivePrice } from '@/lib/useLivePrice';
+import React, { useMemo, useState } from 'react';
 
 type Props = {
-  plan: Plan;
   symbol: string;
   onSymbolChange: (s: string) => void;
   onFullscreen?: () => void;
 };
 
-const DEFAULT_STATE: SimState = {
-  symbol: 'BTCUSDT',
-  balance: 10000,
-  riskPct: 1,
-  tpPct: '',
-  slPct: '',
-  qtyRef: 1000,
-  history: [],
-};
+export default function TradeControls({ symbol, onSymbolChange, onFullscreen }: Props) {
+  const [balance, setBalance] = useState<number>(10000);
+  const [riskPct, setRiskPct] = useState<number>(1);
+  const [tpPct, setTpPct] = useState<number | ''>('');
+  const [slPct, setSlPct] = useState<number | ''>('');
+  const [qtyRef, setQtyRef] = useState<number>(1000);
 
-export default function TradeControls({ plan, symbol, onSymbolChange, onFullscreen }: Props) {
-  const [balance, setBalance] = useState<number>(DEFAULT_STATE.balance);
-  const [riskPct, setRiskPct] = useState<number>(DEFAULT_STATE.riskPct);
-  const [tpPct, setTpPct] = useState<number | ''>(DEFAULT_STATE.tpPct);
-  const [slPct, setSlPct] = useState<number | ''>(DEFAULT_STATE.slPct);
-  const [qtyRef, setQtyRef] = useState<number>(DEFAULT_STATE.qtyRef);
-  const [history, setHistory] = useState<TradeHist[]>([]);
+  const [history, setHistory] = useState<
+    { side: 'BUY' | 'SELL'; symbol: string; price: number; ts: number; qtyRef: number; estQty: number }[]
+  >([]);
 
-  // preço ao vivo via WebSocket Binance
-  const livePrice = useLivePrice(symbol);
-  const price = livePrice ?? 0;
+  // ⚠️ seu preço real pode vir do feed — aqui mantive o mock para focar no CSV
+  const price = useMemo(() => 116823.69, []);
+  const sizeSuggestion = useMemo(
+    () => (balance * (riskPct / 100)).toFixed(4),
+    [balance, riskPct]
+  );
 
-  useEffect(() => {
-    const saved = loadSimState();
-    if (!saved) return;
-    setBalance(saved.balance ?? DEFAULT_STATE.balance);
-    setRiskPct(saved.riskPct ?? DEFAULT_STATE.riskPct);
-    setTpPct(saved.tpPct ?? DEFAULT_STATE.tpPct);
-    setSlPct(saved.slPct ?? DEFAULT_STATE.slPct);
-    setQtyRef(saved.qtyRef ?? DEFAULT_STATE.qtyRef);
-    setHistory(Array.isArray(saved.history) ? saved.history : []);
-    if (saved.symbol) onSymbolChange(saved.symbol);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const now = () => Date.now();
 
-  useEffect(() => {
-    const s: SimState = {
-      symbol,
-      balance,
-      riskPct,
-      tpPct,
-      slPct,
-      qtyRef,
-      history,
-    };
-    saveSimState(s);
-  }, [symbol, balance, riskPct, tpPct, slPct, qtyRef, history]);
+  const handleBuy = () =>
+    setHistory((h) => [
+      {
+        side: 'BUY',
+        symbol,
+        price,
+        ts: now(),
+        qtyRef,
+        estQty: qtyRef > 0 && price > 0 ? qtyRef / price : 0,
+      },
+      ...h,
+    ]);
 
-  const sizeSuggestion = ((balance * (riskPct / 100)) || 0).toFixed(4);
+  const handleSell = () =>
+    setHistory((h) => [
+      {
+        side: 'SELL',
+        symbol,
+        price,
+        ts: now(),
+        qtyRef,
+        estQty: qtyRef > 0 && price > 0 ? qtyRef / price : 0,
+      },
+      ...h,
+    ]);
 
-  const pushTrade = (side: 'BUY' | 'SELL') => {
-    const entry: TradeHist = { side, symbol, price, ts: Date.now() };
-    setHistory((h) => [entry, ...h].slice(0, 200));
-  };
-
-  const handleBuy = () => pushTrade('BUY');
-  const handleSell = () => pushTrade('SELL');
   const handleReset = () => setHistory([]);
 
-  const isFree = plan === 'free';
-  const isBalanceZero = balance <= 0;
-  const buySellDisabled = isBalanceZero;
-  const buySellTitle = isBalanceZero
-    ? 'Saldo zerado — faça upgrade para recarregar'
-    : undefined;
+  // ===== CSV =====
+  const pad2 = (n: number) => (n < 10 ? `0${n}` : `${n}`);
+  const fileStamp = () => {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = pad2(d.getMonth() + 1);
+    const dd = pad2(d.getDate());
+    const hh = pad2(d.getHours());
+    const mi = pad2(d.getMinutes());
+    const ss = pad2(d.getSeconds());
+    return `${yyyy}${mm}${dd}-${hh}${mi}${ss}`;
+  };
+
+  const toCSV = () => {
+    const header = [
+      'timestamp_iso',
+      'data_local',
+      'lado',
+      'par',
+      'preco',
+      'qty_ref_usdt',
+      'qtd_estimada',
+    ];
+
+    const rows = history.map((o) => {
+      const iso = new Date(o.ts).toISOString();
+      const local = new Date(o.ts).toLocaleString('pt-BR');
+      // use ponto como decimal (CSV padrão) e 6 casas para quantidade
+      const priceStr = o.price.toFixed(2);
+      const qtyRefStr = o.qtyRef.toFixed(2);
+      const estQtyStr = o.estQty.toFixed(6);
+      return [iso, local, o.side, o.symbol, priceStr, qtyRefStr, estQtyStr];
+    });
+
+    const escapeCell = (v: string | number) => {
+      const s = String(v);
+      // Se contiver vírgula, aspas ou quebra de linha, envolve com aspas e escapa aspas internas
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+
+    const csv = [header, ...rows].map((r) => r.map(escapeCell).join(',')).join('\n');
+    return csv;
+  };
+
+  const handleExportCSV = () => {
+    if (history.length === 0) return;
+    const csv = toCSV();
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `radarcrypto-historico-${fileStamp()}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   return (
-    <div className="panel compactPanel compactRoot tradePanelShell"
+    <div
+      className="panel compactPanel compactRoot tradePanelShell"
       style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 8 }}
     >
       {/* Cabeçalho */}
       <div className="compactHeader" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
         <h3 className="compactTitle" style={{ margin: 0 }}>Controles de Trade</h3>
         {onFullscreen && (
-          <button type="button" onClick={onFullscreen} aria-label="Tela cheia" title="Tela cheia (F) / Sair (X)"
-            className="chartFsBtn" style={{ width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <button
+            type="button"
+            onClick={onFullscreen}
+            aria-label="Tela cheia"
+            title="Tela cheia (F) / Sair (X)"
+            className="chartFsBtn"
+            style={{ width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 9V3h6M21 9V3h-6M3 15v6h6M21 15v6h-6" />
             </svg>
           </button>
         )}
       </div>
 
-      {/* Plano atual */}
-      <div className="xs muted" style={{ marginTop: -4 }}>
-        Plano atual: <strong style={{ color: '#1cff80' }}>{plan.toUpperCase()}</strong>{' '}
-        {isFree && '— Spot liberado. Recursos avançados serão desbloqueados no upgrade.'}
-      </div>
-
-      {/* GRID 2×N */}
+      {/* GRID 2×N compacto */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, flexGrow: 1 }}>
-        {/* Preço */}
+        {/* Linha 1 — Preço | Voltar */}
         <div>
           <div className="lbl">Preço</div>
-          <div className="green">
-            {price ? price.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '---'}
-          </div>
+          <div className="green">{price.toLocaleString('pt-BR')}</div>
         </div>
-
-        {/* Voltar */}
         <div>
           <a href="/" className="btn btn-primary" style={{ width: '100%' }}>
             Voltar ao início
           </a>
         </div>
 
-        {/* Equity */}
+        {/* Linha 2 */}
         <div>
           <div className="lbl">Equity</div>
           <div>{balance.toFixed(2)} USDT</div>
@@ -129,59 +161,68 @@ export default function TradeControls({ plan, symbol, onSymbolChange, onFullscre
           <div>0.00 USDT (0.00%)</div>
         </div>
 
-        {/* Stop Loss */}
+        {/* Linha 3 */}
         <div>
           <div className="lbl">Stop Loss (%)</div>
           <div className="twoCols">
-            <input className="inp" type="number" placeholder="%"
+            <input
+              className="inp"
+              type="number"
+              placeholder="%"
               value={slPct === '' ? '' : slPct}
               onChange={(e) => setSlPct(e.target.value === '' ? '' : Number(e.target.value))}
             />
             <button className="btn" onClick={() => setSlPct('')}>Zerar</button>
           </div>
         </div>
-
-        {/* Saldo */}
         <div>
           <div className="lbl">Saldo (USDT)</div>
-          <input className="inp" type="number" min={0}
+          <input
+            className="inp"
+            type="number"
+            min={0}
             value={balance}
             onChange={(e) => setBalance(Number(e.target.value))}
           />
         </div>
 
-        {/* Risco */}
+        {/* Linha 4 */}
         <div>
           <div className="lbl">Risco por trade (%)</div>
-          <input className="inp" type="number" min={0}
+          <input
+            className="inp"
+            type="number"
+            min={0}
             value={riskPct}
             onChange={(e) => setRiskPct(Number(e.target.value))}
           />
           <div className="xs muted">Tamanho sug.: {sizeSuggestion}</div>
         </div>
-
-        {/* USDT ref */}
         <div>
           <div className="lbl">USDT p/ referência</div>
-          <input className="inp" type="number" min={0}
+          <input
+            className="inp"
+            type="number"
+            min={0}
             value={qtyRef}
             onChange={(e) => setQtyRef(Number(e.target.value))}
           />
         </div>
 
-        {/* Take Profit */}
+        {/* Linha 5 */}
         <div>
           <div className="lbl">Take Profit (%)</div>
           <div className="twoCols">
-            <input className="inp" type="number" placeholder="%"
+            <input
+              className="inp"
+              type="number"
+              placeholder="%"
               value={tpPct === '' ? '' : tpPct}
               onChange={(e) => setTpPct(e.target.value === '' ? '' : Number(e.target.value))}
             />
             <button className="btn" onClick={() => setTpPct('')}>Zerar</button>
           </div>
         </div>
-
-        {/* Par */}
         <div>
           <div className="lbl">Par</div>
           <select className="inp" value={symbol} onChange={(e) => onSymbolChange(e.target.value)}>
@@ -196,39 +237,37 @@ export default function TradeControls({ plan, symbol, onSymbolChange, onFullscre
           </select>
         </div>
 
-        {/* Botões */}
+        {/* Linha 6 – Botões */}
         <div>
-          <button className="btn btnBuy" onClick={handleBuy} style={{ width: '100%' }}
-            disabled={buySellDisabled} title={buySellTitle}>Comprar</button>
+          <button className="btn btnBuy" onClick={handleBuy} style={{ width: '100%' }}>
+            Comprar
+          </button>
         </div>
         <div>
-          <button className="btn btnSell" onClick={handleSell} style={{ width: '100%' }}
-            disabled={buySellDisabled} title={buySellTitle}>Vender</button>
+          <button className="btn btnSell" onClick={handleSell} style={{ width: '100%' }}>
+            Vender
+          </button>
         </div>
 
-        <div style={{ gridColumn: '1 / span 2' }}>
+        {/* Linha 7 – Reset / Export */}
+        <div style={{ gridColumn: '1 / span 2', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
           <button className="btn" onClick={handleReset} style={{ width: '100%' }}>
             Resetar histórico
+          </button>
+          <button className="btn btn-primary" onClick={handleExportCSV} disabled={history.length === 0} style={{ width: '100%' }}>
+            Exportar CSV
           </button>
         </div>
       </div>
 
-      {isBalanceZero && (
-        <div className="cardMini" style={{ marginTop: 4 }}>
-          <div className="xs" style={{ color: '#ffb3b3' }}>
-            Seu saldo está zerado. No próximo passo, o upgrade de plano permitirá recarga automática.
-          </div>
-        </div>
-      )}
-
-      {/* Histórico */}
+      {/* Histórico no rodapé */}
       <div className="cardMini historyCard" style={{ marginTop: 8 }}>
         <div className="cardTitle">Histórico</div>
         <div className="histWrap">
           {history.length === 0 && <div className="histRow">Sem operações ainda.</div>}
           {history.map((h, i) => (
             <div className="histRow" key={i}>
-              {new Date(h.ts).toLocaleString('pt-BR')} — {h.side} {h.symbol} @ {h.price.toLocaleString('pt-BR')}
+              {new Date(h.ts).toLocaleString('pt-BR')} — {h.side} {h.symbol} @ {h.price.toLocaleString('pt-BR')} (qty: {h.estQty.toFixed(6)})
             </div>
           ))}
         </div>
