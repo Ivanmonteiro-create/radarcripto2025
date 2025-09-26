@@ -7,7 +7,7 @@ import { useLivePrice } from '../../lib/priceFeed';
 
 type Pair =
   | 'BTCUSDT' | 'ETHUSDT' | 'BNBUSDT' | 'SOLUSDT'
-  | 'ADAUSDT' | 'XRPUSDT' | 'DOGEUSDT' | 'DOTUSDT';
+  | 'ADAUSDT' | 'XRPUSDT' | 'DOGEUSDT' | 'LINKUSDT'; // ← trocamos DOT por LINK
 
 export default function SimPageClient() {
   const [symbol, setSymbol] = useState<Pair>('BTCUSDT');
@@ -16,7 +16,7 @@ export default function SimPageClient() {
   const chartPanelRef = useRef<HTMLDivElement | null>(null);
   const [isFs, setIsFs] = useState(false);
 
-  // sincroniza estado de fullscreen
+  // Sincroniza estado do Fullscreen
   useEffect(() => {
     const onChange = () => setIsFs(Boolean(document.fullscreenElement));
     document.addEventListener('fullscreenchange', onChange);
@@ -33,7 +33,7 @@ export default function SimPageClient() {
   };
   const toggleFs = () => (document.fullscreenElement ? exitFs() : enterFs());
 
-  // atalhos F / X
+  // Atalhos F (entrar) e X (sair)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const k = e.key.toLowerCase();
@@ -72,7 +72,7 @@ export default function SimPageClient() {
         </a>
       )}
 
-      {/* PAINEL DO GRÁFICO */}
+      {/* Painel do gráfico */}
       <section
         ref={chartPanelRef}
         className="panel"
@@ -86,7 +86,7 @@ export default function SimPageClient() {
           </div>
         )}
 
-        {/* Botão Tela Cheia — acima da “câmera”, colado no canto */}
+        {/* Botão Tela Cheia — ACIMA da câmera (canto direito inferior) */}
         {!isFs && (
           <button
             aria-label="Tela cheia"
@@ -94,7 +94,7 @@ export default function SimPageClient() {
             onClick={toggleFs}
             style={{
               position: 'absolute',
-              top: 4,
+              bottom: 44,          // ↑ alinhado verticalmente “acima” da câmera
               right: 8,
               zIndex: 40,
               width: 28,
@@ -106,9 +106,12 @@ export default function SimPageClient() {
               color: '#e6e6e6',
               border: '1px solid rgba(255,255,255,.25)',
               cursor: 'pointer',
+              lineHeight: 1,
+              fontWeight: 900,
+              fontSize: 14,
             }}
           >
-            ▢
+            [ ]
           </button>
         )}
 
@@ -117,7 +120,7 @@ export default function SimPageClient() {
         </div>
       </section>
 
-      {/* CONTROLES */}
+      {/* Controles */}
       <section
         className="panel compactPanel"
         style={{ display: 'grid', alignContent: 'start', gap: 10, minHeight: '78vh' }}
