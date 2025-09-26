@@ -10,8 +10,8 @@ type Props = {
 };
 
 const PAIRS = [
-  'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT',
-  'ADAUSDT', 'XRPUSDT', 'DOGEUSDT', 'DOTUSDT',
+  'BTCUSDT','ETHUSDT','BNBUSDT','SOLUSDT',
+  'ADAUSDT','XRPUSDT','DOGEUSDT','DOTUSDT',
 ] as const;
 
 export default function TradeControls({ symbol, onSymbolChange, livePrice }: Props) {
@@ -22,15 +22,17 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
 
   // estilos compactos para caber em 100% zoom
   const compact: React.CSSProperties = { gap: 10, fontSize: 13 };
-  const inp: React.CSSProperties = { height: 32, fontSize: 13, padding: '0 10px' };
+  const inp: React.CSSProperties = { height: 32, fontSize: 13, padding: '0 10px', width: '100%' };
   const fake: React.CSSProperties = { height: 32, display: 'grid', alignItems: 'center', padding: '0 10px' };
 
   return (
     <div className="compactRoot" style={{ display: 'grid', ...compact }}>
-      {/* Cabeçalho: título à esquerda e Voltar ao início à DIREITA */}
-      <div className="tcHeader">
+      {/* Cabeçalho com “Voltar ao início” à direita */}
+      <div className="tcHeader" style={{ gap: 10 }}>
         <h3 className="compactTitle" style={{ margin: 0 }}>Controles de Trade</h3>
-        <a href="/" className="btn tcBackBtn">Voltar ao início</a>
+        <div className="tcHeaderActions" style={{ marginLeft: 'auto' }}>
+          <a href="/" className="btn tcBackBtn">Voltar ao início</a>
+        </div>
       </div>
 
       {/* Par & Preço ao vivo */}
@@ -50,7 +52,9 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
         <div>
           <div className="lbl">Preço ao vivo</div>
           <div className="fakeInput" style={fake}>
-            {livePrice ? livePrice.toLocaleString('en-US', { maximumFractionDigits: 6 }) : '—'}
+            {typeof livePrice === 'number'
+              ? livePrice.toLocaleString('en-US', { maximumFractionDigits: 6 })
+              : '—'}
           </div>
         </div>
       </div>
@@ -95,7 +99,8 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
         </div>
       </div>
 
-      <div className="twoCols" style={compact}>
+      {/* Linha 3 */}
+      <div className="threeCols" style={compact}>
         <div className="cardMini">
           <div className="lbl">Stop Loss</div>
           <input className="inp" style={inp} value={stopLoss} onChange={(e) => setStopLoss(e.target.value)} />
@@ -104,17 +109,29 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice }: Pro
           <div className="lbl">Variação 24h</div>
           <div className="fakeInput" style={fake}>—</div>
         </div>
-      </div>
-
-      {/* Linha extra para preencher a grade */}
-      <div className="twoCols" style={compact}>
         <div className="cardMini">
           <div className="lbl">Volume 24h</div>
           <div className="fakeInput" style={fake}>—</div>
         </div>
+      </div>
+
+      {/* Linha 4 (preenche espaços) */}
+      <div className="threeCols" style={compact}>
         <div className="cardMini">
           <div className="lbl">Spread</div>
           <div className="fakeInput" style={fake}>—</div>
+        </div>
+        <div className="cardMini">
+          <div className="lbl">Preço médio da posição</div>
+          <div className="fakeInput" style={fake}>—</div>
+        </div>
+        <div className="cardMini">
+          <div className="lbl">Preço de mercado</div>
+          <div className="fakeInput" style={fake}>
+            {typeof livePrice === 'number'
+              ? livePrice.toLocaleString('en-US', { maximumFractionDigits: 6 })
+              : '—'}
+          </div>
         </div>
       </div>
 
