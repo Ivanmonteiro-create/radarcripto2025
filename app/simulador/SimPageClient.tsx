@@ -1,198 +1,151 @@
-"use client";
+'use client';
 
-import React, { useCallback, useMemo, useState } from "react";
-import dynamic from "next/dynamic";
-import TradeControls, {
-  Pair,
-  TradeRecord,
-  TradeSide,
-} from "@/components/TradeControls";
+import { useEffect, useRef, useState } from 'react';
+import TradingViewWidget from '../../components/TradingViewWidget';
+import TradeControls from '../../components/TradeControls';
+import { useLivePrice } from '../../lib/priceFeed';
 
-/**
- * IMPORTANTE
- * - Mantemos o widget do TradingView exatamente como você já usa (ssr:false)
- * - A fonte do preço (livePrice) continua vindo do seu estado atual
- *   (se você já atualiza via priceFeed ou via widget, ótimo).
- * - Aqui só “damos vida” aos botões e controlamos o histórico/CSV/PNL locais.
- */
-
-const TradingViewWidget = dynamic(
-  () => import("@/components/TradingViewWidget"),
-  { ssr: false }
-);
+type Pair =
+  | 'BTCUSDT' | 'ETHUSDT' | 'BNBUSDT' | 'SOLUSDT'
+  | 'ADAUSDT' | 'XRPUSDT' | 'DOGEUSDT' | 'LINKUSDT';
 
 export default function SimPageClient() {
-  // ======= estado principal =======
-  const [symbol, setSymbol] = useState<Pair>("BTCUSDT");
+  const [symbol, setSymbol] = useState<Pair>('BTCUSDT');
+  const livePrice = useLivePrice(symbol);
 
-  // Se você já possui um hook/efeito que atualiza livePrice a partir do priceFeed,
-  // mantenha-o. Aqui deixo um fallback estático para não quebrar caso falte feed.
-  const [livePrice, setLivePrice] = useState<number | undefined>(undefined);
+  const chartPanelRef = useRef<HTMLDivElement | null>(null);
+  const [isFs, setIsFs] = useState(false);
 
-  // Balanço/saldo e PNL simples (você pode evoluir essa lógica depois)
-  const [balance, setBalance] = useState<number>(100_000); // USDT
-  const [equity, setEquity] = useState<number | undefined>(undefined);
-  const [pnl, setPnl] = useState<number>(0);
-
-  // Histórico de operações (mostrado no rodapé)
-  const [history, setHistory] = useState<TradeRecord[]>([]);
-
-  // ======= handlers =======
-  const onSymbolChange = useCallback((s: Pair) => {
-    setSymbol(s);
-    // Se o seu price feed troca o canal com base no símbolo, faça isso aqui.
-    // Ex.: subscribePrice(s, setLivePrice)
+  useEffect(() => {
+    const onChange = () => setIsFs(Boolean(document.fullscreenElement));
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
   }, []);
 
-  const addToHistory = useCallback(
-    (side: TradeSide, price: number | undefined, sizeUSDT: number) => {
-      const px = typeof price === "number" ? price : NaN;
-      const rec: TradeRecord = {
-        ts: Date.now(),
-        side,
-        symbol,
-        price: px,
-        sizeUSDT,
-        // PNL real depende de abertura/fechamento; aqui mantemos opcional.
-      };
-      setHistory((h) => [...h, rec]);
-    },
-    [symbol]
-  );
+  const enterFs = () => {
+    const el = chartPanelRef.current;
+    if (!el || document.fullscreenElement) return;
+    void el.requestFullscreen();
+  };
+  const exitFs = () => { if (document.fullscreenElement) void document.exitFullscreen(); };
+  const toggleFs = () => (document.fullscreenElement ? exitFs() : enterFs());
 
-  const handleBuy = useCallback(
-    (p: {
-      symbol: Pair;
-      price?: number;
-      sizeUSDT: number;
-      riskPct: number;
-      tpPrice?: number;
-      slPrice?: number;
-    }) => {
-      // Lógica mínima: apenas registrar a ordem no histórico
-      addToHistory("BUY", p.price, p.sizeUSDT);
-
-      // (Opcional) reservar margem / ajustar saldo:
-      // setBalance((b) => b); // deixe inalterado por enquanto
-
-      // (Opcional) atualizar equity/PNL com base em posição aberta
-      // setPnl((x) => x);
-      // setEquity(balance + pnl);
-    },
-    [addToHistory]
-  );
-
-  const handleSell = useCallback(
-    (p: {
-      symbol: Pair;
-      price?: number;
-      sizeUSDT: number;
-      riskPct: number;
-      tpPrice?: number;
-      slPrice?: number;
-    }) => {
-      addToHistory("SELL", p.price, p.sizeUSDT);
-      // Mesma observação da compra sobre saldo/equity/pnl
-    },
-    [addToHistory]
-  );
-
-  const handleResetHistory = useCallback(() => {
-    setHistory([]);
-    setPnl(0);
-    // equity/balance ficam como estão (ou resete se quiser)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const k = e.key.toLowerCase();
+      if (k === 'f') { e.preventDefault(); enterFs(); }
+      if (k === 'x') { e.preventDefault(); exitFs(); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  const handleExportCSV = useCallback(() => {
-    // Gera CSV simples do histórico atual
-    const headers = ["datetime", "side", "symbol", "price", "sizeUSDT", "pnl"];
-    const lines = [headers.join(",")];
-
-    history.forEach((r) => {
-      const row = [
-        new Date(r.ts).toISOString(),
-        r.side,
-        r.symbol,
-        isFinite(r.price) ? r.price : "",
-        r.sizeUSDT,
-        typeof r.pnl === "number" ? r.pnl : "",
-      ];
-      lines.push(row.join(","));
-    });
-
-    const csv = lines.join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    const ts = new Date().toISOString().replace(/[:.]/g, "-");
-    a.download = `radarcrypto-historico-${ts}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }, [history]);
-
-  // Equity (se quiser mostrar algo, soma saldo + PNL simples)
-  const computedEquity = useMemo(() => {
-    if (typeof balance !== "number") return undefined;
-    return balance + pnl;
-  }, [balance, pnl]);
-
-  // ======= Layout =======
   return (
-    <main className="simWrap">
-      <section className="chartPanel compactPanel">
-        <TradingViewWidget
-          symbol={symbol}
-          interval="1"
-          theme="dark"
-          autosize
-          // Se você já recebe preço do widget, continue chamando setLivePrice
-          // via onPrice? ou por outro listener seu.
-        />
+    <main
+      /* Full-bleed: sem padding, sem gap, altura total */
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 380px',
+        gap: 0,
+        padding: 0,
+        height: '100dvh',
+        alignItems: 'stretch',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Voltar ao início — canto direito superior */}
+      {!isFs && (
+        <a
+          href="/"
+          className="btn tcBackBtn"
+          style={{
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            zIndex: 50,
+            padding: '10px 14px',
+            borderRadius: 12,
+            fontWeight: 800,
+          }}
+        >
+          Voltar ao início
+        </a>
+      )}
+
+      {/* Gráfico (painel sem raio, colado às bordas) */}
+      <section
+        ref={chartPanelRef}
+        className="panel"
+        style={{
+          position: 'relative',
+          minHeight: '100%',
+          height: '100%',
+          borderRadius: 0,               // ← sem cantos arredondados
+          borderRight: '1px solid rgba(255,255,255,.06)', // separador sutil
+        }}
+      >
+        {!isFs && (
+          <div className="compactHeader" style={{ marginBottom: 8 }}>
+            <h2 className="compactTitle" style={{ margin: 0 }}>
+              Gráfico — {symbol}
+            </h2>
+          </div>
+        )}
+
+        {/* Botão Tela Cheia — mantém posição atual */}
+        {!isFs && (
+          <button
+            aria-label="Tela cheia"
+            title="Tela cheia"
+            onClick={toggleFs}
+            style={{
+              position: 'absolute',
+              bottom: 86,
+              right: 8,
+              zIndex: 40,
+              width: 28,
+              height: 28,
+              borderRadius: 8,
+              display: 'grid',
+              placeItems: 'center',
+              background: 'rgba(255,255,255,.12)',
+              color: '#e6e6e6',
+              border: '1px solid rgba(255,255,255,.25)',
+              cursor: 'pointer',
+              lineHeight: 1,
+              fontWeight: 900,
+              fontSize: 14,
+            }}
+          >
+            [ ]
+          </button>
+        )}
+
+        <div style={{ height: 'calc(100% - 0px)', minHeight: 520 }}>
+          <TradingViewWidget symbol={`BINANCE:${symbol}`} />
+        </div>
       </section>
 
-      <section className="tradePanelShell">
+      {/* Controles (sem raio, encostado à borda direita e em toda a altura) */}
+      <section
+        className="panel compactPanel"
+        style={{
+          display: 'grid',
+          alignContent: 'start',
+          gap: 10,
+          minHeight: '100%',
+          height: '100%',
+          borderRadius: 0,               // ← sem cantos arredondados
+          borderLeft: '1px solid rgba(255,255,255,.06)', // garante continuidade
+        }}
+      >
         <TradeControls
           symbol={symbol}
-          onSymbolChange={onSymbolChange}
+          onSymbolChange={(s: string) => setSymbol(s as Pair)}
           livePrice={livePrice}
-          pnl={pnl}
-          equity={computedEquity}
-          balance={balance}
-          onBuy={handleBuy}
-          onSell={handleSell}
-          onResetHistory={handleResetHistory}
-          onExportCSV={handleExportCSV}
-          history={history}
         />
       </section>
-
-      <style jsx>{`
-        .simWrap {
-          display: grid;
-          grid-template-columns: 1.4fr 0.9fr; /* mantém o gráfico dominante */
-          gap: 14px;
-          align-items: start;
-        }
-        .chartPanel {
-          min-height: 72vh;
-        }
-        .compactPanel {
-          /* já está coerente com seu tema; mantemos */
-        }
-        .tradePanelShell {
-          max-height: calc(100vh - 24px);
-          overflow: auto;
-        }
-
-        @media (max-width: 1100px) {
-          .simWrap {
-            grid-template-columns: 1fr;
-          }
-        }
-      `}</style>
     </main>
   );
 }
