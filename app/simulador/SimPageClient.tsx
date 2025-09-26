@@ -1,4 +1,3 @@
-// /app/simulador/SimPageClient.tsx
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
@@ -14,7 +13,7 @@ export default function SimPageClient() {
   const [symbol, setSymbol] = useState<Pair>('BTCUSDT');
   const livePrice = useLivePrice(symbol);
 
-  // -------- Tela cheia do painel do GRÁFICO --------
+  // -------- Fullscreen do painel do gráfico --------
   const chartPanelRef = useRef<HTMLDivElement | null>(null);
   const [isFs, setIsFs] = useState(false);
 
@@ -35,8 +34,9 @@ export default function SimPageClient() {
   // atalhos: F entra, X sai
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() === 'f') { e.preventDefault(); enterFs(); }
-      if (e.key.toLowerCase() === 'x') { e.preventDefault(); exitFs(); }
+      const k = e.key.toLowerCase();
+      if (k === 'f') { e.preventDefault(); enterFs(); }
+      if (k === 'x') { e.preventDefault(); exitFs(); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -45,51 +45,63 @@ export default function SimPageClient() {
   return (
     <main
       className="wrapper"
-      style={{ gridTemplateColumns: '1fr 360px', alignItems: 'stretch' }}
+      style={{
+        gridTemplateColumns: '1fr 380px', // controles um pouco mais altos, mas painel estreito
+        alignItems: 'stretch'
+      }}
     >
-      {/* --------- GRÁFICO --------- */}
+      {/* ================== GRÁFICO ================== */}
       <section
         ref={chartPanelRef}
         className="panel"
-        style={{
-          position: 'relative',
-          minHeight: '78vh',
-          // quando em fullscreen, o próprio elemento vira viewport
-          // e o conteúdo ocupa 100%
-        }}
+        style={{ position: 'relative', minHeight: '78vh' }}
       >
-        {/* Cabeçalho do painel (escondido em FS para liberar área) */}
+        {/* Cabeçalho do painel (esconde no FS para liberar área) */}
         {!isFs && (
           <div className="compactHeader" style={{ marginBottom: 8 }}>
             <h2 className="compactTitle" style={{ margin: 0 }}>Gráfico — {symbol}</h2>
           </div>
         )}
 
-        {/* Botão de Tela Cheia — alinhado acima da “câmera” */}
-        <button
-          aria-label="Tela cheia"
-          title="Tela cheia"
-          onClick={toggleFs}
-          style={{
-            position: 'absolute',
-            top: 4,
-            right: 44,          // ~1 cm da “câmera”
-            zIndex: 6,
-            width: 28, height: 28, borderRadius: 8,
-            display: 'grid', placeItems: 'center',
-            background: 'rgba(255,255,255,.12)',
-            color: '#e6e6e6',
-            border: '1px solid rgba(255,255,255,.25)',
-            cursor: 'pointer'
-          }}
-        >
-          {isFs ? '✕' : '▢'}
-        </button>
+        {/* Botão de Tela Cheia — acima da “câmera” (só quando NÃO está em FS) */}
+        {!isFs && (
+          <button
+            aria-label="Tela cheia"
+            title="Tela cheia"
+            onClick={toggleFs}
+            style={{
+              position: 'absolute',
+              top: 4,
+              right: 44,        // ~1 cm da “câmera”
+              zIndex: 6,
+              width: 28, height: 28, borderRadius: 8,
+              display: 'grid', placeItems: 'center',
+              background: 'rgba(255,255,255,.12)',
+              color: '#e6e6e6',
+              border: '1px solid rgba(255,255,255,.25)',
+              cursor: 'pointer'
+            }}
+          >
+            ▢
+          </button>
+        )}
 
-        <div
-          // em FS, o contêiner vai a 100% da altura do elemento full
-          style={{ height: isFs ? '100vh' : '72vh', minHeight: 520 }}
-        >
+        {/* Overlay para esconder o quadradinho do TradingView em FS */}
+        {isFs && (
+          <div
+            aria-hidden
+            style={{
+              position: 'absolute',
+              top: 4, right: 8,
+              width: 56, height: 32,
+              background: 'transparent',
+              zIndex: 7,
+              pointerEvents: 'none' // só cobre visualmente
+            }}
+          />
+        )}
+
+        <div style={{ height: isFs ? '100vh' : '72vh', minHeight: 520 }}>
           <TradingViewWidget
             symbol={symbol}
             interval="1"
@@ -100,8 +112,16 @@ export default function SimPageClient() {
         </div>
       </section>
 
-      {/* --------- CONTROLES --------- */}
-      <section className="panel compactPanel">
+      {/* ================== CONTROLES ================== */}
+      <section
+        className="panel compactPanel"
+        style={{
+          display: 'grid',
+          alignContent: 'start',
+          gap: 10,
+          minHeight: '78vh' // casa visualmente com o gráfico
+        }}
+      >
         <TradeControls
           symbol={symbol}
           onSymbolChange={(s: string) => setSymbol(s as Pair)}
