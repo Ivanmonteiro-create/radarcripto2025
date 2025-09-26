@@ -7,7 +7,7 @@ import { useLivePrice } from '../../lib/priceFeed';
 
 type Pair =
   | 'BTCUSDT' | 'ETHUSDT' | 'BNBUSDT' | 'SOLUSDT'
-  | 'ADAUSDT' | 'XRPUSDT' | 'DOGEUSDT' | 'LINKUSDT'; // ← trocamos DOT por LINK
+  | 'ADAUSDT' | 'XRPUSDT' | 'DOGEUSDT' | 'LINKUSDT';
 
 export default function SimPageClient() {
   const [symbol, setSymbol] = useState<Pair>('BTCUSDT');
@@ -16,7 +16,7 @@ export default function SimPageClient() {
   const chartPanelRef = useRef<HTMLDivElement | null>(null);
   const [isFs, setIsFs] = useState(false);
 
-  // Sincroniza estado do Fullscreen
+  // Sincroniza estado de FS
   useEffect(() => {
     const onChange = () => setIsFs(Boolean(document.fullscreenElement));
     document.addEventListener('fullscreenchange', onChange);
@@ -28,12 +28,10 @@ export default function SimPageClient() {
     if (!el || document.fullscreenElement) return;
     void el.requestFullscreen();
   };
-  const exitFs = () => {
-    if (document.fullscreenElement) void document.exitFullscreen();
-  };
+  const exitFs = () => { if (document.fullscreenElement) void document.exitFullscreen(); };
   const toggleFs = () => (document.fullscreenElement ? exitFs() : enterFs());
 
-  // Atalhos F (entrar) e X (sair)
+  // Atalhos: F (entra) / X (sai)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const k = e.key.toLowerCase();
@@ -72,7 +70,7 @@ export default function SimPageClient() {
         </a>
       )}
 
-      {/* Painel do gráfico */}
+      {/* Gráfico */}
       <section
         ref={chartPanelRef}
         className="panel"
@@ -86,7 +84,7 @@ export default function SimPageClient() {
           </div>
         )}
 
-        {/* Botão Tela Cheia — ACIMA da câmera (canto direito inferior) */}
+        {/* Botão Tela Cheia — “acima da câmera” */}
         {!isFs && (
           <button
             aria-label="Tela cheia"
@@ -94,7 +92,8 @@ export default function SimPageClient() {
             onClick={toggleFs}
             style={{
               position: 'absolute',
-              bottom: 44,          // ↑ alinhado verticalmente “acima” da câmera
+              /* ajuste fino: suba/abaixe 2–4px se precisar alinhar no seu monitor */
+              bottom: 86,        // ← acima da câmera
               right: 8,
               zIndex: 40,
               width: 28,
