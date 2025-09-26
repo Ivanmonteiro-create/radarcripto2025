@@ -14,7 +14,7 @@ export default function SimPageClient() {
   const [symbol, setSymbol] = useState<Pair>('BTCUSDT');
   const livePrice = useLivePrice(symbol);
 
-  // Tela cheia
+  // Tela cheia (aplicada ao painel do gráfico)
   const chartPanelRef = useRef<HTMLDivElement | null>(null);
   const [isFs, setIsFs] = useState(false);
 
@@ -34,7 +34,8 @@ export default function SimPageClient() {
   return (
     <main
       className="wrapper"
-      style={{ gridTemplateColumns: '1fr 420px', alignItems: 'stretch' }}
+      // Painel de controles um pouco mais largo
+      style={{ gridTemplateColumns: '1fr 480px', alignItems: 'stretch' }}
     >
       {/* Painel do gráfico */}
       <section className="panel" ref={chartPanelRef} style={{ position: 'relative', minHeight: '78vh' }}>
@@ -42,23 +43,7 @@ export default function SimPageClient() {
           <h2 className="compactTitle" style={{ marginRight: 'auto' }}>
             Gráfico — {symbol}
           </h2>
-
-          {/* Tela cheia (▢/▣) */}
-          <button
-            aria-label="Tela cheia"
-            title="Tela cheia"
-            onClick={toggleFullscreen}
-            className="chartFsBtn--header"
-            style={{
-              width: 36, height: 36, borderRadius: 10, lineHeight: 1,
-              display: 'grid', placeItems: 'center',
-              background: 'rgba(255,255,255,.08)',
-              border: '1px solid rgba(255,255,255,.18)',
-              color: '#e6e6e6', marginRight: 8,
-            }}
-          >
-            {isFs ? '▣' : '▢'}
-          </button>
+          {/* (REMOVIDO) Tela cheia aqui; agora o botão fica no painel de controles */}
         </div>
 
         <div style={{ height: '72vh', minHeight: 520 }}>
@@ -72,12 +57,14 @@ export default function SimPageClient() {
         </div>
       </section>
 
-      {/* Painel único de controles */}
+      {/* Painel único de controles — recebe o toggleFullscreen pra exibir o botão no topo direito */}
       <section className="panel compactPanel">
         <TradeControls
           symbol={symbol}
           onSymbolChange={(s: string) => setSymbol(s as Pair)}
           livePrice={livePrice}
+          onToggleFullscreen={toggleFullscreen}
+          isFullscreen={isFs}
         />
       </section>
     </main>
