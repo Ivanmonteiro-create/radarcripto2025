@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import Link from "next/link";
 
-/** ==== Pares (8) – com LINKUSDT no lugar da DOT ==== */
+/** ==== Pares (8) – com LINKUSDT (no lugar da DOT) e DOGEUSDT incluso ==== */
 export type Pair =
   | "BTCUSDT"
   | "ETHUSDT"
@@ -11,7 +10,7 @@ export type Pair =
   | "SOLUSDT"
   | "ADAUSDT"
   | "XRPUSDT"
-  | "LTCUSDT"
+  | "DOGEUSDT"
   | "LINKUSDT";
 
 const PAIRS: Pair[] = [
@@ -21,221 +20,273 @@ const PAIRS: Pair[] = [
   "SOLUSDT",
   "ADAUSDT",
   "XRPUSDT",
-  "LTCUSDT",
+  "DOGEUSDT",
   "LINKUSDT",
 ];
 
+/** ==== Tipagem de props – flexível para não quebrar o build ==== */
 type Props = {
+  /** Par atual (vem da página) */
   symbol: Pair;
-  onSymbolChange: (s: Pair) => void;
-  /** preço atual vindo do priceFeed/tradingview (opcional) */
+
+  /** Troca de par (devolve um Pair; se sua página aceitar string, faça o cast lá) */
+  onSymbolChange?: (s: Pair) => void;
+
+  /** Preço ao vivo (se não vier, mostramos “–”) */
   livePrice?: number;
+
+  /** Leituras do simulador (se existirem) */
+  pnl?: number;
+  equity?: number;
+  balance?: number;
+
+  /** Ações (opcionais) */
+  onBuy?: (params: {
+    symbol: Pair;
+    price?: number;
+    sizeUSDT: number;
+    riskPct: number;
+    tpPrice?: number;
+    slPrice?: number;
+  }) => void;
+
+  onSell?: (params: {
+    symbol: Pair;
+    price?: number;
+    sizeUSDT: number;
+    riskPct: number;
+    tpPrice?: number;
+    slPrice?: number;
+  }) => void;
+
+  onResetHistory?: () => void;
+  onExportCSV?: () => void;
 };
 
-/** Utilitário simples para moeda */
-function fmt(n: number | undefined) {
-  if (n === undefined || Number.isNaN(n)) return "-";
-  try {
-    return n.toLocaleString("en-US", { maximumFractionDigits: 2 });
-  } catch {
-    return String(n);
-  }
-}
+export default function TradeControls({
+  symbol,
+  onSymbolChange,
+  livePrice,
+  pnl = 0,
+  equity,
+  balance,
+  onBuy,
+  onSell,
+  onResetHistory,
+  onExportCSV,
+}: Props) {
+  /* ======= estados locais: risco, tamanho, tp/sl ======= */
+  const [riskPct, setRiskPct] = useState<number>(1);
+  const [sizeUSDT, setSizeUSDT] = useState<number>(100_000);
+  const [tpPrice, setTpPrice] = useState<number | undefined>();
+  const [slPrice, setSlPrice] = useState<number | undefined>();
 
-export default function TradeControls({ symbol, onSymbolChange, livePrice }: Props) {
-  // ======= estados de “trade” (mínimos p/ UI) =======
-  const [riskPct, setRiskPct] = useState<number>(1); // % por trade
-  const [tp, setTp] = useState<number | "">("");
-  const [sl, setSl] = useState<number | "">("");
-  const [pnl, setPnl] = useState<number>(0);
-  const [equity, setEquity] = useState<number>(100_000);
-  const [positionQty, setPositionQty] = useState<number>(0);      // tamanho de posição (em moeda)
-  const [avgPrice, setAvgPrice] = useState<number | undefined>(); // preço médio
-  const [spreadBps] = useState<number>(0.0);                      // placeholder
+  /* ======= derivado simples para “tamanho de posição” ======= */
+  const positionSize = useMemo(() => {
+    // regra simples de exemplo: posição = sizeUSDT / (livePrice ou 1 para evitar NaN)
+    const px = livePrice && livePrice > 0 ? livePrice : 1;
+    return sizeUSDT / px;
+  }, [sizeUSDT, livePrice]);
 
-  /** resumo TP/SL textual (opcional) */
-  const tpSlSummary = useMemo(() => {
-    const t = tp === "" ? "-" : tp;
-    const s = sl === "" ? "-" : sl;
-    return `${t} / ${s}`;
-  }, [tp, sl]);
+  const pretty = (n?: number) =>
+    typeof n === "number" && isFinite(n) ? n.toLocaleString("en-US") : "-";
 
-  /** handlers */
-  function handleBuy() {
-    if (!livePrice) return;
-    // lógica mínima de simulação: compra 0.001 * equity (apenas para não quebrar a UI)
-    const qty = Math.max(0.000001, (equity * 0.001) / livePrice);
-    const newQty = positionQty + qty;
-    const newAvg =
-      newQty > 0
-        ? ((avgPrice ?? livePrice) * positionQty + livePrice * qty) / newQty
-        : livePrice;
+  /* ======= ações ======= */
+  const handleBuy = () => {
+    onBuy?.({
+      symbol,
+      price: livePrice,
+      sizeUSDT,
+      riskPct,
+      tpPrice,
+      slPrice,
+    });
+  };
+  const handleSell = () => {
+    onSell?.({
+      symbol,
+      price: livePrice,
+      sizeUSDT,
+      riskPct,
+      tpPrice,
+      slPrice,
+    });
+  };
 
-    setPositionQty(newQty);
-    setAvgPrice(newAvg);
-  }
-
-  function handleSell() {
-    if (!livePrice) return;
-    if (positionQty <= 0) return;
-    // zera toda a posição (simples)
-    const realized = (livePrice - (avgPrice ?? livePrice)) * positionQty;
-    setPnl((p) => p + realized);
-    setEquity((e) => e + realized);
-    setPositionQty(0);
-    setAvgPrice(undefined);
-  }
-
-  function handleResetHistory() {
-    setPnl(0);
-    setPositionQty(0);
-    setAvgPrice(undefined);
-    setEquity(100_000);
-    setTp("");
-    setSl("");
-  }
-
-  /** Exporta CSV básico de operações (mock simples apenas com snapshot) */
-  function handleExportCSV() {
-    const rows = [
-      ["symbol", "price_now", "pnl", "equity", "position_qty", "avg_price", "tp", "sl", "risk_pct"],
-      [
-        symbol,
-        livePrice ?? "",
-        pnl,
-        equity,
-        positionQty,
-        avgPrice ?? "",
-        tp === "" ? "" : tp,
-        sl === "" ? "" : sl,
-        riskPct,
-      ],
-    ];
-    const csv = rows.map((r) => r.join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `radarcrypto_${symbol}_snapshot.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
+  /* ======= UI ======= */
   return (
-    <aside className="panel compactPanel tradePanelShell" style={{ minWidth: 340 }}>
-      {/* ===== Cabeçalho ===== */}
+    <div className="tcRoot compactPanel compactRoot">
       <div className="tcHeader">
         <h3 className="tcTitle">Controles de Trade</h3>
-        <div className="tcHeaderActions">
-          <Link href="/" className="btn btn-xs btn-primary tcBackBtn">Voltar ao início</Link>
-        </div>
+        {/* O botão “Voltar ao início” fica fora deste componente na página */}
       </div>
 
-      {/* ====== Grade de duas colunas (sem sobras) ====== */}
-      <div
-        className="tcGrid"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 10,
-          alignItems: "start",
-        }}
-      >
-        {/* ---- Coluna ESQUERDA ---- */}
+      <div className="tcForm twoCols">
+        {/* ==== COLUNA ESQUERDA ==== */}
         <div className="col">
           {/* Par */}
           <label className="lbl">Par</label>
-          <div className="fakeInput" style={{ padding: 0 }}>
+          <div className="field">
             <select
-              value={symbol}
-              onChange={(e) => onSymbolChange(e.target.value as Pair)}
               className="inp"
-              style={{ width: "100%" }}
+              value={symbol}
+              onChange={(e) => onSymbolChange?.(e.target.value as Pair)}
             >
               {PAIRS.map((p) => (
-                <option key={p} value={p}>{p}</option>
+                <option key={p} value={p}>
+                  {p}
+                </option>
               ))}
             </select>
           </div>
 
           {/* Preço ao vivo */}
-          <label className="lbl" style={{ marginTop: 8 }}>Preço ao vivo</label>
-          <input className="inp" readOnly value={fmt(livePrice)} />
+          <label className="lbl">Preço ao vivo</label>
+          <input
+            className="inp inp-disabled"
+            disabled
+            value={pretty(livePrice)}
+            readOnly
+          />
 
           {/* Risco por trade (%) */}
-          <label className="lbl" style={{ marginTop: 8 }}>Risco por trade (%)</label>
+          <label className="lbl">Risco por trade (%)</label>
           <input
             className="inp"
             type="number"
-            step="0.1"
+            min={0}
+            step={0.1}
             value={riskPct}
             onChange={(e) => setRiskPct(Number(e.target.value))}
+          />
+
+          {/* Tamanho (USDT) */}
+          <label className="lbl">Tamanho (USDT)</label>
+          <input
+            className="inp"
+            type="number"
             min={0}
+            step={100}
+            value={sizeUSDT}
+            onChange={(e) => setSizeUSDT(Number(e.target.value))}
           />
 
-          {/* Take Profit (preço) */}
-          <label className="lbl" style={{ marginTop: 8 }}>Take Profit (preço)</label>
-          <input
-            className="inp"
-            type="number"
-            value={tp}
-            onChange={(e) => {
-              const v = e.target.value;
-              setTp(v === "" ? "" : Number(v));
-            }}
-          />
-
-          {/* Stop Loss (preço) */}
-          <label className="lbl" style={{ marginTop: 8 }}>Stop Loss (preço)</label>
-          <input
-            className="inp"
-            type="number"
-            value={sl}
-            onChange={(e) => {
-              const v = e.target.value;
-              setSl(v === "" ? "" : Number(v));
-            }}
-          />
-
-          {/* Ações */}
-          <div className="twoCols" style={{ marginTop: 10 }}>
-            <button onClick={handleBuy} className="btn btnBuy btn-xs">Comprar</button>
-            <button onClick={handleSell} className="btn btnSell btn-xs">Vender</button>
+          {/* Botões principais */}
+          <div className="twoCols" style={{ marginTop: 8 }}>
+            <button className="btn btnBuy" onClick={handleBuy}>
+              Comprar
+            </button>
+            <button className="btn btnSell" onClick={handleSell}>
+              Vender
+            </button>
           </div>
 
+          {/* Ações secundárias */}
           <div className="twoCols" style={{ marginTop: 8 }}>
-            <button onClick={handleResetHistory} className="btn btn-xs">Resetar histórico</button>
-            <button onClick={handleExportCSV} className="btn btn-xs">Exportar CSV</button>
+            <button className="btn" onClick={() => onResetHistory?.()}>
+              Resetar histórico
+            </button>
+            <button className="btn" onClick={() => onExportCSV?.()}>
+              Exportar CSV
+            </button>
           </div>
         </div>
 
-        {/* ---- Coluna DIREITA ---- */}
+        {/* ==== COLUNA DIREITA ==== */}
         <div className="col">
           {/* PNL */}
           <label className="lbl">PNL</label>
-          <input className="inp" readOnly value={fmt(pnl)} />
+          <input className="inp inp-disabled" disabled value={pretty(pnl)} />
 
           {/* Equity */}
-          <label className="lbl" style={{ marginTop: 8 }}>Equity</label>
-          <input className="inp" readOnly value={fmt(equity)} />
+          <label className="lbl">Equity</label>
+          <input
+            className="inp inp-disabled"
+            disabled
+            value={pretty(equity)}
+          />
 
-          {/* Tamanho de posição (em moeda) */}
-          <label className="lbl" style={{ marginTop: 8 }}>Tamanho de posição</label>
-          <input className="inp" readOnly value={fmt(positionQty)} />
+          {/* Saldo (USDT) */}
+          <label className="lbl">Saldo (USDT)</label>
+          <input
+            className="inp inp-disabled"
+            disabled
+            value={pretty(balance)}
+          />
 
-          {/* Preço médio da posição */}
-          <label className="lbl" style={{ marginTop: 8 }}>Preço médio da posição</label>
-          <input className="inp" readOnly value={fmt(avgPrice)} />
+          {/* Tamanho de posição (read-only, derivado) */}
+          <label className="lbl">Tamanho de posição</label>
+          <input
+            className="inp inp-disabled"
+            disabled
+            value={
+              isFinite(positionSize)
+                ? positionSize.toLocaleString("en-US", {
+                    maximumFractionDigits: 6,
+                  })
+                : "-"
+            }
+          />
 
-          {/* Spread (bps) */}
-          <label className="lbl" style={{ marginTop: 8 }}>Spread (bps)</label>
-          <input className="inp" readOnly value={fmt(spreadBps)} />
-
-          {/* TP/SL resumo (opcional – pode remover se quiser) */}
-          <label className="lbl" style={{ marginTop: 8 }}>TP/SL</label>
-          <input className="inp" readOnly value={tpSlSummary} />
+          {/* TP / SL (preço) */}
+          <div className="twoCols" style={{ marginTop: 8 }}>
+            <div>
+              <label className="lbl">TP (preço)</label>
+              <input
+                className="inp"
+                type="number"
+                step={0.01}
+                value={tpPrice ?? ""}
+                onChange={(e) =>
+                  setTpPrice(
+                    e.target.value === "" ? undefined : Number(e.target.value)
+                  )
+                }
+                placeholder="TP (preço)"
+              />
+            </div>
+            <div>
+              <label className="lbl">SL (preço)</label>
+              <input
+                className="inp"
+                type="number"
+                step={0.01}
+                value={slPrice ?? ""}
+                onChange={(e) =>
+                  setSlPrice(
+                    e.target.value === "" ? undefined : Number(e.target.value)
+                  )
+                }
+                placeholder="SL (preço)"
+              />
+            </div>
+          </div>
         </div>
       </div>
-    </aside>
+
+      <style jsx>{`
+        .tcRoot {
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 14px;
+          padding: 14px;
+        }
+        .tcForm {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+        }
+        .col {
+          display: grid;
+          grid-auto-rows: min-content;
+          gap: 8px;
+        }
+        @media (max-width: 1100px) {
+          .tcForm {
+            grid-template-columns: 1fr;
+          }
+        }
+      `}</style>
+    </div>
   );
 }
