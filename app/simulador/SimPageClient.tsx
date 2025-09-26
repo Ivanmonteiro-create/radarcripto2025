@@ -1,41 +1,56 @@
-'use client';
+// app/simulador/SimPageClient.tsx
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import TradingViewWidget from '@/components/TradingViewWidget';
-import TradeControls from '@/components/TradeControls';
+import { useState, useMemo } from "react";
+import TradingViewWidget from "@/components/TradingViewWidget";
+import TradeControls from "@/components/TradeControls";
 
-/**
- * Cliente: controla o símbolo e monta o layout (gráfico à esquerda, controles à direita)
- */
+type Pair = "BTCUSDT" | "ETHUSDT" | "BNBUSDT";
+
 export default function SimPageClient() {
-  const [symbol, setSymbol] = useState<string>('BTCUSDT');
+  // Par inicial (como era no projeto)
+  const [symbol, setSymbol] = useState<Pair>("BTCUSDT");
+
+  // Altura do gráfico confortável
+  const chartHeight = useMemo(() => 520, []);
 
   return (
-    <main className="wrapper" style={{ alignItems: 'stretch' }}>
-      {/* Coluna esquerda – Gráfico ocupando o alto */}
-      <section className="panel" style={{ gridColumn: '1 / span 2', minHeight: 560 }}>
-        {/* Cabeçalho pequeno com "Voltar ao início" no topo direito */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
-          <Link href="/" className="btn tcBackBtn">
-            Voltar ao início
-          </Link>
+    <div className="panel tradePanelShell compactPanel" style={{ position: "relative" }}>
+      {/* GRID 2 colunas: gráfico grande | controles */}
+      <div className="compactGrid" style={{ gridTemplateColumns: "minmax(560px,1fr) 380px" }}>
+        {/* Coluna A — Gráfico */}
+        <div className="cardMini" style={{ minWidth: 0 }}>
+          <div className="tcHeader">
+            <h2 className="tcTitle">Gráfico — {symbol}</h2>
+            {/* Botão Tela Cheia clássico (colado no cabeçalho) */}
+            <button
+              className="chartFsBtn--header"
+              aria-label="Tela cheia"
+              title="Tela cheia"
+              onClick={() => {
+                const host = document.getElementById("tv-host");
+                if (!host) return;
+                if (!document.fullscreenElement) {
+                  host.requestFullscreen().catch(() => {});
+                } else {
+                  document.exitFullscreen().catch(() => {});
+                }
+              }}
+            >
+              ⛶
+            </button>
+          </div>
+
+          <div id="tv-host" className="panel" style={{ padding: 10 }}>
+            <TradingViewWidget symbol={symbol} interval="1" theme="dark" height={chartHeight} />
+          </div>
         </div>
 
-        {/* Gráfico ocupa o resto da altura do painel */}
-        <div style={{ height: 'calc(100% - 44px)' }}>
-          <TradingViewWidget symbol={symbol} autosize />
+        {/* Coluna B — Controles */}
+        <div className="cardMini" style={{ minWidth: 0 }}>
+          <TradeControls symbol={symbol} onSymbolChange={(s) => setSymbol(s as Pair)} />
         </div>
-      </section>
-
-      {/* Coluna direita – Controles */}
-      <aside className="panel" style={{ minWidth: 280 }}>
-        <h3 className="compactTitle" style={{ marginBottom: 8, fontSize: 18 }}>Controles de Trade</h3>
-
-        {/* O componente de controles já existia no seu projeto.
-            Passamos somente as props que ele conhece: symbol e onSymbolChange. */}
-        <TradeControls symbol={symbol} onSymbolChange={setSymbol} />
-      </aside>
-    </main>
+      </div>
+    </div>
   );
 }
