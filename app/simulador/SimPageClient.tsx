@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import TradingViewWidget from '@/components/TradingViewWidget';
-import { priceFeed } from '@/lib/priceFeed'; // <<<<<< ajuste: import nomeado
+import { priceFeed } from '@/lib/priceFeed'; // import nomeado
 
 type Pair =
   | 'BTCUSDT'
@@ -32,11 +32,23 @@ type Trade = {
 };
 
 const fmt = (n: number) =>
-  isFinite(n) ? n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-';
+  isFinite(n)
+    ? n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : '-';
 
 function unrealized(tr: Trade, last: number): number {
   const dir = tr.side === 'buy' ? 1 : -1;
   return (last - tr.entryPrice) * tr.qty * dir;
+}
+
+// --- helper para fechar mantendo o tipo literal do status
+function closeTrade(t: Trade, exitPx: number): Trade {
+  return {
+    ...t,
+    status: 'closed' as const,
+    exitPrice: exitPx,
+    pnl: unrealized(t, exitPx),
+  };
 }
 
 export default function SimpageClient() {
@@ -69,11 +81,16 @@ export default function SimpageClient() {
     [trades]
   );
 
-  const equity = useMemo(() => balance + realizedPnL + unrealizedPnL, [balance, realizedPnL, unrealizedPnL]);
+  const equity = useMemo(
+    () => balance + realizedPnL + unrealizedPnL,
+    [balance, realizedPnL, unrealizedPnL]
+  );
 
   const positionQty = useMemo(
     () =>
-      trades.filter(t => t.status === 'open').reduce((acc, t) => acc + (t.side === 'buy' ? t.qty : -t.qty), 0),
+      trades
+        .filter(t => t.status === 'open')
+        .reduce((acc, t) => acc + (t.side === 'buy' ? t.qty : -t.qty), 0),
     [trades]
   );
 
@@ -106,17 +123,18 @@ export default function SimpageClient() {
     watcherRef.current = window.setInterval(() => {
       setTrades(prev => {
         let changed = false;
-        const next = prev.map(t => {
+        const next: Trade[] = prev.map(t => {
           if (t.status === 'open' && lastPrice) {
             const dir = t.side === 'buy' ? 1 : -1;
             const hitTP =
-              typeof t.tp === 'number' && ((dir === 1 && lastPrice >= t.tp) || (dir === -1 && lastPrice <= t.tp));
+              typeof t.tp === 'number' &&
+              ((dir === 1 && lastPrice >= t.tp) || (dir === -1 && lastPrice <= t.tp));
             const hitSL =
-              typeof t.sl === 'number' && ((dir === 1 && lastPrice <= t.sl) || (dir === -1 && lastPrice >= t.sl));
+              typeof t.sl === 'number' &&
+              ((dir === 1 && lastPrice <= t.sl) || (dir === -1 && lastPrice >= t.sl));
             if (hitTP || hitSL) {
-              const pnl = unrealized(t, lastPrice);
               changed = true;
-              return { ...t, status: 'closed', exitPrice: lastPrice, pnl };
+              return closeTrade(t, lastPrice); // <- garante tipo correto
             }
           }
           return t;
@@ -194,7 +212,9 @@ export default function SimpageClient() {
         <div className="rounded-2xl border border-zinc-700/60 p-4 bg-zinc-900/40 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-lg font-semibold">Controles de Trade</h3>
-            <a href="/" className="btn btn-sm btn-success">Voltar ao início</a>
+            <a href="/" className="btn btn-sm btn-success">
+              Voltar ao início
+            </a>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -302,16 +322,28 @@ export default function SimpageClient() {
           </div>
 
           <div className="grid grid-cols-2 gap-3 mt-3">
-            <button className="rounded-lg px-3 py-2 bg-emerald-600 hover:bg-emerald-500 transition" onClick={() => place('buy')}>
+            <button
+              className="rounded-lg px-3 py-2 bg-emerald-600 hover:bg-emerald-500 transition"
+              onClick={() => place('buy')}
+            >
               Comprar
             </button>
-            <button className="rounded-lg px-3 py-2 bg-rose-600 hover:bg-rose-500 transition" onClick={() => place('sell')}>
+            <button
+              className="rounded-lg px-3 py-2 bg-rose-600 hover:bg-rose-500 transition"
+              onClick={() => place('sell')}
+            >
               Vender
             </button>
-            <button className="rounded-lg px-3 py-2 bg-zinc-700 hover:bg-zinc-600 transition" onClick={resetHistory}>
+            <button
+              className="rounded-lg px-3 py-2 bg-zinc-700 hover:bg-zinc-600 transition"
+              onClick={resetHistory}
+            >
               Resetar histórico
             </button>
-            <button className="rounded-lg px-3 py-2 bg-zinc-700 hover:bg-zinc-600 transition" onClick={exportCSV}>
+            <button
+              className="rounded-lg px-3 py-2 bg-zinc-700 hover:bg-zinc-600 transition"
+              onClick={exportCSV}
+            >
               Exportar CSV
             </button>
           </div>
@@ -353,7 +385,9 @@ export default function SimpageClient() {
                           <td className="p-2 text-right">{fmt(t.qty)}</td>
                           <td className="p-2 text-right">{t.status}</td>
                           <td className="p-2 text-right">{t.exitPrice ? fmt(t.exitPrice) : '-'}</td>
-                          <td className={`p-2 text-right ${u >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{fmt(u)}</td>
+                          <td className={`p-2 text-right ${u >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            {fmt(u)}
+                          </td>
                         </tr>
                       );
                     })}
