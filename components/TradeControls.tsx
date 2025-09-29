@@ -124,8 +124,7 @@ export default function TradeControls({
   const unrealizedPnL = useMemo(() => {
     if (!livePrice || !isFinite(livePrice) || positionQty === 0 || !avgEntry)
       return 0;
-    // Para short (qty negativa), a fórmula continua correta:
-    // (live - avg) * qty  → se qty<0 e live<avg => PnL positivo
+    // (live - avg) * qty — funciona para long/short
     return (livePrice - avgEntry) * positionQty;
   }, [livePrice, avgEntry, positionQty]);
 
@@ -152,19 +151,16 @@ export default function TradeControls({
     const tradeQtyAbs = qtyFromUSDT(px); // quantidade a negociar (sempre positiva)
     if (tradeQtyAbs <= 0) return;
 
-    // Sinais e auxiliares
     const isBuy = side === "BUY";
     const signedQty = isBuy ? tradeQtyAbs : -tradeQtyAbs;
 
-    let newQty = positionQty + signedQty;
+    const newQty = positionQty + signedQty;
     let realized = 0;
 
     // Se o trade reduz ou inverte a posição, calcular PnL realizado para a parte fechada
     if (positionQty !== 0 && avgEntry != null && Math.sign(positionQty) !== Math.sign(newQty)) {
-      // Fechou e virou para o outro lado (atravessou zero)
-      const closeQty = Math.abs(positionQty);
-      // PnL realizado ao fechar a posição antiga
-      realized += (px - avgEntry) * positionQty; // funciona para long/short
+      // Inverteu (atravessou zero)
+      realized += (px - avgEntry) * positionQty;
     } else if (
       positionQty !== 0 &&
       avgEntry != null &&
@@ -183,7 +179,6 @@ export default function TradeControls({
       setPositionQty(0);
       setAvgEntry(null);
     } else {
-      // Se seguimos na mesma direção, recalcular preço médio ponderado
       if (Math.sign(newQty) === Math.sign(positionQty) || positionQty === 0) {
         const prevNotional = (avgEntry ?? px) * Math.abs(positionQty);
         const addNotional = px * Math.abs(signedQty);
@@ -192,7 +187,6 @@ export default function TradeControls({
         const newAvg = totalNotional / totalQtyAbs;
         setAvgEntry(newAvg);
       } else {
-        // Inverteu a direção: o preço médio do novo lado passa a ser o do trade
         setAvgEntry(px);
       }
       setPositionQty(newQty);
@@ -236,7 +230,6 @@ export default function TradeControls({
     // Long
     if (positionQty > 0) {
       if (tpPrice && livePrice >= tpPrice) {
-        // realiza: vender tudo
         const allUSDT = Math.abs(positionQty) * livePrice;
         const prevSize = sizeUSDT;
         setSizeUSDT(allUSDT);
@@ -315,6 +308,9 @@ export default function TradeControls({
   // Histórico exibido: prop tem prioridade; se não vier, usa interno
   const historyShown = historyProp ?? history;
 
+  /** ===== Classes de cor do PnL (verde/positivo, vermelho/negativo) ===== */
+  const pnlClass = pnlShown > 0 ? "pnlPos" : pnlShown < 0 ? "pnlNeg" : "pnlZero";
+
   return (
     <div className="tcRoot">
       <div className="tcHead">
@@ -366,7 +362,11 @@ export default function TradeControls({
         {/* ===== COLUNA DIREITA ===== */}
         <div className="col">
           <label className="lbl">PNL</label>
-          <input className="inp inp-disabled" disabled value={fmt(pnlShown)} />
+          <input
+            className={`inp inp-disabled ${pnlClass}`}
+            disabled
+            value={fmt(pnlShown)}
+          />
 
           <label className="lbl">Equity</label>
           <input className="inp inp-disabled" disabled value={fmt(equityShown)} />
@@ -458,16 +458,22 @@ export default function TradeControls({
                 <span>PNL</span>
               </div>
 
-              {historyShown.slice(-15).reverse().map((h) => (
-                <div key={h.ts + "-" + h.side} className="histRow">
-                  <span>{new Date(h.ts).toLocaleString()}</span>
-                  <span className={h.side === "BUY" ? "green" : "red"}>{h.side}</span>
-                  <span>{h.symbol}</span>
-                  <span>{fmt(h.price, 4)}</span>
-                  <span>{fmt(h.sizeUSDT, 0)}</span>
-                  <span>{typeof h.pnl === "number" ? fmt(h.pnl, 2) : "-"}</span>
-                </div>
-              ))}
+              {historyShown.slice(-15).reverse().map((h) => {
+                const pnlSign =
+                  typeof h.pnl === "number" ? (h.pnl > 0 ? "pnlPos" : h.pnl < 0 ? "pnlNeg" : "pnlZero") : "";
+                return (
+                  <div key={h.ts + "-" + h.side} className="histRow">
+                    <span>{new Date(h.ts).toLocaleString()}</span>
+                    <span className={h.side === "BUY" ? "green" : "red"}>{h.side}</span>
+                    <span>{h.symbol}</span>
+                    <span>{fmt(h.price, 4)}</span>
+                    <span>{fmt(h.sizeUSDT, 0)}</span>
+                    <span className={pnlSign}>
+                      {typeof h.pnl === "number" ? fmt(h.pnl, 2) : "-"}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -604,6 +610,11 @@ export default function TradeControls({
 
         .green { color: #1cff80; font-weight: 800 }
         .red   { color: #ff6b6b; font-weight: 800 }
+
+        /* ===== Cores de PNL ===== */
+        .pnlPos  { color: #1cff80 !important; font-weight: 800; }
+        .pnlNeg  { color: #ff6b6b !important; font-weight: 800; }
+        .pnlZero { color: #e6e6e6 !important; }
 
         @media (max-width: 1100px) {
           .tcGrid { grid-template-columns: 1fr; }
