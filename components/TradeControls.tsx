@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 /** ===== Pares (8) ===== */
 export type Pair =
@@ -16,12 +16,12 @@ export type Pair =
 /** Registro simples para o histórico */
 export type TradeSide = "BUY" | "SELL";
 export type TradeRecord = {
-  ts: number;           // epoch ms
+  ts: number; // epoch ms
   side: TradeSide;
   symbol: Pair;
   price: number;
   sizeUSDT: number;
-  pnl?: number;
+  pnl?: number; // PnL realizado nesse trade (se houver)
 };
 
 const PAIRS: Pair[] = [
@@ -40,8 +40,10 @@ type Props = {
   symbol: Pair;
   onSymbolChange?: (s: Pair) => void;
 
+  /** Preço ao vivo vindo do SimPageClient */
   livePrice?: number;
 
+  /** Os props abaixo continuam aceitos, mas agora calculamos localmente por padrão */
   pnl?: number;
   equity?: number;
   balance?: number;
@@ -67,7 +69,7 @@ type Props = {
   onResetHistory?: () => void;
   onExportCSV?: () => void;
 
-  /** Histórico a ser exibido no rodapé (opcional) */
+  /** Histórico a ser exibido (opcional). Se não vier, usamos o interno. */
   history?: TradeRecord[];
 };
 
@@ -75,34 +77,243 @@ export default function TradeControls({
   symbol,
   onSymbolChange,
   livePrice,
-  pnl = 0,
-  equity,
-  balance,
+  pnl: pnlProp,
+  equity: equityProp,
+  balance: balanceProp,
   onBuy,
   onSell,
   onResetHistory,
   onExportCSV,
-  history = [],
+  history: historyProp,
 }: Props) {
+  /** ===== Estados de entrada do usuário ===== */
   const [riskPct, setRiskPct] = useState<number>(1);
   const [sizeUSDT, setSizeUSDT] = useState<number>(100_000);
   const [tpPrice, setTpPrice] = useState<number | undefined>();
   const [slPrice, setSlPrice] = useState<number | undefined>();
 
-  const positionSize = useMemo(() => {
+  /** ===== Estados internos do simulador (sem mexer na página) ===== */
+  const [cash, setCash] = useState<number>(100_000); // Saldo (USDT)
+  const [positionQty, setPositionQty] = useState<number>(0); // quantidade (pode ser negativa = short)
+  const [avgEntry, setAvgEntry] = useState<number | null>(null); // preço médio (null se sem posição)
+  const [history, setHistory] = useState<TradeRecord[]>([]);
+
+  /** Zera posição e estados quando troca de par (mantendo o saldo) */
+  useEffect(() => {
+    setPositionQty(0);
+    setAvgEntry(null);
+    setTpPrice(undefined);
+    setSlPrice(undefined);
+    setHistory([]);
+  }, [symbol]);
+
+  /** Tamanho de posição em “moeda base” calculado pelo tamanho em USDT */
+  const qtyFromUSDT = (price?: number) => {
+    const px = price && price > 0 ? price : undefined;
+    if (!px) return 0;
+    return sizeUSDT / px;
+  };
+
+  /** Tamanho de posição exibido (derivado do sizeUSDT atual) */
+  const positionSizePreview = useMemo(() => {
     const px = livePrice && livePrice > 0 ? livePrice : 1;
     return sizeUSDT / px;
   }, [sizeUSDT, livePrice]);
 
+  /** PnL não realizado (mark-to-market) */
+  const unrealizedPnL = useMemo(() => {
+    if (!livePrice || !isFinite(livePrice) || positionQty === 0 || !avgEntry)
+      return 0;
+    // Para short (qty negativa), a fórmula continua correta:
+    // (live - avg) * qty  → se qty<0 e live<avg => PnL positivo
+    return (livePrice - avgEntry) * positionQty;
+  }, [livePrice, avgEntry, positionQty]);
+
+  /** Equity e saldo visíveis (se props não vierem, usamos internos) */
+  const balanceShown =
+    typeof balanceProp === "number" ? balanceProp : cash;
+  const pnlShown = typeof pnlProp === "number" ? pnlProp : unrealizedPnL;
+  const equityShown =
+    typeof equityProp === "number"
+      ? equityProp
+      : balanceShown + pnlShown;
+
+  /** Utilitário de formatação */
   const fmt = (n?: number, maxFrac = 2) =>
     typeof n === "number" && isFinite(n)
       ? n.toLocaleString("en-US", { maximumFractionDigits: maxFrac })
       : "-";
 
-  const handleBuy = () =>
-    onBuy?.({ symbol, price: livePrice, sizeUSDT, riskPct, tpPrice, slPrice });
-  const handleSell = () =>
-    onSell?.({ symbol, price: livePrice, sizeUSDT, riskPct, tpPrice, slPrice });
+  /** ===== Execução de trade (spot com possibilidade de short) ===== */
+  const execute = (side: TradeSide, price?: number) => {
+    const px = price && price > 0 ? price : undefined;
+    if (!px) return; // sem preço válido, não opera
+
+    const tradeQtyAbs = qtyFromUSDT(px); // quantidade a negociar (sempre positiva)
+    if (tradeQtyAbs <= 0) return;
+
+    // Sinais e auxiliares
+    const isBuy = side === "BUY";
+    const signedQty = isBuy ? tradeQtyAbs : -tradeQtyAbs;
+
+    let newQty = positionQty + signedQty;
+    let realized = 0;
+
+    // Se o trade reduz ou inverte a posição, calcular PnL realizado para a parte fechada
+    if (positionQty !== 0 && avgEntry != null && Math.sign(positionQty) !== Math.sign(newQty)) {
+      // Fechou e virou para o outro lado (atravessou zero)
+      const closeQty = Math.abs(positionQty);
+      // PnL realizado ao fechar a posição antiga
+      realized += (px - avgEntry) * positionQty; // funciona para long/short
+    } else if (
+      positionQty !== 0 &&
+      avgEntry != null &&
+      Math.sign(positionQty) !== Math.sign(signedQty)
+    ) {
+      // Redução parcial sem inverter
+      const closeQty = Math.min(Math.abs(positionQty), Math.abs(signedQty));
+      realized += (px - avgEntry) * (closeQty * Math.sign(positionQty));
+    }
+
+    // Atualiza caixa: buy gasta, sell recebe
+    setCash((c) => c + signedQty * -px);
+
+    // Atualiza posição e preço médio
+    if (newQty === 0) {
+      setPositionQty(0);
+      setAvgEntry(null);
+    } else {
+      // Se seguimos na mesma direção, recalcular preço médio ponderado
+      if (Math.sign(newQty) === Math.sign(positionQty) || positionQty === 0) {
+        const prevNotional = (avgEntry ?? px) * Math.abs(positionQty);
+        const addNotional = px * Math.abs(signedQty);
+        const totalNotional = prevNotional + addNotional;
+        const totalQtyAbs = Math.abs(positionQty) + Math.abs(signedQty);
+        const newAvg = totalNotional / totalQtyAbs;
+        setAvgEntry(newAvg);
+      } else {
+        // Inverteu a direção: o preço médio do novo lado passa a ser o do trade
+        setAvgEntry(px);
+      }
+      setPositionQty(newQty);
+    }
+
+    // Histórico
+    setHistory((h) => [
+      ...h,
+      {
+        ts: Date.now(),
+        side,
+        symbol,
+        price: px,
+        sizeUSDT: sizeUSDT,
+        pnl: realized !== 0 ? realized : undefined,
+      },
+    ]);
+  };
+
+  /** Handlers dos botões (respeitam callbacks externos se existirem) */
+  const handleBuy = () => {
+    if (onBuy) {
+      onBuy({ symbol, price: livePrice, sizeUSDT, riskPct, tpPrice, slPrice });
+    } else {
+      execute("BUY", livePrice);
+    }
+  };
+
+  const handleSell = () => {
+    if (onSell) {
+      onSell({ symbol, price: livePrice, sizeUSDT, riskPct, tpPrice, slPrice });
+    } else {
+      execute("SELL", livePrice);
+    }
+  };
+
+  /** TP/SL automáticos: fecha a posição quando tocar */
+  useEffect(() => {
+    if (!livePrice || !isFinite(livePrice) || positionQty === 0) return;
+
+    // Long
+    if (positionQty > 0) {
+      if (tpPrice && livePrice >= tpPrice) {
+        // realiza: vender tudo
+        const allUSDT = Math.abs(positionQty) * livePrice;
+        const prevSize = sizeUSDT;
+        setSizeUSDT(allUSDT);
+        execute("SELL", livePrice);
+        setSizeUSDT(prevSize);
+        setTpPrice(undefined);
+      } else if (slPrice && livePrice <= slPrice) {
+        const allUSDT = Math.abs(positionQty) * livePrice;
+        const prevSize = sizeUSDT;
+        setSizeUSDT(allUSDT);
+        execute("SELL", livePrice);
+        setSizeUSDT(prevSize);
+        setSlPrice(undefined);
+      }
+    }
+
+    // Short
+    if (positionQty < 0) {
+      if (tpPrice && livePrice <= tpPrice) {
+        const allUSDT = Math.abs(positionQty) * livePrice;
+        const prevSize = sizeUSDT;
+        setSizeUSDT(allUSDT);
+        execute("BUY", livePrice);
+        setSizeUSDT(prevSize);
+        setTpPrice(undefined);
+      } else if (slPrice && livePrice >= slPrice) {
+        const allUSDT = Math.abs(positionQty) * livePrice;
+        const prevSize = sizeUSDT;
+        setSizeUSDT(allUSDT);
+        execute("BUY", livePrice);
+        setSizeUSDT(prevSize);
+        setSlPrice(undefined);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [livePrice]);
+
+  /** Resetar histórico e estados de posição (mantém saldo inicial) */
+  const handleResetHistory = () => {
+    if (onResetHistory) return onResetHistory();
+    setHistory([]);
+    setPositionQty(0);
+    setAvgEntry(null);
+    setTpPrice(undefined);
+    setSlPrice(undefined);
+  };
+
+  /** Exportar CSV do histórico interno */
+  const handleExportCSV = () => {
+    if (onExportCSV) return onExportCSV();
+
+    const rows = [
+      ["timestamp", "date", "side", "symbol", "price", "sizeUSDT", "pnl"],
+      ...history.map((r) => [
+        String(r.ts),
+        new Date(r.ts).toISOString(),
+        r.side,
+        r.symbol,
+        String(r.price),
+        String(r.sizeUSDT),
+        typeof r.pnl === "number" ? String(r.pnl) : "",
+      ]),
+    ];
+    const csv = rows.map((r) => r.map((c) => `"${c.replace?.(/"/g, '""') ?? c}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `history_${symbol}_${Date.now()}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  // Histórico exibido: prop tem prioridade; se não vier, usa interno
+  const historyShown = historyProp ?? history;
 
   return (
     <div className="tcRoot">
@@ -155,19 +366,19 @@ export default function TradeControls({
         {/* ===== COLUNA DIREITA ===== */}
         <div className="col">
           <label className="lbl">PNL</label>
-          <input className="inp inp-disabled" disabled value={fmt(pnl)} />
+          <input className="inp inp-disabled" disabled value={fmt(pnlShown)} />
 
           <label className="lbl">Equity</label>
-          <input className="inp inp-disabled" disabled value={fmt(equity)} />
+          <input className="inp inp-disabled" disabled value={fmt(equityShown)} />
 
           <label className="lbl">Saldo (USDT)</label>
-          <input className="inp inp-disabled" disabled value={fmt(balance)} />
+          <input className="inp inp-disabled" disabled value={fmt(balanceShown)} />
 
           <label className="lbl">Tamanho de posição</label>
           <input
             className="inp inp-disabled"
             disabled
-            value={isFinite(positionSize) ? fmt(positionSize, 6) : "-"}
+            value={isFinite(positionSizePreview) ? fmt(positionSizePreview, 6) : "-"}
           />
         </div>
 
@@ -207,20 +418,20 @@ export default function TradeControls({
 
         {/* ===== FAIXA 2: Comprar / Vender ===== */}
         <div className="row twoCols">
-          <button className="btn btnBuy" onClick={handleBuy}>
+          <button className="btn btnBuy" onClick={handleBuy} disabled={!livePrice}>
             Comprar
           </button>
-          <button className="btn btnSell" onClick={handleSell}>
+          <button className="btn btnSell" onClick={handleSell} disabled={!livePrice}>
             Vender
           </button>
         </div>
 
         {/* ===== FAIXA 3: Resetar / Exportar ===== */}
         <div className="row twoCols">
-          <button className="btn" onClick={() => onResetHistory?.()}>
+          <button className="btn" onClick={handleResetHistory}>
             Resetar histórico
           </button>
-          <button className="btn" onClick={() => onExportCSV?.()}>
+          <button className="btn" onClick={handleExportCSV}>
             Exportar CSV
           </button>
         </div>
@@ -230,11 +441,13 @@ export default function TradeControls({
           <div className="histHead">
             <span className="histTitle">Histórico</span>
             <span className="muted xs">
-              {history.length ? `${history.length} operações` : "Sem operações ainda."}
+              {historyShown.length
+                ? `${historyShown.length} operações`
+                : "Sem operações ainda."}
             </span>
           </div>
 
-          {history.length > 0 && (
+          {historyShown.length > 0 && (
             <div className="histTable">
               <div className="histRow histRow--head">
                 <span>Data</span>
@@ -245,12 +458,10 @@ export default function TradeControls({
                 <span>PNL</span>
               </div>
 
-              {history.slice(-15).reverse().map((h) => (
+              {historyShown.slice(-15).reverse().map((h) => (
                 <div key={h.ts + "-" + h.side} className="histRow">
                   <span>{new Date(h.ts).toLocaleString()}</span>
-                  <span className={h.side === "BUY" ? "green" : "red"}>
-                    {h.side}
-                  </span>
+                  <span className={h.side === "BUY" ? "green" : "red"}>{h.side}</span>
                   <span>{h.symbol}</span>
                   <span>{fmt(h.price, 4)}</span>
                   <span>{fmt(h.sizeUSDT, 0)}</span>
@@ -271,7 +482,6 @@ export default function TradeControls({
           display: grid;
           grid-auto-rows: min-content;
           gap: 10px;
-          /* ajuda a “grudar” no rodapé visual do painel */
           height: 100%;
         }
         .tcHead {
