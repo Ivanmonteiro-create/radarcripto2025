@@ -2,9 +2,8 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import TradingViewWidget from '@/components/TradingViewWidget';
-import priceFeed from '@/lib/priceFeed'; // singleton que já existe no seu projeto
+import { priceFeed } from '@/lib/priceFeed'; // <<<<<< ajuste: import nomeado
 
-// Pares usados no simulador (iguais ao que você tem no seletor atual)
 type Pair =
   | 'BTCUSDT'
   | 'ETHUSDT'
@@ -23,84 +22,66 @@ type Trade = {
   pair: Pair;
   side: Side;
   entryPrice: number;
-  sizeUSDT: number;  // tamanho em USDT informado no painel
-  qty: number;       // quantidade em moeda (sizeUSDT / entryPrice)
+  sizeUSDT: number;
+  qty: number;
   tp?: number | null;
   sl?: number | null;
   status: 'open' | 'closed';
   exitPrice?: number;
-  pnl?: number;      // PnL realizado no fechamento
+  pnl?: number;
 };
 
-// ------- Utilidades -------
 const fmt = (n: number) =>
   isFinite(n) ? n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-';
 
-// PnL não-realizado de um trade aberto no preço atual
 function unrealized(tr: Trade, last: number): number {
   const dir = tr.side === 'buy' ? 1 : -1;
   return (last - tr.entryPrice) * tr.qty * dir;
 }
 
-// ------- Componente -------
 export default function SimpageClient() {
-  // ---------- estados principais ----------
   const [pair, setPair] = useState<Pair>('BTCUSDT');
   const [lastPrice, setLastPrice] = useState<number>(0);
 
-  // Controles do painel (mantive nomes e campos já visíveis na sua UI)
-  const [riskPct, setRiskPct] = useState<number>(1);           // Risco por trade (%)
-  const [balance, setBalance] = useState<number>(100000);      // Saldo (USDT)
-  const [sizeUSDT, setSizeUSDT] = useState<number>(100000);    // Tamanho (USDT)
-  const [tpPrice, setTpPrice] = useState<number | ''>('');     // TP (preço)
-  const [slPrice, setSlPrice] = useState<number | ''>('');     // SL (preço)
+  const [riskPct, setRiskPct] = useState<number>(1);
+  const [balance, setBalance] = useState<number>(100000);
+  const [sizeUSDT, setSizeUSDT] = useState<number>(100000);
+  const [tpPrice, setTpPrice] = useState<number | ''>('');
+  const [slPrice, setSlPrice] = useState<number | ''>('');
 
-  // Livro de trades
   const [trades, setTrades] = useState<Trade[]>([]);
 
-  // assinatura do preço ao vivo
   useEffect(() => {
     let off = () => {};
     try {
       off = priceFeed.subscribe(pair, (p: number) => setLastPrice(p));
-    } catch {
-      // fallback: não quebra a página caso o priceFeed não conecte
-    }
+    } catch {}
     return () => off();
   }, [pair]);
 
-  // PnL não realizado agregado de todos os trades abertos
-  const unrealizedPnL = useMemo(() => {
-    return trades
-      .filter(t => t.status === 'open')
-      .reduce((acc, t) => acc + unrealized(t, lastPrice), 0);
-  }, [trades, lastPrice]);
+  const unrealizedPnL = useMemo(
+    () => trades.filter(t => t.status === 'open').reduce((acc, t) => acc + unrealized(t, lastPrice), 0),
+    [trades, lastPrice]
+  );
 
-  // PnL realizado (fechados)
-  const realizedPnL = useMemo(() => {
-    return trades
-      .filter(t => t.status === 'closed')
-      .reduce((acc, t) => acc + (t.pnl ?? 0), 0);
-  }, [trades]);
+  const realizedPnL = useMemo(
+    () => trades.filter(t => t.status === 'closed').reduce((acc, t) => acc + (t.pnl ?? 0), 0),
+    [trades]
+  );
 
-  // Equity = saldo + PnL realizado + PnL não realizado
   const equity = useMemo(() => balance + realizedPnL + unrealizedPnL, [balance, realizedPnL, unrealizedPnL]);
 
-  // Tamanho de posição total (abertos) em moeda
-  const positionQty = useMemo(() => {
-    return trades
-      .filter(t => t.status === 'open')
-      .reduce((acc, t) => acc + (t.side === 'buy' ? t.qty : -t.qty), 0);
-  }, [trades]);
+  const positionQty = useMemo(
+    () =>
+      trades.filter(t => t.status === 'open').reduce((acc, t) => acc + (t.side === 'buy' ? t.qty : -t.qty), 0),
+    [trades]
+  );
 
-  // -------- ações --------
   function place(side: Side) {
     if (!lastPrice || sizeUSDT <= 0) return;
 
-    // se preferir, respeite riskPct como teto de USDT:
     const maxRiskUSDT = (riskPct / 100) * equity;
-    const effectiveSize = Math.min(sizeUSDT, Math.max(10, maxRiskUSDT)); // mínimo simbólico
-
+    const effectiveSize = Math.min(sizeUSDT, Math.max(10, maxRiskUSDT));
     const qty = effectiveSize / lastPrice;
 
     const tr: Trade = {
@@ -119,10 +100,8 @@ export default function SimpageClient() {
     setTrades(prev => [tr, ...prev]);
   }
 
-  // Observa TP/SL e fecha automaticamente
   const watcherRef = useRef<number | null>(null);
   useEffect(() => {
-    // loop leve para checar TP/SL
     if (watcherRef.current) clearInterval(watcherRef.current);
     watcherRef.current = window.setInterval(() => {
       setTrades(prev => {
@@ -130,8 +109,10 @@ export default function SimpageClient() {
         const next = prev.map(t => {
           if (t.status === 'open' && lastPrice) {
             const dir = t.side === 'buy' ? 1 : -1;
-            const hitTP = typeof t.tp === 'number' && ((dir === 1 && lastPrice >= t.tp) || (dir === -1 && lastPrice <= t.tp));
-            const hitSL = typeof t.sl === 'number' && ((dir === 1 && lastPrice <= t.sl) || (dir === -1 && lastPrice >= t.sl));
+            const hitTP =
+              typeof t.tp === 'number' && ((dir === 1 && lastPrice >= t.tp) || (dir === -1 && lastPrice <= t.tp));
+            const hitSL =
+              typeof t.sl === 'number' && ((dir === 1 && lastPrice <= t.sl) || (dir === -1 && lastPrice >= t.sl));
             if (hitTP || hitSL) {
               const pnl = unrealized(t, lastPrice);
               changed = true;
@@ -142,7 +123,7 @@ export default function SimpageClient() {
         });
         return changed ? next : prev;
       });
-    }, 500); // 2x por segundo é suficiente para o simulador
+    }, 500);
     return () => {
       if (watcherRef.current) clearInterval(watcherRef.current);
     };
@@ -181,14 +162,16 @@ export default function SimpageClient() {
       t.exitPrice ?? '',
       t.pnl ?? '',
     ]);
-    const csv = [headers, ...rows].map(r =>
-      r
-        .map(v => {
-          const s = String(v);
-          return /[",;\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-        })
-        .join(';')
-    ).join('\n');
+    const csv = [headers, ...rows]
+      .map(r =>
+        r
+          .map(v => {
+            const s = String(v);
+            return /[",;\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+          })
+          .join(';')
+      )
+      .join('\n');
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
     const a = document.createElement('a');
@@ -199,26 +182,21 @@ export default function SimpageClient() {
     a.remove();
   }
 
-  // ---------- UI: mantenho a estrutura e classes genéricas ----------
   return (
     <div className="w-full h-full grid grid-cols-12 gap-4">
-      {/* Coluna do gráfico – NÃO mexo na API do widget para evitar incompatibilidades */}
       <div className="col-span-12 lg:col-span-8">
         <div className="rounded-2xl border border-zinc-700/60 overflow-hidden">
           <TradingViewWidget symbol={pair} />
         </div>
       </div>
 
-      {/* Coluna do painel de trade */}
       <div className="col-span-12 lg:col-span-4">
         <div className="rounded-2xl border border-zinc-700/60 p-4 bg-zinc-900/40 backdrop-blur-sm">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-lg font-semibold">Controles de Trade</h3>
-            {/* Botão VOLTAR AO INÍCIO permanece como você já posicionou via CSS global */}
             <a href="/" className="btn btn-sm btn-success">Voltar ao início</a>
           </div>
 
-          {/* Linha 1 */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <label className="text-xs opacity-70">Par</label>
@@ -323,7 +301,6 @@ export default function SimpageClient() {
             </div>
           </div>
 
-          {/* Ações */}
           <div className="grid grid-cols-2 gap-3 mt-3">
             <button className="rounded-lg px-3 py-2 bg-emerald-600 hover:bg-emerald-500 transition" onClick={() => place('buy')}>
               Comprar
@@ -339,7 +316,6 @@ export default function SimpageClient() {
             </button>
           </div>
 
-          {/* Histórico */}
           <div className="mt-4">
             <div className="text-sm font-semibold mb-2">Histórico</div>
             {trades.length === 0 ? (
