@@ -23,22 +23,6 @@ const PAIRS: Pair[] = [
   "ADAUSDT","XRPUSDT","DOGEUSDT","LINKUSDT",
 ];
 
-/** ===== Persistência local ===== */
-const STORAGE_KEY = "radar:sim:v1";
-type PersistedState = {
-  /** global */
-  cash: number;
-  sizeUSDT: number;
-  riskPct: number;
-  /** ligados ao par atual salvo */
-  symbol: Pair;
-  positionQty: number;
-  avgEntry: number | null;
-  tpPrice?: number;
-  slPrice?: number;
-  history: TradeRecord[];
-};
-
 /** ===== Props ===== */
 type Props = {
   symbol: Pair;
@@ -66,56 +50,17 @@ export default function TradeControls({
   onBuy, onSell, onResetHistory, onExportCSV, history: historyProp,
 }: Props) {
   /** ===== Entradas ===== */
-  const [riskPct, setRiskPct]   = useState<number>(1);
-  const [sizeUSDT, setSizeUSDT] = useState<number>(10_000); // valor padrão de ordem
+  const [riskPct, setRiskPct] = useState<number>(1);
+  const [sizeUSDT, setSizeUSDT] = useState<number>(100_000);
+  const [tpPrice, setTpPrice] = useState<number | undefined>();
+  const [slPrice, setSlPrice] = useState<number | undefined>();
 
   /** ===== Estados internos ===== */
-  const [cash, setCash]                 = useState<number>(10_000); // SALDO INICIAL 10k
-  const [positionQty, setPositionQty]   = useState<number>(0);
-  const [avgEntry, setAvgEntry]         = useState<number | null>(null);
-  const [tpPrice, setTpPrice]           = useState<number | undefined>();
-  const [slPrice, setSlPrice]           = useState<number | undefined>();
-  const [history, setHistory]           = useState<TradeRecord[]>([]);
+  const [cash, setCash] = useState<number>(100_000);
+  const [positionQty, setPositionQty] = useState<number>(0);
+  const [avgEntry, setAvgEntry] = useState<number | null>(null);
+  const [history, setHistory] = useState<TradeRecord[]>([]);
 
-  /** ---- Carrega do localStorage uma vez (montagem) ---- */
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const data = JSON.parse(raw) as PersistedState;
-
-      // sempre aplicamos configs globais
-      if (typeof data.cash === "number")     setCash(data.cash);
-      if (typeof data.sizeUSDT === "number") setSizeUSDT(data.sizeUSDT);
-      if (typeof data.riskPct === "number")  setRiskPct(data.riskPct);
-
-      // só restauramos posição/histórico se o par salvo coincide com o atual
-      if (data.symbol === symbol) {
-        setPositionQty(data.positionQty ?? 0);
-        setAvgEntry(typeof data.avgEntry === "number" ? data.avgEntry : null);
-        setTpPrice(data.tpPrice);
-        setSlPrice(data.slPrice);
-        setHistory(Array.isArray(data.history) ? data.history : []);
-      }
-    } catch { /* ignore */ }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // uma vez
-
-  /** ---- Salva no localStorage quando algo relevante mudar ---- */
-  useEffect(() => {
-    const toSave: PersistedState = {
-      cash, sizeUSDT, riskPct,
-      symbol,
-      positionQty, avgEntry,
-      tpPrice, slPrice,
-      history,
-    };
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
-    } catch { /* ignore */ }
-  }, [cash, sizeUSDT, riskPct, symbol, positionQty, avgEntry, tpPrice, slPrice, history]);
-
-  /** Ao trocar de par, zeramos apenas a posição/TP/SL/histórico, mantendo saldo e configs */
   useEffect(() => {
     setPositionQty(0);
     setAvgEntry(null);
@@ -169,7 +114,6 @@ export default function TradeControls({
       realized += (px - avgEntry) * (closeQty * Math.sign(positionQty));
     }
 
-    // caixa: buy gasta, sell recebe
     setCash((c) => c + signedQty * -px);
 
     if (newQty === 0) {
@@ -193,15 +137,9 @@ export default function TradeControls({
     ]);
   };
 
-  const handleBuy  = () =>
-    onBuy ? onBuy({ symbol, price: livePrice, sizeUSDT, riskPct, tpPrice, slPrice })
-          : execute("BUY",  livePrice);
+  const handleBuy  = () => onBuy  ? onBuy ({ symbol, price: livePrice, sizeUSDT, riskPct, tpPrice, slPrice }) : execute("BUY",  livePrice);
+  const handleSell = () => onSell ? onSell({ symbol, price: livePrice, sizeUSDT, riskPct, tpPrice, slPrice }) : execute("SELL", livePrice);
 
-  const handleSell = () =>
-    onSell ? onSell({ symbol, price: livePrice, sizeUSDT, riskPct, tpPrice, slPrice })
-           : execute("SELL", livePrice);
-
-  /** TP/SL automáticos */
   useEffect(() => {
     if (!livePrice || !isFinite(livePrice) || positionQty === 0) return;
 
@@ -234,7 +172,6 @@ export default function TradeControls({
     setAvgEntry(null);
     setTpPrice(undefined);
     setSlPrice(undefined);
-    // saldo permanece — “reseta a posição”, não a banca
   };
 
   const handleExportCSV = () => {
@@ -263,7 +200,6 @@ export default function TradeControls({
   const historyShown = historyProp ?? history;
 
   /** Cor do PnL */
-  const pnlShown = typeof pnlProp === "number" ? pnlProp : (livePrice && avgEntry != null ? (livePrice - avgEntry) * positionQty : 0);
   const pnlClass = pnlShown > 0 ? "pnlPos" : pnlShown < 0 ? "pnlNeg" : "pnlZero";
 
   return (
@@ -295,7 +231,7 @@ export default function TradeControls({
 
           <label className="lbl">Tamanho (USDT)</label>
           <input
-            className="inp" type="number" min={0} step={10}
+            className="inp" type="number" min={0} step={100}
             value={sizeUSDT} onChange={(e) => setSizeUSDT(Number(e.target.value))}
           />
         </div>
@@ -309,7 +245,7 @@ export default function TradeControls({
           <input className="inp inp-disabled" disabled value={fmt(equityShown)} />
 
           <label className="lbl">Saldo (USDT)</label>
-          <input className="inp inp-disabled" disabled value={fmt(cash)} />
+          <input className="inp inp-disabled" disabled value={fmt(balanceShown)} />
 
           <label className="lbl">Tamanho de posição</label>
           <input
