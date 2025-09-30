@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import "./globals.css"; // importa direto do app/globals.css
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
@@ -8,6 +8,15 @@ export const metadata: Metadata = {
   },
   description:
     "RadarCrypto é um simulador educacional de trade em criptomoedas. Pratique estratégias, aprenda sem risco e evolua no mercado com saldo fictício.",
+  keywords: [
+    "RadarCrypto",
+    "Simulador de trade",
+    "Criptomoedas",
+    "Bitcoin",
+    "Ethereum",
+    "Trading",
+    "Investimentos",
+  ],
   openGraph: {
     type: "website",
     url: "https://radarcrypto.space",
@@ -15,7 +24,14 @@ export const metadata: Metadata = {
     description:
       "Pratique estratégias e aprenda a negociar criptomoedas com saldo fictício de 10.000 USDT. Sem riscos, só aprendizado.",
     siteName: "RadarCrypto.space",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "RadarCrypto Simulador de Trade" }],
+    images: [
+      {
+        url: "/og-image.png", // coloque esse arquivo em /public
+        width: 1200,
+        height: 630,
+        alt: "RadarCrypto Simulador de Trade",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -23,11 +39,18 @@ export const metadata: Metadata = {
     description:
       "Pratique estratégias e aprenda a negociar criptomoedas com saldo fictício de 10.000 USDT. Sem riscos, só aprendizado.",
     images: ["/og-image.png"],
+    creator: "@RadarCrypto", // opcional: se tiver Twitter
   },
-  icons: { icon: "/favicon.ico" },
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="pt-BR">
       <body>{children}</body>
