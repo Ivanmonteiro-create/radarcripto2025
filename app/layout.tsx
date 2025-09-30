@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import "./globals.css";
+import "@/styles/globals.css";
 
 export const metadata: Metadata = {
   title: {
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     siteName: "RadarCrypto.space",
     images: [
       {
-        url: "/og-image.png", // coloque esse arquivo em /public
+        url: "/og-image.png",
         width: 1200,
         height: 630,
         alt: "RadarCrypto Simulador de Trade",
@@ -39,18 +39,13 @@ export const metadata: Metadata = {
     description:
       "Pratique estratégias e aprenda a negociar criptomoedas com saldo fictício de 10.000 USDT. Sem riscos, só aprendizado.",
     images: ["/og-image.png"],
-    creator: "@RadarCrypto", // opcional: se tiver Twitter
   },
   icons: {
     icon: "/favicon.ico",
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
       <body>{children}</body>
