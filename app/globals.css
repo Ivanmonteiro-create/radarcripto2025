@@ -1,327 +1,436 @@
-/* ===============================
-   app/globals.css — versão consolidada/limpa
-   =============================== */
-
-/* ---- Tokens ---- */
-:root{
-  --bg:#0a0f0d;
-  --panel:#0f1513;
-  --grid:rgba(255,255,255,.06);
-  --text:#d5fbe6;
-  --muted:#8fbfa8;
-  --accent:#21f38d;
-  --accent-strong:#1cff80;
-}
-
-*{ box-sizing:border-box }
-html,body{ height:100% }
-
-body{
-  margin:0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-  color:var(--text);
-  background-color:var(--bg);
-  background-image:
-    linear-gradient(to right, var(--grid) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
-  background-size:60px 60px;
-}
-
-/* ===== Layout (home) ===== */
-.wrapper{
-  display:grid;
-  grid-template-columns:300px 1fr 200px;
-  gap:16px;
-  min-height:100dvh;
-  padding:16px;
-  align-items:start;
-}
-@media (max-width:1100px){
-  .wrapper{ grid-template-columns:1fr }
-  .rightMenu{ position:static }
-  .leftPanel{ order:2 }
-}
-
-/* Painéis gerais */
-.panel{
-  position:relative;
-  background:radial-gradient(1200px 1200px at -10% -10%, rgba(33,243,141,.06), transparent 40%), var(--panel);
-  border:1px solid rgba(255,255,255,.06);
-  border-radius:16px;
-  padding:14px;
-}
-
-/* ===== Tickers (coluna esquerda) ===== */
-.tickers{ display:grid; grid-template-columns:1fr; gap:10px }
-.tickerCard{
-  background:rgba(255,255,255,.02);
-  border:1px solid rgba(255,255,255,.06);
-  border-radius:12px;
-  padding:10px 12px;
-}
-.tickerSymbol{ color:var(--text); font-size:14px; letter-spacing:.08em; text-transform:uppercase; font-weight:800 }
-.tickerSymbol.strong{ font-size:16px }
-.tickerPrice{ font-weight:700; font-size:18px; opacity:.95 }
-.tickerPrice.green{ color:var(--accent-strong); filter:drop-shadow(0 0 6px rgba(33,243,141,.25)) }
-
-/* ===== Hero (centro) ===== */
-.hero{ height:100%; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden }
-.heroInner{ width:min(940px,95%); text-align:center }
-.heroTag{ color:var(--muted); letter-spacing:.15em; font-size:12px; text-transform:uppercase }
-.heroTitle{ font-size:clamp(26px,4.5vw,56px); line-height:1.06; margin:8px 0 12px; font-weight:800 }
-.heroSubtitle{ color:#c9eedc; opacity:.9; max-width:700px; margin:0 auto 22px }
-.liveLineWrap{ position:relative; height:64px; margin:18px auto 4px; width:min(720px,100%) }
-.liveLine{ position:absolute; inset:0; border-radius:999px; background:linear-gradient(90deg,transparent,var(--accent),transparent); filter:drop-shadow(0 0 10px var(--accent)); opacity:.8 }
-.liveDot{ position:absolute; top:50%; width:10px; height:10px; background:var(--accent-strong); border-radius:999px; transform:translate(-50%,-50%); filter:drop-shadow(0 0 10px var(--accent-strong)); animation:run 2.2s linear infinite }
-@keyframes run{ from{left:0%} to{left:100%} }
-@media (prefers-reduced-motion:reduce){ .liveDot{ animation:none; left:100% } }
-
-/* ===== Menu direito (home) ===== */
-.rightMenu{ position:sticky; top:16px; height:fit-content }
-.menuList{ display:grid; gap:8px }
-.menuBtn{
-  display:block; text-decoration:none; color:var(--text);
-  background:rgba(255,255,255,.03);
-  border:1px solid rgba(255,255,255,.06);
-  padding:10px 12px; border-radius:12px; text-align:center; font-weight:600;
-  font-size:14px;
-}
-.menuBtn.active{ outline:2px solid var(--accent); box-shadow:0 0 0 4px rgba(33,243,141,.12) inset; color:var(--accent-strong) }
-
-/* Utilidades */
-.muted{ color:var(--muted) }
-.small{ font-size:12px }
-.green{ color:#1cff80; font-weight:800 }
-
 /* =========================================================
-   SIMULADOR — ajustes visuais
+   RadarCrypto.space — CSS Global Consolidado
+   (compatível com Next.js App Router e Turbopack)
+   - CSS puro (sem nesting/SCSS)
+   - Comentários sempre fechados
+   - Todas as chaves "}" fechadas
    ========================================================= */
-.compactPanel { padding:12px !important }
-.compactRoot { font-size:13px }
-.compactTitle { font-size:15px; margin:0; font-weight:800 }
-.compactHeader { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px }
 
-.compactGrid{ display:grid; grid-template-columns: minmax(280px,1fr) minmax(240px,1fr); gap:12px; height:100% }
-.colA,.colB{ display:flex; flex-direction:column; gap:8px; min-width:0 }
-.twoCols{ display:grid; grid-template-columns:1fr 1fr; gap:8px }
-.threeCols{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px }
-@media (max-width:1280px){ .threeCols{ grid-template-columns:1fr 1fr } }
-
-.lbl{ font-size:12px; color:rgba(255,255,255,.7); margin-bottom:2px }
-.xs{ font-size:11px }
-.muted.xs{ font-size:11px; color:rgba(255,255,255,.55) }
-
-.inp{
-  width:100%; height:36px; padding:0 10px;
-  border-radius:10px; background:rgba(255,255,255,.03);
-  color:inherit; border:1px solid rgba(255,255,255,.12);
-}
-.inp-disabled{ background:rgba(255,255,255,.08); cursor:not-allowed }
-
-.btn{ padding:10px 12px; border-radius:10px; font-size:15px; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.06); color:inherit; }
-.btn:hover{ background:rgba(255,255,255,.12) }
-.btn-xs{ padding:7px 9px; font-size:12px; border-radius:10px }
-.btn-primary{ background:rgba(33,243,141,.15); border-color:rgba(33,243,141,.35); color:#1cff80; font-weight:800 }
-.btnBuy{ background:linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10)); color:#1cff80; border:1px solid rgba(33,243,141,.35); font-weight:800 }
-.btnSell{ background:linear-gradient(180deg, rgba(255,76,76,.20), rgba(255,76,76,.08)); color:#ff6b6b; border:1px solid rgba(255,255,255,.35); font-weight:800 }
-
-.panel .compactHeader .btn{
-  background:linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10)) !important;
-  border-color:rgba(33,243,141,.35) !important;
-  color:var(--accent-strong) !important;
-  box-shadow:0 0 0 2px rgba(33,243,141,.15) inset !important;
-  font-size:14px !important;
+/* =================== TOKENS / THEME =================== */
+:root {
+  --bg: #0a0f0d;
+  --bg-2: #0d1311;
+  --panel: #0f1513;
+  --panel-2: #101a16;
+  --grid: rgba(255, 255, 255, 0.06);
+  --grid-2: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.10);
+  --text: #d5fbe6;
+  --text-weak: #bfe6d3;
+  --muted: #8fbfa8;
+  --accent: #21f38d;
+  --accent-strong: #1cff80;
+  --accent-soft: rgba(33, 243, 141, 0.12);
+  --danger: #ff6b6b;
+  --danger-soft: rgba(255, 76, 76, 0.12);
+  --shadow: 0 8px 30px rgba(0,0,0,.25);
 }
 
-/* Botão Tela Cheia alinhado à “câmera” do Mac */
-section.panel .chartFsBtn{
-  position:absolute !important; top:4px !important; right:44px !important;
-  z-index:6 !important; width:28px; height:28px; border-radius:8px;
-  display:grid; place-items:center; background:rgba(255,255,255,.12);
-  color:#e6e6e6; border:1px solid rgba(255,255,255,.25); cursor:pointer;
-}
-section.panel .chartFsBtn:hover{ background:rgba(255,255,255,.18); color:#fff }
-
-/* Histórico: manter somente o do rodapé */
-.panel .historyCard:not(:last-of-type),
-.panel .histWrap:not(:last-of-type),
-.panel .histRow:not(:last-of-type),
-.compactGrid .colA .historyCard,
-.compactGrid .colA .histWrap,
-.compactGrid .colA .histRow,
-.compactGrid .colA .cardMini.history,
-.compactGrid .colA .cardMini.is-history{ display:none !important; }
-.historyCard{ margin-top:auto }
-
-/* Simulador sem scroll global (como aprovado) */
-html, body { overflow:hidden }
-main, .panel, .compactPanel { overflow:hidden }
-.historyCard .histWrap{ max-height:none; overflow:hidden }
-/* barras escondidas */
-*{ scrollbar-width:none } *::-webkit-scrollbar{ width:0; height:0 }
-
-/* PARES rápidos */
-.pairsRow{ display:grid; grid-auto-flow:column; gap:6px; align-items:center; justify-content:start; overflow-x:auto; padding-top:4px }
-.chip{
-  border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.06);
-  border-radius:999px; padding:6px 10px; font-size:12px; line-height:1; white-space:nowrap; cursor:pointer;
-}
-.chip:hover{ background:rgba(255,255,255,.12) }
-.chip-active{
-  background:linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10));
-  border-color:rgba(33,243,141,.35); color:#1cff80; font-weight:800;
+/* =================== RESET BÁSICO =================== */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* =========================================================
-   SOBRE — layout “v2” (o que você escolheu)
-   ========================================================= */
-.aboutV2-root{ position:relative; max-width:1200px; margin:0 auto; padding:16px 18px; overflow:hidden }
-.aboutV2-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px }
-.aboutV2-tag{
-  font-size:12px; letter-spacing:.22em; color:var(--muted);
-  padding:6px 10px; border:1px solid rgba(255,255,255,.10);
-  border-radius:999px; background:rgba(255,255,255,.03);
-}
-.aboutV2-back{ padding:10px 14px; border-radius:10px; font-weight:800 }
+img { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; cursor: pointer; }
+input, select, textarea { font: inherit; color: inherit; }
 
-/* grid com 3 colunas (cards | título | vazio) */
-.aboutV2-hero{
-  position:relative; display:grid; grid-template-columns:340px 1fr 180px; gap:18px; min-height:60vh;
+/* =================== TIPOGRAFIA =================== */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0 0 8px 0;
+  font-weight: 900;
+  line-height: 1.15;
 }
-@media (max-width:1100px){ .aboutV2-hero{ grid-template-columns:1fr } }
+p { margin: 0 0 10px 0; }
+small, .xs { font-size: 12px; }
+.muted { color: rgba(255,255,255,0.70); }
+.dim { opacity: .85; }
+.bold { font-weight: 800; }
 
-.aboutV2-cards{ display:grid; gap:12px; align-content:start }
-.aboutV2-card{
-  border-radius:14px; padding:14px;
-  background: radial-gradient(900px 900px at -20% -20%, rgba(33,243,141,.08), transparent 40%), rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.10);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 8px 26px rgba(0,0,0,.25);
-}
-.aboutV2-cardTitle{ color:var(--accent-strong); font-weight:900; margin-bottom:6px; letter-spacing:.01em }
-.aboutV2-cardText{ margin:0; opacity:.95 }
-
-.aboutV2-center{ display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:8px 10px; position:relative }
-.aboutV2-title{
-  margin:0; font-weight:1000; letter-spacing:.02em; font-size:clamp(32px, 6vw, 76px);
-  background:linear-gradient(180deg,#dfffe9 0%, #1cff80 100%);
-  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
-  text-shadow:0 6px 28px rgba(33,243,141,.18);
-}
-.aboutV2-sub{ margin:12px auto 0; max-width:760px; color:#c9eedc; opacity:.9; font-size:clamp(14px,1.6vw,18px) }
-
-.aboutV2-root::before{
-  content:""; position:absolute; inset:-40%;
-  background: radial-gradient(60% 60% at 70% 10%, rgba(33,243,141,.06), transparent 60%);
-  pointer-events:none;
+/* =================== LAYOUT / CONTAINERS =================== */
+.container {
+  width: min(1150px, 94vw);
+  margin: 0 auto;
 }
 
-/* =========================================================
-   RADAR CANVAS (usado em “Fale com a gente”)
-   ========================================================= */
-.bgCanvas{
-  position:absolute; inset:0; pointer-events:none; z-index:0; filter:saturate(110%);
-}
-
-/* =========================================================
-   FALE COM A GENTE — estilos
-   ========================================================= */
-.contactRoot{ overflow:hidden; padding:22px; min-height:100dvh; position:relative }
-.backTopRight{ position:absolute; top:14px; right:14px; z-index:3; padding:10px 14px; border-radius:12px; font-weight:800 }
-.radarLayer{ position:absolute; inset:0; z-index:0 }
-.contactContent{ position:relative; z-index:1; max-width:1100px; margin:0 auto }
-
-.eyebrow{ color:var(--muted); letter-spacing:.18em; text-transform:uppercase; font-size:12px; margin-bottom:6px }
-.contactTitle{
-  margin:0 0 6px; font-size:clamp(26px,4.2vw,44px); font-weight:900; color:#dfffea;
-  text-shadow:0 0 14px rgba(33,243,141,.18);
-}
-.contactSubtitle{ margin:0 0 18px; color:#cfeede; opacity:.9 }
-
-.contactGrid{ display:grid; grid-template-columns:1fr 1fr; gap:16px }
-@media (max-width:980px){ .contactGrid{ grid-template-columns:1fr } }
-
-.contactCard{
-  background:rgba(255,255,255,.02);
-  border:1px solid rgba(33,243,141,.35);
-  border-radius:14px;
-  padding:14px;
-  box-shadow: 0 0 0 1px rgba(33,243,141,.12) inset, 0 0 36px rgba(33,243,141,.10);
-}
-.cardHead{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px }
-.badge{
-  display:inline-block; padding:6px 10px; border-radius:999px; font-size:12px;
-  border:1px solid rgba(33,243,141,.35);
-  background:linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10));
-  color:#1cff80; font-weight:800;
-}
-.cardText{ margin:0 0 10px; color:#d5fbe6; opacity:.92 }
-
-.field{ display:grid; gap:6px; margin-bottom:10px }
-.fakeInput{
-  height:36px; display:grid; align-items:center; padding:0 12px; border-radius:10px;
-  border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.05); color:#e7fff3;
-}
-.actions .btn{ width:100% }
-
-/* botões verdes */
-.contactCard .btn{
-  background:linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10));
-  border:1px solid rgba(33,243,141,.35);
-  color:#1cff80; font-weight:800; border-radius:10px; padding:10px 12px;
-}
-.contactCard .btn:disabled{ opacity:.6; cursor:not-allowed }
-/* ====== SIMULADOR: Grid e alturas estáveis ====== */
-.simShell{
+.grid {
   display: grid;
-  grid-template-columns: minmax(640px, 1fr) 420px; /* gráfico | painel */
-  gap: 16px;
-  align-items: start;
-  padding: 16px;
-  min-height: 100dvh;
+  gap: 14px;
 }
 
-@media (max-width: 1100px){
-  .simShell{ grid-template-columns: 1fr; }
+.section {
+  padding: 24px 0;
 }
 
-/* Painel do gráfico com zero “aperto” */
-.chartBox{ padding: 8px; }
-.chartWrap{
-  position: relative;
-  height: calc(100vh - 140px);  /* ocupa bem a tela */
-  min-height: 560px;            /* garante altura mínima */
+/* Painéis / Cards */
+.panel {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+}
+.compactPanel {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+}
+
+/* Cabeçalhos compactos (usados no simulador) */
+.compactHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  border-bottom: 1px dashed var(--grid);
+}
+.compactTitle {
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: .2px;
+}
+
+/* Botão flutuante “Voltar ao início”/Ações */
+.tcBackBtn {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.25);
+  color: var(--text);
+  backdrop-filter: blur(6px);
+}
+
+/* =================== BOTÕES =================== */
+.btn {
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.06);
+  border-radius: 10px;
+  color: inherit;
+  padding: 10px 12px;
+  font-size: 15px;
+  transition: background .15s ease, transform .05s ease;
+}
+.btn:hover { background: rgba(255,255,255,0.12); }
+.btn:active { transform: translateY(1px); }
+
+.btnPrimary {
+  background: linear-gradient(180deg, var(--accent-soft), rgba(33,243,141,.06));
+  border-color: rgba(33,243,141,.35);
+  color: var(--accent-strong);
+  font-weight: 800;
+}
+.btnDanger {
+  background: var(--danger-soft);
+  border-color: rgba(255, 107, 107, .35);
+  color: var(--danger);
+  font-weight: 800;
+}
+
+/* =================== FORM / INPUTS =================== */
+.inp {
   width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.03);
+  color: inherit;
+  border: 1px solid rgba(255,255,255,0.12);
+  outline: none;
+}
+.inp:focus {
+  border-color: rgba(33,243,141,.35);
+  box-shadow: 0 0 0 3px rgba(33,243,141,.15);
+}
+.inp-disabled {
+  background: rgba(255,255,255,0.08);
+  cursor: not-allowed;
+}
+.lbl {
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 2px;
+}
+
+/* =================== COMPONENTES (simulador) =================== */
+/* Painel TradeControls tem estilos locais via styled-jsx,
+   mas replicamos utilitários para consistência */
+.pnlPos  { color: #1cff80 !important; font-weight: 800; }
+.pnlNeg  { color: #ff6b6b !important; font-weight: 800; }
+.pnlZero { color: #e6e6e6 !important; }
+
+.green { color: #1cff80; font-weight: 800; }
+.red   { color: #ff6b6b; font-weight: 800; }
+
+/* Histórico (quando exibido fora do styled-jsx) */
+.histCard {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  padding: 10px;
+}
+.histHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.histTitle { font-weight: 800; }
+.histTableWrapper { overflow-x: auto; }
+.histTable { display: grid; gap: 6px; min-width: 600px; }
+.histRow {
+  display: grid;
+  grid-template-columns: 1.6fr 0.6fr 0.9fr 1fr 1fr 0.8fr;
+  gap: 6px;
+  font-size: 13px;
+  align-items: center;
+}
+.histRow--head { opacity: 0.7; font-weight: 700; }
+
+/* =================== HOME / HERO =================== */
+.hero {
+  position: relative;
+  padding: 40px 16px;
+  border-radius: 16px;
+  background: radial-gradient(1200px 420px at 50% 0%,
+    rgba(33,243,141,0.10), rgba(33,243,141,0.04) 50%, transparent 70%),
+    var(--panel);
+  border: 1px solid var(--grid);
+}
+.heroTitle {
+  font-size: clamp(28px, 6vw, 48px);
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+.heroSubtitle {
+  color: var(--text-weak);
+  font-size: clamp(14px, 3vw, 18px);
+  margin-bottom: 18px;
+}
+.heroActions {
+  display: grid;
+  grid-auto-flow: column;
+  gap: 10px;
+  width: fit-content;
+}
+.heroActions .btn { min-width: 150px; }
+
+/* =================== PÁGINA PLANOS =================== */
+.plansGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+.planCard {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 14px;
+  padding: 14px;
+  display: grid;
+  grid-auto-rows: min-content;
+  gap: 10px;
+}
+.planHeader {
+  display: grid;
+  gap: 6px;
+}
+.planName { font-size: 18px; font-weight: 900; }
+.planPrice { font-size: 24px; font-weight: 900; color: var(--accent-strong); }
+.planPromo { font-size: 12px; color: var(--muted); }
+.planList {
+  display: grid;
+  gap: 6px;
+  padding-left: 0;
+  margin: 0;
+  list-style: none;
+}
+.planList li {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: 18px 1fr;
+  align-items: start;
+  gap: 8px;
+  font-size: 14px;
+}
+.planCheck {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  border: 1px solid rgba(33,243,141,.35);
+  color: var(--accent-strong);
+  background: var(--accent-soft);
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* =================== PÁGINA SOBRE =================== */
+.aboutGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 12px;
+}
+.aboutCard {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 14px;
+  display: grid;
+  gap: 6px;
+}
+.aboutCard h3 { font-size: 16px; }
+
+/* =================== PÁGINA CONTATO =================== */
+.contactGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 12px;
+}
+.contactCard {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+.contactAction {
+  display: grid;
+  grid-auto-flow: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: start;
+}
+
+/* =================== TABELAS GENÉRICAS =================== */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--grid);
+  border-radius: 10px;
   overflow: hidden;
 }
+.table th, .table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--grid);
+  text-align: left;
+  font-size: 14px;
+}
+.table thead th {
+  background: rgba(255,255,255,0.06);
+  font-weight: 800;
+}
+.table tr:last-child td { border-bottom: none; }
 
-/* Garante que o widget ocupe tudo que dermos */
-.chartWrap > *{
+/* =================== UTILITÁRIOS =================== */
+.row { display: grid; grid-auto-flow: row; gap: 10px; }
+.col2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.col3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.col4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+
+.fullHeight { min-height: 100dvh; }
+.center { display: grid; place-items: center; }
+.spaceBetween { display: flex; justify-content: space-between; align-items: center; }
+
+.badge {
+  display: inline-grid;
+  place-items: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  border: 1px solid var(--grid);
+  background: rgba(255,255,255,0.06);
+}
+.badgeAccent {
+  border-color: rgba(33,243,141,.35);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-weight: 800;
+}
+
+/* =================== RESPONSIVIDADE =================== */
+@media (max-width: 1100px) {
+  .plansGrid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .aboutGrid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .contactGrid { grid-template-columns: 1fr; }
+  .histRow { grid-template-columns: 1.4fr .6fr .8fr .8fr .8fr .7fr; }
+}
+
+@media (max-width: 900px) {
+  .heroActions { grid-auto-flow: row; width: 100%; }
+  .heroActions .btn { width: 100%; }
+}
+
+@media (max-width: 768px) {
+  .container { width: min(100%, 94vw); }
+  .plansGrid { grid-template-columns: 1fr; }
+  .aboutGrid { grid-template-columns: 1fr; }
+  .col2 { grid-template-columns: 1fr; }
+  .col3, .col4 { grid-template-columns: 1fr; }
+  .histTable { min-width: 500px; }
+  .compactPanel { border-radius: 10px; }
+  .tcBackBtn { padding: 8px 10px; font-size: 14px; }
+  .hero { padding: 28px 14px; }
+}
+
+/* =================== GRID DE FUNDO (HOME) =================== */
+.gridBG {
   position: absolute;
   inset: 0;
+  background-image: linear-gradient(to right, var(--grid) 1px, transparent 1px),
+                    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: 32px 32px, 32px 32px;
+  mask-image: radial-gradient(100% 60% at 50% 0%, rgba(0,0,0,1), rgba(0,0,0,0));
+  pointer-events: none;
 }
 
-/* Painel de controles rola internamente se precisar */
-.tradePanelShell{
-  max-height: calc(100vh - 180px);
-  overflow: auto;
-}
-
-/* Deixa o botão “Voltar ao início” com presença (verde) */
-.tcBackBtn{
+/* =================== ELEMENTOS ESPECÍFICOS =================== */
+/* Botões Comprar/Vender compatíveis com TradeControls */
+.btnBuy {
   background: linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10));
-  border: 1px solid rgba(33,243,141,.35);
+  border-color: rgba(33,243,141,.35);
   color: #1cff80;
   font-weight: 800;
-  border-radius: 12px;
-  padding: 12px 16px;
+}
+.btnSell {
+  background: linear-gradient(180deg, rgba(255,76,76,.20), rgba(255,76,76,.08));
+  color: #ff6b6b;
+  border: 1px solid rgba(255,255,255,.35);
+  font-weight: 800;
 }
 
-/* Mantém o botão de Tela Cheia alinhado com a câmera (seu seletor antigo) */
-section.panel button[aria-label*="Tela cheia"],
-section.panel button[title*="Tela cheia"],
-section.panel .chartFsBtn{
-  position: absolute !important;
-  top: 4px !important;
-  right: 44px !important;
-  z-index: 6 !important;
+/* Inputs “fantasma” (usados em cards) */
+.inputGhost {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px dashed var(--grid);
+  background: transparent;
+  color: inherit;
 }
+
+/* Cartões de destaque */
+.highlight {
+  border: 1px solid rgba(33,243,141,.35);
+  background: linear-gradient(180deg, rgba(33,243,141,.12), rgba(33,243,141,.06));
+  border-radius: 12px;
+}
+
+/* Rodapé simples */
+.footer {
+  padding: 18px 0;
+  border-top: 1px solid var(--grid);
+  color: var(--text-weak);
+  font-size: 14px;
+  text-align: center;
+}
+
+/* =================== FIM DO CSS GLOBAL =================== */
