@@ -51,12 +51,12 @@ export default function TradeControls({
 }: Props) {
   /** ===== Entradas ===== */
   const [riskPct, setRiskPct] = useState<number>(1);
-  const [sizeUSDT, setSizeUSDT] = useState<number>(100_000);
+  const [sizeUSDT, setSizeUSDT] = useState<number>(1000);   // ajustado p/ 1k padrão
   const [tpPrice, setTpPrice] = useState<number | undefined>();
   const [slPrice, setSlPrice] = useState<number | undefined>();
 
   /** ===== Estados internos ===== */
-  const [cash, setCash] = useState<number>(100_000);
+  const [cash, setCash] = useState<number>(10_000);         // ajustado p/ 10k padrão
   const [positionQty, setPositionQty] = useState<number>(0);
   const [avgEntry, setAvgEntry] = useState<number | null>(null);
   const [history, setHistory] = useState<TradeRecord[]>([]);
@@ -298,29 +298,31 @@ export default function TradeControls({
           </div>
 
           {historyShown.length > 0 && (
-            <div className="histTable">
-              <div className="histRow histRow--head">
-                <span>Data</span><span>Side</span><span>Par</span>
-                <span>Preço</span><span>Tam. (USDT)</span><span>PNL</span>
-              </div>
+            <div className="histTableWrapper">
+              <div className="histTable">
+                <div className="histRow histRow--head">
+                  <span>Data</span><span>Side</span><span>Par</span>
+                  <span>Preço</span><span>Tam. (USDT)</span><span>PNL</span>
+                </div>
 
-              {historyShown.slice(-15).reverse().map((h) => {
-                const pnlSign = typeof h.pnl === "number"
-                  ? (h.pnl > 0 ? "pnlPos" : h.pnl < 0 ? "pnlNeg" : "pnlZero")
-                  : "";
-                return (
-                  <div key={h.ts + "-" + h.side} className="histRow">
-                    <span>{new Date(h.ts).toLocaleString()}</span>
-                    <span className={h.side === "BUY" ? "green" : "red"}>{h.side}</span>
-                    <span>{h.symbol}</span>
-                    <span>{fmt(h.price, 4)}</span>
-                    <span>{fmt(h.sizeUSDT, 0)}</span>
-                    <span className={pnlSign}>
-                      {typeof h.pnl === "number" ? fmt(h.pnl, 2) : "-"}
-                    </span>
-                  </div>
-                );
-              })}
+                {historyShown.slice(-15).reverse().map((h) => {
+                  const pnlSign = typeof h.pnl === "number"
+                    ? (h.pnl > 0 ? "pnlPos" : h.pnl < 0 ? "pnlNeg" : "pnlZero")
+                    : "";
+                  return (
+                    <div key={h.ts + "-" + h.side} className="histRow">
+                      <span>{new Date(h.ts).toLocaleString()}</span>
+                      <span className={h.side === "BUY" ? "green" : "red"}>{h.side}</span>
+                      <span>{h.symbol}</span>
+                      <span>{fmt(h.price, 4)}</span>
+                      <span>{fmt(h.sizeUSDT, 0)}</span>
+                      <span className={pnlSign}>
+                        {typeof h.pnl === "number" ? fmt(h.pnl, 2) : "-"}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
@@ -359,7 +361,8 @@ export default function TradeControls({
         }
         .histHead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
         .histTitle { font-weight: 800; }
-        .histTable { display: grid; gap: 6px; }
+        .histTableWrapper { overflow-x: auto; }
+        .histTable { display: grid; gap: 6px; min-width: 600px; }
         .histRow {
           display: grid;
           grid-template-columns: 1.6fr 0.6fr 0.9fr 1fr 1fr 0.8fr;
@@ -378,6 +381,7 @@ export default function TradeControls({
         .btn {
           border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.06);
           border-radius: 10px; color: inherit; padding: 10px 12px; font-size: 15px;
+          width: 100%;
         }
         .btn:hover { background: rgba(255,255,255,0.12); }
         .btnBuy {
@@ -401,6 +405,12 @@ export default function TradeControls({
           .tcGrid { grid-template-columns: 1fr; }
           .row { grid-column: auto; }
           .histRow { grid-template-columns: 1.4fr .6fr .8fr .8fr .8fr .7fr; }
+        }
+
+        @media (max-width: 768px) {
+          .twoCols { grid-template-columns: 1fr; }
+          .btn { font-size: 14px; padding: 10px; }
+          .histTable { min-width: 500px; }
         }
       `}</style>
     </div>
