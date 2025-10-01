@@ -680,3 +680,69 @@ small, .xs { font-size: 12px; }
     margin: 14px auto 24px auto;
   }
 }
+/* ===== 1) HERO colado mais no topo (linha dos tickers ~ ADA/USDT) ===== */
+:root {
+  /* ajuste fino da altura do topo. Vá reduzindo até alinhar: 36px, 32px, 28px… */
+  --header-offset: 32px;
+}
+
+.rc-hero {
+  position: absolute;
+  top: var(--header-offset);
+  right: 2vw;
+  margin: 0 !important;
+  z-index: 10;   /* acima do radar */
+}
+
+/* ===== 2) Radar maior, centralizado e “de ponta a ponta” ===== */
+/* Tamanho alvo do radar: usa a largura da viewport (vw) e limita um máximo */
+:root {
+  --radar-size: min(1400px, 92vw); /* aumente para 95vw se quiser ainda mais cheio */
+}
+
+/* Container genérico do radar no fundo (cobre os prováveis nomes de classe) */
+.rc-radar, .radarBg, [data-radar-bg] {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;   /* radar é decorativo */
+  z-index: 0;
+}
+
+/* Aplica o tamanho grande ao elemento real (canvas/svg/div) do radar */
+.rc-radar > canvas,
+.rc-radar > svg,
+.rc-radar .radarCanvas,
+.radarBg > canvas,
+.radarBg > svg,
+[data-radar-bg] > canvas,
+[data-radar-bg] > svg {
+  width: var(--radar-size);
+  height: var(--radar-size);
+  max-width: none;
+  max-height: none;
+}
+
+/* Footer fixo embaixo (© 2025 RadarCrypto — Fase 1) */
+.rc-home__footer {
+  position: absolute;
+  bottom: 18px;
+  left: 14px;
+  opacity: .65;
+  z-index: 5;
+}
+
+/* Mobile: volta tudo a um fluxo normal para não quebrar */
+@media (max-width: 980px) {
+  .rc-hero {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin: 16px auto 0 auto !important;
+  }
+  .rc-home__footer {
+    position: static;
+    margin: 14px auto 24px auto;
+  }
+}
