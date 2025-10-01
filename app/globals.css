@@ -746,3 +746,108 @@ small, .xs { font-size: 12px; }
     margin: 14px auto 24px auto;
   }
 }
+/* === HERO no topo, alinhado com a última linha dos tickers (ADA/USDT) === */
+:root {
+  /* ajuste fino: diminua até alinhar milimetricamente */
+  --header-offset: 24px;   /* teste 24px → 22px → 20px se ainda faltar um pouco */
+}
+
+.rc-hero {
+  position: absolute;
+  top: var(--header-offset);
+  right: 2vw;
+  margin: 0 !important;
+  z-index: 10;
+}
+/* Radar maior, centralizado */
+:root {
+  --radar-size: min(1600px, 95vw);  /* antes estava 1400px/92vw */
+}
+
+.rc-radar, .radarBg, [data-radar-bg] {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.rc-radar > canvas,
+.rc-radar > svg,
+.rc-radar .radarCanvas,
+.radarBg > canvas,
+.radarBg > svg,
+[data-radar-bg] > canvas,
+[data-radar-bg] > svg {
+  width: var(--radar-size);
+  height: var(--radar-size);
+  max-width: none;
+  max-height: none;
+  opacity: 0.9; /* leve transparência para não conflitar com textos */
+}
+/* ====== Tickers em cards ====== */
+
+/* container provável dos tickers (flex/row) */
+.rc-tickers, .tickers, .live-tickers, .ticker-row, [data-tickers] {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  padding: 6px 12px;
+}
+
+/* cada item de ticker vira um "card" */
+.rc-tickers > * ,
+.tickers > * ,
+.live-tickers > * ,
+.ticker-row > * ,
+[data-tickers] > * {
+  background: linear-gradient(180deg, rgba(0,255,120,0.06), rgba(0,255,120,0.02));
+  border: 1px solid rgba(0,255,120,0.25);
+  border-radius: 10px;
+  padding: 6px 10px;
+  min-width: 92px;        /* mantém caixinha estável */
+  display: grid;
+  grid-auto-flow: row;
+  gap: 2px;
+  color: #dfffe9;
+  box-shadow: 0 0 0 1px rgba(0,255,120,0.08) inset;
+}
+
+/* par / símbolo em cima, forte */
+.rc-tickers > * .sym,
+.tickers > * .sym,
+.live-tickers > * .sym,
+.ticker-row > * .sym,
+[data-tickers] > * .sym {
+  font-weight: 800;
+  letter-spacing: .2px;
+  opacity: .95;
+}
+
+/* preço/variação embaixo */
+.rc-tickers > * .px,
+.tickers > * .px,
+.live-tickers > * .px,
+.ticker-row > * .px,
+[data-tickers] > * .px {
+  font-size: 12px;
+  opacity: .85;
+}
+
+/* verde/verm. automáticos se já tiverem classes */
+.rc-tickers > * .up,  .tickers > * .up  { color: #1cff80; font-weight: 800; }
+.rc-tickers > * .down,.tickers > * .down{ color: #ff6b6b; font-weight: 800; }
+
+/* responsivo: menos espaçamento em telas pequenas */
+@media (max-width: 980px) {
+  .rc-tickers, .tickers, .live-tickers, .ticker-row, [data-tickers] {
+    gap: 6px;
+    padding: 6px 8px;
+  }
+  .rc-tickers > * , .tickers > * , .live-tickers > * , .ticker-row > * , [data-tickers] > * {
+    min-width: 84px;
+    padding: 5px 8px;
+  }
+}
