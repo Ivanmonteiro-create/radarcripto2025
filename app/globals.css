@@ -1,3 +1,9 @@
+@charset "UTF-8";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- a partir daqui, deixe TODO o seu CSS autoral como já está --- */
 /* =========================================================
    RadarCrypto.space — CSS Global Consolidado
    (compatível com Next.js App Router e Turbopack)
