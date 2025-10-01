@@ -1,4 +1,31 @@
 @charset "UTF-8";
+
+/* Tailwind layers – se você estiver com o setup do Tailwind v3 */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== Smoke test e tema base (não muda seu design, só garante aplicação) ===== */
+:root {
+  --bg: #0a0f0d;
+  --text: #d5fbe6;
+}
+
+html, body {
+  height: 100%;
+}
+
+.rc-root {
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans",
+    "Helvetica Neue", sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+/* borda temporária pra confirmar que o CSS está carregando;
+   pode remover assim que ver no navegador */
+.rc-root { outline: 2px solid rgba(33,243,141,.35); }
+@charset "UTF-8";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
