@@ -618,3 +618,10 @@ small, .xs { font-size: 12px; }
 @media (max-width: 980px) {
   .rc-hero { margin: 16px auto 0 auto; } /* recentealiza no mobile */
 }
+/* === Ajuste para subir o card (herói) da Home === */
+
+.rc-hero {
+  margin-top: -60px !important;  /* valor negativo p/ puxar para cima */
+}
+
+/* Opcional: se quiser subir ainda mais, pode aumentar o valor para -80px ou -100px */
