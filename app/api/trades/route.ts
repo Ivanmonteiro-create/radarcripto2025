@@ -1,15 +1,13 @@
 // app/api/trades/route.ts
 import { NextResponse } from "next/server";
 
+// GET apenas retorna um array vazio por enquanto
 export async function GET() {
-  const { prisma } = await import("../../../lib/prisma"); // import dinâmico
-  const trades = await prisma.trade.findMany({ orderBy: { ts: "desc" }, take: 50 });
-  return NextResponse.json({ ok: true, trades });
+  return NextResponse.json({ ok: true, trades: [] });
 }
 
+// POST apenas ecoa o que recebeu, sem salvar em banco
 export async function POST(req: Request) {
-  const { prisma } = await import("../../../lib/prisma");
-  const body = await req.json();
-  const created = await prisma.trade.create({ data: body });
-  return NextResponse.json({ ok: true, created });
+  const data = await req.json().catch(() => ({}));
+  return NextResponse.json({ ok: true, created: data });
 }
