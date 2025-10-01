@@ -953,3 +953,54 @@ small, .xs { font-size: 12px; }
 .rc-hero {
   max-width: 480px;   /* antes estava maior; reduzido para liberar espaço */
 }
+/* ====== Forçar 1 coluna de tickers na lateral esquerda ====== */
+.rc-tickers, .tickers, .live-tickers, .ticker-row, [data-tickers] {
+  display: flex !important;
+  flex-direction: column !important;   /* 1 coluna */
+  flex-wrap: nowrap !important;        /* nunca quebrar para 2 colunas */
+  align-items: stretch;
+  width: 132px;                        /* largura fixa da coluna */
+  max-width: 132px;
+  gap: 6px;
+  padding: 6px 8px;
+}
+
+/* cada card do ticker ocupa toda a coluna */
+.rc-tickers > *,
+.tickers > *,
+.live-tickers > *,
+.ticker-row > *,
+[data-tickers] > * {
+  width: 100%;
+  min-width: 0;
+  padding: 4px 6px;
+  border-radius: 8px;
+  border: 1px solid rgba(0,255,120,.25);
+  background: linear-gradient(180deg, rgba(0,255,120,.06), rgba(0,255,120,.02));
+  box-shadow: 0 0 0 1px rgba(0,255,120,.05) inset;
+  font-size: 12px;
+  display: grid;
+  gap: 2px;
+}
+
+/* tipografia interna */
+.rc-tickers > * .sym,
+.tickers > * .sym,
+.live-tickers > * .sym,
+.ticker-row > * .sym,
+[data-tickers] > * .sym {
+  font-weight: 700;
+  font-size: 12px;
+}
+.rc-tickers > * .px,
+.tickers > * .px,
+.live-tickers > * .px,
+.ticker-row > * .px,
+[data-tickers] > * .px {
+  font-size: 11px;
+}
+
+/* hero volta a ter uma largura confortável (opcional) */
+.rc-hero {
+  max-width: 520px;
+}
