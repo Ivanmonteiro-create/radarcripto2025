@@ -1,26 +1,15 @@
+// app/api/trades/route.ts
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
 
 export async function GET() {
-  const trades = await prisma.trade.findMany({
-    orderBy: { ts: "desc" },
-    take: 20,
-  });
-  return NextResponse.json(trades);
+  const { prisma } = await import("../../../lib/prisma"); // import dinâmico
+  const trades = await prisma.trade.findMany({ orderBy: { ts: "desc" }, take: 50 });
+  return NextResponse.json({ ok: true, trades });
 }
 
 export async function POST(req: Request) {
+  const { prisma } = await import("../../../lib/prisma");
   const body = await req.json();
-  const trade = await prisma.trade.create({
-    data: {
-      side: body.side,
-      symbol: body.symbol,
-      price: body.price,
-      sizeUSDT: body.sizeUSDT,
-      pnl: body.pnl ?? null,
-    },
-  });
-  return NextResponse.json(trade);
+  const created = await prisma.trade.create({ data: body });
+  return NextResponse.json({ ok: true, created });
 }
