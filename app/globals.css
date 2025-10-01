@@ -600,3 +600,21 @@ small, .xs { font-size: 12px; }
     grid-template-columns: repeat(2, minmax(0,1fr));
   }
 }
+/* === Ajuste de posição do herói na Home (alinha à direita e sobe) === */
+
+/* Empurra o card para a DIREITA e reduz o topo */
+.rc-hero {
+  /* antes: margin: 28px auto 0 auto; */
+  margin: 8px 2vw 0 auto;        /* sobe (8px) e encosta 2vw da borda direita */
+  width: min(1100px, 96%);        /* mantém largura responsiva */
+}
+
+/* Em telas grandes, dá um “toquezinho” extra pra direita */
+@media (min-width: 1280px) {
+  .rc-hero { margin-right: 24px; } /* ~24px da borda direita */
+}
+
+/* Em telas menores, volta a centralizar para não esmagar layout */
+@media (max-width: 980px) {
+  .rc-hero { margin: 16px auto 0 auto; } /* recentealiza no mobile */
+}
