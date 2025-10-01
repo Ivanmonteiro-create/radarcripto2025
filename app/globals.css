@@ -623,3 +623,21 @@ small, .xs { font-size: 12px; }
   margin-top: 0 !important;      /* encosta no topo */
   align-self: flex-start;        /* garante que fique no início do container */
 }
+/* === Colocar o card hero no topo === */
+.rc-hero {
+  position: absolute;   /* tira do fluxo normal */
+  top: 80px;            /* distância do topo (ajuste se precisar) */
+  right: 2vw;           /* mantém encostado à direita */
+  margin: 0 !important; 
+  z-index: 10;          /* garante que fique por cima do radar */
+}
+
+/* Em telas pequenas, volta para centralizado */
+@media (max-width: 980px) {
+  .rc-hero {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin: 16px auto 0 auto !important;
+  }
+}
