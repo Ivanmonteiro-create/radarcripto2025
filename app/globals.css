@@ -1,3 +1,4 @@
+body { outline: 2px solid lime; }
 @charset "UTF-8";
 
 /* Tailwind layers – se você estiver com o setup do Tailwind v3 */
