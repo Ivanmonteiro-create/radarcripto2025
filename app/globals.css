@@ -618,10 +618,8 @@ small, .xs { font-size: 12px; }
 @media (max-width: 980px) {
   .rc-hero { margin: 16px auto 0 auto; } /* recentealiza no mobile */
 }
-/* === Ajuste para subir o card (herói) da Home === */
-
+/* === Forçar o card da Home a ficar no topo === */
 .rc-hero {
-  margin-top: -60px !important;  /* valor negativo p/ puxar para cima */
+  margin-top: 0 !important;      /* encosta no topo */
+  align-self: flex-start;        /* garante que fique no início do container */
 }
-
-/* Opcional: se quiser subir ainda mais, pode aumentar o valor para -80px ou -100px */
