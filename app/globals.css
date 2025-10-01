@@ -851,3 +851,54 @@ small, .xs { font-size: 12px; }
     padding: 5px 8px;
   }
 }
+/* ===== Ajuste fino: tickers cabendo na lateral esquerda ===== */
+
+/* container dos tickers */
+.rc-tickers, .tickers, .live-tickers, .ticker-row, [data-tickers] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;            /* menos espaço entre cards */
+  padding: 4px 8px;
+  max-width: 240px;    /* força ficar mais compacto na lateral */
+}
+
+/* cada card de ticker */
+.rc-tickers > * ,
+.tickers > * ,
+.live-tickers > * ,
+.ticker-row > * ,
+[data-tickers] > * {
+  background: linear-gradient(180deg, rgba(0,255,120,0.06), rgba(0,255,120,0.02));
+  border: 1px solid rgba(0,255,120,0.25);
+  border-radius: 8px;
+  padding: 4px 6px;       /* menos padding */
+  min-width: 78px;        /* largura menor */
+  font-size: 12px;
+  display: grid;
+  grid-auto-flow: row;
+  gap: 1px;
+  box-shadow: 0 0 0 1px rgba(0,255,120,0.05) inset;
+}
+
+/* textos dentro do card */
+.rc-tickers > * .sym,
+.tickers > * .sym,
+.live-tickers > * .sym,
+.ticker-row > * .sym,
+[data-tickers] > * .sym {
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.rc-tickers > * .px,
+.tickers > * .px,
+.live-tickers > * .px,
+.ticker-row > * .px,
+[data-tickers] > * .px {
+  font-size: 11px;
+}
+
+/* hero um pouco mais estreito para abrir espaço */
+.rc-hero {
+  max-width: 480px;   /* antes estava maior; reduzido para liberar espaço */
+}
