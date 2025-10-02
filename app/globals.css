@@ -746,3 +746,42 @@ small, .xs { font-size: 12px; }
     margin: 14px auto 24px auto;
   }
 }
+/* ====== Tickers: 1 coluna fixa à esquerda ====== */
+.ticker-stack {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 60;
+
+  width: 140px;       /* largura dos cards */
+  max-width: 140px;
+  pointer-events: auto;
+}
+
+.ticker-stack .tickers {
+  display: flex !important;
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+  gap: 6px;
+}
+
+.ticker-stack .tickers > * {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: block;
+  padding: 6px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,255,120,.25);
+  background: linear-gradient(180deg, rgba(0,255,120,.08), rgba(0,255,120,.03));
+  box-shadow: 0 0 0 1px rgba(0,255,120,.05) inset;
+}
+
+/* Em telas muito estreitas, “desgruda” um pouco do topo */
+@media (max-width: 520px) {
+  .ticker-stack {
+    top: 8px;
+    left: 8px;
+    width: 128px;
+    max-width: 128px;
+  }
+}
