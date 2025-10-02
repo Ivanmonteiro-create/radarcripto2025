@@ -1,4 +1,4 @@
-// components/LiveTickers.tsx
+// components/LiveTickersInner.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -32,14 +32,13 @@ async function fetchPrice(symbol: string): Promise<number> {
   return Number(data.price);
 }
 
-export default function LiveTickers() {
+export default function LiveTickersInner() {
   const [prices, setPrices] = useState<PriceMap>({});
   const [loading, setLoading] = useState(true);
 
   const pairs = useMemo(
     () =>
       SYMBOLS.map((s) => ({
-        // exibe como ADA/USDT
         label: `${s.replace("USDT", "")}/USDT`,
         key: s,
       })),
@@ -71,7 +70,6 @@ export default function LiveTickers() {
     };
 
     load();
-    // atualiza a cada 10s
     timer = setInterval(load, 10_000);
 
     return () => {
