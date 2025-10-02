@@ -822,3 +822,44 @@ small, .xs { font-size: 12px; }
 
 /* evita múltiplas colunas internas */
 .ticker-stack *{ column-count: 1 !important; }
+/* === Gancho único para alinhar tudo junto === */
+:root{
+  /* ajuste milimétrico: sobe/desce tickers e hero na mesma régua */
+  --homeTop: 10px;
+}
+
+/* ====== Tickers em cards (1 coluna à esquerda) ====== */
+.ticker-stack{
+  position: fixed !important;
+  inset: var(--homeTop) auto auto 16px !important; /* top usa a mesma régua do hero */
+  z-index: 60 !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  width: 150px !important;
+  max-width: 150px !important;
+  pointer-events: auto !important;
+}
+
+/* transforma cada item em “card” */
+.ticker-stack > *,
+.ticker-stack :where(li,div,article){
+  display: block !important;
+  width: 100% !important;
+  min-height: 26px !important;
+  padding: 6px 10px !important;
+  border-radius: 10px !important;
+  border: 1px solid rgba(0,255,120,.25) !important;
+  background: linear-gradient(180deg, rgba(0,255,120,.08), rgba(0,255,120,.03)) !important;
+  box-shadow: 0 0 0 1px rgba(0,255,120,.05) inset !important;
+  line-height: 1.15 !important;
+}
+
+/* garante 1 coluna interna */
+.ticker-stack *{ column-count: 1 !important; }
+
+/* ====== Hero alinhado ao topo dos tickers ====== */
+.home-hero{
+  margin-top: var(--homeTop) !important;
+}
