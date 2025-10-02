@@ -785,3 +785,40 @@ small, .xs { font-size: 12px; }
     max-width: 128px;
   }
 }
+/* === 1) Stack dos tickers: 1 coluna em cards, à esquerda === */
+
+:root{
+  /* mude este valor se quiser tudo (tickers + hero) mais alto/baixo */
+  --homeTop: 12px;
+}
+
+/* coluna fixa à esquerda */
+.ticker-stack{
+  position: fixed;
+  inset: var(--homeTop) auto auto 16px; /* top usa a mesma régua do hero */
+  z-index: 60;
+
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px;
+  width: 150px;              /* largura da coluna */
+  max-width: 150px;
+  pointer-events: auto;
+}
+
+/* transforma qualquer filho (div, li, etc.) em “card” */
+.ticker-stack > *,
+.ticker-stack :where(li,div,article){
+  display: block;
+  width: 100% !important;
+  min-height: 26px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,255,120,.25);
+  background: linear-gradient(180deg, rgba(0,255,120,.08), rgba(0,255,120,.03));
+  box-shadow: 0 0 0 1px rgba(0,255,120,.05) inset;
+  line-height: 1.15;
+}
+
+/* evita múltiplas colunas internas */
+.ticker-stack *{ column-count: 1 !important; }
