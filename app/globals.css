@@ -863,3 +863,49 @@ small, .xs { font-size: 12px; }
 .home-hero{
   margin-top: var(--homeTop) !important;
 }
+/* ---------- Alinhamento fino do topo (tickers + hero) ---------- */
+:root{
+  /* ajuste milimétrico: mexa aqui se quiser subir/descer tudo junto */
+  --homeTop: 6px;
+}
+
+/* ---------- Coluna fixa de tickers em "cards" ---------- */
+.ticker-stack{
+  position: fixed;
+  top: var(--homeTop);
+  left: 16px;
+  z-index: 60;
+  width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.ticker-card{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,255,120,.25);
+  background: linear-gradient(180deg, rgba(0,255,120,.08), rgba(0,255,120,.03));
+  box-shadow: 0 0 0 1px rgba(0,255,120,.05) inset;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.ticker-card .sym{
+  opacity: .95;
+}
+
+.ticker-card .px{
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Hero na mesma régua dos tickers ---------- */
+.home-hero{
+  margin-top: var(--homeTop);
+}
