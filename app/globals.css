@@ -908,4 +908,85 @@ small, .xs { font-size: 12px; }
 /* ---------- Hero na mesma régua dos tickers ---------- */
 .home-hero{
   margin-top: var(--homeTop);
+}/* =======================
+   TICKERS — MODO COMPACTO
+   (1 coluna, cards menores)
+   ======================= */
+
+/* Wrapper que fica à esquerda dos tickers */
+.tickersLeft {
+  position: absolute;
+  left: 18px;
+  top: 14px;
+  display: flex;
+  flex-direction: column;   /* força 1 coluna */
+  gap: 8px;                 /* espaço entre cards */
+  width: 146px;             /* coluna mais estreita */
+  z-index: 6;               /* acima do background, abaixo do hero */
+  pointer-events: none;     /* não intercepta cliques do hero */
+}
+
+/* Cada card do ticker */
+.tickerCard {
+  pointer-events: auto;     /* reabilita hover/click no card */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+
+  padding: 4px 6px;         /* compacto */
+  min-height: 28px;
+  border-radius: 10px;
+
+  background: rgba(10, 20, 12, 0.28);
+  border: 1px solid rgba(120, 255, 160, 0.28);
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,0.25),
+    0 1px 6px rgba(0,0,0,0.18);
+}
+
+/* Texto do par (ex.: ADA/USDT) */
+.tickerCard .pair,
+.ticker-pair,
+.ticker__pair {
+  font-weight: 700;
+  font-size: 0.82rem;       /* menor */
+  letter-spacing: .2px;
+  color: #dfffe9;
+  white-space: nowrap;
+}
+
+/* Preço em destaque */
+.tickerCard .price,
+.ticker-price,
+.ticker__price {
+  font-weight: 800;
+  font-size: 0.86rem;       /* menor */
+  color: #5efb83;           /* verde legível */
+  white-space: nowrap;
+}
+
+/* Estado neutro/queda/alta (mantém se já existir classes parecidas) */
+.tickerCard.is-up   .price { color: #6bff9a; }
+.tickerCard.is-down .price { color: #ff6b6b; }
+
+/* Se a altura da janela ficar curta, deixa rolar vertical dentro da coluna */
+@media (max-height: 740px) {
+  .tickersLeft {
+    max-height: calc(100dvh - 28px);
+    overflow: auto;         /* aparece scroll só se necessário */
+    padding-right: 2px;
+  }
+}
+
+/* Em telas menores, coluna ainda mais enxuta */
+@media (max-width: 1280px) {
+  .tickersLeft { width: 136px; gap: 6px; }
+  .tickerCard { padding: 3px 6px; min-height: 26px; }
+  .tickerCard .pair,
+  .ticker-pair,
+  .ticker__pair { font-size: 0.78rem; }
+  .tickerCard .price,
+  .ticker-price,
+  .ticker__price { font-size: 0.80rem; }
 }
