@@ -1,52 +1,40 @@
-'use client';
+// components/LiveTickers.tsx
+"use client";
 
-import { useMemo } from 'react';
-import { useLivePrice } from '@/lib/useLivePrice';
+import React from "react";
+import TickerCard from "./TickerCard";
 
-type Pair =
-  | 'ADAUSDT' | 'BTCUSDT' | 'ETHUSDT' | 'SOLUSDT'
-  | 'LINKUSDT' | 'BNBUSDT' | 'XRPUSDT' | 'DOGEUSDT';
-
-const PAIRS: Pair[] = [
-  'ADAUSDT',
-  'BTCUSDT',
-  'ETHUSDT',
-  'SOLUSDT',
-  'LINKUSDT',
-  'BNBUSDT',
-  'XRPUSDT',
-  'DOGEUSDT',
+// Se você já tem um hook/prop com os preços ao vivo, troque este array pelo seu.
+// A ordem define quem fica no topo (ADA/USDT primeiro, como você quer).
+const DEFAULT_SYMBOLS = [
+  "ADA/USDT",
+  "BTC/USDT",
+  "ETH/USDT",
+  "SOL/USDT",
+  "LINK/USDT",
+  "BNB/USDT",
+  "XRP/USDT",
+  "DOGE/USDT",
 ];
 
-function formatPrice(v: number | null) {
-  if (v == null || Number.isNaN(v)) return '—';
-  // Formatação curta mas legível (tabular-nums no CSS)
-  if (v >= 1000) return v.toLocaleString('pt-PT', { maximumFractionDigits: 2 });
-  if (v >= 1) return v.toLocaleString('pt-PT', { maximumFractionDigits: 2 });
-  return v.toLocaleString('pt-PT', { maximumFractionDigits: 6 });
-}
+type LiveTickersProps = {
+  data?: { symbol: string; price: number | string }[]; // opcional: injete seus preços prontos
+};
 
-export default function LiveTickers() {
-  // Busca os preços numa única render
-  const prices = useMemo(() => {
-    return PAIRS.map((p) => ({ pair: p }));
-  }, []);
+export default function LiveTickers({ data }: LiveTickersProps) {
+  // Se vier `data`, usa; senão monta lista com preço vazio (evita quebra visual)
+  const items =
+    data ??
+    DEFAULT_SYMBOLS.map((s) => ({
+      symbol: s,
+      price: "",
+    }));
 
   return (
-    <aside className="ticker-stack" aria-label="Cotações ao vivo">
-      {prices.map(({ pair }) => (
-        <TickerCard key={pair} pair={pair} />
+    <aside aria-label="Cotações ao vivo" className="rc-tickers-rail">
+      {items.map((t) => (
+        <TickerCard key={t.symbol} symbol={t.symbol} price={t.price} />
       ))}
     </aside>
-  );
-}
-
-function TickerCard({ pair }: { pair: Pair }) {
-  const price = useLivePrice(pair); // já existe no seu projeto
-  return (
-    <div className="ticker-card">
-      <span className="sym">{pair.replace('USDT', '/USDT')}</span>
-      <span className="px">{formatPrice(price)}</span>
-    </div>
   );
 }
