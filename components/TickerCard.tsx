@@ -7,9 +7,9 @@ export default function TickerCard({
   price: string;
 }) {
   return (
-    <div className="tickerCard">
-      <div className="tickerSymbol strong">{symbol}</div>
-      <div className="tickerPrice green">{price}</div>
+    <div className="ticker-card">
+      <span className="pair">{symbol}</span>
+      <span className="price">{price}</span>
     </div>
   );
 }
