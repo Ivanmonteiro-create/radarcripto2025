@@ -1289,7 +1289,7 @@ small, .xs { font-size: 12px; }
 
 /* ---- RÉGUA única para alinhamento de topo ---- */
 :root {
-  --rc-home-top: 80px;          /* ajuste fino: 70–110px conforme seu header */
+  --rc-home-top: 56px;          /* ajuste fino: 70–110px conforme seu header */
   --rc-tickers-w: 172px;        /* largura da coluna de tickers */
   --rc-card-h: 58px;            /* altura dos cards dos tickers */
   --rc-gap: 10px;               /* espaçamento vertical entre os cards */
