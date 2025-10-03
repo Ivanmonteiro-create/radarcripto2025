@@ -1277,3 +1277,160 @@ small, .xs { font-size: 12px; }
   margin-right: auto;
   width: min(1100px, 92vw);
 }
+/* =========================================================
+   RADARCRYPTO — CONSOLIDAÇÃO GLOBAL (FASE 1: OVERRIDE FINAL)
+   Objetivo:
+   - Tickers: coluna única à esquerda, em cards uniformes
+   - Hero: alinhado à direita, na mesma “linha” dos tickers
+   - Radar: centralizado como background (sem interferir nos cliques)
+   Observação: esta camada usa alta especificidade/!important para
+   vencer duplicatas antigas. Fase 2: removeremos as duplicatas.
+   ========================================================= */
+
+/* ---- RÉGUA única para alinhamento de topo ---- */
+:root {
+  --rc-home-top: 80px;          /* ajuste fino: 70–110px conforme seu header */
+  --rc-tickers-w: 172px;        /* largura da coluna de tickers */
+  --rc-card-h: 58px;            /* altura dos cards dos tickers */
+  --rc-gap: 10px;               /* espaçamento vertical entre os cards */
+  --rc-hero-right: 2vw;         /* respiro à direita do hero */
+  --rc-radar-size: min(1500px, 94vw); /* tamanho do radar */
+}
+
+/* ---- TICKERS (coluna única, cards uniformes) ---- */
+main .live-tickers {
+  position: absolute !important;
+  top: var(--rc-home-top) !important;
+  left: clamp(8px, 2vw, 24px) !important;
+  width: var(--rc-tickers-w) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: var(--rc-gap) !important;
+  z-index: 6 !important;              /* acima do radar, abaixo do hero */
+  pointer-events: auto !important;
+}
+
+/* Cada card com 2 linhas (símbolo em cima, preço embaixo) */
+main .live-tickers .ticker-card {
+  width: calc(var(--rc-tickers-w) - 4px) !important;
+  height: var(--rc-card-h) !important;
+  padding: 8px 10px !important;
+  border-radius: 12px !important;
+  border: 1px solid rgba(33,255,56,.25) !important;
+  background: rgba(8,30,12,.35) !important;
+  box-shadow:
+    0 0 0 1px rgba(33,255,56,.08) inset,
+    0 6px 18px rgba(0,0,0,.25) !important;
+  backdrop-filter: blur(2px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  overflow: hidden !important; /* impede “vazar” conteúdo */
+}
+
+main .live-tickers .ticker-symbol {
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+  font-weight: 600 !important;
+  letter-spacing: .4px !important;
+  color: var(--text, #d5fbe6) !important;
+  opacity: .95 !important;
+  margin-bottom: 2px !important;
+  white-space: nowrap !important;
+}
+
+main .live-tickers .ticker-price {
+  font-size: 14px !important;
+  line-height: 1.1 !important;
+  font-weight: 800 !important;
+  color: #30ff7a !important;        /* verde consistente */
+  font-variant-numeric: tabular-nums !important;
+  white-space: nowrap !important;
+}
+
+/* Responsivo: quando a viewport ficar pequena, os tickers param de grudar no topo */
+@media (max-width: 980px) {
+  main .live-tickers {
+    position: static !important;
+    width: auto !important;
+    margin: 12px auto 0 !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    justify-content: center !important;
+  }
+  main .live-tickers .ticker-card {
+    width: 148px !important;
+    height: 52px !important;
+  }
+}
+
+/* ---- HERO (card principal) alinhado com a régua dos tickers ---- */
+main .rc-hero {
+  position: absolute !important;       /* cola no topo do main */
+  top: var(--rc-home-top) !important;  /* mesma régua dos tickers */
+  right: var(--rc-hero-right) !important;
+  margin: 0 !important;
+  z-index: 10 !important;              /* acima dos tickers e do radar */
+}
+
+/* Em telas menores, hero volta ao fluxo e centraliza */
+@media (max-width: 980px) {
+  main .rc-hero {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    margin: 16px auto 0 auto !important;
+    width: min(1100px, 96%) !important;
+  }
+}
+
+/* ---- RADAR (fundo centralizado, grande, não bloqueia cliques) ---- */
+.rc-radar, .radarBg, [data-radar-bg] {
+  position: absolute !important;
+  inset: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  pointer-events: none !important;     /* não intercepta cliques */
+  z-index: 0 !important;
+}
+.rc-radar > canvas,
+.rc-radar > svg,
+.rc-radar .radarCanvas,
+.radarBg > canvas,
+.radarBg > svg,
+[data-radar-bg] > canvas,
+[data-radar-bg] > svg {
+  width: var(--rc-radar-size) !important;
+  height: var(--rc-radar-size) !important;
+  max-width: none !important;
+  max-height: none !important;
+  opacity: .95;
+}
+
+/* ---- Rodapé discreto sempre visível ---- */
+main .rc-home__footer {
+  position: absolute !important;
+  bottom: 18px !important;
+  left: 14px !important;
+  opacity: .65 !important;
+  z-index: 5 !important;
+}
+@media (max-width: 980px) {
+  main .rc-home__footer {
+    position: static !important;
+    margin: 14px auto 24px auto !important;
+  }
+}
+
+/* ---- HIGIENIZAÇÃO mínima: neutraliza estilos antigos que ainda “puxam” pro topo ---- */
+main .ticker-stack,
+main .tickersLeft,
+main .rc-tickers-rail {
+  position: static !important;
+  inset: auto !important;
+}
+main .ticker-stack > *,
+main .tickersLeft > * {
+  width: 100% !important;
+}
