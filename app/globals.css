@@ -1195,3 +1195,85 @@ small, .xs { font-size: 12px; }
   }
 }
 /* =================== /Live Tickers – v3 ====================== */
+/* ==== HOME: Tickers embaixo (grid 4x2) ==== */
+
+/* O componente já usa a classe .live-tickers.
+   Vamos transformá-lo num grid centralizado no final do main. */
+.live-tickers {
+  /* layout */
+  display: grid;
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  gap: 12px 16px;
+
+  /* posição visual */
+  width: min(1100px, 92vw);
+  margin: 28px auto 0; /* coloca para baixo do herói e centraliza */
+  padding: 4px 2px;
+
+  /* visual */
+  border-radius: 14px;
+}
+
+/* Cada card deve ficar com altura uniforme e “grudar” no grid */
+.live-tickers .ticker-card {
+  height: 54px;
+  display: grid;
+  grid-template-columns: 1fr auto; /* par | preço */
+  align-items: center;
+}
+
+/* Tipografia mais compacta p/ caber em 1 linha */
+.ticker-card .pair {
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+.ticker-card .price {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Hover consistente com os botões da direita */
+.ticker-card:hover {
+  box-shadow: inset 0 0 0 1px rgba(99, 255, 160, 0.45);
+}
+
+/* Responsivo: 3 colunas em laptops estreitos */
+@media (max-width: 1100px) {
+  .live-tickers {
+    grid-template-columns: repeat(3, minmax(160px, 1fr));
+  }
+}
+/* Responsivo: 2 colunas em tablets */
+@media (max-width: 820px) {
+  .live-tickers {
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
+  }
+}
+/* Responsivo: 1 coluna no mobile */
+@media (max-width: 520px) {
+  .live-tickers {
+    grid-template-columns: 1fr;
+    width: min(560px, 94vw);
+  }
+  .live-tickers .ticker-card {
+    height: 50px;
+  }
+}
+
+/* ==== HOME: bloco do herói centralizado e um “pouquinho” mais alto ==== */
+/* Se seu bloco principal tiver uma classe própria, troque .hero-panel por ela */
+.hero-panel {
+  margin-left: auto;
+  margin-right: auto;
+  width: min(1100px, 92vw);
+  /* sobe ~8px para alinhar com a primeira linha das moedas (ADA/USDT era a referência) */
+  transform: translateY(-8px);
+}
+
+/* Se o radar usa um wrapper com classe .radar-wrap, mantemos centralizado */
+.radar-wrap {
+  margin-left: auto;
+  margin-right: auto;
+  width: min(1100px, 92vw);
+}
