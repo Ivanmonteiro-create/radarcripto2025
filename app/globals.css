@@ -1053,3 +1053,70 @@ small, .xs { font-size: 12px; }
     padding-right: 2px;
   }
 }
+/* ===== RadarCrypto — Rail de Tickers (coluna única à esquerda) ===== */
+
+.rc-tickers-rail{
+  position: absolute;
+  left: 24px;                /* encosta na margem esquerda */
+  top: 108px;                /* alinha com o topo da ADA/USDT e com o herói */
+  width: 220px;              /* largura fixa da coluna */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 6;                /* acima do fundo/radar, abaixo do menu/overlay */
+  pointer-events: auto;
+}
+
+/* Cada cartão (moeda + preço) */
+.rc-ticker-card{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 10px;
+  background: rgba(0, 15, 10, .35);   /* leve vidro */
+  box-shadow: inset 0 0 0 1px rgba(0,255,170,.08);
+  backdrop-filter: blur(2px);
+}
+
+.rc-ticker-symbol{
+  font-weight: 700;
+  letter-spacing: .3px;
+  color: #a9ffcf;            /* símbolo em verde claro */
+}
+
+.rc-ticker-price{
+  font-variant-numeric: tabular-nums;
+  color: #29f178;            /* preço verde consistente */
+}
+
+/* Ajuste do bloco herói para não colidir com a coluna esquerda */
+.rc-hero-shell{
+  /* Garante espaço livre à esquerda para a coluna de tickers */
+  margin-left: 260px;        /* 220 (coluna) + 24 (gap) + 16 folga */
+}
+
+/* Opcional: sobe um tiquinho o herói para casar com ADA/USDT */
+@media (min-width: 1024px){
+  .rc-hero-shell{
+    transform: translateY(-6px);
+  }
+}
+
+/* Comportamento em telas menores: vira linha acima do herói */
+@media (max-width: 1023px){
+  .rc-tickers-rail{
+    position: static;
+    width: auto;
+    margin: 12px 16px 0;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .rc-hero-shell{
+    margin-left: 0;
+    transform: none;
+  }
+}
