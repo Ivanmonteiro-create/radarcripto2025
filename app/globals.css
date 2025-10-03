@@ -1434,3 +1434,6 @@ main .ticker-stack > *,
 main .tickersLeft > * {
   width: 100% !important;
 }
+/* ==== Locks da Home para alinhar hero + tickers à mesma régua ==== */
+.rc-home .live-tickers { position: absolute !important; top: var(--homeTop) !important; left: 16px; z-index: 6; }
+.rc-home .rc-hero      { position: absolute !important; top: var(--homeTop) !important; right: 2vw;  z-index: 10; margin: 0 !important; }
