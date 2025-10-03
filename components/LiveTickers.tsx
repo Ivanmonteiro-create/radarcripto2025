@@ -1,92 +1,52 @@
-// components/LiveTickersInner.tsx
-"use client";
+'use client';
 
-import { useEffect, useMemo, useState } from "react";
-import TickerCard from "@/components/TickerCard";
+import { useMemo } from 'react';
+import { useLivePrice } from '@/lib/useLivePrice';
 
-type PriceMap = Record<string, string>;
+type Pair =
+  | 'ADAUSDT' | 'BTCUSDT' | 'ETHUSDT' | 'SOLUSDT'
+  | 'LINKUSDT' | 'BNBUSDT' | 'XRPUSDT' | 'DOGEUSDT';
 
-const SYMBOLS = [
-  "ADAUSDT",
-  "BTCUSDT",
-  "ETHUSDT",
-  "SOLUSDT",
-  "LINKUSDT",
-  "BNBUSDT",
-  "XRPUSDT",
-  "DOGEUSDT",
+const PAIRS: Pair[] = [
+  'ADAUSDT',
+  'BTCUSDT',
+  'ETHUSDT',
+  'SOLUSDT',
+  'LINKUSDT',
+  'BNBUSDT',
+  'XRPUSDT',
+  'DOGEUSDT',
 ];
 
-const nf = new Intl.NumberFormat("pt-PT", {
-  style: "decimal",
-  maximumFractionDigits: 6,
-});
-
-async function fetchPrice(symbol: string): Promise<number> {
-  const res = await fetch(
-    `https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`,
-    { cache: "no-store" }
-  );
-  if (!res.ok) throw new Error(`Erro ao buscar ${symbol}`);
-  const data = (await res.json()) as { symbol: string; price: string };
-  return Number(data.price);
+function formatPrice(v: number | null) {
+  if (v == null || Number.isNaN(v)) return '—';
+  // Formatação curta mas legível (tabular-nums no CSS)
+  if (v >= 1000) return v.toLocaleString('pt-PT', { maximumFractionDigits: 2 });
+  if (v >= 1) return v.toLocaleString('pt-PT', { maximumFractionDigits: 2 });
+  return v.toLocaleString('pt-PT', { maximumFractionDigits: 6 });
 }
 
-export default function LiveTickersInner() {
-  const [prices, setPrices] = useState<PriceMap>({});
-  const [loading, setLoading] = useState(true);
-
-  const pairs = useMemo(
-    () =>
-      SYMBOLS.map((s) => ({
-        label: `${s.replace("USDT", "")}/USDT`,
-        key: s,
-      })),
-    []
-  );
-
-  useEffect(() => {
-    let mounted = true;
-    let timer: ReturnType<typeof setInterval> | null = null;
-
-    const load = async () => {
-      try {
-        const results = await Promise.all(
-          SYMBOLS.map((s) =>
-            fetchPrice(s)
-              .then((p) => [s, p] as const)
-              .catch(() => [s, NaN] as const)
-          )
-        );
-        if (!mounted) return;
-        const next: PriceMap = {};
-        for (const [sym, val] of results) {
-          next[sym] = isNaN(val) ? "—" : nf.format(val);
-        }
-        setPrices(next);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-
-    load();
-    timer = setInterval(load, 10_000);
-
-    return () => {
-      mounted = false;
-      if (timer) clearInterval(timer);
-    };
+export default function LiveTickers() {
+  // Busca os preços numa única render
+  const prices = useMemo(() => {
+    return PAIRS.map((p) => ({ pair: p }));
   }, []);
 
   return (
-    <div className="tickers">
-      {pairs.map((p) => (
-        <TickerCard
-          key={p.key}
-          symbol={p.label}
-          price={prices[p.key] ?? (loading ? "…" : "—")}
-        />
+    <aside className="ticker-stack" aria-label="Cotações ao vivo">
+      {prices.map(({ pair }) => (
+        <TickerCard key={pair} pair={pair} />
       ))}
+    </aside>
+  );
+}
+
+function TickerCard({ pair }: { pair: Pair }) {
+  const price = useLivePrice(pair); // já existe no seu projeto
+  return (
+    <div className="ticker-card">
+      <span className="sym">{pair.replace('USDT', '/USDT')}</span>
+      <span className="px">{formatPrice(price)}</span>
     </div>
   );
 }
