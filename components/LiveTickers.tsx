@@ -3,38 +3,33 @@
 
 import React from "react";
 import TickerCard from "./TickerCard";
+import useLivePrice from "@/lib/useLivePrice";
 
-// Se você já tem um hook/prop com os preços ao vivo, troque este array pelo seu.
-// A ordem define quem fica no topo (ADA/USDT primeiro, como você quer).
-const DEFAULT_SYMBOLS = [
-  "ADA/USDT",
-  "BTC/USDT",
-  "ETH/USDT",
-  "SOL/USDT",
-  "LINK/USDT",
-  "BNB/USDT",
-  "XRP/USDT",
-  "DOGE/USDT",
-];
+// Ordem e quantidade fixas -> ok usar hook dentro do map
+const PAIRS = [
+  "ADAUSDT",
+  "BTCUSDT",
+  "ETHUSDT",
+  "SOLUSDT",
+  "LINKUSDT",
+  "BNBUSDT",
+  "XRPUSDT",
+  "DOGEUSDT",
+] as const;
 
-type LiveTickersProps = {
-  data?: { symbol: string; price: number | string }[]; // opcional: injete seus preços prontos
-};
-
-export default function LiveTickers({ data }: LiveTickersProps) {
-  // Se vier `data`, usa; senão monta lista com preço vazio (evita quebra visual)
-  const items =
-    data ??
-    DEFAULT_SYMBOLS.map((s) => ({
-      symbol: s,
-      price: "",
-    }));
-
+export default function LiveTickers() {
   return (
-    <aside aria-label="Cotações ao vivo" className="rc-tickers-rail">
-      {items.map((t) => (
-        <TickerCard key={t.symbol} symbol={t.symbol} price={t.price} />
-      ))}
+    <aside className="live-tickers" aria-label="Cotações em tempo real">
+      {PAIRS.map((pair) => {
+        // O seu hook pode retornar number ou objeto; tratamos os dois jeitos.
+        const data: any = useLivePrice(pair);
+        const price =
+          typeof data === "number"
+            ? (data as number)
+            : (data?.price as number | undefined);
+
+        return <TickerCard key={pair} symbol={pair} price={price} />;
+      })}
     </aside>
   );
 }
