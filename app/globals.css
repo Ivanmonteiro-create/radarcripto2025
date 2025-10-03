@@ -1120,3 +1120,78 @@ small, .xs { font-size: 12px; }
     transform: none;
   }
 }
+/* ===================== Live Tickers – v3 ===================== */
+/* Coluna vertical fixa à esquerda, cada moeda em seu "cartão"
+   com duas linhas (símbolo em cima, preço embaixo). */
+
+.live-tickers {
+  position: absolute;
+  left: clamp(8px, 2vw, 24px);          /* encosta na esquerda */
+  top: clamp(70px, 9vh, 112px);         /* alinhe com ADA/USDT; ajuste fino aqui */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 172px;                         /* largura da coluna */
+  z-index: 6;                           /* acima do radar, abaixo do menu se houver */
+}
+
+/* Cartão do ticker */
+.ticker-card {
+  width: 168px;
+  height: 58px;
+  padding: 8px 10px;
+  border: 1px solid rgba(33, 255, 56, 0.25);
+  border-radius: 12px;
+  background: rgba(8, 30, 12, 0.35);
+  box-shadow:
+    0 0 0 1px rgba(33, 255, 56, 0.08) inset,
+    0 6px 18px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(2px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* evita que o conteúdo estoure e invada o cartão seguinte */
+  overflow: hidden;
+}
+
+/* Símbolo (linha de cima) */
+.ticker-symbol {
+  font-size: 12px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  color: var(--text, #d5fbe6);
+  opacity: 0.95;
+  margin-bottom: 2px;
+  white-space: nowrap;
+}
+
+/* Preço (linha de baixo) */
+.ticker-price {
+  font-size: 14px;
+  line-height: 1.1;
+  font-weight: 800;
+  color: #30ff7a; /* verde vivo */
+  white-space: nowrap;
+}
+
+/* Responsivo: abaixo de 1024px vira faixa no topo e não quebra layout */
+@media (max-width: 1024px) {
+  .live-tickers {
+    position: static;
+    width: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 12px 0 8px 0;
+  }
+  .ticker-card {
+    width: 148px;
+    height: 52px;
+  }
+  .ticker-price {
+    font-size: 13px;
+  }
+}
+/* =================== /Live Tickers – v3 ====================== */
