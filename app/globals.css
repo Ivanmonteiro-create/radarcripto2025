@@ -990,3 +990,66 @@ small, .xs { font-size: 12px; }
   .ticker-price,
   .ticker__price { font-size: 0.80rem; }
 }
+/* =======================
+   TICKERS — VERSÃO AJUSTADA
+   ======================= */
+
+/* Coluna inteira de tickers */
+.ticker-stack {
+  position: absolute;
+  top: 14px;
+  left: 18px;
+  display: flex;
+  flex-direction: column;   /* uma coluna */
+  gap: 8px;
+  width: 150px;             /* largura fixa */
+  z-index: 6;
+}
+
+/* Cada moeda */
+.ticker-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+
+  padding: 4px 6px;
+  min-height: 28px;
+  border-radius: 10px;
+
+  background: rgba(10, 20, 12, 0.28);
+  border: 1px solid rgba(120, 255, 160, 0.28);
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,0.25),
+    0 1px 6px rgba(0,0,0,0.18);
+}
+
+/* Nome do par */
+.ticker-card .sym {
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: .2px;
+  color: #dfffe9;
+  white-space: nowrap;
+}
+
+/* Preço */
+.ticker-card .px {
+  font-weight: 800;
+  font-size: 0.86rem;
+  color: #5efb83;
+  white-space: nowrap;
+}
+
+/* Alta e baixa (se você já tiver lógica de cor dinâmica no futuro) */
+.ticker-card.is-up .px { color: #6bff9a; }
+.ticker-card.is-down .px { color: #ff6b6b; }
+
+/* Ajuste se a tela for pequena na vertical */
+@media (max-height: 740px) {
+  .ticker-stack {
+    max-height: calc(100dvh - 28px);
+    overflow: auto;
+    padding-right: 2px;
+  }
+}
