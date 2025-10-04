@@ -3,9 +3,9 @@
 
 import React from "react";
 import TickerCard from "./TickerCard";
-// ⬇️ O hook é exportado com *named export*
-import { useLivePrice } from "@/lib/useLivePrice";
+import { useLivePrice } from "@/lib/useLivePrice"; // named export
 
+// Pares exibidos na Home (ordem = de cima pra baixo)
 const PAIRS = [
   "ADAUSDT",
   "BTCUSDT",
@@ -17,17 +17,25 @@ const PAIRS = [
   "DOGEUSDT",
 ] as const;
 
+export type Pair = (typeof PAIRS)[number];
+
 export default function LiveTickers() {
   return (
-    <aside className="live-tickers" aria-label="Cotações em tempo real">
+    /**
+     * Mantemos a classe original (live-tickers) e adicionamos rc-tickers-rail
+     * para permitir o “lock” por CSS que fixa a coluna à esquerda.
+     * (Se o CSS final preferir mirar só .live-tickers, também funciona.)
+     */
+    <aside className="live-tickers rc-tickers-rail" aria-label="Cotações em tempo real">
       {PAIRS.map((pair) => {
-        const data: any = useLivePrice(pair);
+        // O hook pode retornar number OU objeto { price }
+        const data: unknown = useLivePrice(pair);
         const price =
           typeof data === "number"
-            ? (data as number)
-            : (data?.price as number | undefined);
+            ? data
+            : (data as { price?: number } | null | undefined)?.price ?? null;
 
-        return <TickerCard key={pair} symbol={pair} price={price ?? null} />;
+        return <TickerCard key={pair} symbol={pair} price={price} />;
       })}
     </aside>
   );
