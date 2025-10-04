@@ -1606,3 +1606,75 @@ main .tickersLeft > * {
     width: min(1100px, 94vw) !important;
   }
 }
+/* ====== RadarCrypto — Ajustes finos da HOME (tickers + hero) ====== */
+
+/* 0) Régua única do topo para tickers e hero */
+:root { --homeTop: 0px; } /* suba/abaixe tudo junto ajustando aqui (0–12px) */
+
+/* 1) Tickers: coluna à esquerda, cartões menores, sem rolagem visível */
+.live-tickers{
+  position: absolute;
+  left: clamp(8px, 2vw, 20px);
+  top: var(--homeTop);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 136px;                 /* ↓ mais estreito */
+  z-index: 6;
+  overflow: visible;            /* não cria barra */
+  scrollbar-width: none;        /* Firefox: esconde barra, por via das dúvidas */
+}
+.live-tickers::-webkit-scrollbar{ display: none; } /* WebKit */
+
+/* Cada cartão do ticker (duas linhas: par em cima, preço embaixo) */
+.ticker-card{
+  width: 132px;                 /* ↓ mais estreito */
+  height: 46px;                 /* ↓ mais baixo */
+  padding: 6px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(120,255,160,0.25);
+  background: rgba(8,20,12,0.30);
+  box-shadow: inset 0 0 0 1px rgba(0,255,120,0.06), 0 4px 12px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.ticker-symbol{
+  font-size: 12px;
+  line-height: 1.15;
+  font-weight: 600;
+  letter-spacing: .3px;
+  color: var(--text, #d5fbe6);
+  margin-bottom: 2px;
+  white-space: nowrap;
+}
+.ticker-price{
+  font-size: 13px;
+  line-height: 1.1;
+  font-weight: 800;
+  color: #30ff7a;
+  white-space: nowrap;
+}
+
+/* 2) Hero colado ao topo e alinhado com os tickers (mesma régua) */
+.home-hero{ margin-top: var(--homeTop) !important; }
+
+/* 3) Ocultar o “© 2025 RadarCrypto — Fase 1” duplicado da Home (o de trás do DOGE) */
+.rc-home__footer{ display: none; }
+
+/* 4) Responsivo: mantém tudo legível em telas menores */
+@media (max-width: 980px){
+  .live-tickers{
+    position: static;
+    width: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px auto 0;
+    justify-content: center;
+  }
+  .ticker-card{ width: 148px; height: 50px; }
+  .home-hero{ margin-top: 8px !important; }
+}
