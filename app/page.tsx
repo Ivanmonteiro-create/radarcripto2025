@@ -21,9 +21,9 @@ export default function Home() {
         <div className="rc-hero__inner">
           <p className="rc-hero__eyebrow">SIMULADOR DE TRADING</p>
           <h1 className="rc-hero__title">
-            Aprenda de verdade <br /> sem perder nada.
-          </h1>
-          <p className="rc-hero__desc">
+             Aprenda trading na prática, sem arriscar um centavo.
+            </h1> 
+        <p className="rc-hero__desc">
             Um simulador prático para testar estratégias e evoluir sem risco —
             histórico local no navegador. <span className="rc-hero__phase">
               Em construção: Fase 1 (site base online).
