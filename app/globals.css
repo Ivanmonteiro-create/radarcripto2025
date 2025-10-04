@@ -1678,3 +1678,26 @@ main .tickersLeft > * {
   .ticker-card{ width: 148px; height: 50px; }
   .home-hero{ margin-top: 8px !important; }
 }
+/* ===== RadarCrypto — micro-ajustes de alinhamento (HOME) ===== */
+
+/* Reguladores independentes */
+:root{
+  --tickersTop: 2px;   /* ↑ sobe/↓ desce apenas a coluna ADA/…  */
+  --heroTop:    14px;  /* ↑ sobe/↓ desce só o card “Aprenda …”  */
+  --heroRight:  3.2vw; /* aumenta para mover o herói um pouco à ESQUERDA */
+}
+
+/* Tickers (ADA/USDT…) um pouquinho mais para cima */
+.live-tickers{
+  top: var(--tickersTop) !important;
+}
+
+/* Card do herói um pouquinho mais para BAIXO e levemente à ESQUERDA */
+.home-hero{ margin-top: var(--heroTop) !important; }
+
+.rc-hero{
+  right: var(--heroRight) !important;  /* antes era ~2vw; 3.2vw puxa à esquerda */
+}
+
+/* Opcional: se o seu herói não usa .rc-hero, tente este fallback também */
+.hero-panel{ right: var(--heroRight) !important; }
