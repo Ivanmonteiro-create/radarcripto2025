@@ -1853,3 +1853,38 @@ main .tickersLeft > * {
     mask-image: linear-gradient(to right, transparent 0, black 24px, black calc(100% - 24px), transparent 100%);
   }
 }
+/* ======= HOME – herói sem coluna de CTAs e radar central ======= */
+
+/* 3.1) Herói vira 1 coluna (sem CTAs à direita) e volta a ficar centralizado */
+.rc-hero{
+  position: relative;
+  margin: 16px auto 0 auto !important;   /* mostra a borda direita do card */
+  width: min(1100px, 96%);
+  display: grid;
+  grid-template-columns: 1fr;            /* era 1fr 260px */
+  gap: 16px;
+  padding: 22px;
+}
+
+/* Garante que qualquer bloco residual de ações não apareça */
+.rc-hero__actions, .heroActions { display: none !important; }
+
+/* 3.2) Radar central e no “tamanho de antes” (ajuste fino em --radar-size) */
+:root{
+  --radar-size: min(1200px, 84vw); /* aumente/diminua aqui se quiser */
+}
+.rc-radar, .radarBg, [data-radar-bg]{
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  pointer-events: none; z-index: 0;
+}
+.rc-radar > canvas, .rc-radar > svg, .rc-radar .radarCanvas,
+.radarBg > canvas, .radarBg > svg,
+[data-radar-bg] > canvas, [data-radar-bg] > svg{
+  width: var(--radar-size); height: var(--radar-size);
+  max-width: none; max-height: none;
+}
+
+/* 3.3) Um leve “respiro” no topo para não encostar nos tickers */
+:root{ --homeTopPad: 8px; }
+.rc-home__tickers{ padding-top: var(--homeTopPad); }
