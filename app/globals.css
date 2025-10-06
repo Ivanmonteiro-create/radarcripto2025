@@ -2112,3 +2112,151 @@ main .tickersLeft > * {
   }
   .ticker-card{ width: 150px; height: 46px; }
 }
+/* =========================================================
+   RADARCRYPTO — AJUSTES FINAIS (NAV + HERO + RADAR + TICKERS)
+   ========================================================= */
+
+/* --- topbar fixa, centralizada --- */
+.rc-topnav{
+  position: fixed;
+  top: 10px;
+  left: 0; right: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  pointer-events: none; /* evita conflitos, os pills reativam clique */
+}
+.rc-topnav__inner{
+  display: flex;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  background: rgba(10,16,14,.36);
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 8px 30px rgba(0,0,0,.25);
+  pointer-events: auto;
+}
+.rc-pill{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  font-weight: 800;
+  text-decoration: none;
+  transition: background .15s ease, transform .08s ease, border-color .15s ease;
+}
+.rc-pill:hover{ background: rgba(255,255,255,.12); transform: translateY(-1px); }
+.rc-pill.is-active{
+  border-color: rgba(33,243,141,.45);
+  background: linear-gradient(180deg, rgba(33,243,141,.18), rgba(33,243,141,.08));
+  color: #1cff80;
+}
+
+/* botão único nas páginas internas (topo direito) */
+.rc-backtop{
+  position: fixed;
+  top: 10px;
+  right: 16px;
+  z-index: 72;
+}
+.rc-btn{
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px; height: 40px; padding: 0 14px; border-radius: 12px;
+  font-weight: 800; border: 1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.06); color: var(--text);
+  text-decoration: none; transition: transform .08s ease, background .15s ease;
+}
+.rc-btn:hover{ background: rgba(255,255,255,.12); transform: translateY(-1px); }
+.rc-btn--green{
+  background: linear-gradient(180deg, rgba(33,243,141,.22), rgba(33,243,141,.10));
+  border-color: rgba(33,243,141,.35);
+  color: #1cff80;
+}
+
+/* empurra o conteúdo abaixo da topbar */
+.rc-main{ padding-top: 64px; }
+
+/* --- HOME layout --- */
+.rc-home{ position: relative; min-height: 100dvh; }
+
+/* HERO: levemente mais à esquerda e um pouco mais abaixo
+   (para não “colar” nos pills e mostrar a borda direita inteira) */
+.rc-hero{
+  position: relative;
+  z-index: 10;
+  margin: 18px auto 0 auto;       /* desce ~18px */
+  width: min(1040px, 94%);
+  padding: 22px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(33,243,141,.08), rgba(33,243,141,.04));
+}
+.rc-hero__glow{
+  position: absolute; inset: 0; border-radius: 16px; pointer-events: none;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.06) inset,
+    0 20px 80px rgba(33,243,141,.10),
+    0 6px 26px rgba(33,243,141,.10) inset;
+}
+.rc-hero__inner{ min-height: 260px; display: grid; align-content: center; gap: 10px; }
+.rc-hero__eyebrow{ letter-spacing: .12em; font-size: 12px; font-weight: 800; opacity: .85; }
+.rc-hero__title{ font-size: clamp(28px, 5.2vw, 62px); line-height: 1.05; font-weight: 900; margin: 0; }
+.rc-hero__desc{ max-width: 60ch; opacity: .92; }
+.rc-hero__phase{ opacity: .75; }
+
+/* radar central (mesmo tamanho “clássico”) */
+.rc-radar{
+  position: absolute; inset: 0; display: grid; place-items: center; z-index: 0; pointer-events:none;
+}
+.rc-radar::before{
+  content: ""; width: min(1200px, 90vw); aspect-ratio: 1/1;
+  border-radius: 999px;
+  /* círculos do radar — desenhados via gradients */
+  background:
+    radial-gradient(circle at 50% 50%, transparent 38%, rgba(72,255,160,.14) 39% 40%, transparent 41%),
+    radial-gradient(circle at 50% 50%, transparent 58%, rgba(72,255,160,.14) 59% 60%, transparent 61%),
+    radial-gradient(circle at 50% 50%, transparent 78%, rgba(72,255,160,.14) 79% 80%, transparent 81%),
+    radial-gradient(circle at 50% 50%, rgba(72,255,160,.10) 0 1px, transparent 1px);
+  box-shadow: 0 0 0 1px rgba(72,255,160,.18) inset, 0 40px 120px rgba(0,0,0,.45);
+  filter: saturate(110%);
+}
+
+/* --- Tickers: uma coluna; preço embaixo do símbolo --- */
+.live-tickers{
+  position: absolute; left: clamp(10px, 2vw, 24px); top: 82px; z-index: 6;
+  display: flex; flex-direction: column; gap: 8px; width: 160px;
+}
+.ticker-card{
+  width: 160px; height: 62px; padding: 8px 10px;
+  border-radius: 12px; border: 1px solid rgba(33,255,120,.25);
+  background: rgba(8,30,12,.35);
+  box-shadow: 0 0 0 1px rgba(33,255,120,.08) inset, 0 6px 18px rgba(0,0,0,.25);
+  display: flex; flex-direction: column; justify-content: center; overflow: hidden;
+}
+.ticker-symbol{
+  font-size: 12px; font-weight: 700; letter-spacing: .3px; opacity: .95; white-space: nowrap;
+}
+.ticker-price{
+  font-size: 15px; font-weight: 800; color: #30ff7a; white-space: nowrap; line-height: 1.15;
+}
+
+/* responsivo da home */
+@media (max-width: 1000px){
+  .live-tickers{ position: static; width: auto; flex-direction: row; flex-wrap: wrap; margin: 8px 10px 0; }
+  .rc-hero{ margin-top: 10px; }
+}
+
+/* ——— Remoções/limpezas pedidas ——— */
+
+/* esconde botões antigos “Voltar ao início” espalhados nas páginas */
+.tcBackBtn{ display: none !important; }
+
+/* página “Fale com a gente”: deixa o título em verde (se for <h1>) */
+.rc-main :where([data-route="/fale-com-agente"] h1, .page-fale h1){
+  color: var(--accent-strong);
+}
