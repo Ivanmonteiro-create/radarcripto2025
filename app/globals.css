@@ -2057,3 +2057,58 @@ main .tickersLeft > * {
 @media (max-width: 980px){
   .rc-hero{ margin: calc(var(--topbar-h) + 8px) auto 0 auto; }
 }
+:root { --radar-size: min(1200px, 90vw); }
+.rc-radar, .radarBg, [data-radar-bg]{
+  position: absolute; inset: 0; display: grid; place-items: center;
+  z-index: 0; pointer-events: none;
+}
+.rc-radar > canvas, .rc-radar > svg,
+.radarBg > canvas, .radarBg > svg,
+[data-radar-bg] > canvas, [data-radar-bg] > svg{
+  width: var(--radar-size); height: var(--radar-size);
+}
+/* Coluna fixa no topo-esquerdo (sem barra horizontal, e sem passar por cima do herói) */
+.live-tickers{
+  position: absolute;
+  top: calc(var(--topbar-h) + 8px);
+  left: clamp(8px, 2vw, 24px);
+  z-index: 12;
+  display: flex; flex-direction: column; gap: 8px;
+  width: 164px;
+}
+
+/* Card compacto: duas linhas (símbolo em cima, preço embaixo) */
+.ticker-card{
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  align-items: center;
+  height: 48px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(120,255,160,.25);
+  background: rgba(10,20,12,.28);
+  box-shadow: inset 0 0 0 1px rgba(0,255,120,.05), 0 1px 6px rgba(0,0,0,.18);
+}
+
+.ticker-symbol{
+  font-size: 12px; font-weight: 700; letter-spacing: .2px;
+  white-space: nowrap; opacity: .95;
+}
+.ticker-price{
+  font-size: 13px; font-weight: 800; color: #30ff7a;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+
+/* Se faltar altura de janela, rola só a coluna (vertical) */
+@media (max-height: 780px){
+  .live-tickers{ max-height: calc(100dvh - var(--topbar-h) - 12px); overflow-y: auto; }
+}
+
+/* Em telas estreitas vira faixa acima do herói */
+@media (max-width: 980px){
+  .live-tickers{
+    position: static; margin: 10px auto 0; width: min(560px, 94vw);
+    flex-direction: row; flex-wrap: wrap; justify-content: center;
+  }
+  .ticker-card{ width: 150px; height: 46px; }
+}
