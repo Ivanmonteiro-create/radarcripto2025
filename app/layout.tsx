@@ -1,50 +1,68 @@
 // app/layout.tsx
-"use client";
-
+import type { Metadata } from "next";
 import "./globals.css";
-import React from "react";
-import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import React from "react";
 
-function TopBarHome() {
-  // barra superior só na Home (simulador, robôs, planos, sobre, fale)
+export const metadata: Metadata = {
+  title: "RadarCrypto — Simulador & Robôs (SIM)",
+  description:
+    "Aprenda trading na prática, sem arriscar um centavo. Simulador e robôs no modo SIM (dados em tempo real, sem risco).",
+};
+
+const LINKS = [
+  { href: "/simulador", label: "Simulador" },
+  { href: "/robos", label: "Robôs (SIM)" },
+  { href: "/planos", label: "Planos" },
+  { href: "/sobre", label: "Sobre" },
+  { href: "/fale-com-agente", label: "Fale com a gente" },
+];
+
+function TopNav() {
+  const pathname = usePathname();
+  const onHome = pathname === "/";
+
   return (
-    <header
-      className="rc-topbar"
-      role="navigation"
-      aria-label="Atalhos principais"
-    >
-      <nav className="rc-topbar__nav">
-        <Link href="/simulador" className="rc-btn">Simulador</Link>
-        <Link href="/robos" className="rc-btn">Robôs (SIM)</Link>
-        <Link href="/planos" className="rc-btn">Planos</Link>
-        <Link href="/sobre" className="rc-btn">Sobre</Link>
-        <Link href="/fale-com-agente" className="rc-btn">Fale com a gente</Link>
+    <>
+      {/* barra fixa e centralizada */}
+      <nav className="rc-topnav" aria-label="Navegação principal">
+        <div className="rc-topnav__inner">
+          {LINKS.map((l) => {
+            const active = pathname.startsWith(l.href);
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                className={`rc-pill ${active ? "is-active" : ""}`}
+              >
+                {l.label}
+              </Link>
+            );
+          })}
+        </div>
       </nav>
-    </header>
-  );
-}
 
-function BackHomeRight() {
-  // botão único nas páginas internas
-  return (
-    <div className="rc-back-right">
-      <Link href="/" className="rc-btn rc-btn--green">Voltar ao início</Link>
-    </div>
+      {/* botão único “Voltar ao início” nas páginas internas */}
+      {!onHome && (
+        <div className="rc-backtop">
+          <Link href="/" className="rc-btn rc-btn--green">
+            Voltar ao início
+          </Link>
+        </div>
+      )}
+    </>
   );
 }
 
 export default function RootLayout({
   children,
-}: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const isHome = pathname === "/";
-
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="pt-BR">
       <body className="rc-root">
-        {isHome ? <TopBarHome /> : <BackHomeRight />}
-        {children}
+        <TopNav />
+        <main className="rc-main">{children}</main>
       </body>
     </html>
   );
