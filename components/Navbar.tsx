@@ -6,9 +6,8 @@ import { usePathname } from "next/navigation";
 import React from "react";
 
 const links = [
-  { href: "/", label: "Início" },
   { href: "/simulador", label: "Simulador" },
-  { href: "/robos", label: "Robôs (SIM)" }, // destaque que queríamos
+  { href: "/robos", label: "Robôs (SIM)" },
   { href: "/planos", label: "Planos" },
   { href: "/sobre", label: "Sobre" },
   { href: "/fale-com-agente", label: "Fale com a gente" },
@@ -16,7 +15,6 @@ const links = [
 
 export default function Navbar() {
   const pathname = usePathname();
-
   return (
     <header className="rc-navbar" role="navigation" aria-label="Principal">
       <div className="rc-navbar__inner">
@@ -28,17 +26,9 @@ export default function Navbar() {
 
         <nav className="rc-navbar__nav">
           {links.map((l) => {
-            const active =
-              l.href === "/"
-                ? pathname === "/"
-                : pathname.startsWith(l.href);
-
+            const active = pathname === l.href || pathname.startsWith(l.href);
             return (
-              <Link
-                key={l.href}
-                href={l.href}
-                className={`rc-navlink ${active ? "is-active" : ""}`}
-              >
+              <Link key={l.href} href={l.href} className={`rc-navlink ${active ? "is-active" : ""}`}>
                 {l.label}
               </Link>
             );
