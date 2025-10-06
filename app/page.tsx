@@ -37,7 +37,6 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Coluna de botões à direita (mantida como no seu layout) */}
         <div className="rc-hero__actions">
           <Link href="/simulador" className="rc-btn rc-btn--green">
             Acessar simulador
