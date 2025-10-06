@@ -1,50 +1,65 @@
-'use client';
+// app/page.tsx
+import Link from "next/link";
+import LiveTickers from "@/components/LiveTickers";
 
-import Link from 'next/link';
-import LiveTickers from '@/components/LiveTickers';
-import RadarBackground from '@/components/RadarBackground';
-
-export default function Home() {
+export default function HomePage() {
   return (
-    <main className="rc-home">
-      {/* GRID / RADAR de fundo */}
-      <RadarBackground />
+    <div className="rc-home relative">
+      {/* Tickers em cards (sua coluna/grade atual) */}
+      <LiveTickers />
 
-      {/* Faixa de tickers no topo */}
-      <div className="rc-home__tickers">
-        <LiveTickers />
-      </div>
-
-      {/* Card principal (herói) */}
-      <section className="rc-hero">
-        <div className="rc-hero__glow" />
+      {/* Bloco HERO principal */}
+      <section
+        className="rc-hero home-hero relative"
+        aria-label="Apresentação e acesso rápido"
+      >
+        {/* Painel de conteúdo à esquerda */}
         <div className="rc-hero__inner">
           <p className="rc-hero__eyebrow">SIMULADOR DE TRADING</p>
+
           <h1 className="rc-hero__title">
-             Aprenda trading na prática, sem arriscar um centavo.
-            </h1> 
-        <p className="rc-hero__desc">
-            Um simulador prático para testar estratégias e evoluir sem risco —
-            histórico local no navegador. <span className="rc-hero__phase">
-              Em construção: Fase 1 (site base online).
-            </span>
+            Aprenda trading na prática, sem arriscar um centavo.
+          </h1>
+
+          <p className="rc-hero__desc">
+            Pratique com saldo virtual e evolua sem risco — histórico local no
+            navegador. <span className="rc-hero__phase">Fase 1 (site base online)</span>
           </p>
+
+          {/* Ações do HERO */}
+          <div className="rc-hero__actions grid grid-cols-[auto_auto] gap-2 mt-2">
+            <Link href="/simulador" className="rc-btn rc-btn--green">
+              Acessar simulador
+            </Link>
+            <Link href="/robos" className="rc-btn">
+              Robôs (SIM)
+            </Link>
+          </div>
         </div>
 
-        {/* A pilha de botões à direita do card */}
-        <nav className="rc-hero__actions" aria-label="Ações principais">
-          <Link href="/simulador" className="rc-btn rc-btn--green">Acessar simulador</Link>
+        {/* Coluna de botões à direita (mantida como no seu layout) */}
+        <div className="rc-hero__actions">
+          <Link href="/simulador" className="rc-btn rc-btn--green">
+            Acessar simulador
+          </Link>
+          <Link href="/robos" className="rc-btn">
+            Robôs (SIM)
+          </Link>
           <Link href="/planos" className="rc-btn">Planos</Link>
           <Link href="/sobre" className="rc-btn">Sobre</Link>
-          <Link href="/" className="rc-btn">Início</Link>
-          <Link href="/fale-com-agente" className="rc-btn">Fale com a gente</Link>
-        </nav>
+          <Link href="/fale-com-agente" className="rc-btn">
+            Fale com a gente
+          </Link>
+        </div>
+
+        {/* brilho/borda interna do hero */}
+        <div className="rc-hero__glow" />
       </section>
 
-      {/* Rodapé simples */}
+      {/* Rodapé da Home (© 2025…) se você já tem, pode remover esta duplicação */}
       <footer className="rc-home__footer">
-        <small>© 2025 RadarCrypto — Fase 1</small>
+        © 2025 RadarCrypto — Fase 1
       </footer>
-    </main>
+    </div>
   );
 }
