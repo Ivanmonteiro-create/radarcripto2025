@@ -1,22 +1,48 @@
 // app/layout.tsx
-import type { Metadata } from "next";
+"use client";
+
 import "./globals.css";
-import NavBar from "@/components/Navbar";
+import React from "react";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "RadarCrypto — Simulador de Trading",
-  description:
-    "Aprenda trading na prática, sem arriscar um centavo. Simulador com saldo virtual e robôs em modo SIM.",
-  icons: { icon: "/favicon.ico" },
-};
+function FloatingNav() {
+  return (
+    <nav
+      aria-label="Atalhos"
+      className="fixed right-4 top-20 z-[80] flex flex-col gap-2"
+    >
+      <Link href="/simulador" className="rc-btn">Simulador</Link>
+      <Link href="/robos" className="rc-btn">Robôs (SIM)</Link>
+      <Link href="/planos" className="rc-btn">Planos</Link>
+      <Link href="/sobre" className="rc-btn">Sobre</Link>
+      <Link href="/fale-com-agente" className="rc-btn">Fale com a gente</Link>
+    </nav>
+  );
+}
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+function BackHomeRight() {
+  return (
+    <div className="fixed right-4 top-20 z-[80]">
+      <Link href="/" className="rc-btn rc-btn--green">Voltar ao início</Link>
+    </div>
+  );
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+
   return (
     <html lang="pt-BR">
       <body className="rc-root">
-        <NavBar />
-        {/* espaço para a barra fixa (altura ~56px) */}
-        <main className="pt-[64px]">{children}</main>
+        {/* Home: mostra a barra flutuante com 5 botões */}
+        {isHome ? <FloatingNav /> : <BackHomeRight />}
+        {children}
       </body>
     </html>
   );
