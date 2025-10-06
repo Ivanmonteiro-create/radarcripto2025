@@ -1,38 +1,58 @@
+// components/NavBar.tsx
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import React from "react";
 
-export default function Navbar() {
+const links = [
+  { href: "/", label: "Início" },
+  { href: "/simulador", label: "Simulador" },
+  { href: "/robos", label: "Robôs (SIM)" }, // ← destaque pedido
+  { href: "/planos", label: "Planos" },
+  { href: "/sobre", label: "Sobre" },
+  { href: "/fale-com-agente", label: "Fale com a gente" },
+];
+
+export default function NavBar() {
   const pathname = usePathname();
 
-  const links = [
-    { href: "/", label: "Início" },
-    { href: "/acessar-simulador", label: "Acessar simulador" },
-    { href: "/planos", label: "Planos" },
-    { href: "/sobre", label: "Sobre" },
-    { href: "/robos", label: "Robôs" },
-    { href: "/fale-com-agente", label: "Fale com a gente" },
-  ];
-
   return (
-    <nav className="flex flex-col sm:flex-row items-center justify-center sm:justify-end gap-2 sm:gap-4 py-4">
-      {links.map(({ href, label }) => {
-        const active = pathname === href;
-        return (
-          <Link
-            key={href}
-            href={href}
-            className={`px-4 py-2 rounded-md border transition-all ${
-              active
-                ? "bg-green-500 text-black border-green-500"
-                : "border-green-500 text-green-400 hover:bg-green-500/20"
-            }`}
-          >
-            {label}
-          </Link>
-        );
-      })}
-    </nav>
+    <header
+      className="fixed top-0 left-0 right-0 z-[70] backdrop-blur-sm"
+      aria-label="Barra de navegação"
+    >
+      <div className="mx-auto w-[min(1100px,96%)] flex items-center justify-between py-2">
+        {/* Logo / nome curto */}
+        <Link href="/" className="font-extrabold tracking-tight">
+          RadarCrypto
+          <span className="opacity-60 font-semibold"> · Fase 1</span>
+        </Link>
+
+        {/* Links desktop */}
+        <nav className="hidden md:flex items-center gap-8">
+          {links.map((l) => {
+            const active = pathname === l.href;
+            const base =
+              "rc-btn !py-2 !px-3 !rounded-xl !text-sm border";
+            const green =
+              "rc-btn--green border-[rgba(33,243,141,.35)]";
+            const ghost =
+              "hover:opacity-100 opacity-90";
+
+            const cls =
+              l.label.includes("Robôs")
+                ? `${base} ${green}`
+                : `${base} ${ghost} bg-[rgba(255,255,255,.06)]`;
+
+            return (
+              <Link key={l.href} href={l.href} className={cls} aria-current={active ? "page" : undefined}>
+                {l.label}
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+    </header>
   );
 }
