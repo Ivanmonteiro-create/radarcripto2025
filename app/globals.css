@@ -1888,3 +1888,28 @@ main .tickersLeft > * {
 /* 3.3) Um leve “respiro” no topo para não encostar nos tickers */
 :root{ --homeTopPad: 8px; }
 .rc-home__tickers{ padding-top: var(--homeTopPad); }
+/* === Radar central no fundo (Home) === */
+:root { --radar-size: min(1200px, 90vw); }
+
+.rc-radar,
+.radarBg,
+[data-radar-bg]{
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.rc-radar > canvas,
+.rc-radar > svg,
+.radarBg > canvas,
+.radarBg > svg,
+[data-radar-bg] > canvas,
+[data-radar-bg] > svg{
+  width: var(--radar-size);
+  height: var(--radar-size);
+  max-width: none;
+  max-height: none;
+}
