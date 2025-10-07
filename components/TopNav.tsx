@@ -14,17 +14,28 @@ const LINKS = [
 
 export default function TopNav() {
   const pathname = usePathname();
-  const active = (href: string) => pathname.startsWith(href);
+  const onHome = pathname === "/";
 
   return (
-    <nav className="rc-topnav" aria-label="Navegação principal">
-      <div className="rc-topnav__inner">
-        {LINKS.map((l) => (
-          <Link key={l.href} href={l.href} className={`rc-pill ${active(l.href) ? "is-active" : ""}`}>
-            {l.label}
-          </Link>
-        ))}
-      </div>
-    </nav>
+    <>
+      <nav className="rc-topnav" aria-label="Navegação principal">
+        <div className="rc-topnav__inner">
+          {LINKS.map((l) => {
+            const active = pathname.startsWith(l.href);
+            return (
+              <Link key={l.href} href={l.href} className={`rc-pill ${active ? "is-active" : ""}`}>
+                {l.label}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+
+      {!onHome && (
+        <div className="rc-backtop">
+          <Link href="/" className="rc-btn rc-btn--green">Voltar ao início</Link>
+        </div>
+      )}
+    </>
   );
 }
