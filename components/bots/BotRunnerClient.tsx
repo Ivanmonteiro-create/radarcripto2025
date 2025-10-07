@@ -7,10 +7,10 @@ import { upsertConfig } from "@/lib/bots/store";
 import { SimEngine } from "@/lib/bots/simEngine";
 import { useLivePrice } from "@/lib/useLivePrice";
 
-// (opcional) lista de referência, mas não bloqueia nada
-const KNOWN_PAIRS = [
-  "ADAUSDT","BTCUSDT","ETHUSDT","SOLUSDT","LINKUSDT","BNBUSDT","XRPUSDT","DOGEUSDT",
-] as const;
+type Props = {
+  pair: string;
+  onPairChange?: (next: string) => void;
+};
 
 const DEFAULT: BotConfig = {
   id: "bot-1",
@@ -23,34 +23,26 @@ const DEFAULT: BotConfig = {
   createdAt: Date.now(),
 };
 
-// normaliza: "ada/usdt" -> "ADAUSDT", "  btcusdt " -> "BTCUSDT"
-function normalizePair(v: string) {
-  return String(v).replace(/[^a-z0-9]/gi, "").toUpperCase();
-}
+const norm = (v: string) => String(v).replace(/[^a-z0-9]/gi, "").toUpperCase();
 
-export default function BotRunnerClient() {
-  const [cfg, setCfg] = useState<BotConfig>(DEFAULT);
+export default function BotRunnerClient({ pair, onPairChange }: Props) {
+  const [cfg, setCfg] = useState<BotConfig>({ ...DEFAULT, pair: norm(pair) });
   const [running, setRunning] = useState(false);
   const [rt, setRt] = useState<any>(null);
 
+  // sincroniza cfg.pair quando a prop "pair" mudar nos chips
+  useEffect(() => {
+    setCfg((c) => (c.pair === norm(pair) ? c : { ...c, pair: norm(pair) }));
+  }, [pair]);
+
+  // persistência
+  useEffect(() => { upsertConfig(cfg); }, [cfg]);
+
+  // engine + preço ao vivo
   const engine = useMemo(() => new SimEngine(setRt), []);
   const { price } = useLivePrice(cfg.pair);
 
-  // persiste
-  useEffect(() => { upsertConfig(cfg); }, [cfg]);
-
-  // escuta evento global disparado pelos chips na /robos
-  useEffect(() => {
-    const handler = (ev: Event) => {
-      const e = ev as CustomEvent<{ pair?: string }>;
-      const next = normalizePair(e.detail?.pair ?? "");
-      if (next) setCfg((c) => ({ ...c, pair: next }));
-    };
-    window.addEventListener("robot:setPair", handler as EventListener);
-    return () => window.removeEventListener("robot:setPair", handler as EventListener);
-  }, []);
-
-  // loop de simulação (suave ~0.8s)
+  // loop de simulação suave
   const lastTs = useRef(0);
   useEffect(() => {
     if (!running || !price) return;
@@ -60,9 +52,11 @@ export default function BotRunnerClient() {
     engine.step(cfg, price, now);
   }, [running, price, engine, cfg]);
 
-  // input manual: também normaliza
-  const onChangePair = (v: string) => {
-    setCfg((c) => ({ ...c, pair: normalizePair(v) }));
+  // quando usuário digita manualmente no input
+  const handleManualPair = (v: string) => {
+    const next = norm(v);
+    setCfg((c) => ({ ...c, pair: next }));
+    onPairChange?.(next); // mantém chips em sincronia
   };
 
   return (
@@ -85,46 +79,78 @@ export default function BotRunnerClient() {
             <input
               className="inp"
               value={cfg.pair}
-              onChange={(e) => onChangePair(e.target.value)}
-              list="pairs"
+              onChange={(e) => handleManualPair(e.target.value)}
               placeholder="ex.: BTCUSDT"
             />
-            <datalist id="pairs">
-              {KNOWN_PAIRS.map((p) => <option key={p} value={p} />)}
-            </datalist>
           </label>
           <label className="lbl">Capital (USDT)
-            <input className="inp" type="number" value={cfg.risk.capitalUSDT}
-              onChange={(e) => setCfg((c) => ({ ...c, risk: { ...c.risk, capitalUSDT: Number(e.target.value) || 0 } }))} />
+            <input
+              className="inp"
+              type="number"
+              value={cfg.risk.capitalUSDT}
+              onChange={(e) =>
+                setCfg((c) => ({ ...c, risk: { ...c.risk, capitalUSDT: Number(e.target.value) || 0 } }))
+              }
+            />
           </label>
           <label className="lbl">% por trade
-            <input className="inp" type="number" value={cfg.risk.orderSizePct}
-              onChange={(e) => setCfg((c) => ({ ...c, risk: { ...c.risk, orderSizePct: Number(e.target.value) || 0 } }))} />
+            <input
+              className="inp"
+              type="number"
+              value={cfg.risk.orderSizePct}
+              onChange={(e) =>
+                setCfg((c) => ({ ...c, risk: { ...c.risk, orderSizePct: Number(e.target.value) || 0 } }))
+              }
+            />
           </label>
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8 }}>
           <label className="lbl">EMA curta
-            <input className="inp" type="number" value={(cfg.strategy.params as any).short as number}
-              onChange={(e) => setCfg((c) => ({
-                ...c,
-                strategy: { ...c.strategy, params: { ...(c.strategy.params as any), short: Number(e.target.value) || 0 } },
-              }))} />
+            <input
+              className="inp"
+              type="number"
+              value={(cfg.strategy.params as any).short as number}
+              onChange={(e) =>
+                setCfg((c) => ({
+                  ...c,
+                  strategy: { ...c.strategy, params: { ...(c.strategy.params as any), short: Number(e.target.value) || 0 } },
+                }))
+              }
+            />
           </label>
           <label className="lbl">EMA longa
-            <input className="inp" type="number" value={(cfg.strategy.params as any).long as number}
-              onChange={(e) => setCfg((c) => ({
-                ...c,
-                strategy: { ...c.strategy, params: { ...(c.strategy.params as any), long: Number(e.target.value) || 0 } },
-              }))} />
+            <input
+              className="inp"
+              type="number"
+              value={(cfg.strategy.params as any).long as number}
+              onChange={(e) =>
+                setCfg((c) => ({
+                  ...c,
+                  strategy: { ...c.strategy, params: { ...(c.strategy.params as any), long: Number(e.target.value) || 0 } },
+                }))
+              }
+            />
           </label>
           <label className="lbl">TP (%)
-            <input className="inp" type="number" value={cfg.risk.takeProfitPct ?? 0}
-              onChange={(e) => setCfg((c) => ({ ...c, risk: { ...c.risk, takeProfitPct: Number(e.target.value) || 0 } }))} />
+            <input
+              className="inp"
+              type="number"
+              value={cfg.risk.takeProfitPct ?? 0}
+              onChange={(e) =>
+                setCfg((c) => ({ ...c, risk: { ...c.risk, takeProfitPct: Number(e.target.value) || 0 } }))
+              }
+            />
           </label>
           <label className="lbl">SL (%)
-            <input className="inp" type="number" value={cfg.risk.stopLossPct ?? 0}
-              onChange={(e) => setCfg((c) => ({ ...c, risk: { ...c.risk, stopLossPct: Number(e.target.value) || 0 } }))} />
+            <input
+              className="inp"
+              type="number"
+              value={cfg.risk.stopLossPct ?? 0}
+              onChange={(e) =>
+                setCfg((c) => ({ ...c, risk: { ...c.risk, stopLossPct: Number(e.target.value) || 0 } }))
+              }
+            />
           </label>
         </div>
 
