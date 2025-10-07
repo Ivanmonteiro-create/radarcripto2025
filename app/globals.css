@@ -2408,3 +2408,87 @@ button.rc-btn--ghost[data-variant="back"],
 a.rc-btn--ghost[data-variant="back"] {
   display: none !important;
 }
+/* ====== HOME LAYOUT & FIT (zoom 100%) ====== */
+.rc-home { position: relative; padding-top: 8rem; }
+.rc-topnav { position: sticky; top: 0; z-index: 40; padding: .75rem 0; }
+.rc-topnav__inner { display:flex; gap:.5rem; justify-content:center; align-items:center; position:relative; }
+.rc-backtop { margin-left:auto; }
+.rc-pill { padding:.5rem .9rem; border:1px solid #1df07e33; border-radius:999px; background:#0b1c14; color:#cfead8; }
+.rc-btn.rc-btn--green { background:#1df07e; color:#062d1e; border-radius:.75rem; padding:.55rem .9rem; font-weight:600; }
+
+/* Tickers sempre no topo e compactos */
+.rc-live-tickers { 
+  position: sticky; top: 3.25rem; z-index: 30;
+  display:flex; gap:.6rem; justify-content:flex-start; 
+  padding: .4rem .8rem 0; margin:0 auto; max-width: 1280px;
+}
+.rc-ticker-card { transform: translateY(-6px); } /* sobe levemente */
+.rc-ticker-card .pair { display:block; }
+.rc-ticker-card .price { display:block; opacity:.9; margin-top:.15rem; }
+
+/* Hero card com folga à direita + largura menor para caber sem cortar */
+.rc-hero { display:flex; justify-content:center; padding:2rem .75rem 5rem; }
+.rc-hero__card {
+  position:relative;
+  width:100%;
+  max-width: 1020px;            /* <- diminui largura */
+  margin: 0 16px 0 16px;        /* <- folga lateral */
+  border:1px solid #1df07e33;
+  border-radius: 20px;
+  background: linear-gradient(180deg,#0b1813 0%, #0f2018 100%);
+  box-shadow: 0 0 0 1px #1df07e1a inset, 0 20px 60px #0b2a1a80;
+  overflow:hidden;
+}
+/* texto: dá um respiro para os botões de cima */
+.rc-hero__text { position:relative; padding: 2.2rem 2rem 2.4rem; }
+.rc-hero__eyebrow { letter-spacing:.18em; color:#88f0b8; font-size:.9rem; margin:0 0 .5rem; }
+.rc-hero__title { font-size: clamp(2.1rem, 5.2vw, 4.2rem); line-height:1.05; margin:.2rem 0 .8rem; color:#e9fff5; }
+.rc-hero__desc { color:#cde9db; max-width:38ch; }
+.rc-hero__phase { color:#8ee9ba; }
+
+/* ====== RADAR CLÁSSICO (anéis + sweep girando) ====== */
+.rc-radar {
+  --ring:#1df07e22; --grid:#1df07e0f; --sweep:#39f08a;
+  position:absolute; inset:0;
+  pointer-events:none;
+}
+.rc-radar::before, .rc-radar::after { content:""; position:absolute; inset:0; }
+.rc-radar::before {
+  /* anéis concêntricos + grade suave */
+  background:
+    radial-gradient(circle at 50% 50%, transparent 34%, var(--ring) 35%, transparent 36%) ,
+    radial-gradient(circle at 50% 50%, transparent 54%, var(--ring) 55%, transparent 56%) ,
+    radial-gradient(circle at 50% 50%, transparent 74%, var(--ring) 75%, transparent 76%) ,
+    radial-gradient(circle at 50% 50%, transparent 94%, var(--ring) 95%, transparent 96%),
+    repeating-linear-gradient(0deg, var(--grid) 0 1px, transparent 1px 48px),
+    repeating-linear-gradient(90deg, var(--grid) 0 1px, transparent 1px 48px);
+  opacity:.75;
+  filter: blur(.2px);
+}
+.rc-radar--classic::after {
+  /* fatia (sweep) girando */
+  --deg: 65deg;
+  background:
+    conic-gradient(from 0deg at 55% 58%,
+      rgba(0,0,0,0) 0deg,
+      rgba(57,240,138,.0) 0deg,
+      rgba(57,240,138,.22) var(--deg),
+      rgba(0,0,0,0) calc(var(--deg) + 1deg)
+    );
+  mix-blend-mode: screen;
+  animation: rc-sweep 2.8s linear infinite;
+  opacity:.9;
+  transform: scale(1.2); /* amplia para pegar a borda arredondada */
+}
+@keyframes rc-sweep {
+  to { transform: scale(1.2) rotate(360deg); }
+}
+
+/* ====== RESPONSIVO: garante ajuste no 100% */
+@media (max-width: 1280px) {
+  .rc-hero__card { max-width: 980px; }
+}
+@media (max-width: 1024px) {
+  .rc-hero__card { max-width: 860px; }
+  .rc-live-tickers { top: 3rem; }
+}
