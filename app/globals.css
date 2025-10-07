@@ -2260,3 +2260,44 @@ main .tickersLeft > * {
 .rc-main :where([data-route="/fale-com-agente"] h1, .page-fale h1){
   color: var(--accent-strong);
 }
+/* ===== Overrides mínimos p/ Home & navegação ===== */
+
+/* Top pills (Home apenas): faixa alinhada ao topo-centro */
+.rc-topnav { position: sticky; top: 8px; z-index: 40; display: grid; place-items: center; }
+.rc-topnav__inner { display: grid; grid-auto-flow: column; gap: 10px; }
+.rc-pill {
+  padding: 8px 12px; border: 1px solid rgba(99,255,160,.28); border-radius: 999px;
+  background: rgba(12,24,18,.35); font-weight: 700;
+}
+.rc-pill.is-active { box-shadow: inset 0 0 0 1px rgba(99,255,160,.45); }
+
+/* Botão voltar nas internas (fixo canto direito, alinhado com conteúdo) */
+.rc-backtop { position: fixed; right: 18px; top: 88px; z-index: 45; }
+
+/* Radar vivo centralizado, ocupando bem o herói */
+.rc-radar { position: absolute; inset: 0; display: grid; place-items: center; z-index: 0; pointer-events: none; }
+.rc-radar__svg { width: min(1100px, 90vw); height: auto; opacity: .9; }
+.rc-radar__sweep { transform-origin: 0 0; animation: rc-sweep 3.8s linear infinite; }
+@keyframes rc-sweep { to { transform: rotate(360deg); } }
+
+/* Tickers: 8 cards na mesma linha, sem barra de rolagem vertical. */
+.live-tickers {
+  position: relative; z-index: 5;
+  display: grid; grid-template-columns: repeat(8, minmax(120px, 1fr));
+  gap: 10px; width: min(1100px, 96%); margin: 8px auto 0; padding: 0 2px;
+}
+.ticker-card { height: 52px; display: grid; grid-template-rows: 1fr 1fr; padding: 6px 8px; }
+.ticker-symbol { font-weight: 700; font-size: 12px; line-height: 1.1; opacity: .95; }
+.ticker-price  { font-weight: 800; font-size: 14px; line-height: 1.1; color: #30ff7a; }
+
+/* Herói: sobe um pouco, mas deixa “respiro” p/ pílulas */
+.rc-hero { position: relative; z-index: 10; margin: 14px auto 0; width: min(1100px, 96%); }
+
+/* Responsivo */
+@media (max-width: 1100px){
+  .live-tickers { grid-template-columns: repeat(4, minmax(140px, 1fr)); }
+}
+@media (max-width: 760px){
+  .live-tickers { grid-template-columns: repeat(2, minmax(140px, 1fr)); }
+  .rc-backtop { top: 72px; right: 12px; }
+}
