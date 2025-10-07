@@ -2260,3 +2260,17 @@ main .tickersLeft > * {
 .rc-main :where([data-route="/fale-com-agente"] h1, .page-fale h1){
   color: var(--accent-strong);
 }
+/* Cabeçalhos de páginas internas (título + botão à direita) */
+.rc-pagebar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:14px;
+}
+.rc-pagebar__title{
+  font-size:20px;
+  font-weight:900;
+  letter-spacing:.2px;
+  margin:0;
+}
