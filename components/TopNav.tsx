@@ -3,6 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import React from "react";
 
 const LINKS = [
   { href: "/simulador", label: "Simulador" },
@@ -18,20 +19,20 @@ export default function TopNav() {
 
   return (
     <>
-      <nav className="rc-topnav" aria-label="Navegação principal">
-        <div className="rc-topnav__inner">
-          {LINKS.map((l) => {
-            const active = pathname.startsWith(l.href);
-            return (
-              <Link key={l.href} href={l.href} className={`rc-pill ${active ? "is-active" : ""}`}>
-                {l.label}
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
-
-      {!onHome && (
+      {onHome ? (
+        <nav className="rc-topnav" aria-label="Navegação principal">
+          <div className="rc-topnav__inner">
+            {LINKS.map((l) => {
+              const active = pathname.startsWith(l.href);
+              return (
+                <Link key={l.href} href={l.href} className={`rc-pill ${active ? "is-active" : ""}`}>
+                  {l.label}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+      ) : (
         <div className="rc-backtop">
           <Link href="/" className="rc-btn rc-btn--green">Voltar ao início</Link>
         </div>
