@@ -1,7 +1,7 @@
 // app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
-import NavBar from "@/components/NavBar";
+import Navbar from "@/components/NavBar";
 
 export const metadata: Metadata = {
   title: "RadarCrypto — Fase 1",
