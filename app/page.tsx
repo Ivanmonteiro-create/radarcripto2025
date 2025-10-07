@@ -1,10 +1,11 @@
 // app/page.tsx
 import LiveTickers from "@/components/LiveTickers";
+import HeroRadar from "@/components/HeroRadar";
 
 export default function HomePage() {
   return (
     <div className="rc-home">
-      <div className="rc-radar" aria-hidden />
+      <HeroRadar />
       <LiveTickers />
       <section className="rc-hero" aria-label="Chamada principal">
         <div className="rc-hero__glow" />
