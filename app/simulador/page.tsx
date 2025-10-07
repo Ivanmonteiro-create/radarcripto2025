@@ -1,4 +1,5 @@
 // app/simulador/page.tsx
+"use client";
 import Link from "next/link";
 import SimPageClient from "./SimPageClient";
 
