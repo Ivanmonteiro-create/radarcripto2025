@@ -2492,3 +2492,91 @@ a.rc-btn--ghost[data-variant="back"] {
   .rc-hero__card { max-width: 860px; }
   .rc-live-tickers { top: 3rem; }
 }
+/* ========== TOPO FIXO ========== */
+:root { --topbar-h: 64px; }
+.rc-topbar{
+  position:fixed; inset:0 0 auto 0; height:var(--topbar-h);
+  z-index:100; backdrop-filter:saturate(140%) blur(6px);
+  background: linear-gradient(180deg,#08130fdd 0%, #08130f99 70%, transparent 100%);
+  border-bottom:1px solid #1df07e22;
+}
+.rc-topbar__inner{ max-width:1280px; margin:0 auto; height:100%;
+  display:flex; align-items:center; justify-content:center; padding:0 12px;
+}
+.rc-pills{ display:flex; gap:.5rem; flex-wrap:nowrap; }
+.rc-pill{
+  border-radius:999px; padding:.55rem .95rem; font-weight:600; border:1px solid #1df07e40;
+}
+.rc-pill--green{ background:#1df07e; color:#05271a; }
+.rc-btn.rc-btn--green{ background:#1df07e; color:#05271a; border-radius:.8rem; padding:.55rem .9rem; font-weight:700; }
+.rc-backtop{ margin-left:auto; }
+
+/* empurra o conteúdo abaixo do topo fixo */
+.rc-root .rc-main, body{ scroll-padding-top: calc(var(--topbar-h) + 8px); }
+.rc-home{ padding-top: calc(var(--topbar-h) + 16px); }
+
+/* ========== TICKERS NO TOPO, SEM ROLAGEM ========== */
+.rc-live-tickers{
+  position:sticky; top: calc(var(--topbar-h) + 4px);
+  z-index:60; display:flex; gap:.6rem; flex-wrap:wrap;
+  max-width:1280px; margin:0 auto; padding: 2px 8px 0;
+}
+.rc-ticker-card .pair{ display:block; }
+.rc-ticker-card .price{ display:block; margin-top:.15rem; opacity:.95; }
+
+/* ========== HERO (card menor e mais alto na página) ========== */
+.rc-hero{ display:flex; justify-content:center; padding:14px 12px 64px; }
+.rc-hero__card{
+  position:relative; width:100%;
+  max-width: 980px;   /* ↓ menor para caber no zoom 100% */
+  margin-top:16px;    /* ~1cm abaixo dos 5 botões */
+  border:1px solid #1df07e33; border-radius:20px; overflow:hidden;
+  background: linear-gradient(180deg,#0b1813 0%, #0f2018 100%);
+  box-shadow: 0 0 0 1px #1df07e1a inset, 0 20px 60px #0b2a1a80;
+}
+.rc-hero__text{ position:relative; padding: 28px 24px 30px; }
+.rc-hero__eyebrow{ letter-spacing:.18em; color:#8be9b6; margin:0 0 8px; }
+.rc-hero__title{ color:#eaffe8; line-height:1.05; font-size:clamp(2.1rem,5.2vw,4.2rem); margin:.2rem 0 .8rem; }
+.rc-hero__desc{ color:#cfeadb; max-width:38ch; }
+.rc-hero__phase{ color:#98f3c2; }
+
+/* ========== RADAR RETRO (anéis + 2 feixes) ========== */
+.rc-radar{ position:absolute; inset:0; pointer-events:none; }
+.rc-radar--retro::before,
+.rc-radar--retro::after{ content:""; position:absolute; inset:0; }
+.rc-radar--retro::before{
+  background:
+    radial-gradient(circle at 50% 50%, transparent 34%, #1df07e2b 35%, transparent 36%),
+    radial-gradient(circle at 50% 50%, transparent 54%, #1df07e25 55%, transparent 56%),
+    radial-gradient(circle at 50% 50%, transparent 74%, #1df07e20 75%, transparent 76%),
+    radial-gradient(circle at 50% 50%, transparent 94%, #1df07e1a 95%, transparent 96%),
+    repeating-linear-gradient(0deg, #1df07e10 0 1px, transparent 1px 48px),
+    repeating-linear-gradient(90deg, #1df07e10 0 1px, transparent 1px 48px);
+  opacity:.8; filter:blur(.2px);
+}
+.rc-radar--retro::after{
+  --deg:70deg;
+  background:
+    conic-gradient(from 0deg at 55% 58%,
+      rgba(0,0,0,0) 0deg,
+      rgba(57,240,138,.0) 0deg,
+      rgba(57,240,138,.24) var(--deg),
+      rgba(0,0,0,0) calc(var(--deg) + 1deg)),
+    conic-gradient(from 180deg at 45% 42%,
+      rgba(0,0,0,0) 0deg,
+      rgba(57,240,138,.18) 10deg,
+      rgba(0,0,0,0) 11deg);
+  mix-blend-mode:screen; opacity:.95; transform:scale(1.18);
+  animation: rc-scan 2.8s linear infinite;
+}
+@keyframes rc-scan{ to{ transform:scale(1.18) rotate(360deg); } }
+
+/* ========== PÁGINAS INTERNAS ========== */
+/* Botão “Voltar ao início” fixo à direita (inclusive no /simulador) */
+.rc-backtop{ position:fixed; right:20px; top: calc(var(--topbar-h) + 12px); z-index:70; }
+
+/* Remove espaço morto no topo das páginas (gráfico/robôs/planos/sobre/contato) */
+main, .rc-main{ padding-top: calc(var(--topbar-h) + 12px) !important; }
+
+/* ========== OPCIONAL: esconder “back” branco antigo, se existir ========== */
+a.rc-legacy-back, .btn-ghost-back { display:none !important; }
