@@ -1,23 +1,12 @@
 // app/simulador/page.tsx
-"use client";
-import Link from "next/link";
+import React from "react";
 import SimPageClient from "./SimPageClient";
 
 export const metadata = {
-  title: "Simulador | RadarCrypto",
+  title: "Simulador — RadarCrypto",
+  description: "Simule operações com saldo virtual e aprenda sem arriscar.",
 };
-// /app/simulador/page.tsx
-import SimPageClient from './SimPageClient';
 
 export default function Page() {
-  // A page é “fina”: só orquestra. Nada de dynamic/ssr:false aqui.
-  return (
-    <main className="aboutV2-root" style={{ paddingTop: 12 }}>
-      <Link href="/" className="btn backTopRight tcBackBtn">
-        Voltar ao início
-      </Link>
-      <SimPageClient />
-    </main>
-  );
   return <SimPageClient />;
 }
