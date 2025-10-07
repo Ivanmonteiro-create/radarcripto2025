@@ -2324,3 +2324,87 @@ main .tickersLeft > * {
   background: rgba(0, 255, 128, 0.2);
   color: #fff;
 }
+/* --- HOME LAYOUT FINO --------------------------- */
+.rc-home {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* Tickers colados no topo e sem scroll inicial */
+.rc-tickers {
+  position: relative;
+  z-index: 3;
+  margin-top: clamp(4px, 0.8vh, 10px);   /* sobe as moedas */
+}
+.rc-tickers * {
+  /* garante que os cards fiquem numa linha e caibam melhor */
+  white-space: nowrap;
+}
+
+/* HERO mais enxuto e com respiro à direita */
+.rc-hero {
+  position: relative;
+  z-index: 2;
+  margin-top: clamp(22px, 3.5vh, 36px);  /* baixa um pouco p/ aparecer os 5 botões */
+  margin-left: clamp(10px, 2vw, 24px);
+  margin-right: clamp(12px, 4vw, 28px);  /* dá “fim” visível à direita */
+  max-width: min(880px, 88vw);           /* encurta lateralmente */
+  border-radius: 18px;
+  backdrop-filter: blur(6px);
+}
+
+/* título menor em largura (sem perder impacto) */
+.rc-hero__title {
+  line-height: 0.95;
+  font-size: clamp(34px, 6vw, 68px);
+}
+
+/* brilho/sombra do cartão */
+.rc-hero__glow {
+  position: absolute;
+  inset: -12px;
+  border-radius: 22px;
+  background:
+    radial-gradient(60% 60% at 30% 50%, rgba(0,255,120,.08), transparent 60%),
+    radial-gradient(50% 50% at 80% 40%, rgba(0,255,120,.08), transparent 60%);
+  pointer-events: none;
+}
+
+/* --- RADAR ANIMADO ------------------------------ */
+.rc-radar {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 60%, rgba(0,255,120,.08) 0 1px, transparent 1px) 0 0/44px 44px,
+    radial-gradient(circle at 50% 60%, rgba(0,255,120,.06) 0 1px, transparent 1px) 0 0/120px 120px;
+}
+.rc-radar::before {
+  /* “feixe” girando */
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  width: 70vmax;
+  height: 70vmax;
+  transform: translate(-50%, -50%);
+  background:
+    conic-gradient(from 0deg, rgba(0,255,120,.25), rgba(0,255,120,.05) 40%, transparent 60%);
+  border-radius: 50%;
+  animation: rc-sweep 6s linear infinite;
+  filter: blur(1px);
+  opacity: .9;
+}
+@keyframes rc-sweep {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* --- BOTÃO "VOLTA AO INÍCIO" DUPLICADO (hotfix) - opcional
+   Se ainda aparecer um segundo botão branco nas páginas,
+   esconda qualquer versão "fantasma". Depois a gente remove no código. */
+button.rc-btn--ghost[data-variant="back"],
+a.rc-btn--ghost[data-variant="back"] {
+  display: none !important;
+}
