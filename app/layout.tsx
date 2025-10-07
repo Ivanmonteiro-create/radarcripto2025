@@ -1,24 +1,20 @@
 // app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
+import TopNav from "@/components/TopNav";
 
 export const metadata: Metadata = {
-  title: "RadarCrypto — Fase 1",
-  description: "Simulador de trading no navegador, histórico local. Fase 1.",
+  title: "RadarCrypto — Simulador & Robôs (SIM)",
+  description:
+    "Aprenda trading na prática, sem arriscar um centavo. Simulador e robôs no modo SIM (dados em tempo real, sem risco).",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
       <body className="rc-root">
-        {/* Barra flutuante global (client component) */}
-        <NavBar />
-        {children}
+        <TopNav />
+        <main className="rc-main">{children}</main>
       </body>
     </html>
   );
