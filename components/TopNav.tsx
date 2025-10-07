@@ -3,7 +3,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React from "react";
 
 const LINKS = [
   { href: "/simulador", label: "Simulador" },
@@ -18,25 +17,20 @@ export default function TopNav() {
   const onHome = pathname === "/";
 
   return (
-    <>
-      {onHome ? (
-        <nav className="rc-topnav" aria-label="Navegação principal">
-          <div className="rc-topnav__inner">
-            {LINKS.map((l) => {
-              const active = pathname.startsWith(l.href);
-              return (
-                <Link key={l.href} href={l.href} className={`rc-pill ${active ? "is-active" : ""}`}>
-                  {l.label}
-                </Link>
-              );
-            })}
+    <nav className="rc-topnav" aria-label="Navegação principal">
+      <div className="rc-topnav__inner">
+        {onHome ? (
+          LINKS.map((l) => (
+            <Link key={l.href} href={l.href} className="rc-pill">
+              {l.label}
+            </Link>
+          ))
+        ) : (
+          <div className="rc-backtop">
+            <Link href="/" className="rc-btn rc-btn--green">Voltar ao início</Link>
           </div>
-        </nav>
-      ) : (
-        <div className="rc-backtop">
-          <Link href="/" className="rc-btn rc-btn--green">Voltar ao início</Link>
-        </div>
-      )}
-    </>
+        )}
+      </div>
+    </nav>
   );
 }
