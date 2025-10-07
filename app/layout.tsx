@@ -1,21 +1,22 @@
-// app/layout.tsx
-import type { Metadata } from "next";
-import "./globals.css";
-import TopNav from "@/components/TopNav";
+// app/page.tsx
+import LiveTickers from "@/components/LiveTickers";
 
-export const metadata: Metadata = {
-  title: "RadarCrypto — Simulador & Robôs (SIM)",
-  description:
-    "Aprenda trading na prática, sem arriscar um centavo. Simulador e robôs no modo SIM (dados em tempo real, sem risco).",
-};
-
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function HomePage() {
   return (
-    <html lang="pt-BR">
-      <body className="rc-root">
-        <TopNav />
-        <main className="rc-main">{children}</main>
-      </body>
-    </html>
+    <div className="rc-home">
+      <div className="rc-radar" aria-hidden />
+      <LiveTickers />
+      <section className="rc-hero" aria-label="Chamada principal">
+        <div className="rc-hero__glow" />
+        <div className="rc-hero__inner">
+          <p className="rc-hero__eyebrow">SIMULADOR DE TRADING</p>
+          <h1 className="rc-hero__title">Aprenda trading na prática, sem arriscar um centavo.</h1>
+          <p className="rc-hero__desc">
+            Pratique com saldo virtual e evolua sem risco — histórico local no navegador.
+            <span className="rc-hero__phase"> Fase 1 (site base online)</span>
+          </p>
+        </div>
+      </section>
+    </div>
   );
 }
