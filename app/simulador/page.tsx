@@ -1,23 +1,21 @@
-// /app/simulador/page.tsx
-import SimPageClient from './SimPageClient';
 // app/simulador/page.tsx
 import Link from "next/link";
+import SimPageClient from "./SimPageClient";
 
-export default function SimuladorPage() {
-  return (
-    <section className="container section">
-      {/* Barra de título + botão à direita */}
-      <header className="rc-pagebar">
-        <h1 className="rc-pagebar__title">Controles de Trade</h1>
-        <Link href="/" className="rc-btn rc-btn--green">Voltar ao início</Link>
-      </header>
+export const metadata = {
+  title: "Simulador | RadarCrypto",
+};
+// /app/simulador/page.tsx
+import SimPageClient from './SimPageClient';
 
-      {/* ---- seu conteúdo atual do simulador abaixo ---- */}
-      {/* <Grafico /> */}
-      {/* <TradeControls /> */}
-    </section>
-  );
-}
 export default function Page() {
+  // A page é “fina”: só orquestra. Nada de dynamic/ssr:false aqui.
+  return (
+    <main className="aboutV2-root" style={{ paddingTop: 12 }}>
+      <Link href="/" className="btn backTopRight tcBackBtn">
+        Voltar ao início
+      </Link>
+      <SimPageClient />
+    </main>
+  );
   return <SimPageClient />;
-}
