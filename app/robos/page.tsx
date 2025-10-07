@@ -1,7 +1,7 @@
 // app/robos/page.tsx
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import BotRunnerClient from "@/components/bots/BotRunnerClient";
 
 const PAIRS = [
@@ -16,62 +16,61 @@ const PAIRS = [
 ] as const;
 
 export default function RobosPage() {
-  const [pair, setPair] = React.useState<(typeof PAIRS)[number]>("BTCUSDT");
+  // Atualiza o campo “Par” automaticamente quando o usuário clica em uma moeda
+  function setRobotPair(pair: string) {
+    const el = document.getElementById("robotPair") as
+      | HTMLInputElement
+      | HTMLSelectElement
+      | null;
 
-  function handlePick(p: (typeof PAIRS)[number]) {
-    setPair(p);
-    // fallback universal: avisa o componente filho via evento global
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new CustomEvent("rc:setPair", { detail: p }));
-    }
+    if (!el) return;
+    el.value = pair;
+    el.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
+  // Scroll para o topo (boa prática visual ao abrir a página)
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
-    <main className="min-h-screen flex flex-col items-center justify-start bg-black text-green-400 p-6">
-      <h1 className="text-3xl font-bold mb-2 text-center">
-        Robôs de Trading (Modo Simulado)
-      </h1>
-      <p className="text-sm text-green-300 mb-6 text-center max-w-xl">
-        Aqui você pode testar estratégias automáticas em tempo real usando dados ao vivo,
-        sem arriscar nada. Este é o modo <b>SIM</b> (simulação local).
-      </p>
+    <div className="rc-page">
+      <section className="rc-section">
+        <h1 className="rc-title">
+          Robôs de Trading <span className="rc-green">(Modo Simulado)</span>
+        </h1>
+        <p className="rc-desc">
+          Aqui você pode testar estratégias automatizadas em tempo real usando dados ao vivo.
+          Este é o modo SIM (simulação local).
+        </p>
 
-      {/* Seleção rápida de par (as 8 moedas) */}
-      <div className="w-full max-w-4xl mb-4">
-        <div className="flex flex-wrap gap-2">
-          {PAIRS.map((p) => {
-            const active = p === pair;
-            return (
-              <button
-                key={p}
-                onClick={() => handlePick(p)}
-                className={[
-                  "px-3 py-2 rounded-lg border text-sm font-semibold",
-                  "transition-colors",
-                  active
-                    ? "bg-emerald-600/30 text-emerald-300 border-emerald-400/50"
-                    : "bg-[#0b0b0b] text-green-300/80 border-green-500/30 hover:border-emerald-400/60 hover:text-emerald-300",
-                ].join(" ")}
-                aria-pressed={active}
-              >
-                {p.replace("USDT", "/USDT")}
-              </button>
-            );
-          })}
+        {/* Seleção rápida de pares */}
+        <div className="rc-quickpairs">
+          {PAIRS.map((p) => (
+            <button
+              key={p}
+              type="button"
+              className="rc-pill"
+              onClick={() => setRobotPair(p)}
+              aria-label={`Selecionar par ${p}`}
+            >
+              {p}
+            </button>
+          ))}
         </div>
-      </div>
 
-      {/* Card principal do robô */}
-      <div className="w-full max-w-4xl bg-[#0b0b0b] border border-green-500/30 rounded-2xl p-6 shadow-lg">
-        {/* 
-          Preferência: se o BotRunnerClient aceitar 'pair' ou 'initialPair',
-          ele já vai usar a seleção acima. Se ainda não aceitar, ele simplesmente ignora,
-          mas receberá também o evento 'rc:setPair' disparado em handlePick().
-        */}
-        {/* Tenta primeiro 'pair'; se seu componente usa 'initialPair', troque abaixo */}
-        <BotRunnerClient pair={pair} />
-        {/* <BotRunnerClient initialPair={pair} /> */}
-      </div>
-    </main>
+        {/* Bot principal do robô */}
+        <div className="rc-botcontainer">
+          <BotRunnerClient />
+        </div>
+
+        {/* Botão voltar ao início */}
+        <div className="rc-backtop">
+          <a href="/" className="rc-btn rc-btn--green">
+            Voltar ao início
+          </a>
+        </div>
+      </section>
+    </div>
   );
 }
