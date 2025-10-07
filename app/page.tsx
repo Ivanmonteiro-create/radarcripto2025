@@ -1,11 +1,14 @@
 // app/page.tsx
+import TopNav from "@/components/TopNav";
 import LiveTickers from "@/components/LiveTickers";
 
 export default function HomePage() {
   return (
     <div className="rc-home">
-      <div className="rc-radar" aria-hidden />
-      <LiveTickers />
+      <TopNav />                 {/* <-- só a Home exibe os 5 botões */}
+      <div className="rc-radar" aria-hidden />  {/* radar no fundo */}
+      <LiveTickers />                           {/* coluna de moedas */}
+
       <section className="rc-hero" aria-label="Chamada principal">
         <div className="rc-hero__glow" />
         <div className="rc-hero__inner">
