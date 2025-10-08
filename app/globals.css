@@ -2581,3 +2581,37 @@ main, .rc-main{ padding-top: calc(var(--topbar-h) + 12px) !important; }
 /* ========== OPCIONAL: esconder “back” branco antigo, se existir ========== */
 a.rc-legacy-back, .btn-ghost-back { display:none !important; }
 ID do pagamento:H_30783023
+/* === HOME: remover linha/folga e subir os cards das moedas === */
+
+/* 1) Zera qualquer espaço vindo do topo/nav */
+.rc-topnav {
+  margin-bottom: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* 2) Remove “scanline”/linha decorativa que cruza a página */
+.rc-scanline,
+.rc-home .scanline,
+.rc-hero::before,
+.rc-hero::after,
+.rc-home::before,
+.rc-home::after {
+  display: none !important;
+}
+
+/* 3) Garante que a faixa de tickers encoste no topo */
+.rc-live-tickers,
+.rc-ticker-row,
+.rc-tickers {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  position: relative !important;
+  top: 0 !important;
+  z-index: 3;
+}
+
+/* 4) Dá só um respiro entre os tickers e o card do herói */
+.rc-hero {
+  margin-top: 12px !important;
+}
