@@ -1,17 +1,12 @@
-"use client";
+// app/simulador/page.tsx
+import React from "react";
+import SimPageClient from "./SimPageClient";
 
-import Link from "next/link";
-import TradingViewWidget from "@/components/TradingViewWidget";
+export const metadata = {
+  title: "Simulador — RadarCrypto",
+  description: "Simule operações com saldo virtual e aprenda sem arriscar.",
+};
 
-export default function SimuladorPage() {
-  return (
-    <div className="flex flex-col items-stretch justify-center bg-transparent">
-      <TradingViewWidget />
-      <div className="flex justify-center mt-4">
-        <Link href="/" className="rc-btn rc-btn--green">
-          Voltar ao início
-        </Link>
-      </div>
-    </div>
-  );
+export default function Page() {
+  return <SimPageClient />;
 }
