@@ -2615,3 +2615,103 @@ ID do pagamento:H_30783023
 .rc-hero {
   margin-top: 12px !important;
 }
+/* ==== HOME: remover separador/linha e trazer moedas pro topo ==== */
+
+/* remove qualquer separador/scanline que esteja criando “faixa” entre top-nav e conteúdo */
+.rc-sep,
+.rc-divider,
+.rc-scanline,
+.rc-hero::before,
+.rc-hero::after,
+.rc-home::before,
+.rc-home::after,
+.rc-live-tickers::before,
+.rc-live-tickers::after {
+  display: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+/* zera folga no bloco das moedas/tickers e encosta no topo */
+.rc-live-tickers,
+.rc-tickers,
+.rc-ticker-row {
+  margin: 0 !important;
+  padding: 0 !important;
+  top: 0 !important;
+  position: relative !important;
+  z-index: 3;
+}
+
+/* dá um respiro mínimo entre as moedas e o card do herói */
+.rc-hero {
+  margin-top: 10px !important;
+}
+
+/* ==== RADAR ANTIGO (animação com anéis + feixe) ==== */
+
+.rc-radar-old {
+  --r-size: min(80vh, 900px);
+  --r-color: rgba(46, 255, 139, 0.25);
+  --r-line: rgba(46, 255, 139, 0.35);
+  --r-sweep: rgba(46, 255, 139, 0.45);
+
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  transform: translate(-50%, -50%);
+  width: var(--r-size);
+  height: var(--r-size);
+  border-radius: 50%;
+  overflow: hidden;
+  pointer-events: none;
+  filter: drop-shadow(0 0 20px rgba(46,255,139,.15));
+}
+
+/* anéis concêntricos */
+.rc-radar-old::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 29%, var(--r-line) 30% 31%, transparent 32%) 0 0 / 100% 100%,
+    radial-gradient(circle at 50% 50%, transparent 44%, var(--r-line) 45% 46%, transparent 47%) 0 0 / 100% 100%,
+    radial-gradient(circle at 50% 50%, transparent 59%, var(--r-line) 60% 61%, transparent 62%) 0 0 / 100% 100%,
+    radial-gradient(circle at 50% 50%, transparent 74%, var(--r-line) 75% 76%, transparent 77%) 0 0 / 100% 100%,
+    radial-gradient(circle at 50% 50%, var(--r-color), transparent 70%);
+  opacity: .9;
+}
+
+/* linhas cruzadas (horizontal/vertical) */
+.rc-radar-old::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to right, transparent 49.8%, var(--r-line) 50%, transparent 50.2%),
+    linear-gradient(to bottom, transparent 49.8%, var(--r-line) 50%, transparent 50.2%);
+  opacity: .65;
+}
+
+/* feixe girando */
+.rc-radar-old .sweep {
+  position: absolute;
+  inset: 0;
+  background:
+    conic-gradient(from 0deg at 50% 50%,
+      var(--r-sweep) 0deg,
+      rgba(46,255,139,0.05) 35deg,
+      transparent 60deg 360deg);
+  animation: rc-radar-spin 3.6s linear infinite;
+  mix-blend-mode: screen;
+  opacity: .9;
+}
+
+@keyframes rc-radar-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ativar o feixe */
+.rc-radar-old { isolation: isolate; }
+.rc-radar-old > .sweep { position: absolute; }
