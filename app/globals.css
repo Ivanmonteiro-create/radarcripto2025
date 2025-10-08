@@ -2580,3 +2580,4 @@ main, .rc-main{ padding-top: calc(var(--topbar-h) + 12px) !important; }
 
 /* ========== OPCIONAL: esconder “back” branco antigo, se existir ========== */
 a.rc-legacy-back, .btn-ghost-back { display:none !important; }
+ID do pagamento:H_30783023
