@@ -6,6 +6,3 @@ export const metadata = {
   title: "Simulador — RadarCrypto",
   description: "Simule operações com saldo virtual e aprenda sem arriscar.",
 };
-
-export default function Page() {
-  return <SimPageClient />;
