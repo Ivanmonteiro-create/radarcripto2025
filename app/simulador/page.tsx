@@ -10,7 +10,7 @@ export default function SimuladorPage() {
       <div className="rc-sim__grid grid grid-cols-12 gap-4 w-full h-full">
         {/* === GRÁFICO === */}
         <div className="col-span-9 flex items-stretch justify-center bg-transparent">
-          <TradingViewWidget />
+          <TradingViewWidget symbol="BTCUSDT" />
         </div>
 
         {/* === PAINEL DE CONTROLES === */}
