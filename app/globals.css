@@ -2715,3 +2715,54 @@ ID do pagamento:H_30783023
 /* ativar o feixe */
 .rc-radar-old { isolation: isolate; }
 .rc-radar-old > .sweep { position: absolute; }
+/* ==== REMOVER FAIXAS PRETAS DE TOPO (todas as páginas) ==== */
+.rc-topband,
+.rc-shell-topband,
+.rc-page::before,
+.rc-page .top-band,
+.header-spacer,
+.top-spacer {
+  display: none !important;
+  height: 0 !important;
+}
+
+/* Garantir que nada empurre o conteúdo para baixo */
+body, .rc-root, .rc-main, .rc-page {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* ==== HOME: botões logo ABAIXO da linha verde ==== */
+/* Deixe a barra de botões encostar na linha verde */
+.rc-topnav { 
+  position: relative;
+  margin-top: 8px !important; /* abaixo da linha verde */
+}
+
+/* Hero (quadrado) desce um pouco para abrir espaço dos botões */
+.rc-hero { 
+  margin-top: 16px !important;
+}
+
+/* Tickers (moedas) colados no topo, sem espaço extra */
+.rc-tickers {
+  margin-top: 0 !important;
+}
+
+/* ==== SIMULADOR: remover faixas e espaços extras de topo ==== */
+.rc-sim, .rc-sim * {
+  scroll-margin-top: 0;
+}
+.rc-sim { 
+  margin-top: 0 !important; 
+  padding-top: 0 !important; 
+}
+
+/* Cabeçalho do painel do simulador com o botão à direita */
+.rc-sim__panelHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
