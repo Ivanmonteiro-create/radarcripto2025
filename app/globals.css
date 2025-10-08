@@ -2757,7 +2757,6 @@ body, .rc-root, .rc-main, .rc-page {
   margin-top: 0 !important; 
   padding-top: 0 !important; 
 }
-
 /* Cabeçalho do painel do simulador com o botão à direita */
 .rc-sim__panelHead {
   display: flex;
