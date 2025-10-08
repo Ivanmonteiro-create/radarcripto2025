@@ -1,23 +1,11 @@
-// app/simulador/page.tsx (trecho do painel à direita)
-import Link from "next/link";
+// app/simulador/page.tsx
+import React from "react";
+import SimPageClient from "./SimPageClient";
 
-export default function SimuladorPage() {
-  return (
-    <div className="rc-sim">
-      <div className="rc-sim__grid">
-        {/* ... seu componente do gráfico ... */}
+export const metadata = {
+  title: "Simulador — RadarCrypto",
+  description: "Simule operações com saldo virtual e aprenda sem arriscar.",
+};
 
-        <aside className="rc-sim__panel">
-          <header className="rc-sim__panelHead">
-            <h2>Controles de Trade</h2>
-            <Link href="/" className="rc-btn rc-btn--green">
-              Voltar ao início
-            </Link>
-          </header>
-
-          {/* ... seus controles (inputs, botões Comprar/Vender etc.) ... */}
-        </aside>
-      </div>
-    </div>
-  );
-}
+export default function Page() {
+  return <SimPageClient />;
