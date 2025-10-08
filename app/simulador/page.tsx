@@ -1,5 +1,5 @@
 // app/simulador/page.tsx (trecho do painel à direita)
-import Link from "next/link";
+import Link from "next/link";"use client";
 
 export default function SimuladorPage() {
   return (
