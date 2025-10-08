@@ -1,8 +1,9 @@
 // app/simulador/page.tsx
-import React from "react";
+import Link from "next/link";
 import SimPageClient from "./SimPageClient";
 
 export const metadata = {
-  title: "Simulador — RadarCrypto",
-  description: "Simule operações com saldo virtual e aprenda sem arriscar.",
+  title: "Simulador | RadarCrypto",
 };
+// /app/simulador/page.tsx
+import SimPageClient from './SimPageClient';
