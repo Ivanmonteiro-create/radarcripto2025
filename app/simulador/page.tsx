@@ -5,12 +5,12 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 
-// Carrega o widget só no cliente (evita erro de window no SSR)
-const TVChart = dynamic(() => import("@/components/TradingViewWidget"), {
-  ssr: false,
-});
+// Torna o componente dinâmico tolerante às props (evita erro de tipo no build)
+const TVChart = dynamic<any>(
+  () => import("@/components/TradingViewWidget").then((m) => m.default ?? m),
+  { ssr: false }
+);
 
-// Os 8 pares que você usa no site
 const PAIRS = [
   "BTCUSDT",
   "ETHUSDT",
@@ -27,24 +27,20 @@ export default function SimuladorPage() {
 
   return (
     <div className="rc-sim">
-      {/* Cabeçalho do painel */}
+      {/* Cabeçalho */}
       <div className="rc-sim__head">
         <h2 className="rc-sim__title">Controles de Trade</h2>
         <Link href="/" className="rc-btn rc-btn--green">Voltar ao início</Link>
       </div>
 
-      {/* Corpo com gráfico + painel lateral (ou seus controles atuais) */}
+      {/* Corpo */}
       <div className="rc-sim__body">
         <div className="rc-sim__chart">
-          {/* A prop symbol é OBRIGATÓRIA para o seu componente tipado */}
           <TVChart symbol={`BINANCE:${pair}`} interval="30" autosize />
         </div>
 
         <aside className="rc-sim__side">
-          {/* Se você já tem seus controles (Comprar/Vender etc), renderize-os aqui */}
-          {/* <TradeControls pair={pair} onPairChange={setPair} /> */}
-
-          {/* Seleção rápida dos 8 pares (opcional, pode remover se já existir no seu painel) */}
+          {/* Seção de pares rápida (opcional) */}
           <div className="rc-sim__pairs">
             {PAIRS.map((p) => (
               <button
@@ -56,21 +52,16 @@ export default function SimuladorPage() {
               </button>
             ))}
           </div>
+          {/* Aqui você pode renderizar seus controles existentes */}
+          {/* <TradeControls pair={pair} onPairChange={setPair} /> */}
         </aside>
       </div>
 
-      {/* Estilos mínimos para organizar sem depender do seu globals */}
       <style jsx>{`
         .rc-sim { display: grid; gap: 16px; }
-        .rc-sim__head {
-          display: flex; align-items: center; justify-content: space-between;
-        }
+        .rc-sim__head { display: flex; align-items: center; justify-content: space-between; }
         .rc-sim__title { font-weight: 700; }
-        .rc-sim__body {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) 340px;
-          gap: 16px;
-        }
+        .rc-sim__body { display: grid; grid-template-columns: minmax(0,1fr) 340px; gap: 16px; }
         .rc-sim__chart { min-height: 70vh; border-radius: 12px; overflow: hidden; }
         .rc-sim__side { display: grid; gap: 12px; align-content: start; }
         .rc-sim__pairs { display: grid; gap: 8px; }
