@@ -181,3 +181,135 @@ a{ color: inherit; text-decoration: none; }
 }
 
 /* ================== Fim ================== */
+/* === RADARCRYPTO: HOME LAYOUT FIX ======================================= */
+
+/* Tickers no topo (sem tarja), com respiro mínimo */
+.rc-tickers { 
+  margin-top: 8px;
+}
+.rc-tickers > * { /* garante que os chips fiquem coladinhos ao topo */
+  margin-top: 0 !important;
+}
+
+/* Hero reduzido, mais à esquerda e com largura controlada para caber na tela 100% */
+.rc-hero {
+  position: relative;
+  margin: 20px auto 56px;
+  max-width: 980px;           /* ↓ diminui o “quadradão” */
+  transform: translateX(-20px); /* puxa um pouco para a esquerda */
+}
+@media (max-width: 1200px) {
+  .rc-hero { transform: none; max-width: 920px; }
+}
+@media (max-width: 992px) {
+  .rc-hero { max-width: 860px; }
+}
+
+/* Mantém o contorno interno/externo sem exagero */
+.rc-hero__inner {
+  border-radius: 18px;
+  border: 1px solid rgba(0, 255, 128, 0.22);
+  background: radial-gradient(80% 60% at 50% 40%, rgba(16, 40, 20, 0.55), rgba(10, 22, 14, 0.35));
+  backdrop-filter: blur(3px);
+  padding: 28px 32px;
+}
+.rc-hero__glow { display:none; } /* evitamos que expanda demais o bloco */
+
+.rc-hero__title {
+  line-height: 0.95;
+}
+
+/* === RADAR ANIMADO (leve e sem JS) ====================================== */
+.rc-radar {
+  --line: rgba(0,255,128,0.18);
+  --beam: rgba(0,255,128,0.28);
+  position: absolute;
+  inset: 0 0 auto 50%;
+  width: 620px;
+  height: 620px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  opacity: 0.9;
+}
+.rc-radar::before,
+.rc-radar::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, var(--line) 1px, transparent 1px) 0 0/ 62px 62px,
+    radial-gradient(circle at center, var(--line) 1px, transparent 1px) 31px 31px/ 62px 62px;
+  mask: radial-gradient(circle at center, transparent 35%, #000 36%);
+  opacity: 0.7;
+}
+.rc-radar::after {
+  mask: none;
+  background: conic-gradient(from 0deg, var(--beam), transparent 35%);
+  animation: rc-sweep 3.4s linear infinite;
+  mix-blend-mode: screen;
+  opacity: 0.6;
+}
+@keyframes rc-sweep {
+  to { transform: rotate(360deg); }
+}
+
+/* === NAV: botões só na Home; já controlado no TopNav.tsx ================= */
+/* Aparência dos pills e hover fluorescente */
+.rc-topnav { margin-top: 6px; }
+.rc-topnav__inner {
+  display: flex; gap: 10px; flex-wrap: wrap;
+}
+.rc-pill {
+  display:inline-flex; align-items:center; justify-content:center;
+  height: 38px; padding: 0 14px; border-radius: 999px;
+  border: 1px solid rgba(0,255,128,0.35);
+  background: rgba(0,255,128,0.10);
+  color: #bfffdc; font-weight: 600; letter-spacing:.2px;
+  transition: transform .08s ease, background .12s ease, box-shadow .12s ease;
+}
+.rc-pill:hover { 
+  background: rgba(0,255,128,0.18);
+  box-shadow: 0 0 0 4px rgba(0,255,128,0.10) inset;
+  transform: translateY(-1px);
+}
+.rc-pill.is-active {
+  background: rgba(0,255,128,0.28);
+  color: #041d10;
+}
+
+/* Botão “Voltar ao início” */
+.rc-backtop { display:flex; justify-content:flex-end; margin: 14px 0 0; }
+.rc-btn { display:inline-flex; height: 38px; align-items:center; padding: 0 16px; border-radius: 10px; font-weight:700; }
+.rc-btn--green { background:#18e273; color:#01210f; }
+.rc-btn--green:hover { filter: brightness(1.1); }
+
+/* === ROBÔS: inputs/labels/cartões com “verde RadarCrypto” ================ */
+.panel {
+  border: 1px solid rgba(0,255,128,0.20);
+  background: rgba(0, 20, 10, 0.55);
+  border-radius: 16px;
+  box-shadow: 0 8px 28px rgba(0,0,0,.35) inset, 0 0 0 1px rgba(0,255,128,.08);
+}
+.lbl { color:#b6ffdb; font-size: 13px; display:flex; flex-direction:column; gap:6px; }
+.inp {
+  background: rgba(0,255,128,0.06);
+  border: 1px solid rgba(0,255,128,0.22);
+  border-radius: 10px; color:#eafff5; padding:10px 12px;
+  outline: none;
+}
+.inp:focus { border-color:#18e273; box-shadow: 0 0 0 3px rgba(24,226,115,.18); }
+.btn { background:#18e273; color:#052515; border-radius:10px; padding:8px 12px; font-weight:700; }
+.btn:hover { filter:brightness(1.07); }
+.highlight { background: rgba(0,255,128,0.08); border:1px solid rgba(0,255,128,0.18); border-radius: 12px; }
+.pnlPos{ color:#16f086; }
+.pnlNeg{ color:#ff6b6b; }
+
+/* === CARDS utilitários (p/ “Fale com a gente” etc.) ====================== */
+.rc-card {
+  border: 1px solid rgba(0,255,128,0.20);
+  background: rgba(0, 25, 12, 0.55);
+  border-radius: 16px;
+  padding: 14px;
+}
+.rc-card h3 { color:#bfffdc; margin:0 0 8px; }
