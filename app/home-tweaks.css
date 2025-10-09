@@ -1,0 +1,44 @@
+/* Tudo dentro de [data-page="home"] para não afetar outras páginas */
+[data-page="home"] .rc-tickers-wrap {
+  margin-top: 0 !important;       /* moedas coladas no topo */
+}
+
+/* Se o componente das moedas já usar .rc-tickers, reforça também */
+[data-page="home"] .rc-tickers {
+  margin-top: 0 !important;
+}
+
+/* Moldura externa do hero mais estreita para caber a 100% */
+[data-page="home"] .rc-hero__frame,
+[data-page="home"] .rc-hero:not(:has(.rc-hero__frame)) {
+  --hero-max: 960px;
+  width: min(var(--hero-max), 92vw);
+  margin: 14px auto 0;            /* pequeno respiro abaixo das moedas */
+  position: relative;
+  border-radius: 18px;
+}
+
+/* contorno interno “linha verde” reaparecendo */
+[data-page="home"] .rc-hero__frame::before,
+[data-page="home"] .rc-hero:not(:has(.rc-hero__frame))::before {
+  content: "";
+  position: absolute;
+  inset: 16px;                    /* distância da borda para dentro */
+  border: 1px solid rgba(60, 255, 160, 0.28);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Conteúdo interno com respiro nas laterais */
+[data-page="home"] .rc-hero__inner {
+  max-width: calc(100% - 64px);
+  margin-inline: auto;
+}
+
+/* Em telas bem largas, afina um pouco mais para garantir que a borda direita apareça */
+@media (min-width: 1280px) {
+  [data-page="home"] .rc-hero__frame,
+  [data-page="home"] .rc-hero:not(:has(.rc-hero__frame)) {
+    --hero-max: 920px;
+  }
+}
