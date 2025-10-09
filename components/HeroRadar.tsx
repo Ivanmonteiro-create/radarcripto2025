@@ -6,7 +6,6 @@ export default function HeroRadar() {
   return (
     <div className="rc-radar rc-radar--alive" aria-hidden>
       <style>{`
-        .rc-radar--alive {}
         .rc-radar__frame {
           position: absolute;
           inset: 0;
@@ -29,11 +28,9 @@ export default function HeroRadar() {
             );
           mix-blend-mode: screen;
           filter: blur(.3px);
-          -webkit-mask:
-            radial-gradient(circle at center, transparent 0 24%, #000 25% 100%);
-                  mask:
-            radial-gradient(circle at center, transparent 0 24%, #000 25% 100%);
-          animation: rc-radar-spin 3.8s linear infinite; /* ← ajustado para mais lento */
+          -webkit-mask: radial-gradient(circle at center, transparent 0 24%, #000 25% 100%);
+                  mask: radial-gradient(circle at center, transparent 0 24%, #000 25% 100%);
+          animation: rc-radar-spin 3.0s linear infinite; /* ← velocidade ajustada */
         }
         .rc-radar__beam::after {
           content:"";
