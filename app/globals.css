@@ -2977,3 +2977,45 @@ html,body,#__next {
 .rc-hero-gap::before {
   content: none !important;
 }
+/* === REATIVA OS 5 BOTÕES E AJUSTA O HERO =============================== */
+
+/* Garante que a barra de botões sempre apareça e clique normal */
+.rc-topnav {
+  display: flex !important;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;        /* centralizado como você pediu */
+  position: relative !important;  /* sai de qualquer posicionamento “bugado” */
+  pointer-events: auto !important;
+  z-index: 10 !important;
+  margin-top: 8px;                /* um respiro abaixo das moedas/linha */
+}
+
+/* Pílulas verdes dos botões (caso tenham sido afetadas) */
+.rc-topnav .rc-pill {
+  background: #11a84b !important;     /* verde */
+  color: #0b1b12 !important;
+  border: 1px solid #1fe66a !important;
+  box-shadow: 0 0 0 0 transparent !important;
+}
+
+/* Espaço para o hero descer e caber os 5 botões no topo */
+.rc-hero,
+.rc-home .rc-hero {
+  margin-top: 18px !important;    /* ajuste fino: suba/baixe trocando esse valor */
+}
+
+/* Se os botões estiverem DENTRO de algum “topstrip” que foi zerado,
+   reabilitamos altura só para o conteúdo dos botões, sem voltar a tarja. */
+.rc-topstrip:has(.rc-topnav),
+.rc-topband:has(.rc-topnav),
+.rc-header:has(.rc-topnav) {
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  pointer-events: auto !important;
+}
