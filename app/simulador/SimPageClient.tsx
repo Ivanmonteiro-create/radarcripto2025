@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import TradingViewWidget from "../../components/TradingViewWidget";
 import TradeControls from "../../components/TradeControls";
-import useLivePrice from "../../lib/priceFeed";
+import { useLivePrice } from "../../lib/priceFeed";
 
 type Pair =
   | "BTCUSDT"
