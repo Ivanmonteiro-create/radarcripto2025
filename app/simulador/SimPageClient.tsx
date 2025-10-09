@@ -1,38 +1,28 @@
 // app/simulador/SimPageClient.tsx
-'use client';
-
-import React, { useRef, useState } from 'react';
-import TradingViewWidget from '../../components/TradingViewWidget';
-import TradeControls from '../../components/TradeControls';
-import { useLivePrice } from '../../lib/priceFeed';
-
-type Pair =
-  | 'BTCUSDT'
-  | 'ETHUSDT'
-  | 'BNBUSDT'
-  | 'SOLUSDT'
-  | 'ADAUSDT'
-  | 'XRPUSDT'
-  | 'DOGEUSDT'
-  | 'LINKUSDT';
+"use client";
+import React from "react";
 
 export default function SimPageClient() {
-  const [symbol, setSymbol] = useState<Pair>('BTCUSDT');
-  const livePrice = useLivePrice(symbol); // pode ser usado dentro do TradeControls depois
-  const chartPanelRef = useRef<HTMLDivElement | null>(null);
-
   return (
-    <main className="rc-sim">
-      <section className="rc-sim_body">
-        <div className="rc-sim_chart" ref={chartPanelRef}>
-          <TradingViewWidget symbol={symbol} />
-        </div>
+    <div className="sim-container" style={{ display: "flex", gap: 18 }}>
+      <div style={{ flex: 1 }}>
+        {/* placeholder chart */}
+        <div style={{ height: 360, borderRadius: 12, background: "linear-gradient(180deg,#07110b,#0c2218)" }} />
+      </div>
 
-        <div className="rc-sim_controls">
-          {/* TradeControls requer 'symbol' — passamos a seleção atual */}
-          <TradeControls symbol={symbol} />
+      <aside className="trade-panel" style={{ width: 420 }}>
+        <div style={{ background: "rgba(0,0,0,0.22)", padding: 18, borderRadius: 12 }}>
+          <h3>Controles de Trade</h3>
+          <div style={{ display: "grid", gap: 8 }}>
+            <input placeholder="Preço ao vivo" />
+            <input placeholder="Tamanho (USDT)" />
+            <button style={{ padding: 10, background: "var(--rc-green)", borderRadius: 10 }}>Comprar</button>
+            <button style={{ padding: 10, background: "#b32d2d", borderRadius: 10 }}>Vender</button>
+          </div>
         </div>
-      </section>
-    </main>
+      </aside>
+
+      <button className="btn-go-top">Voltar ao início</button>
+    </div>
   );
 }
