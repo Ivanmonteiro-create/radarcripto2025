@@ -2765,3 +2765,171 @@ body, .rc-root, .rc-main, .rc-page {
   gap: 12px;
   margin-bottom: 12px;
 }
+/* app/globals.css */
+/* --- variáveis básicas (ajuste conforme seu tema) --- */
+:root {
+  --rc-green: #19d368;
+  --rc-dark: rgba(0,0,0,0.55);
+  --rc-bg: #07110b;
+  --rc-hero-padding: 2.5rem;
+  --rc-button-radius: 28px;
+  --rc-overlay-opacity: 0.22;
+}
+
+/* reset / base (mantenha suas regras existentes se tiver) */
+html,body,#__next {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: linear-gradient(180deg, #062018 0%, #07110b 100%);
+  color: #eafaf0;
+}
+
+/* container escopo geral do site */
+.rc-root {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- HERO / Home scoped styles --- */
+.rc-home .hero-wrapper {
+  position: relative;
+  padding: var(--rc-hero-padding) 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+}
+
+/* linha verde separadora (a "linha" que você mencionou) */
+.rc-home .hero-line {
+  width: 100%;
+  max-width: 1100px;
+  height: 4px;
+  background: rgba(25,211,104,0.12);
+  border-radius: 8px;
+  box-shadow: 0 0 18px rgba(25,211,104,0.06) inset;
+  margin-top: 0;
+}
+
+/* o "quadrado grande" (hero card) */
+.rc-home .hero-card {
+  width: min(920px, 92%);
+  padding: 28px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(15,40,34,0.45), rgba(12,25,20,0.28));
+  border: 1px solid rgba(25,211,104,0.07);
+  box-shadow: 0 8px 60px rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+}
+
+/* área das moedas (top tray) */
+.rc-home .top-coins {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* cada moeda (card pequeno) */
+.rc-home .coin-chip {
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(25,211,104,0.18);
+  background: rgba(0,0,0,0.08);
+  min-width: 82px;
+  text-align: center;
+  box-shadow: 0 6px 22px rgba(0,0,0,0.45);
+}
+
+/* área dos 5 botões (escopada) */
+.rc-home .cta-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  z-index: 30; /* garante que fique acima de backgrounds */
+  right: 0;
+  margin-left: auto;
+  margin-right: 48px;
+}
+
+/* estilo dos botões */
+.rc-home .cta-buttons .rc-cta {
+  display: inline-block;
+  padding: 10px 18px;
+  border-radius: var(--rc-button-radius);
+  background: linear-gradient(180deg, #15d36a, #0db45a);
+  color: #0a0a0a;
+  font-weight: 600;
+  box-shadow: 0 10px 34px rgba(16,140,75,0.12);
+  border: none;
+  cursor: pointer;
+}
+
+/* -- IMPORTANT: remove overlay/pseudo-elements only inside .rc-home -- */
+/* Isto evita afetar outras páginas */
+.rc-home .hero-wrapper::before,
+.rc-home .hero-wrapper::after {
+  /* se havia um overlay indesejado como pseudo-elemento, escondemos aqui */
+  content: "";
+  display: none !important;
+}
+
+/* --- Simulador (escopo) --- */
+.rc-sim .sim-container {
+  position: relative;
+  padding: 18px;
+  min-height: 520px;
+}
+
+/* remover barras pretas/overlays apenas para a sim page */
+.rc-sim .sim-root::before,
+.rc-sim .sim-root::after {
+  content: "";
+  display: none !important;
+}
+
+/* garantir que o painel de trade fique acima */
+.rc-sim .trade-panel {
+  position: relative;
+  z-index: 40;
+}
+
+/* garantir que o botão "Voltar ao início" fique à frente do painel */
+.rc-sim .btn-go-top {
+  position: absolute;
+  right: 28px;
+  bottom: 28px;
+  z-index: 50;
+  border-radius: 999px;
+  padding: 12px 18px;
+  background: linear-gradient(180deg,#19d368,#10b85a);
+  color: #001;
+  font-weight: 700;
+}
+
+/* small responsive tweaks */
+@media (max-width: 900px) {
+  .rc-home .top-coins {
+    gap: 8px;
+    overflow-x: auto;
+    padding: 8px 16px;
+  }
+  .rc-home .cta-buttons {
+    position: static;
+    margin: 10px auto 0;
+    width: calc(100% - 32px);
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
