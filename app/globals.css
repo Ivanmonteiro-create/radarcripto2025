@@ -3019,3 +3019,40 @@ html,body,#__next {
   border: 0 !important;
   pointer-events: auto !important;
 }
+/* ===== Reativa os 5 botões e empurra o hero para baixo ================= */
+
+/* Mostra a barra de botões no topo, centralizada e acima do hero */
+.rc-topnav {
+  display: flex !important;
+  justify-content: center;
+  position: relative !important;
+  z-index: 10 !important;
+  margin-top: 8px;
+}
+.rc-topnav__inner { display: flex; gap: 8px; }
+
+.rc-topnav .rc-pill {
+  background: #11a84b !important;
+  color: #0b1b12 !important;
+  border: 1px solid #1fe66a !important;
+}
+
+/* Se algum ancestral da barra foi “zerado”, neutraliza sem voltar a tarja */
+.rc-topnav, .rc-topnav * { pointer-events: auto !important; }
+* > .rc-topnav { background: transparent !important; }
+
+/* Dá espaço para o hero caber abaixo dos 5 botões */
+.rc-hero, .rc-home .rc-hero { margin-top: 20px !important; }
+
+/* Segurança: qualquer faixa superior que contenha os botões fica transparente */
+.rc-topstrip:has(.rc-topnav),
+.rc-topband:has(.rc-topnav),
+.rc-header:has(.rc-topnav) {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
