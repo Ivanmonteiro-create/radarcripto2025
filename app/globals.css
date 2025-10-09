@@ -313,3 +313,102 @@ a{ color: inherit; text-decoration: none; }
   padding: 14px;
 }
 .rc-card h3 { color:#bfffdc; margin:0 0 8px; }
+/* ====== TICKERS EM CHIPS, À ESQUERDA =================================== */
+.rc-tickers--left {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  gap: 10px;
+  justify-content: start;      /* alinha à esquerda */
+  margin: 8px 0 0;
+}
+.rc-chip {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(0,255,128,0.35);
+  background: rgba(0,255,128,0.08);
+  box-shadow: 0 0 0 1px rgba(0,255,128,0.07) inset;
+}
+.rc-chip__pair  { color:#bfffdc; font-weight: 700; letter-spacing:.2px; }
+.rc-chip__price { color:#18e273; font-weight: 700; }
+
+/* ====== HERO MENOR E UM POUCO MAIS ALTO PARA CABER NO ZOOM 100% ======== */
+.rc-hero {
+  position: relative;
+  margin: 16px auto 56px;
+  max-width: 980px;
+}
+@media (max-width: 1200px){ .rc-hero{ max-width: 920px; } }
+@media (max-width: 992px) { .rc-hero{ max-width: 860px; } }
+
+.rc-hero__inner{
+  border-radius: 18px;
+  border: 1px solid rgba(0,255,128,0.22);
+  background: radial-gradient(80% 60% at 50% 40%, rgba(16, 40, 20, 0.55), rgba(10, 22, 14, 0.35));
+  padding: 28px 32px;
+}
+
+/* ====== RADAR LEVE ATRÁS DO HERO ====================================== */
+.rc-radar {
+  --line: rgba(0,255,128,0.18);
+  --beam: rgba(0,255,128,0.28);
+  position: absolute;
+  inset: 0 0 auto 50%;
+  width: 620px; height: 620px;
+  transform: translateX(-50%);
+  pointer-events: none; opacity: .9;
+}
+.rc-radar::before,
+.rc-radar::after{
+  content:""; position:absolute; inset:0; border-radius:50%;
+}
+.rc-radar::before{
+  background:
+    radial-gradient(circle at center, var(--line) 1px, transparent 1px) 0 0/ 62px 62px,
+    radial-gradient(circle at center, var(--line) 1px, transparent 1px) 31px 31px/ 62px 62px;
+  mask: radial-gradient(circle at center, transparent 35%, #000 36%);
+  opacity:.7;
+}
+.rc-radar::after{
+  background: conic-gradient(from 0deg, var(--beam), transparent 35%);
+  animation: rc-sweep 3.4s linear infinite;
+  mix-blend-mode: screen; opacity:.6;
+}
+@keyframes rc-sweep{ to{ transform: rotate(360deg); } }
+
+/* ====== NAV/“Voltar ao início” (evita duplicados e tarjas) ============= */
+main .rc-backtop:not(:last-of-type){ display:none !important; }  /* se surgir duplicado */
+main, .rc-home, .rc-page { padding-top: 0 !important; margin-top: 0 !important; }
+
+/* ====== SIMULADOR: botão ao lado direito da área de controles ========== */
+/* Sem refatorar o TSX: deixa o botão colado à direita e com tamanho ok. */
+.page-simulador .rc-backtop{
+  display:flex; justify-content:flex-end; margin: 10px 0 0;
+}
+.page-simulador .rc-backtop .rc-btn{ height: 36px; padding: 0 14px; }
+
+/* ====== PÁGINAS INTERNAS: só um botão e conteúdo colado ao topo ======== */
+.page-planos .rc-backtop,
+.page-sobre .rc-backtop,
+.page-fale .rc-backtop { margin: 8px 0 0; }
+
+/* ====== CORES “VERDE RADARCRYPTO” PARA CONTROLES/PAINÉIS =============== */
+.panel{
+  border: 1px solid rgba(0,255,128,0.20);
+  background: rgba(0,20,10,0.55);
+  border-radius: 16px;
+  box-shadow: 0 8px 28px rgba(0,0,0,.35) inset, 0 0 0 1px rgba(0,255,128,.08);
+}
+.lbl{ color:#b6ffdb; font-size:13px; display:flex; flex-direction:column; gap:6px; }
+.inp{
+  background: rgba(0,255,128,0.06);
+  border: 1px solid rgba(0,255,128,0.22);
+  border-radius: 10px; color:#eafff5; padding:10px 12px; outline:none;
+}
+.inp:focus{ border-color:#18e273; box-shadow:0 0 0 3px rgba(24,226,115,.18); }
+.btn{ background:#18e273; color:#052515; border-radius:10px; padding:8px 12px; font-weight:700; }
+.btn:hover{ filter:brightness(1.07); }
