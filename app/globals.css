@@ -348,4 +348,40 @@ main, .rc-home, .rc-page { padding-top: 0 !important; margin-top: 0 !important; 
 }
 .page-simulador::after {
   content: attr(data-btn-text);
+}/* === SIMULADOR: esconder botão antigo e qualquer tarja herdada ========= */
+
+/* Se existir um botão antigo em qualquer canto, some com ele */
+.page-simulador .tcBackBtn,
+.page-simulador a[href="/"]:is(.btn, .tcBackBtn){
+  display: none !important;
+}
+
+/* Garante que nenhuma “topbar/tarja preta” herdada apareça no simulador */
+.page-simulador .rc-topbar,
+.page-simulador .rc-topband,
+.page-simulador .rc-topstrip,
+.page-simulador .rc-page-top {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* O novo botão (no painel) sempre visível e verde */
+.page-simulador .rc-backtop .rc-btn.rc-btn--green{
+  display: inline-flex !important;
+  height: 36px;
+  align-items: center;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-weight: 800;
+}
+
+/* Não deixa nada empurrar o conteúdo para baixo nesta página */
+.page-simulador{
+  padding-top: 0 !important;
+  margin-top: 0 !important;
 }
