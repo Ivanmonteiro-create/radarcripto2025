@@ -18,7 +18,6 @@
   --topbar-h: 64px;        /* altura virtual da barra superior (para espaçamentos) */
   --hero-max: 960px;       /* largura máxima do card do hero */
 }
-
 /* ================== Reset mínimo ================== */
 *{ box-sizing: border-box; }
 html, body { height: 100%; }
