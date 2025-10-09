@@ -332,3 +332,41 @@ main, .rc-home, .rc-page { padding-top: 0 !important; margin-top: 0 !important; 
   padding-top: 0 !important;
   margin-top: 0 !important;
 }
+/* === SIMULADOR: limpar tarjas e mover botão ============================ */
+
+/* Restaura o cabeçalho do gráfico (caso alguma regra anterior tenha escondido) */
+.page-simulador .compactHeader{
+  display:block !important;
+}
+
+/* Remove a ÚLTIMA tarja preta que sobrou (qualquer topbar velha na página do simulador) */
+.page-simulador .rc-topbar,
+.page-simulador .rc-topband,
+.page-simulador .rc-topstrip,
+.page-simulador .rc-page-top{
+  display:none !important;
+  height:0 !important;
+  padding:0 !important;
+  margin:0 !important;
+  border:0 !important;
+  box-shadow:none !important;
+  background:transparent !important;
+}
+
+/* Esconde o botão antigo (de onde ele estava no canto esquerdo) */
+.page-simulador .tcBackBtn{
+  display:none !important;
+}
+
+/* Garante que o botão novo (no painel) fique visível e verde */
+.page-simulador .rc-backtop .rc-btn.rc-btn--green{
+  display:inline-flex !important;
+  height:36px; align-items:center; padding:0 14px;
+  border-radius:10px; font-weight:800;
+}
+
+/* Previne qualquer espaçamento extra no topo da página do simulador */
+.page-simulador{
+  padding-top:0 !important;
+  margin-top:0 !important;
+}
