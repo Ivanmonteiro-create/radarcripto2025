@@ -1,7 +1,7 @@
-/* app/globals.css — RadarCrypto (clean) */
+/* app/globals.css — RadarCrypto (home align + full-height tickers + pro radar) */
 @charset "UTF-8";
 
-/* Tailwind layers (uma vez só) */
+/* Tailwind layers */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -15,9 +15,16 @@
   --grid: rgba(255,255,255,.08);
 
   /* Home layout knobs */
-  --topbar-h: 64px;        /* altura virtual da barra superior (para espaçamentos) */
-  --hero-max: 1160px;      /* largura máxima do card do hero (↑ para letras maiores) */
-  --tickers-col-w: 150px;  /* largura reservada para a coluna de moedas à esquerda */
+  --topbar-h: 64px;
+  --hero-max: 1160px;
+  --tickers-col-w: 150px;
+
+  /* Radar knobs */
+  --radar-size: clamp(520px, 76vh, 980px);
+  --radar-line: rgba(0,255,128,0.18);
+  --radar-beam: rgba(24,226,115,0.35);
+  --radar-beam-soft: rgba(24,226,115,0.18);
+  --radar-glow: rgba(24,226,115,0.22);
 }
 
 /* ================== Reset mínimo ================== */
@@ -35,14 +42,8 @@ img{ max-width:100%; display:block; }
 a{ color: inherit; text-decoration: none; }
 
 /* ================== Remoção de tarjas pretas (global) ================== */
-.rc-topbar,
-.rc-topband,
-.rc-topstrip,
-.rc-header,
-.rc-page-top,
-.rc-hero-gap,
-.rc-sep,
-.rc-divider {
+.rc-topbar, .rc-topband, .rc-topstrip, .rc-header,
+.rc-page-top, .rc-hero-gap, .rc-sep, .rc-divider {
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
@@ -51,12 +52,8 @@ a{ color: inherit; text-decoration: none; }
   padding: 0 !important;
   margin: 0 !important;
 }
-.rc-topbar::before,
-.rc-topband::before,
-.rc-topstrip::before,
-.rc-header::before,
-.rc-page-top::before,
-.rc-hero-gap::before { content: none !important; }
+.rc-topbar::before, .rc-topband::before, .rc-topstrip::before,
+.rc-header::before, .rc-page-top::before, .rc-hero-gap::before { content: none !important; }
 
 /* ================== TopNav – 5 botões ================== */
 .rc-topnav{
@@ -71,27 +68,26 @@ a{ color: inherit; text-decoration: none; }
   border: 1px solid #1fe66a; background:#0f2e1f; color:#1fe66a;
   font-weight: 800; line-height:1; transition: transform .12s, box-shadow .12s, filter .12s;
 }
-.rc-pill:hover,
-.rc-pill:focus-visible,
-.rc-pill.is-active{
+.rc-pill:hover, .rc-pill:focus-visible, .rc-pill.is-active{
   filter: brightness(1.25);
   box-shadow: 0 0 0 2px #1fe66a inset, 0 0 28px rgba(31,230,106,.35);
   transform: translateY(-1px);
   outline: none;
 }
 
-/* ================== Live Tickers (moedas) ================== */
-/* Coluna fixa no TOPO ESQUERDO — caber 8 chips a 100% de zoom */
+/* ================== Live Tickers (moedas) — coluna ocupa a viewport toda ================== */
 .rc-home{ position: relative; }
 
 .rc-tickers--leftColumn{
   position: absolute;
-  top: 0;                /* cola no topo da viewport de conteúdo */
-  left: 18px;
+  top: 0; left: 18px;
   display: flex;
   flex-direction: column;
-  gap: 6px;              /* gap menor para caber as 8 */
-  padding: 6px 0;        /* respiro sutil */
+  /* ocupa a altura da viewport e distribui os 8 chips do topo ao rodapé */
+  height: 100dvh;
+  justify-content: space-between;
+  gap: 0;                   /* gaps passam a ser distribuídos pelo space-between */
+  padding: 6px 0;
   z-index: 6;
 }
 
@@ -100,28 +96,23 @@ a{ color: inherit; text-decoration: none; }
   background: rgba(0,255,128,.08);
   box-shadow: 0 0 0 1px rgba(0,255,128,.07) inset;
   border-radius: 14px;
-  padding: 8px 10px;     /* mais compacto */
+  padding: 8px 10px;        /* compacto para caber 8 sem rolar */
 }
 .rc-chip--vertical{
   display: flex; flex-direction: column; align-items: center;
-  min-width: 112px;      /* estreita um pouco pra caber 8 */
+  min-width: 110px;
 }
 .rc-chip__pair  { color:#bfffdc; font-weight:700; letter-spacing:.2px; line-height:1; }
 .rc-chip__price { color:#18e273; font-weight:800; margin-top:6px; line-height:1; }
 
-/* ================== HERO (card grande, FLUORESCENTE e MAIOR) ================== */
-/* Compatível com os dois padrões de classe do TSX: _inner e __inner, etc. */
+/* ================== HERO (card grande, fluorescente, maior) ================== */
 .rc-hero{
   position: relative; z-index: 5;
-  /* centraliza visualmente entre a coluna esquerda e a margem direita */
   margin: 14px auto 56px;
   width: min(var(--hero-max), calc(96vw - var(--tickers-col-w)));
-  /* afasta do bloco de moedas à esquerda */
-  margin-left: calc(var(--tickers-col-w) + 36px);
-  /* dá leve ênfase à borda direita visível */
+  margin-left: calc(var(--tickers-col-w) + 36px);  /* afasta da coluna de moedas */
   transform: translateX(-6px);
   border-radius: 18px;
-  /* contorno fluorescente */
   border: 1px solid rgba(0,255,128,.35);
   background:
     radial-gradient(80% 60% at 50% 40%, rgba(16,40,20,.65), rgba(10,22,14,.38)),
@@ -137,7 +128,6 @@ a{ color: inherit; text-decoration: none; }
   display: grid; align-content: center; gap: 12px;
   padding: 32px 40px;
   border-radius: 18px;
-  /* brilho interno suave */
   box-shadow: 0 0 0 1px rgba(0,255,128,.18) inset;
   backdrop-filter: blur(3px);
 }
@@ -145,12 +135,11 @@ a{ color: inherit; text-decoration: none; }
   letter-spacing:.12em; font-size:13px; font-weight:800; opacity:.9;
 }
 .rc-hero_title, .rc-hero__title{
-  color: #b8ffd8;                       /* base clara */
-  /* destaque FLUORESCENTE */
+  color: #b8ffd8;
   text-shadow:
     0 0 12px rgba(24,226,115,.45),
     0 0 40px rgba(24,226,115,.25);
-  font-size: clamp(34px, 5.8vw, 70px);  /* ↑ maior para mais impacto */
+  font-size: clamp(34px, 5.8vw, 70px);
   line-height: 1.02; font-weight: 900; margin: 0;
 }
 .rc-hero_desc, .rc-hero__desc{
@@ -158,26 +147,81 @@ a{ color: inherit; text-decoration: none; }
 }
 .rc-hero_phase{ margin-left: 8px; color:#7affc1; font-weight:700; }
 
-/* ================== Radar (fundo leve) ================== */
-.rc-radar,
-.radarBg,
-[data-radar-bg]{
-  position: absolute; inset: 0; display: grid; place-items: center;
-  z-index: 0; pointer-events: none;
+/* ================== RADAR PRO — centralizado, atrás do conteúdo ================== */
+/* Usa apenas o contêiner <div class="rc-radar" aria-hidden /> existente */
+.rc-radar{
+  position: fixed;           /* sempre central do viewport */
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 1;                /* atrás do hero (que tem z-index:5) */
+  pointer-events: none;
 }
-.rc-radar > canvas,
-.rc-radar > svg,
-.radarBg > canvas,
-.radarBg > svg,
-[data-radar-bg] > canvas,
-[data-radar-bg] > svg{
-  width: min(1200px, 90vw);
-  height: min(1200px, 90vw);
-  max-width: none; max-height: none; opacity: .95;
+.rc-radar::before,
+.rc-radar::after{
+  content:"";
+  width: var(--radar-size);
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  position: relative;
 }
 
+/* Camada de grade, anéis, eixos e “estrelas” (tudo em um background composto) */
+.rc-radar::before{
+  background:
+    /* estrelas/ruído sutil */
+    radial-gradient(circle at 20% 30%, rgba(24,226,115,.10) 1px, transparent 2px) 0 0 / 120px 120px,
+    radial-gradient(circle at 70% 80%, rgba(24,226,115,.08) 1px, transparent 2px) 60px 30px / 140px 140px,
+    radial-gradient(circle at 40% 60%, rgba(24,226,115,.06) 1px, transparent 2px) 20px 80px / 100px 100px,
+    /* grade de pontos (duas malhas defasadas) */
+    radial-gradient(circle at center, rgba(24,226,115,.18) 1px, transparent 1.2px) 0 0 / 62px 62px,
+    radial-gradient(circle at center, rgba(24,226,115,.12) 1px, transparent 1.2px) 31px 31px / 62px 62px,
+    /* anéis concêntricos */
+    repeating-radial-gradient(circle at center,
+      rgba(24,226,115,.25) 0 1px,
+      transparent 1px 62px),
+    /* glow central */
+    radial-gradient(80% 80% at 50% 50%,
+      rgba(24,226,115,.15), rgba(24,226,115,.04) 60%, transparent 70%);
+  box-shadow:
+    0 0 0 1px rgba(24,226,115,.25) inset,
+    0 0 80px rgba(24,226,115,.10);
+  /* eixos cruzados */
+  -webkit-mask:
+    radial-gradient(circle at center, #000 68%, transparent 69%),
+    linear-gradient(#000,#000) 50% 0 / 1px 100% no-repeat,
+    linear-gradient(#000,#000) 0 50% / 100% 1px no-repeat;
+          mask:
+    radial-gradient(circle at center, #000 68%, transparent 69%),
+    linear-gradient(#000,#000) 50% 0 / 1px 100% no-repeat,
+    linear-gradient(#000,#000) 0 50% / 100% 1px no-repeat;
+}
+
+/* Feixe com cauda (trail) e brilho */
+.rc-radar::after{
+  background:
+    /* feixe principal */
+    conic-gradient(from 0turn,
+      var(--radar-beam) 0deg,
+      var(--radar-beam-soft) 40deg,
+      transparent 55deg 360deg);
+  filter: blur(.4px);
+  transform-origin: 50% 50%;
+  animation: rc-radar-spin 3.6s linear infinite;
+  /* máscara para “cortar” o miolo e deixar parecer antena */
+  -webkit-mask:
+    radial-gradient(circle at center, transparent 0 26%, #000 27% 100%);
+          mask:
+    radial-gradient(circle at center, transparent 0 26%, #000 27% 100%);
+  box-shadow:
+    0 0 24px var(--radar-glow),
+    0 0 120px rgba(24,226,115,.16);
+}
+
+@keyframes rc-radar-spin { to { transform: rotate(1turn); } }
+
 /* ================== Internas / utilidades leves ================== */
-.tcBackBtn{ display:none !important; }         /* remove versões fantasmas do back */
+.tcBackBtn{ display:none !important; }
 .panel{ background: rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); border-radius:14px; }
 
 /* ================== RESPONSIVO ================== */
@@ -189,10 +233,11 @@ a{ color: inherit; text-decoration: none; }
   }
 }
 @media (max-width: 980px){
-  /* Empilha: moedas podem quebrar em duas colunas; hero centraliza total */
+  /* No mobile, os tickers viram linha(s) no topo */
   .rc-tickers--leftColumn{
     position: static; left: auto; top: auto;
-    flex-direction: row; flex-wrap: wrap; justify-content: center;
+    height: auto; justify-content: center;
+    flex-direction: row; flex-wrap: wrap;
     gap: 8px; padding-top: 8px; margin-bottom: 6px;
   }
   .rc-hero{
@@ -208,12 +253,8 @@ main, .rc-home, .rc-page { padding-top: 0 !important; margin-top: 0 !important; 
 
 /* ====== SIMULADOR: botão ao lado direito da área de controles ========== */
 .page-simulador .rc-controls{ position: relative; }
-.page-simulador .rc-backtop{
-  position: absolute; right: 12px; top: 8px; z-index: 50;
-}
-.page-simulador .rc-backtop .rc-btn{
-  height: 34px; padding: 0 14px; border-radius: 10px;
-}
+.page-simulador .rc-backtop{ position: absolute; right: 12px; top: 8px; z-index: 50; }
+.page-simulador .rc-backtop .rc-btn{ height: 34px; padding: 0 14px; border-radius: 10px; }
 
 /* ====== Controles/inputs com “verde RadarCrypto” ======================= */
 .panel{
