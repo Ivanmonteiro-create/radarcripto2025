@@ -1,5 +1,6 @@
 // app/page.tsx
 import LiveTickers from "@/components/LiveTickers";
+import HeroRadar from "@/components/HeroRadar";
 
 export default function HomePage() {
   return (
@@ -9,8 +10,10 @@ export default function HomePage() {
         <LiveTickers />
       </div>
 
-      {/* Radar e hero */}
-      <div className="rc-radar" aria-hidden />
+      {/* Radar central, atrás do hero */}
+      <HeroRadar />
+
+      {/* Hero */}
       <section className="rc-hero" aria-label="Chamada principal">
         <div className="rc-hero_inner">
           <p className="rc-hero_eyebrow">SIMULADOR DE TRADING</p>
