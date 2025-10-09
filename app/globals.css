@@ -385,3 +385,61 @@ main, .rc-home, .rc-page { padding-top: 0 !important; margin-top: 0 !important; 
   padding-top: 0 !important;
   margin-top: 0 !important;
 }
+/* === SIMULADOR: levar "Voltar ao início" p/ frente do painel e sumir com a tarja === */
+
+/* O painel de controles vira referência de posicionamento */
+.page-simulador .rc-controls {
+  position: relative !important;
+}
+
+/* O contêiner da tarja deixa de ser “faixa”: fica fora do fluxo e transparente */
+.page-simulador .rc-backtop {
+  position: fixed !important;      /* sai do fluxo, não cria mais tarja */
+  inset: auto 12px  auto  auto;    /* right:12px; top definido abaixo */
+  top: 8px !important;             /* topo da página (alinha com cabeçalho do gráfico) */
+  left: auto !important;
+  z-index: 60 !important;          /* acima do painel e do gráfico */
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  pointer-events: none;            /* contêiner ignora clique; só o botão recebe */
+}
+
+/* O botão verde em si (dentro do rc-backtop) */
+.page-simulador .rc-backtop .rc-btn.rc-btn--green {
+  display: inline-flex !important;
+  pointer-events: auto;            /* botão é clicável */
+  height: 36px;
+  align-items: center;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-weight: 800;
+  background: #18e273;             /* verde RadarCrypto */
+  color: #052515;
+  box-shadow: 0 0 0 1px rgba(0,255,128,0.28), 0 8px 24px rgba(0,0,0,.35);
+}
+.page-simulador .rc-backtop .rc-btn.rc-btn--green:hover {
+  filter: brightness(1.07);
+  transform: translateY(-1px);
+}
+
+/* Segurança: se existir alguma outra “faixa/topbar” herdada, apaga só no simulador */
+.page-simulador .rc-topbar,
+.page-simulador .rc-topband,
+.page-simulador .rc-topstrip,
+.page-simulador .rc-page-top {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Garante que nada adicione offset no topo do simulador */
+.page-simulador { padding-top: 0 !important; margin-top: 0 !important; }
