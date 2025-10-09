@@ -55,13 +55,25 @@ export default function SimPageClient() {
         overflow: 'hidden',
       }}
     >
-      {/* CSS local — apenas para esta página */}
+      {/* ===== CSS local do simulador ===== */}
       <style>{`
-        /* Apaga qualquer instância antiga (tarjas e botões externos) */
-        .page-simulador .rc-backtop,
-        .page-simulador .rc-backtop-fixed { display: none !important; }
+        /* 0) Garantias: nada empurra o topo nesta página */
+        body:has(.page-simulador) .rc-backtop,
+        body:has(.page-simulador) .rc-topbar,
+        body:has(.page-simulador) .rc-topband,
+        body:has(.page-simulador) .rc-topstrip,
+        body:has(.page-simulador) .rc-page-top {
+          display: none !important;
+          height: 0 !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          border: 0 !important;
+          background: transparent !important;
+          box-shadow: none !important;
+        }
+        .page-simulador{ padding-top:0 !important; margin-top:0 !important; }
 
-        /* Cabeçalho do gráfico (mantém exatamente como está) */
+        /* 1) Cabeçalho do gráfico (mantém como está) */
         .page-simulador .compactHeader{
           display:flex; align-items:center; justify-content:space-between;
           gap:8px; padding:6px 8px; margin:0;
@@ -78,28 +90,35 @@ export default function SimPageClient() {
         }
         .page-simulador .tvFsBtn:hover{ filter:brightness(1.05); }
 
-        /* Painel de controles vira referência para o botão interno */
+        /* 2) Painel de controles vira referência para o botão interno */
         .page-simulador .rc-controls{
           position:relative;
-          padding-top:8px;   /* respiro mínimo */
+          padding-top:8px;   /* respiro mínimo do topo */
         }
 
-        /* Botão "Voltar ao início" DENTRO do painel, na frente do título */
+        /* 3) "Voltar ao início" DENTRO do quadrado do painel, na MESMA LINHA do título */
         .page-simulador .backBtnInPanel{
           position:absolute;
-          top:6px;                 /* alinha com o topo do painel */
-          right:10px;              /* canto direito do quadrado */
+          top: 0;                 /* mesma linha do topo do painel */
+          right: 10px;
           z-index: 5;
           display:inline-flex;
-          white-space:nowrap;
-          writing-mode: initial;   /* garante horizontal */
-          transform: none;
-        }
-        .page-simulador .backBtnInPanel .rc-btn{
+          align-items:center;
           height: 34px;
-          padding: 0 14px;
-          border-radius: 10px;
+        }
+        /* Botão quadrado VERDE (marca do site) */
+        .page-simulador .backBtnInPanel .rc-btn--green{
+          display:inline-flex;
+          height: 34px; padding: 0 14px;
+          border-radius: 8px;                    /* quadrado (sem formato pill) */
           font-weight: 800;
+          background: #18e273;                   /* verde RadarCrypto */
+          color: #052515;
+          box-shadow: 0 0 0 1px rgba(0,255,128,.28), 0 8px 24px rgba(0,0,0,.35);
+        }
+        .page-simulador .backBtnInPanel .rc-btn--green:hover{
+          filter: brightness(1.07);
+          transform: translateY(-1px);
         }
       `}</style>
 
@@ -149,7 +168,7 @@ export default function SimPageClient() {
           borderLeft: '1px solid rgba(255,255,255,.06)',
         }}
       >
-        {/* Botão VERDE dentro do quadrado, na frente do "Controles de Trade" */}
+        {/* Botão VERDE dentro do quadrado, na MESMA LINHA do topo do painel */}
         <div className="backBtnInPanel">
           <a href="/" className="rc-btn rc-btn--green">Voltar ao início</a>
         </div>
