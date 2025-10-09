@@ -1,20 +1,19 @@
 // app/layout.tsx
-import type { Metadata } from "next";
 import "./globals.css";
-import TopNav from "@/components/TopNav";
+import React from "react";
 
-export const metadata: Metadata = {
-  title: "RadarCrypto — Simulador & Robôs (SIM)",
-  description:
-    "Aprenda trading na prática, sem arriscar um centavo. Simulador e robôs no modo SIM (dados em tempo real, sem risco).",
+export const metadata = {
+  title: "RadarCrypto",
+  description: "RadarCrypto - Simulador e Radar",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
       <body className="rc-root">
-        <TopNav />
-        <main className="rc-main">{children}</main>
+        {/* aqui poderia ir um Header comum */}
+        {children}
+        {/* opcional Footer */}
       </body>
     </html>
   );
