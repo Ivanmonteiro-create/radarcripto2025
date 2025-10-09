@@ -7,7 +7,7 @@ export default function HeroRadar() {
   return (
     <div className="rc-radar rc-radar--alive" aria-hidden>
       <style>{`
-        /* Camada animada, não altera o tamanho/posição do círculo base do globals */
+        /* Camada animada independente do layout global */
         .rc-radar__frame {
           position: absolute;
           inset: 0;
@@ -15,42 +15,43 @@ export default function HeroRadar() {
           place-items: center;
           pointer-events: none;
           z-index: 2; /* acima da grade ::before, abaixo do hero */
+          transform: scale(.88); /* ↓ ligeiramente menor, sem mexer no círculo base */
+          transform-origin: center;
         }
 
+        /* Varredura CALMA: mais lenta, feixe mais estreito e menos intenso */
         .rc-radar__beam {
           width: var(--radar-size);
           aspect-ratio: 1 / 1;
           border-radius: 50%;
           position: relative;
-          /* Feixe 120°: núcleo claro + cauda */
           background:
             conic-gradient(
               from 0turn,
-              rgba(40,255,170,0.72) 0deg,
-              rgba(40,255,170,0.38) 88deg,
-              rgba(40,255,170,0.18) 120deg,
-              transparent 130deg 360deg
+              rgba(40,255,170,0.50) 0deg,     /* núcleo mais suave */
+              rgba(40,255,170,0.26) 70deg,    /* transição */
+              rgba(40,255,170,0.12) 100deg,   /* cauda leve */
+              transparent 110deg 360deg       /* resto transparente */
             );
           mix-blend-mode: screen;
           filter: blur(.25px);
-          /* furo central (antena) e limite do círculo */
           -webkit-mask: radial-gradient(circle at center, transparent 0 24%, #000 25% 100%);
                   mask: radial-gradient(circle at center, transparent 0 24%, #000 25% 100%);
-          animation: rc-radar-spin 2.6s linear infinite;
+          animation: rc-radar-spin 5.2s linear infinite; /* ← bem mais lento */
         }
 
-        /* Halo na borda para sensação de “scan” tangenciando o perímetro */
+        /* Halo na borda também suavizado */
         .rc-radar__beam::after {
           content:"";
           position:absolute; inset:0;
           border-radius:50%;
           background:
-            radial-gradient(closest-side, transparent 92%, rgba(40,255,170,.14) 96%, transparent 100%);
+            radial-gradient(closest-side, transparent 92%, rgba(40,255,170,.10) 96%, transparent 100%);
           -webkit-mask: radial-gradient(circle at center, transparent 0 24%, #000 25% 100%);
                   mask: radial-gradient(circle at center, transparent 0 24%, #000 25% 100%);
         }
 
-        /* Pulso de alcance: anel que expande e desvanece (cada 3.6s) */
+        /* Pulso de alcance: mais leve e mais lento */
         .rc-radar__pulse {
           position:absolute; inset:0; display:grid; place-items:center;
           pointer-events:none;
@@ -60,14 +61,14 @@ export default function HeroRadar() {
           width: calc(var(--radar-size) * .26);
           height: calc(var(--radar-size) * .26);
           border-radius:50%;
-          border: 2px solid rgba(40,255,170,.28);
-          box-shadow: 0 0 24px rgba(40,255,170,.18);
+          border: 2px solid rgba(40,255,170,.18); /* menos luminoso */
+          box-shadow: 0 0 18px rgba(40,255,170,.12);
           -webkit-mask: radial-gradient(circle at center, transparent 0 22%, #000 23% 100%);
                   mask: radial-gradient(circle at center, transparent 0 22%, #000 23% 100%);
-          animation: rc-range-pulse 3.6s ease-out infinite;
+          animation: rc-range-pulse 5.4s ease-out infinite; /* ciclo mais longo */
         }
 
-        /* Blips discretos: 4 pontos fixos que “acendem/apagam” */
+        /* Blips discretos ainda presentes, porém com opacidade reduzida */
         .rc-radar__blips {
           position:absolute; inset:0; display:grid; place-items:center;
           pointer-events:none;
@@ -82,40 +83,40 @@ export default function HeroRadar() {
           content:"";
           position:absolute; inset:0; border-radius:50%;
           background:
-            radial-gradient(circle at 22% 36%, rgba(40,255,170,.0) 0 5px, rgba(40,255,170,.6) 5.5px, rgba(40,255,170,.0) 6px) no-repeat,
-            radial-gradient(circle at 70% 26%, rgba(40,255,170,.0) 0 6px, rgba(40,255,170,.6) 6.5px, rgba(40,255,170,.0) 7px) no-repeat;
-          animation: rc-blips-a 2.8s ease-in-out infinite;
-          opacity:.85;
+            radial-gradient(circle at 22% 36%, rgba(40,255,170,.0) 0 5px, rgba(40,255,170,.45) 5.5px, rgba(40,255,170,.0) 6px) no-repeat,
+            radial-gradient(circle at 70% 26%, rgba(40,255,170,.0) 0 6px, rgba(40,255,170,.45) 6.5px, rgba(40,255,170,.0) 7px) no-repeat;
+          animation: rc-blips-a 4.2s ease-in-out infinite; /* mais lento */
+          opacity:.7;
         }
         .rc-radar__blips::after {
           background:
-            radial-gradient(circle at 66% 68%, rgba(40,255,170,.0) 0 4px, rgba(40,255,170,.55) 4.5px, rgba(40,255,170,.0) 5px) no-repeat,
-            radial-gradient(circle at 32% 72%, rgba(40,255,170,.0) 0 4px, rgba(40,255,170,.55) 4.5px, rgba(40,255,170,.0) 5px) no-repeat;
-          animation: rc-blips-b 3.4s ease-in-out infinite;
-          opacity:.85;
+            radial-gradient(circle at 66% 68%, rgba(40,255,170,.0) 0 4px, rgba(40,255,170,.40) 4.5px, rgba(40,255,170,.0) 5px) no-repeat,
+            radial-gradient(circle at 32% 72%, rgba(40,255,170,.0) 0 4px, rgba(40,255,170,.40) 4.5px, rgba(40,255,170,.0) 5px) no-repeat;
+          animation: rc-blips-b 4.8s ease-in-out infinite;
+          opacity:.7;
         }
 
         @keyframes rc-radar-spin { to { transform: rotate(1turn); } }
         @keyframes rc-range-pulse {
-          0%   { transform: scale(.6); opacity:.28; }
-          70%  { transform: scale(1.15); opacity:.06; }
-          100% { transform: scale(1.18); opacity:0; }
+          0%   { transform: scale(.6); opacity:.22; }
+          75%  { transform: scale(1.12); opacity:.05; }
+          100% { transform: scale(1.14); opacity:0; }
         }
         @keyframes rc-blips-a {
-          0%,20%{ opacity:.9; }
-          35%   { opacity:.2; }
-          55%,75%{ opacity:.9; }
-          100%  { opacity:.6; }
+          0%,25%{ opacity:.7; }
+          45%   { opacity:.15; }
+          70%,90%{ opacity:.7; }
+          100%  { opacity:.55; }
         }
         @keyframes rc-blips-b {
-          0%,25%{ opacity:.9; }
-          45%   { opacity:.2; }
-          65%,85%{ opacity:.9; }
-          100%  { opacity:.6; }
+          0%,25%{ opacity:.7; }
+          50%   { opacity:.15; }
+          75%,95%{ opacity:.7; }
+          100%  { opacity:.55; }
         }
       `}</style>
 
-      {/* Feixe animado + pulse + blips (não mexe no círculo/grade do globals) */}
+      {/* Feixe animado + pulse + blips (somente radar) */}
       <div className="rc-radar__frame">
         <div className="rc-radar__beam" />
         <div className="rc-radar__pulse" />
