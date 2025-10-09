@@ -1,4 +1,4 @@
-/* app/globals.css — RadarCrypto (tickers topo/rodapé fixos + sweep dentro do círculo) */
+/* app/globals.css — RadarCrypto (tickers ok + RADAR VIVO no círculo) */
 @charset "UTF-8";
 
 /* Tailwind layers */
@@ -20,11 +20,11 @@
   --tickers-col-w: 150px;
 
   /* Radar */
-  --radar-size: clamp(620px, 72vmin, 1120px);
+  --radar-size: clamp(620px, 72vmin, 1120px); /* NÃO muda o tamanho do círculo */
   --radar-line: rgba(0,255,128,0.18);
-  --radar-beam: rgba(24,226,115,0.42);
-  --radar-beam-soft: rgba(24,226,115,0.20);
-  --radar-glow: rgba(24,226,115,0.22);
+  --radar-beam: rgba(40,255,170,0.60);        /* feixe mais claro/vivo */
+  --radar-beam-soft: rgba(40,255,170,0.28);
+  --radar-glow: rgba(40,255,170,0.25);
 }
 
 /* ================== Reset mínimo ================== */
@@ -80,15 +80,10 @@ a{ color: inherit; text-decoration: none; }
 
 .rc-tickers--leftColumn{
   position: fixed;           /* garante topo absoluto da janela */
-  top: 0;                    /* encosta no topo */
-  bottom: 0;                 /* encosta no rodapé */
-  left: 18px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between; /* 1º no topo, último no rodapé */
-  align-items: stretch;
-  gap: 0;
-  padding: 0 !important;     /* sem respiro — cola mesmo no topo */
+  top: 0; bottom: 0; left: 18px;
+  display: flex; flex-direction: column;
+  justify-content: space-between; align-items: stretch;
+  gap: 0; padding: 0 !important;
   z-index: 6;
 }
 .rc-tickers--leftColumn > *{ margin: 0 !important; }
@@ -150,9 +145,7 @@ a{ color: inherit; text-decoration: none; }
 }
 .rc-hero_phase{ margin-left: 8px; color:#7affc1; font-weight:700; }
 
-/* ================== RADAR — círculo base + FEIXE animado interno ======= */
-/* O círculo base com anéis/grade continua, e adicionamos o sweep animado
-   DENTRO do mesmo círculo (sem mudar TSX). */
+/* ================== RADAR — círculo base (sem mexer no tamanho) ======== */
 .rc-radar{
   position: fixed;           /* sempre central */
   inset: 0;
@@ -195,47 +188,41 @@ a{ color: inherit; text-decoration: none; }
   opacity: .95;
 }
 
-/* FEIXE animado + blips PULSANDO — DENTRO do círculo */
+/* ================== FEIXE ANIMADO VIVO DENTRO DO CÍRCULO =============== */
+/* Sem alterar o círculo: apenas camadas de sweep dentro da mesma área.   */
 .rc-radar::after{
   content:"";
   width: var(--radar-size);
   aspect-ratio: 1 / 1;
   border-radius: 50%;
   position: relative;
+  /* 3 camadas: feixe principal + halo externo + scanlines finas */
   background:
-    /* blips (3 pontos que acendem/apagam) */
-    radial-gradient(circle at 18% 36%, rgba(24,226,115,.0) 0 6%, rgba(24,226,115,.55) 6.5%, rgba(24,226,115,.0) 7%) no-repeat,
-    radial-gradient(circle at 72% 22%, rgba(24,226,115,.0) 0 7%, rgba(24,226,115,.55) 7.5%, rgba(24,226,115,.0) 8%) no-repeat,
-    radial-gradient(circle at 66% 70%, rgba(24,226,115,.0) 0 5%, rgba(24,226,115,.55) 5.5%, rgba(24,226,115,.0) 6%) no-repeat,
-    /* FEIXE (conic) com cauda */
+    /* halo sutil na margem para “varrer” a borda */
+    radial-gradient(closest-side, transparent 92%, rgba(40,255,170,.12) 96%, transparent 100%) center/100% 100% no-repeat,
+    /* feixe principal com cauda */
     conic-gradient(from 0turn,
       var(--radar-beam) 0deg,
-      var(--radar-beam-soft) 42deg,
-      transparent 60deg 360deg);
-  filter: blur(.3px);
-  transform-origin: 50% 50%;
-  animation:
-    rc-radar-spin 3.0s linear infinite,
-    rc-blips 2.8s ease-in-out infinite;
-  /* Máscara para manter o sweep DENTRO do círculo e com “furo” central */
-  -webkit-mask:
-    radial-gradient(circle at center, transparent 0 26%, #000 27% 100%);
-          mask:
-    radial-gradient(circle at center, transparent 0 26%, #000 27% 100%);
-  box-shadow:
-    0 0 24px var(--radar-glow),
-    0 0 140px rgba(24,226,115,.18);
+      var(--radar-beam-soft) 44deg,
+      transparent 64deg 360deg),
+    /* scanlines bem leves para dar sensação de varredura */
+    repeating-linear-gradient(transparent 0 6px, rgba(40,255,170,.05) 6px 7px);
   mix-blend-mode: screen;
+  filter: blur(.25px);
+  transform-origin: 50% 50%;
+  animation: rc-radar-spin 2.8s linear infinite;
+  /* máscara garante que tudo fique DENTRO do círculo e com furo central */
+  -webkit-mask:
+    radial-gradient(circle at center, transparent 0 24%, #000 25% 100%);
+          mask:
+    radial-gradient(circle at center, transparent 0 24%, #000 25% 100%);
+  box-shadow:
+    0 0 26px var(--radar-glow),
+    0 0 160px rgba(40,255,170,.22);
 }
 
+/* rotação do feixe — velocidade viva e contínua */
 @keyframes rc-radar-spin { to { transform: rotate(1turn); } }
-@keyframes rc-blips {
-  0%, 25%   { opacity: .85; }
-  37%       { opacity: .20; }
-  50%, 75%  { opacity: .85; }
-  87%       { opacity: .20; }
-  100%      { opacity: .85; }
-}
 
 /* ================== Internas / utilidades leves ================== */
 .tcBackBtn{ display:none !important; }
