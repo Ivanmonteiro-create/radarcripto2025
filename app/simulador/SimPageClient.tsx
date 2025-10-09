@@ -1,4 +1,3 @@
-// app/simulador/SimPageClient.tsx
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
@@ -55,9 +54,9 @@ export default function SimPageClient() {
         overflow: 'hidden',
       }}
     >
-      {/* ===== CSS local do simulador ===== */}
+      {/* ===== CSS local — apenas para o simulador ===== */}
       <style>{`
-        /* 0) Garantias: nada empurra o topo nesta página */
+        /* Garantias: sem tarjas/linhas superiores nesta página */
         body:has(.page-simulador) .rc-backtop,
         body:has(.page-simulador) .rc-topbar,
         body:has(.page-simulador) .rc-topband,
@@ -73,7 +72,7 @@ export default function SimPageClient() {
         }
         .page-simulador{ padding-top:0 !important; margin-top:0 !important; }
 
-        /* 1) Cabeçalho do gráfico (mantém como está) */
+        /* Cabeçalho do gráfico (mantém) */
         .page-simulador .compactHeader{
           display:flex; align-items:center; justify-content:space-between;
           gap:8px; padding:6px 8px; margin:0;
@@ -90,27 +89,23 @@ export default function SimPageClient() {
         }
         .page-simulador .tvFsBtn:hover{ filter:brightness(1.05); }
 
-        /* 2) Painel de controles vira referência para o botão interno */
-        .page-simulador .rc-controls{
-          position:relative;
-          padding-top:8px;   /* respiro mínimo do topo */
-        }
+        /* Painel de controles como referência */
+        .page-simulador .rc-controls{ position:relative; padding-top:8px; }
 
-        /* 3) "Voltar ao início" DENTRO do quadrado do painel, na MESMA LINHA do título */
+        /* Botão "Voltar ao início" DENTRO do painel, alinhado com o título */
         .page-simulador .backBtnInPanel{
           position:absolute;
-          top: 0;                 /* mesma linha do topo do painel */
+          top: 6px;          /* ↓ desce um pouco para alinhar à linha do título */
           right: 10px;
           z-index: 5;
-          display:inline-flex;
-          align-items:center;
-          height: 34px;
+          display:inline-flex; align-items:center; height:34px;
+          white-space:nowrap;
         }
         /* Botão quadrado VERDE (marca do site) */
         .page-simulador .backBtnInPanel .rc-btn--green{
           display:inline-flex;
           height: 34px; padding: 0 14px;
-          border-radius: 8px;                    /* quadrado (sem formato pill) */
+          border-radius: 8px;                    /* quadrado */
           font-weight: 800;
           background: #18e273;                   /* verde RadarCrypto */
           color: #052515;
@@ -119,6 +114,14 @@ export default function SimPageClient() {
         .page-simulador .backBtnInPanel .rc-btn--green:hover{
           filter: brightness(1.07);
           transform: translateY(-1px);
+        }
+
+        /* Remove a "bolinha verde" que sobrepõe o texto (toggles/switches) */
+        .page-simulador .rc-controls [role="switch"],
+        .page-simulador .rc-controls .rc-switch,
+        .page-simulador .rc-controls .toggle,
+        .page-simulador .rc-controls .status-dot {
+          display: none !important;
         }
       `}</style>
 
@@ -168,7 +171,7 @@ export default function SimPageClient() {
           borderLeft: '1px solid rgba(255,255,255,.06)',
         }}
       >
-        {/* Botão VERDE dentro do quadrado, na MESMA LINHA do topo do painel */}
+        {/* Botão VERDE dentro do quadrado, alinhado à linha do título */}
         <div className="backBtnInPanel">
           <a href="/" className="rc-btn rc-btn--green">Voltar ao início</a>
         </div>
