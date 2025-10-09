@@ -5,79 +5,68 @@ import React from "react";
 
 export default function HeroRadar() {
   return (
-    <div className="rc-radar" aria-hidden>
+    <div className="rc-radar rc-radar--kill-after" aria-hidden>
+      {/* CSS local para garantir a animação em qualquer setup */}
+      <style>{`
+        /* Faz o SVG ocupar exatamente o mesmo tamanho do círculo definido no CSS global */
+        .rc-radar__svg {
+          width: var(--radar-size);
+          height: var(--radar-size);
+          display: block;
+        }
+
+        /* Se existir um ::after no .rc-radar (do globals.css), removemos para não cobrir o SVG */
+        .rc-radar.rc-radar--kill-after::after { content: none !important; }
+
+        /* Animação confiável (CSS) — rotação contínua */
+        @keyframes rc-sweep-spin { to { transform: rotate(360deg); } }
+        .rc-sweep {
+          /* Necessário para transform funcionar direito em SVG */
+          transform-box: fill-box;
+          transform-origin: 100px 100px; /* centro do viewBox (200x200) */
+          animation: rc-sweep-spin 2.8s linear infinite;
+        }
+      `}</style>
+
       <svg
         className="rc-radar__svg"
         viewBox="0 0 200 200"
         width="100%"
         height="100%"
         preserveAspectRatio="xMidYMid meet"
+        role="presentation"
+        aria-hidden="true"
       >
         <defs>
-          {/* brilho central */}
+          {/* brilho central suave */}
           <radialGradient id="rg" cx="50%" cy="50%">
-            <stop offset="0%" stopColor="rgba(40,255,170,0.25)" />
+            <stop offset="0%" stopColor="rgba(40,255,170,0.22)" />
             <stop offset="70%" stopColor="rgba(40,255,170,0.10)" />
             <stop offset="100%" stopColor="rgba(40,255,170,0.00)" />
           </radialGradient>
 
-          {/* rastro do feixe */}
+          {/* gradiente do feixe com cauda */}
           <linearGradient id="sweep" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="rgba(40,255,170,0.65)" />
             <stop offset="70%" stopColor="rgba(40,255,170,0.28)" />
             <stop offset="100%" stopColor="rgba(40,255,170,0.00)" />
           </linearGradient>
 
-          {/* máscara de arco para o feixe (quadrante) */}
+          {/* máscara em forma de "fatia" (wedge) para o feixe */}
           <mask id="arc">
             <rect width="200" height="200" fill="black" />
-            {/* arco de 90° no canto inferior direito */}
-            <path d="M100,100 L190,100 A90,90 0 0,1 100,190 Z" fill="white" />
+            <!-- Abertura ~60° (ajustável) no quadrante inferior direito -->
+            <path d="M100,100 L190,100 A90,90 0 0,1 154.5,154.5 Z" fill="white" />
           </mask>
         </defs>
 
-        {/* glow central */}
+        {/* glow central (opcional, o círculo/grade vem do CSS ::before) */}
         <circle cx="100" cy="100" r="95" fill="url(#rg)" />
 
-        {/* anéis + eixos */}
-        <g stroke="rgba(90,255,170,0.25)" strokeWidth="0.6" fill="none">
-          <circle cx="100" cy="100" r="80" />
-          <circle cx="100" cy="100" r="60" />
-          <circle cx="100" cy="100" r="40" />
-          <circle cx="100" cy="100" r="20" />
-          <line x1="20" y1="100" x2="180" y2="100" />
-          <line x1="100" y1="20" x2="100" y2="180" />
-        </g>
-
-        {/* estrelas/ruído leve */}
-        <g fill="rgba(40,255,170,0.18)">
-          <circle cx="62" cy="54" r="0.7" />
-          <circle cx="138" cy="42" r="0.7" />
-          <circle cx="156" cy="128" r="0.7" />
-          <circle cx="52" cy="132" r="0.7" />
-          <circle cx="88" cy="164" r="0.7" />
-        </g>
-
-        {/* FEIXE GIRANDO — grupo com animação nativa SVG */}
-        <g mask="url(#arc)" transform-origin="100 100">
-          {/* animação: rotação contínua do grupo inteiro */}
-          <animateTransform
-            attributeName="transform"
-            type="rotate"
-            from="0 100 100"
-            to="360 100 100"
-            dur="2.8s"
-            repeatCount="indefinite"
-          />
-          {/* rastro/feixe */}
-          <rect
-            className="rc-radar__sweep"
-            x="100"
-            y="100"
-            width="100"
-            height="100"
-            fill="url(#sweep)"
-          />
+        {/* FEIXE GIRANDO (CSS animation) */}
+        <g className="rc-sweep" mask="url(#arc)">
+          {/* retângulo preenchido pelo gradiente; o grupo todo gira */}
+          <rect x="100" y="100" width="100" height="100" fill="url(#sweep)" />
         </g>
       </svg>
     </div>
