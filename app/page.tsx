@@ -1,11 +1,15 @@
 // app/page.tsx
 import LiveTickers from "@/components/LiveTickers";
+import "./home-tweaks.css"; // <-- overrides só da Home, vem depois do globals.css
 
 export default function HomePage() {
   return (
     <div className="rc-home" data-page="home">
-      {/* Radar fica como já estiver; não mexemos aqui */}
-      <LiveTickers />
+      {/* wrapper para garantir seletor estável */}
+      <div className="rc-tickers-wrap">
+        <LiveTickers />
+      </div>
+
       <section className="rc-hero" aria-label="Chamada principal">
         <div className="rc-hero__frame">
           <div className="rc-hero__inner">
