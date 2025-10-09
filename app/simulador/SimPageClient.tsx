@@ -44,6 +44,7 @@ export default function SimPageClient() {
   return (
     <main
       className="page-simulador"
+      /* grade 2 colunas, altura total, sem tarjas extras */
       style={{
         display: 'grid',
         gridTemplateColumns: '1fr 380px',
@@ -55,6 +56,52 @@ export default function SimPageClient() {
         overflow: 'hidden',
       }}
     >
+      {/* CSS local — escopo só do simulador */}
+      <style>{`
+        /* remove qualquer “Voltar ao início” antigo (tarja do topo) */
+        .page-simulador .rc-backtop { display: none !important; }
+
+        /* cabeçalho compacto do gráfico vira uma barrinha flex */
+        .page-simulador .compactHeader {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+          padding: 6px 8px;
+          margin: 0;
+          border-bottom: 1px solid rgba(255,255,255,.06);
+          background: rgba(0,0,0,.25);
+        }
+        .page-simulador .compactTitle {
+          margin: 0;
+          font-size: 12.5px;
+          font-weight: 800;
+          letter-spacing: .02em;
+          opacity: .85;
+        }
+
+        /* botão de tela cheia AGORA DENTRO do cabeçalho (sem ultrapassar) */
+        .page-simulador .tvFsBtn {
+          width: 28px; height: 28px;
+          border-radius: 8px;
+          display: grid; place-items: center;
+          background: rgba(255,255,255,.12);
+          color: #e6e6e6;
+          border: 1px solid rgba(255,255,255,.25);
+          cursor: pointer; line-height: 1; font-weight: 900; font-size: 14px;
+        }
+        .page-simulador .tvFsBtn:hover { filter: brightness(1.05); }
+
+        /* barra fixa do NOVO botão verde (frente do painel de controles) */
+        .page-simulador .backFixed {
+          position: fixed;
+          top: 8px;
+          right: 12px;
+          z-index: 60;
+          display: inline-flex;
+        }
+      `}</style>
+
       {/* ======= GRÁFICO ======= */}
       <section
         ref={chartPanelRef}
@@ -65,44 +112,22 @@ export default function SimPageClient() {
           height: '100%',
           borderRadius: 0,
           borderRight: '1px solid rgba(255,255,255,.06)',
+          display: 'grid',
+          gridTemplateRows: 'auto 1fr',
         }}
       >
-        {/* Cabeçalho do gráfico (mantém título/pares) */}
         {!isFs && (
-          <div className="compactHeader" style={{ margin: 0, padding: '8px 8px 0' }}>
-            <h2 className="compactTitle" style={{ margin: 0, fontSize: 13, opacity: .85 }}>
-              Gráfico — {symbol}
-            </h2>
+          <div className="compactHeader">
+            <h2 className="compactTitle">Gráfico — {symbol}</h2>
+            <button
+              aria-label="Tela cheia"
+              title="Tela cheia"
+              className="tvFsBtn"
+              onClick={toggleFs}
+            >
+              [ ]
+            </button>
           </div>
-        )}
-
-        {/* Botão Tela Cheia — topo direito do gráfico */}
-        {!isFs && (
-          <button
-            aria-label="Tela cheia"
-            title="Tela cheia"
-            onClick={toggleFs}
-            style={{
-              position: 'absolute',
-              top: 8,
-              right: 8,
-              zIndex: 40,
-              width: 28,
-              height: 28,
-              borderRadius: 8,
-              display: 'grid',
-              placeItems: 'center',
-              background: 'rgba(255,255,255,.12)',
-              color: '#e6e6e6',
-              border: '1px solid rgba(255,255,255,.25)',
-              cursor: 'pointer',
-              lineHeight: 1,
-              fontWeight: 900,
-              fontSize: 14,
-            }}
-          >
-            [ ]
-          </button>
         )}
 
         <div style={{ height: '100%', minHeight: 520 }}>
@@ -125,18 +150,8 @@ export default function SimPageClient() {
           paddingTop: 8,
         }}
       >
-        {/* Voltar ao início — AQUI na frente do painel (verde) */}
-        <div
-          className="rc-backtop"
-          style={{
-            position: 'sticky',
-            top: 0,
-            zIndex: 60,
-            display: 'flex',
-            justifyContent: 'flex-end',
-            marginBottom: 8,
-          }}
-        >
+        {/* Botão verde fixo NA FRENTE do painel de controles */}
+        <div className="backFixed">
           <a href="/" className="rc-btn rc-btn--green">Voltar ao início</a>
         </div>
 
