@@ -498,3 +498,16 @@ main .rc-backtop:not(:last-of-type){ display:none!important; }
 .rc-hero{
   margin-inline: calc(var(--tickers-col-w) + 30px) 40px; /* empurra um pouco p/ a direita */
 }
+/* ===== Simulador: posiciona o botão dentro do painel de controles ===== */
+.page-simulador .rc-controls{ position: relative; }
+
+.page-simulador .rc-backtop{
+  position: absolute;
+  right: 12px;   /* encostado à direita do painel */
+  top: 6px;      /* logo abaixo da linha/contorno verde superior */
+  z-index: 50;   /* à frente do painel */
+}
+
+.page-simulador .rc-backtop .rc-btn{
+  height: 34px; padding: 0 14px; border-radius: 10px;
+}
