@@ -6,21 +6,20 @@ import React from "react";
 export default function HeroRadar() {
   return (
     <div className="rc-radar rc-radar--kill-after" aria-hidden>
-      {/* CSS local: tamanho do SVG, kill do ::after e fallback de animação */}
+      {/* CSS local: garante tamanho, animação e remove overlay global */}
       <style>{`
         .rc-radar__svg {
           width: var(--radar-size);
           height: var(--radar-size);
           display: block;
         }
-        /* garante que nenhuma camada do globals cubra o SVG */
         .rc-radar.rc-radar--kill-after::after { content: none !important; }
 
-        /* Fallback: se o navegador ignorar SMIL, anima por CSS */
+        /* Fallback CSS se animação SVG for ignorada */
         @keyframes rc-sweep-spin { to { transform: rotate(360deg); } }
         .rc-sweep--fallback {
           transform-box: fill-box;
-          transform-origin: 100px 100px; /* centro do viewBox (200x200) */
+          transform-origin: 100px 100px;
           animation: rc-sweep-spin 2.6s linear infinite;
         }
       `}</style>
@@ -54,23 +53,23 @@ export default function HeroRadar() {
             <stop offset="100%" stopColor="rgba(40,255,170,0.00)" />
           </linearGradient>
 
-          {/* Máscaras de fatia (90° = bem visível) */}
+          {/* Máscaras de fatia (90° e ~130°) */}
           <mask id="arc90">
             <rect width="200" height="200" fill="black" />
-            <!-- wedge 90° no quadrante inferior direito -->
+            {/* wedge 90° no quadrante inferior direito */}
             <path d="M100,100 L190,100 A90,90 0 0,1 100,190 Z" fill="white" />
           </mask>
           <mask id="arc90WideTrail">
             <rect width="200" height="200" fill="black" />
-            <!-- wedge ~130° para o rastro suave -->
+            {/* wedge ~130° para o rastro suave */}
             <path d="M100,100 L190,100 A90,90 0 0,1 128,186 Z" fill="white" />
           </mask>
         </defs>
 
-        {/* Glow central — o círculo/grade continuam vindo do CSS ::before */}
+        {/* Glow central */}
         <circle cx="100" cy="100" r="95" fill="url(#rg)" />
 
-        {/* GRUPO ANIMADO (SMIL) — rota 360°; mantém classe fallback */}
+        {/* GRUPO ANIMADO (usa SMIL e fallback CSS) */}
         <g className="rc-sweep--fallback" transform-origin="100 100">
           <animateTransform
             attributeName="transform"
@@ -80,11 +79,11 @@ export default function HeroRadar() {
             dur="2.6s"
             repeatCount="indefinite"
           />
-          {/* feixe principal (mais claro) */}
+          {/* feixe principal */}
           <g mask="url(#arc90)">
             <rect x="100" y="100" width="100" height="100" fill="url(#beamMain)" />
           </g>
-          {/* rastro amplo e suave por trás para dar “vida” */}
+          {/* rastro suave */}
           <g mask="url(#arc90WideTrail)">
             <rect x="100" y="100" width="100" height="100" fill="url(#beamTrail)" />
           </g>
