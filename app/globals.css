@@ -469,3 +469,32 @@ main .rc-backtop:not(:last-of-type){ display:none!important; }
 .page-planos .rc-backtop:first-child,
 .page-sobre  .rc-backtop:first-child,
 .page-fale   .rc-backtop:first-child{ display:none!important; }
+/* ===== Tickers: coluna à esquerda, encostados no topo ===== */
+:root { --tickers-col-w: 150px; }
+
+.rc-tickers--leftColumn{
+  position: absolute;
+  inset-block-start: 0;     /* top: 0 */
+  inset-inline-start: 18px; /* left */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;                 /* menor espaçamento p/ caber 8 */
+  z-index: 5;
+  padding-block: 8px;       /* respiro do topo */
+}
+
+.rc-chip{
+  border: 1px solid rgba(0,255,128,.35);
+  background: rgba(0,255,128,.08);
+  box-shadow: 0 0 0 1px rgba(0,255,128,.07) inset;
+  border-radius: 14px;
+  padding: 8px 10px;        /* um pouco menor */
+}
+.rc-chip--vertical{ min-width: 118px; }
+.rc-chip__pair  { color:#bfffdc; font-weight:700; line-height:1; }
+.rc-chip__price { color:#18e273; font-weight:800; margin-top:6px; line-height:1; }
+
+/* Hero com “folga” da coluna de tickers e centralizado visualmente */
+.rc-hero{
+  margin-inline: calc(var(--tickers-col-w) + 30px) 40px; /* empurra um pouco p/ a direita */
+}
