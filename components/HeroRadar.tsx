@@ -1,4 +1,3 @@
-// components/HeroRadar.tsx
 "use client";
 
 import React from "react";
@@ -7,39 +6,35 @@ export default function HeroRadar() {
   return (
     <div className="rc-radar rc-radar--alive" aria-hidden>
       <style>{`
-        /* Camada animada, não altera o tamanho/posição do círculo base do globals */
+        .rc-radar--alive {}
         .rc-radar__frame {
           position: absolute;
           inset: 0;
           display: grid;
           place-items: center;
           pointer-events: none;
-          z-index: 2; /* acima da grade ::before, abaixo do hero */
+          z-index: 2;
         }
-
         .rc-radar__beam {
           width: var(--radar-size);
           aspect-ratio: 1 / 1;
           border-radius: 50%;
           position: relative;
-          /* Feixe 120°: núcleo claro + cauda */
           background:
             conic-gradient(
               from 0turn,
-              rgba(40,255,170,0.72) 0deg,
-              rgba(40,255,170,0.38) 88deg,
-              rgba(40,255,170,0.18) 120deg,
-              transparent 130deg 360deg
+              rgba(40,255,170,0.70) 0deg,
+              rgba(40,255,170,0.30) 48deg,
+              transparent 72deg 360deg
             );
           mix-blend-mode: screen;
-          filter: blur(.25px);
-          /* furo central (antena) e limite do círculo */
-          -webkit-mask: radial-gradient(circle at center, transparent 0 24%, #000 25% 100%);
-                  mask: radial-gradient(circle at center, transparent 0 24%, #000 25% 100%);
-          animation: rc-radar-spin 2.6s linear infinite;
+          filter: blur(.3px);
+          -webkit-mask:
+            radial-gradient(circle at center, transparent 0 24%, #000 25% 100%);
+                  mask:
+            radial-gradient(circle at center, transparent 0 24%, #000 25% 100%);
+          animation: rc-radar-spin 3.8s linear infinite; /* ← ajustado para mais lento */
         }
-
-        /* Halo na borda para sensação de “scan” tangenciando o perímetro */
         .rc-radar__beam::after {
           content:"";
           position:absolute; inset:0;
@@ -49,8 +44,6 @@ export default function HeroRadar() {
           -webkit-mask: radial-gradient(circle at center, transparent 0 24%, #000 25% 100%);
                   mask: radial-gradient(circle at center, transparent 0 24%, #000 25% 100%);
         }
-
-        /* Pulso de alcance: anel que expande e desvanece (cada 3.6s) */
         .rc-radar__pulse {
           position:absolute; inset:0; display:grid; place-items:center;
           pointer-events:none;
@@ -66,8 +59,6 @@ export default function HeroRadar() {
                   mask: radial-gradient(circle at center, transparent 0 22%, #000 23% 100%);
           animation: rc-range-pulse 3.6s ease-out infinite;
         }
-
-        /* Blips discretos: 4 pontos fixos que “acendem/apagam” */
         .rc-radar__blips {
           position:absolute; inset:0; display:grid; place-items:center;
           pointer-events:none;
@@ -115,7 +106,6 @@ export default function HeroRadar() {
         }
       `}</style>
 
-      {/* Feixe animado + pulse + blips (não mexe no círculo/grade do globals) */}
       <div className="rc-radar__frame">
         <div className="rc-radar__beam" />
         <div className="rc-radar__pulse" />
