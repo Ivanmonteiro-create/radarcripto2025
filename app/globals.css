@@ -289,3 +289,63 @@ main, .rc-home, .rc-page { padding-top: 0 !important; margin-top: 0 !important; 
   padding: 14px;
 }
 .rc-card h3 { color:#bfffdc; margin:0 0 8px; }
+/* === AJUSTE SIMULADOR: remover tarja e mover botão ===================== */
+
+/* Remove a tarja preta do topo do simulador (onde ficava o botão antigo) */
+.page-simulador .tcBackBtn {
+  display: none !important;
+}
+.page-simulador header,
+.page-simulador .topbar,
+.page-simulador .rc-topband,
+.page-simulador .rc-page-top {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Novo botão verde fixo na frente do painel de controles */
+.page-simulador::after {
+  content: "Voltar ao início";
+  position: fixed;
+  right: 20px;
+  top: 10px;
+  z-index: 99;
+  background: #18e273;               /* verde RadarCrypto */
+  color: #052515;
+  font-weight: 800;
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px rgba(0,255,128,0.28),
+              0 8px 24px rgba(0,0,0,.35);
+  transition: all 0.2s ease;
+}
+.page-simulador::after:hover {
+  filter: brightness(1.07);
+  transform: translateY(-1px);
+}
+
+/* Faz o botão realmente funcionar como link */
+.page-simulador {
+  position: relative;
+}
+.page-simulador::after {
+  pointer-events: auto;
+}
+.page-simulador {
+  pointer-events: none;
+}
+.page-simulador * {
+  pointer-events: auto;
+}
+.page-simulador::after {
+  pointer-events: all;
+}
+.page-simulador::after {
+  content: attr(data-btn-text);
+}
