@@ -37,10 +37,7 @@ export default function SimPageClient() {
           </a>
         </div>
 
-        <TradeControls
-          symbol={symbol}
-          setSymbol={setSymbol}
-          livePrice={livePrice}
+        <TradeControls />
         />
       </section>
     </main>
