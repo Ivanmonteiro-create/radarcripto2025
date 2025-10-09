@@ -3180,3 +3180,71 @@ html,body,#__next {
 
 /* Segurança: nada clipa nas laterais */
 :where(.rc-home, .rc-hero, [class*="home"]) { overflow: visible !important; }
+/* ====== HOME: moedas no topo, sem faixa e sem espaçamento sobrando ====== */
+
+/* Remove qualquer “faixa/strip” escura que possa existir acima do conteúdo */
+.rc-top-spacer,
+.rc-strip,
+.rc-hero--spacer,
+.rc-home .top-strip,
+.rc-home .rc-strip {
+  display: none !important;
+}
+
+/* A fileira de moedas deve encostar no topo do conteúdo */
+.rc-home .rc-tickers {
+  margin-top: 0 !important;
+}
+
+/* O hero (cartão grande) deve começar logo abaixo das moedas */
+.rc-home .rc-hero {
+  margin-top: 14px !important; /* pequeno respiro abaixo das moedas */
+}
+
+/* ====== HERO: reduzir LARGURA do QUADRADO EXTERNO para caber a 100% ====== */
+/* Moldura/“aura” externa do hero */
+.rc-hero__frame {
+  /* limite de largura mais estreito para as laterais aparecerem */
+  --hero-max: 980px;
+  width: min(var(--hero-max), 92vw);
+  margin-inline: auto;
+  border-radius: 18px;
+}
+
+/* Em telas bem largas, deixe ainda um pouco mais estreito para garantir visibilidade */
+@media (min-width: 1280px) {
+  .rc-hero__frame {
+    --hero-max: 940px;
+  }
+}
+
+/* Conteúdo interno do hero (texto) fica centrado e com respiro */
+.rc-hero__inner {
+  max-width: calc(100% - 64px); /* mantém respiro interno nas laterais */
+  margin-inline: auto;
+}
+
+/* Se o projeto não tiver .rc-hero__frame e só usar .rc-hero,
+   este fallback já resolve a largura também */
+.rc-hero:not(:has(.rc-hero__frame)) {
+  --hero-max: 980px;
+  width: min(var(--hero-max), 92vw);
+  margin-inline: auto;
+}
+
+/* ====== GARANTIR QUE AS MOEDAS FIQUEM MESMO NO TOPO ====== */
+.rc-home .rc-tickers,
+.rc-tickers {
+  position: relative; /* nada fixo, só impede deslocamentos estranhos */
+  top: 0;
+}
+
+/* ====== Efeito hover dos 5 botões (já estava ok, mas reforço leve) ====== */
+.rc-topnav .rc-pill:hover {
+  filter: brightness(1.2);
+}
+
+/* Segurança: zera qualquer margem top “global” que possa ter sobrado no home */
+.rc-home {
+  --rc-top-gap: 0px;
+}
