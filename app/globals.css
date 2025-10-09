@@ -511,3 +511,39 @@ main .rc-backtop:not(:last-of-type){ display:none!important; }
 .page-simulador .rc-backtop .rc-btn{
   height: 34px; padding: 0 14px; border-radius: 10px;
 }
+/* ===== 1) MOEDAS: coluna encostada no topo ===== */
+:root { --tickers-col-w: 150px; }
+
+.rc-home{              /* garante que nada empurre pra baixo */
+  position: relative;
+  padding-top: 0 !important;
+}
+
+.rc-tickers--leftColumn{
+  position: absolute;
+  top: 0 !important;          /* cola no topo */
+  left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;                   /* cabem as 8 */
+  z-index: 5;
+  padding: 6px 0;             /* respiro sutil */
+}
+
+.rc-chip{
+  border: 1px solid rgba(0,255,128,.35);
+  background: rgba(0,255,128,.08);
+  box-shadow: 0 0 0 1px rgba(0,255,128,.07) inset;
+  border-radius: 14px;
+  padding: 8px 10px;
+}
+.rc-chip--vertical{ min-width: 118px; }
+.rc-chip__pair  { color:#bfffdc; font-weight:700; line-height:1; }
+.rc-chip__price { color:#18e273; font-weight:800; margin-top:6px; line-height:1; }
+
+/* ===== 2) HERO: mais centralizado e com menos espaço à direita ===== */
+.rc-hero{
+  /* empurra a partir da coluna de tickers e reduz margem direita */
+  margin-inline: calc(var(--tickers-col-w) + 26px) 12px;
+  max-width: 1150px;          /* evita ficar largo demais */
+}
