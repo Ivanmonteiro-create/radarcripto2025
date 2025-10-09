@@ -97,7 +97,7 @@ export default function SimPageClient() {
         /* Botão "Voltar ao início" DENTRO do painel, na MESMA LINHA do título */
         .page-simulador .backBtnInPanel{
           position:absolute;
-          top: 10px;         /* ajuste fino pra ficar nivelado ao texto do título */
+          top: 22px;         /* ajuste fino pra ficar nivelado ao texto do título */
           right: 10px;
           z-index: 5;
           display:inline-flex; align-items:center; height:34px;
