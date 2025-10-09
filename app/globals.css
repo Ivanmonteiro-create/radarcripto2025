@@ -547,3 +547,17 @@ main .rc-backtop:not(:last-of-type){ display:none!important; }
   margin-inline: calc(var(--tickers-col-w) + 26px) 12px;
   max-width: 1150px;          /* evita ficar largo demais */
 }
+/* Painel do simulador precisa ser referência de posicionamento */
+.page-simulador .rc-controls{ position: relative; }
+
+/* Botão fixado no topo-direito do painel (à frente) */
+.page-simulador .rc-backtop{
+  position: absolute;
+  right: 12px;
+  top: 8px;            /* fica logo abaixo do contorno superior */
+  z-index: 50;         /* fica por cima de tudo do painel */
+}
+
+.page-simulador .rc-backtop .rc-btn{
+  height: 34px; padding: 0 14px; border-radius: 10px;
+}
