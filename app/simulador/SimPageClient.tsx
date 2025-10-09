@@ -42,6 +42,7 @@ export default function SimPageClient() {
 
   return (
     <main
+      /* Full-bleed: sem padding, sem gap, altura total */
       style={{
         display: 'grid',
         gridTemplateColumns: '1fr 380px',
@@ -53,7 +54,26 @@ export default function SimPageClient() {
         overflow: 'hidden',
       }}
     >
-      {/* GRÁFICO */}
+      {/* Voltar ao início — canto direito superior */}
+      {!isFs && (
+        <a
+          href="/"
+          className="btn tcBackBtn"
+          style={{
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            zIndex: 50,
+            padding: '10px 14px',
+            borderRadius: 12,
+            fontWeight: 800,
+          }}
+        >
+          Voltar ao início
+        </a>
+      )}
+
+      {/* Gráfico (painel colado às bordas) */}
       <section
         ref={chartPanelRef}
         className="panel"
@@ -66,13 +86,22 @@ export default function SimPageClient() {
         }}
       >
         {!isFs && (
+          <div className="compactHeader" style={{ marginBottom: 8 }}>
+            <h2 className="compactTitle" style={{ margin: 0 }}>
+              Gráfico — {symbol}
+            </h2>
+          </div>
+        )}
+
+        {/* Botão Tela Cheia — TOPO DIREITO (ajuste principal) */}
+        {!isFs && (
           <button
             aria-label="Tela cheia"
             title="Tela cheia"
             onClick={toggleFs}
             style={{
               position: 'absolute',
-              top: 8,
+              top: 8,         // <-- antes estava bottom: 86
               right: 8,
               zIndex: 40,
               width: 28,
@@ -93,55 +122,30 @@ export default function SimPageClient() {
           </button>
         )}
 
-        <div style={{ height: '100%', minHeight: 520 }}>
+        <div style={{ height: 'calc(100% - 0px)', minHeight: 520 }}>
+          {/* Usa a sua API original: prop "symbol" com o prefixo da corretora */}
           <TradingViewWidget symbol={`BINANCE:${symbol}`} />
         </div>
       </section>
 
-      {/* CONTROLES + VOLTAR */}
+      {/* Controles */}
       <section
-        className="panel"
+        className="panel compactPanel"
         style={{
           display: 'grid',
-          gridTemplateRows: 'auto 1fr',
+          alignContent: 'start',
           gap: 10,
           minHeight: '100%',
           height: '100%',
           borderRadius: 0,
           borderLeft: '1px solid rgba(255,255,255,.06)',
-          position: 'relative',
         }}
       >
-        {/* Botão no topo do painel de Controles */}
-        <div style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 50,
-          background: 'linear-gradient(180deg, rgba(6,18,12,.92), rgba(6,18,12,.75))',
-          padding: '8px 8px 6px',
-          display: 'flex',
-          justifyContent: 'flex-end'
-        }}>
-          <a
-            href="/"
-            className="btn"
-            style={{
-              padding: '10px 14px',
-              borderRadius: 12,
-              fontWeight: 800,
-            }}
-          >
-            Voltar ao início
-          </a>
-        </div>
-
-        <div style={{ overflow: 'auto', paddingTop: 2 }}>
-          <TradeControls
-            symbol={symbol}
-            onSymbolChange={(s: string) => setSymbol(s as Pair)}
-            livePrice={livePrice}
-          />
-        </div>
+        <TradeControls
+          symbol={symbol}
+          onSymbolChange={(s: string) => setSymbol(s as Pair)}
+          livePrice={livePrice}
+        />
       </section>
     </main>
   );
