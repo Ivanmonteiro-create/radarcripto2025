@@ -1,3 +1,4 @@
+// app/simulador/SimPageClient.tsx
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
@@ -42,6 +43,7 @@ export default function SimPageClient() {
 
   return (
     <main
+      className="page-simulador"
       /* Full-bleed: sem padding, sem gap, altura total */
       style={{
         display: 'grid',
@@ -54,25 +56,6 @@ export default function SimPageClient() {
         overflow: 'hidden',
       }}
     >
-      {/* Voltar ao início — canto direito superior */}
-      {!isFs && (
-        <a
-          href="/"
-          className="btn tcBackBtn"
-          style={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-            zIndex: 50,
-            padding: '10px 14px',
-            borderRadius: 12,
-            fontWeight: 800,
-          }}
-        >
-          Voltar ao início
-        </a>
-      )}
-
       {/* Gráfico (painel colado às bordas) */}
       <section
         ref={chartPanelRef}
@@ -93,7 +76,7 @@ export default function SimPageClient() {
           </div>
         )}
 
-        {/* Botão Tela Cheia — TOPO DIREITO (ajuste principal) */}
+        {/* Botão Tela Cheia — TOPO DIREITO */}
         {!isFs && (
           <button
             aria-label="Tela cheia"
@@ -101,7 +84,7 @@ export default function SimPageClient() {
             onClick={toggleFs}
             style={{
               position: 'absolute',
-              top: 8,         // <-- antes estava bottom: 86
+              top: 8,
               right: 8,
               zIndex: 40,
               width: 28,
@@ -123,14 +106,13 @@ export default function SimPageClient() {
         )}
 
         <div style={{ height: 'calc(100% - 0px)', minHeight: 520 }}>
-          {/* Usa a sua API original: prop "symbol" com o prefixo da corretora */}
           <TradingViewWidget symbol={`BINANCE:${symbol}`} />
         </div>
       </section>
 
       {/* Controles */}
       <section
-        className="panel compactPanel"
+        className="panel compactPanel rc-controls"
         style={{
           display: 'grid',
           alignContent: 'start',
@@ -139,8 +121,14 @@ export default function SimPageClient() {
           height: '100%',
           borderRadius: 0,
           borderLeft: '1px solid rgba(255,255,255,.06)',
+          position: 'relative',
         }}
       >
+        {/* Voltar ao início — agora NA FRENTE do painel de controles (verde) */}
+        <div className="rc-backtop" style={{ position: 'sticky', top: 8, zIndex: 50, display: 'flex', justifyContent: 'flex-end', margin: '0 0 8px' }}>
+          <a href="/" className="rc-btn rc-btn--green">Voltar ao início</a>
+        </div>
+
         <TradeControls
           symbol={symbol}
           onSymbolChange={(s: string) => setSymbol(s as Pair)}
