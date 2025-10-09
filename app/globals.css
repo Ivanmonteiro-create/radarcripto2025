@@ -2933,3 +2933,47 @@ html,body,#__next {
     justify-content: space-between;
   }
 }
+/* === MATA-FAIXA PRETA (todas as páginas) =============================== */
+/* Faixas/topbars mais comuns do projeto */
+.rc-topbar,
+.rc-topband,
+.rc-topstrip,
+.rc-header,
+.rc-page-top,
+.rc-hero-gap {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  backdrop-filter: none !important;
+}
+
+/* Se alguma tarja for absolutamente posicionada no topo */
+.rc-topbar,
+.rc-topband,
+.rc-topstrip {
+  position: static !important;           /* sai de cima do conteúdo */
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  pointer-events: none !important;       /* não bloqueia clique dos botões */
+  z-index: 0 !important;
+}
+
+/* Garante que os 5 botões continuam clicáveis e por cima do plano de fundo */
+.rc-topnav,
+.rc-topnav__inner,
+.rc-pill {
+  position: relative;
+  z-index: 2;
+}
+
+/* Qualquer pseudo-efeito de faixa aplicada no topo */
+.rc-topbar::before,
+.rc-topband::before,
+.rc-topstrip::before,
+.rc-header::before,
+.rc-page-top::before,
+.rc-hero-gap::before {
+  content: none !important;
+}
