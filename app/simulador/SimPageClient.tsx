@@ -44,7 +44,6 @@ export default function SimPageClient() {
   return (
     <main
       className="page-simulador"
-      /* grade 2 colunas, altura total, sem tarjas extras */
       style={{
         display: 'grid',
         gridTemplateColumns: '1fr 380px',
@@ -56,50 +55,57 @@ export default function SimPageClient() {
         overflow: 'hidden',
       }}
     >
-      {/* CSS local — escopo só do simulador */}
+      {/* ===== CSS local do simulador (não impacta a Home) ===== */}
       <style>{`
-        /* remove qualquer “Voltar ao início” antigo (tarja do topo) */
-        .page-simulador .rc-backtop { display: none !important; }
+        /* 1) Remove o botão antigo e a tarja onde ele fica, SOMENTE nesta página.
+              Usa :has() para alcançar elementos fora do <main>. (Chrome OK) */
+        body:has(.page-simulador) .rc-backtop {
+          display: none !important;
+          height: 0 !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          border: 0 !important;
+          box-shadow: none !important;
+          background: transparent !important;
+        }
 
-        /* cabeçalho compacto do gráfico vira uma barrinha flex */
-        .page-simulador .compactHeader {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 8px;
-          padding: 6px 8px;
-          margin: 0;
-          border-bottom: 1px solid rgba(255,255,255,.06);
+        /* 2) Cabeçalho do gráfico (onde fica o botão de tela cheia) — mantém como está */
+        .page-simulador .compactHeader{
+          display:flex; align-items:center; justify-content:space-between;
+          gap:8px; padding:6px 8px; margin:0;
+          border-bottom:1px solid rgba(255,255,255,.06);
           background: rgba(0,0,0,.25);
         }
-        .page-simulador .compactTitle {
-          margin: 0;
-          font-size: 12.5px;
-          font-weight: 800;
-          letter-spacing: .02em;
-          opacity: .85;
+        .page-simulador .compactTitle{ margin:0; font-size:12.5px; font-weight:800; opacity:.85; }
+        .page-simulador .tvFsBtn{
+          width:28px; height:28px; border-radius:8px;
+          display:grid; place-items:center;
+          background:rgba(255,255,255,.12);
+          color:#e6e6e6; border:1px solid rgba(255,255,255,.25);
+          cursor:pointer; line-height:1; font-weight:900; font-size:14px;
         }
+        .page-simulador .tvFsBtn:hover{ filter:brightness(1.05); }
 
-        /* botão de tela cheia AGORA DENTRO do cabeçalho (sem ultrapassar) */
-        .page-simulador .tvFsBtn {
-          width: 28px; height: 28px;
-          border-radius: 8px;
-          display: grid; place-items: center;
-          background: rgba(255,255,255,.12);
-          color: #e6e6e6;
-          border: 1px solid rgba(255,255,255,.25);
-          cursor: pointer; line-height: 1; font-weight: 900; font-size: 14px;
-        }
-        .page-simulador .tvFsBtn:hover { filter: brightness(1.05); }
+        /* 3) Painel de controles vira referência p/ nosso botão novo */
+        .page-simulador .rc-controls{ position:relative; padding-top:8px; }
 
-        /* barra fixa do NOVO botão verde (frente do painel de controles) */
-        .page-simulador .backFixed {
-          position: fixed;
-          top: 8px;
-          right: 12px;
+        /* 4) Novo "Voltar ao início" — na FRENTE dos controles (topo do painel), verde */
+        .page-simulador .rc-backtop-panel{
+          position: sticky;  /* acompanha a rolagem interna do painel */
+          top: 0;            /* gruda no topo do painel */
           z-index: 60;
-          display: inline-flex;
+          display:flex; justify-content:flex-end;
+          margin: 0 0 8px 0;
+          padding: 0;
+          background: transparent;
         }
+        .page-simulador .rc-backtop-panel .rc-btn.rc-btn--green{
+          display:inline-flex; height:36px; align-items:center;
+          padding:0 14px; border-radius:10px; font-weight:800;
+        }
+
+        /* Mais garantias de que nada empurre o topo da página do simulador */
+        .page-simulador{ padding-top:0 !important; margin-top:0 !important; }
       `}</style>
 
       {/* ======= GRÁFICO ======= */}
@@ -116,6 +122,7 @@ export default function SimPageClient() {
           gridTemplateRows: 'auto 1fr',
         }}
       >
+        {/* Cabeçalho do gráfico + Tela cheia (perfeito, sem mexer) */}
         {!isFs && (
           <div className="compactHeader">
             <h2 className="compactTitle">Gráfico — {symbol}</h2>
@@ -146,12 +153,10 @@ export default function SimPageClient() {
           height: '100%',
           borderRadius: 0,
           borderLeft: '1px solid rgba(255,255,255,.06)',
-          position: 'relative',
-          paddingTop: 8,
         }}
       >
-        {/* Botão verde fixo NA FRENTE do painel de controles */}
-        <div className="backFixed">
+        {/* Botão VERDE na frente dos controles (topo do painel) */}
+        <div className="rc-backtop-panel">
           <a href="/" className="rc-btn rc-btn--green">Voltar ao início</a>
         </div>
 
