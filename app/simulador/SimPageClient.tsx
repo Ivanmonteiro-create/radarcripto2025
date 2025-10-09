@@ -67,7 +67,7 @@ export default function SimPageClient() {
           borderRight: '1px solid rgba(255,255,255,.06)',
         }}
       >
-        {/* Cabeçalho do gráfico (restaurado) */}
+        {/* Cabeçalho do gráfico (mantém título/pares) */}
         {!isFs && (
           <div className="compactHeader" style={{ margin: 0, padding: '8px 8px 0' }}>
             <h2 className="compactTitle" style={{ margin: 0, fontSize: 13, opacity: .85 }}>
@@ -125,7 +125,7 @@ export default function SimPageClient() {
           paddingTop: 8,
         }}
       >
-        {/* Voltar ao início — NA FRENTE do painel de controles (verde) */}
+        {/* Voltar ao início — AQUI na frente do painel (verde) */}
         <div
           className="rc-backtop"
           style={{
