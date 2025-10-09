@@ -3112,3 +3112,71 @@ html,body,#__next {
 
 /* Segurança: evita qualquer corte lateral */
 .rc-home, .rc-hero { overflow: visible !important; }
+/* ================== AJUSTES HOME (forçados) ================== */
+
+/* 1) Pílulas das MOEDAS no topo (subir mesmo) */
+:where(.rc-live-tickers, .rc-tickers, [class*="tickers"]) {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  gap: 8px !important;
+  margin-top: 6px !important;     /* sobe tudo */
+  padding: 0 12px !important;
+  overflow: visible !important;
+}
+
+/* Cada “pill” de moeda (bem genérico) */
+:where(.rc-live-tickers, .rc-tickers, [class*="tickers"])
+  :where(.rc-pill, a, button) {
+  padding: 8px 12px !important;
+  font-size: 12.5px !important;
+  line-height: 1 !important;
+  background: #0f2e1f !important;
+  border: 1px solid #1fe66a !important;
+  color: #1fe66a !important;
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease !important;
+}
+
+/* Hover das moedas: contraste forte */
+:where(.rc-live-tickers, .rc-tickers, [class*="tickers"])
+  :where(.rc-pill, a, button):hover,
+:where(.rc-live-tickers, .rc-tickers, [class*="tickers"])
+  :where(.rc-pill, a, button):focus-visible {
+  filter: brightness(1.25) !important;
+  box-shadow: 0 0 0 2px #1fe66a inset, 0 0 28px rgba(31,230,106,.35) !important;
+  transform: translateY(-1px) !important;
+  outline: none !important;
+}
+
+/* 2) Hover/active dos 5 BOTÕES (TopNav) – fluorescente */
+:where(.rc-topnav, [class*="topnav"], nav)
+  :where(.rc-pill, a, button) {
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease !important;
+}
+:where(.rc-topnav, [class*="topnav"], nav)
+  :where(.rc-pill, a, button):hover,
+:where(.rc-topnav, [class*="topnav"], nav)
+  :where(.rc-pill, a, button):focus-visible,
+:where(.rc-topnav, [class*="topnav"], nav)
+  :where(.rc-pill, a, button).is-active {
+  filter: brightness(1.25) !important;
+  box-shadow: 0 0 0 2px #1fe66a inset, 0 0 28px rgba(31,230,106,.35) !important;
+  transform: translateY(-1px) !important;
+  outline: none !important;
+}
+
+/* 3) HERO menor/um pouco mais “à esquerda” para caber inteiro */
+:where(.rc-hero, [class*="hero"]) { 
+  margin-top: 18px !important;                 /* espaço p/ os 5 botões */
+  padding-inline: 16px !important;
+  overflow: visible !important;
+}
+:where(.rc-hero__inner, .rc-hero .rc-card, .rc-hero [class*="inner"], [class*="hero"] [class*="card"]) {
+  width: min(940px, calc(100% - 44px)) !important;
+  margin-inline: auto !important;              /* centraliza */
+  transform: translateX(-6px) !important;      /* leve “empurrão” à esquerda */
+}
+
+/* Segurança: nada clipa nas laterais */
+:where(.rc-home, .rc-hero, [class*="home"]) { overflow: visible !important; }
