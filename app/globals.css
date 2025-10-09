@@ -561,3 +561,100 @@ main .rc-backtop:not(:last-of-type){ display:none!important; }
 .page-simulador .rc-backtop .rc-btn{
   height: 34px; padding: 0 14px; border-radius: 10px;
 }
+/* ====== LAYOUT HOME ====== */
+.rc-home{
+  position: relative;
+  min-height: 100dvh;
+  /* reserva espaço lateral para a coluna de moedas */
+  padding-left: 120px;  /* ajuste fino se precisar: 110–140px */
+}
+
+/* Radar/halo de fundo */
+.rc-radar{
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 60% at 35% 50%, rgba(0,255,140,0.18) 0%, rgba(0,255,140,0.08) 40%, rgba(0,255,140,0.00) 70%) no-repeat,
+    radial-gradient(35% 35% at 55% 60%, rgba(0,255,140,0.12) 0%, rgba(0,255,140,0.00) 70%) no-repeat;
+  z-index: 0;
+}
+
+/* Hero centralizado visualmente entre a coluna e a borda direita */
+.rc-hero{
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  padding: 40px 16px 56px;
+}
+
+.rc-hero_inner{
+  width: min(960px, 100%);
+  border: 1px solid rgba(0,255,140,0.28);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(5,30,18,0.85), rgba(5,20,14,0.80));
+  box-shadow: 0 0 0 1px rgba(0,255,140,0.12) inset, 0 18px 60px rgba(12, 170, 110, 0.18);
+  padding: 28px 28px 36px;
+}
+
+.rc-hero_eyebrow{
+  color: #7cfcc9;
+  letter-spacing: .16em;
+  font-weight: 800;
+  font-size: .9rem;
+  margin: 0 0 10px;
+}
+
+.rc-hero_title{
+  margin: 0 0 10px;
+  line-height: 1.05;
+  font-weight: 900;
+  font-size: clamp(28px, 5.5vw, 64px);
+  color: #e9fff5;
+}
+
+.rc-hero_desc{
+  margin: 0;
+  color: #c8f7e6;
+  font-size: clamp(14px, 2.4vw, 18px);
+  opacity: .95;
+}
+.rc-hero_phase{ margin-left: .35rem; opacity: .9 }
+
+/* ====== COLUNA DE MOEDAS (esquerda) ====== */
+.rc-tickers{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.rc-tickers--leftColumn{
+  position: fixed;
+  top: 8px;
+  left: 16px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rc-chip{
+  width: 92px;
+  height: 54px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,255,120,.55);
+  background: rgba(0,255,120,.10);
+  color: #00ff88;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  box-shadow: 0 0 8px rgba(0,255,120,.18);
+}
+.rc-chip__pair{ font-size: .80rem; opacity: .95; }
+.rc-chip__price{ font-size: .92rem; }
+
+/* Pequeno respiro em telas menores */
+@media (max-width: 1024px){
+  .rc-home{ padding-left: 108px; }
+  .rc-chip{ width: 88px; height: 50px; }
+}
