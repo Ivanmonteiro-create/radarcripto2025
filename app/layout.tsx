@@ -13,6 +13,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR">
       <body className="rc-root">
+        {/* TopNav sempre presente e independente de faixas */}
         <TopNav />
         <main className="rc-main">{children}</main>
       </body>
