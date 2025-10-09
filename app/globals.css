@@ -412,3 +412,60 @@ main, .rc-home, .rc-page { padding-top: 0 !important; margin-top: 0 !important; 
 .inp:focus{ border-color:#18e273; box-shadow:0 0 0 3px rgba(24,226,115,.18); }
 .btn{ background:#18e273; color:#052515; border-radius:10px; padding:8px 12px; font-weight:700; }
 .btn:hover{ filter:brightness(1.07); }
+/* ====== Tickers em coluna na lateral esquerda ========================= */
+.rc-home{ position: relative; }
+
+.rc-tickers--leftColumn{
+  position: absolute;
+  left: 18px;            /* encosta à esquerda */
+  top: 14px;             /* no topo */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 5;
+}
+
+/* chip verde */
+.rc-chip{
+  border: 1px solid rgba(0,255,128,.35);
+  background: rgba(0,255,128,.08);
+  box-shadow: 0 0 0 1px rgba(0,255,128,.07) inset;
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+.rc-chip--vertical{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 120px;
+}
+.rc-chip__pair  { color:#bfffdc; font-weight: 700; letter-spacing:.2px; line-height: 1; }
+.rc-chip__price { color:#18e273; font-weight: 800; margin-top: 6px; line-height: 1; }
+
+/* Dá um respiro no hero para não colidir com os chips */
+.rc-hero{ margin-left: 150px; }
+
+/* ====== Simulador: “Voltar ao início” dentro/à frente do painel ======= */
+/* Sem alterar TSX: posiciona o botão colado ao topo-direito do painel,
+   sobrepondo-o de forma elegante no layout atual. */
+.page-simulador .rc-backtop{
+  position: sticky;
+  top: 8px;                 /* gruda no topo da área de controles */
+  display: flex;
+  justify-content: flex-end;
+  margin: 0 0 8px auto;     /* vai para a direita */
+  z-index: 40;              /* fica à frente do painel */
+}
+.page-simulador .rc-backtop .rc-btn{
+  height: 34px; padding: 0 14px; border-radius: 10px;
+}
+
+/* ====== Páginas internas: remover tarjas e duplicados, subir conteúdo == */
+main, .rc-page{ padding-top:0!important; margin-top:0!important; }
+main .rc-backtop:not(:last-of-type){ display:none!important; }
+
+/* Planos / Sobre / Fale: se houver um “Voltar ao início” no topo, some,
+   e mantenha apenas o da lateral/direita; conteúdo cola no topo. */
+.page-planos .rc-backtop:first-child,
+.page-sobre  .rc-backtop:first-child,
+.page-fale   .rc-backtop:first-child{ display:none!important; }
