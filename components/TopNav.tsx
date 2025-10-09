@@ -1,3 +1,4 @@
+// components/TopNav.tsx
 "use client";
 
 import Link from "next/link";
@@ -13,25 +14,18 @@ const LINKS = [
 
 export default function TopNav() {
   const pathname = usePathname();
-  const onHome = pathname === "/";
-
   return (
-    <header className="rc-topbar">
-      <div className="rc-topbar__inner">
-        {onHome ? (
-          <nav className="rc-pills" aria-label="Navegação principal">
-            {LINKS.map((l) => (
-              <Link key={l.href} href={l.href} className="rc-pill rc-pill--green">
-                {l.label}
-              </Link>
-            ))}
-          </nav>
-        ) : (
-          <div className="rc-backtop">
-            <Link href="/" className="rc-btn rc-btn--green">Voltar ao início</Link>
-          </div>
-        )}
+    <nav className="rc-topnav" aria-label="Navegação principal">
+      <div className="rc-topnav__inner">
+        {LINKS.map((l) => {
+          const active = pathname.startsWith(l.href);
+          return (
+            <Link key={l.href} href={l.href} className={`rc-pill ${active ? "is-active" : ""}`}>
+              {l.label}
+            </Link>
+          );
+        })}
       </div>
-    </header>
+    </nav>
   );
 }
