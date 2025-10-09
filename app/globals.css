@@ -3056,3 +3056,59 @@ html,body,#__next {
   padding: 0 !important;
   margin: 0 !important;
 }
+/* ====== HOME – Tickers no topo, hero ajustado e hover forte ====== */
+
+/* Fila de tickers (moedas) — garante topo, centraliza, sem corte */
+.rc-tickers, .rc-live-tickers {
+  display: flex !important;
+  flex-wrap: nowrap !important;          /* mantém tudo em 1 linha */
+  justify-content: center !important;
+  align-items: flex-start !important;
+  gap: 8px !important;
+  margin-top: 6px !important;            /* gruda no topo */
+  padding: 0 12px !important;
+  overflow: visible !important;          /* nada fica escondido */
+}
+
+/* Deixa os “pills” das moedas um pouco mais compactos para caberem as 8 */
+.rc-tickers .rc-pill,
+.rc-live-tickers .rc-pill {
+  padding: 8px 12px !important;
+  font-size: 12.5px !important;
+  line-height: 1 !important;
+  background: #0f2e1f !important;
+  border: 1px solid #1fe66a !important;
+  color: #1fe66a !important;
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+
+/* Hover/Focus — “ganho” de verde e leve elevação */
+.rc-tickers .rc-pill:hover,
+.rc-tickers .rc-pill:focus-visible,
+.rc-live-tickers .rc-pill:hover,
+.rc-live-tickers .rc-pill:focus-visible {
+  filter: brightness(1.25) !important;
+  box-shadow:
+    0 0 0 2px #1fe66a inset,
+    0 0 32px rgba(31,230,106,.35) !important;
+  transform: translateY(-1px);
+  outline: none;
+}
+
+/* Hero: reduz um pouco e garante que caiba inteiro a 100% */
+.rc-hero { 
+  margin-top: 18px !important;           /* fica logo abaixo dos 5 botões */
+  padding-inline: 16px !important;
+}
+.rc-hero__inner {
+  width: min(960px, calc(100% - 40px)) !important; /* menor p/ caber no viewport */
+  margin: 0 auto !important;                          /* centralizado */
+}
+
+/* Se o cartão do hero tiver um “container” próprio, reduz também */
+.rc-hero .rc-card, .rc-hero .rc-hero__card, .rc-hero .rc-hero__panel {
+  width: min(960px, calc(100% - 40px)) !important;
+}
+
+/* Segurança: evita qualquer corte lateral */
+.rc-home, .rc-hero { overflow: visible !important; }
