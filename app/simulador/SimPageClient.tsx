@@ -1,3 +1,4 @@
+// app/simulador/SimPageClient.tsx
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
@@ -43,6 +44,7 @@ export default function SimPageClient() {
   return (
     <main
       className="page-simulador"
+      /* Full-bleed: sem padding, sem gap, altura total */
       style={{
         display: 'grid',
         gridTemplateColumns: '1fr 380px',
@@ -54,7 +56,7 @@ export default function SimPageClient() {
         overflow: 'hidden',
       }}
     >
-      {/* ======= GRÁFICO ======= */}
+      {/* Gráfico (painel colado às bordas) */}
       <section
         ref={chartPanelRef}
         className="panel"
@@ -66,8 +68,15 @@ export default function SimPageClient() {
           borderRight: '1px solid rgba(255,255,255,.06)',
         }}
       >
-        {/* removido o cabeçalho preto para liberar espaço */}
-        {/* Botão Tela Cheia — topo direito do gráfico */}
+        {!isFs && (
+          <div className="compactHeader" style={{ marginBottom: 8 }}>
+            <h2 className="compactTitle" style={{ margin: 0 }}>
+              Gráfico — {symbol}
+            </h2>
+          </div>
+        )}
+
+        {/* Botão Tela Cheia — TOPO DIREITO */}
         {!isFs && (
           <button
             aria-label="Tela cheia"
@@ -96,12 +105,12 @@ export default function SimPageClient() {
           </button>
         )}
 
-        <div style={{ height: '100%', minHeight: 520 }}>
+        <div style={{ height: 'calc(100% - 0px)', minHeight: 520 }}>
           <TradingViewWidget symbol={`BINANCE:${symbol}`} />
         </div>
       </section>
 
-      {/* ======= CONTROLES ======= */}
+      {/* Controles */}
       <section
         className="panel compactPanel rc-controls"
         style={{
@@ -113,21 +122,10 @@ export default function SimPageClient() {
           borderRadius: 0,
           borderLeft: '1px solid rgba(255,255,255,.06)',
           position: 'relative',
-          paddingTop: 8,
         }}
       >
-        {/* Voltar ao início — AGORA NA FRENTE DO PAINEL (verde) */}
-        <div
-          className="rc-backtop"
-          style={{
-            position: 'sticky',
-            top: 0,
-            zIndex: 50,
-            display: 'flex',
-            justifyContent: 'flex-end',
-            marginBottom: 8,
-          }}
-        >
+        {/* Voltar ao início — agora NA FRENTE do painel de controles (verde) */}
+        <div className="rc-backtop" style={{ position: 'sticky', top: 8, zIndex: 50, display: 'flex', justifyContent: 'flex-end', margin: '0 0 8px' }}>
           <a href="/" className="rc-btn rc-btn--green">Voltar ao início</a>
         </div>
 
