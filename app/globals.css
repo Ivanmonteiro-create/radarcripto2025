@@ -16,8 +16,10 @@
 
   /* Home layout knobs */
   --topbar-h: 64px;        /* altura virtual da barra superior (para espaçamentos) */
-  --hero-max: 960px;       /* largura máxima do card do hero */
+  --hero-max: 1160px;      /* largura máxima do card do hero (↑ para letras maiores) */
+  --tickers-col-w: 150px;  /* largura reservada para a coluna de moedas à esquerda */
 }
+
 /* ================== Reset mínimo ================== */
 *{ box-sizing: border-box; }
 html, body { height: 100%; }
@@ -58,16 +60,11 @@ a{ color: inherit; text-decoration: none; }
 
 /* ================== TopNav – 5 botões ================== */
 .rc-topnav{
-  position: relative;             /* nunca “cobre” conteúdo */
-  z-index: 10;
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 8px;                /* logo abaixo das moedas */
-  pointer-events: auto;
+  position: relative; z-index: 10;
+  display: flex; justify-content: center; gap: 8px;
+  margin-top: 8px; pointer-events: auto;
 }
 .rc-topnav__inner{ display:flex; gap:8px; }
-
 .rc-pill{
   display:inline-flex; align-items:center; justify-content:center;
   height: 36px; padding: 0 12px; border-radius: 999px;
@@ -84,68 +81,89 @@ a{ color: inherit; text-decoration: none; }
 }
 
 /* ================== Live Tickers (moedas) ================== */
-/* Sempre no topo do conteúdo, em uma faixa centralizada (sem rolagem vertical) */
-.rc-live-tickers,
-.rc-tickers,
-.rc-ticker-row{
-  position: relative;
+/* Coluna fixa no TOPO ESQUERDO — caber 8 chips a 100% de zoom */
+.rc-home{ position: relative; }
+
+.rc-tickers--leftColumn{
+  position: absolute;
+  top: 0;                /* cola no topo da viewport de conteúdo */
+  left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;              /* gap menor para caber as 8 */
+  padding: 6px 0;        /* respiro sutil */
   z-index: 6;
-  display: flex !important;
-  flex-wrap: nowrap !important;
-  justify-content: center !important;
-  align-items: flex-start !important;
-  gap: 8px !important;
-  margin-top: 6px !important;
-  padding: 0 12px !important;
-  overflow: visible !important;
 }
 
-/* Se os cards das moedas forem “pills”, deixam tipografia compacta */
-.rc-live-tickers .rc-pill,
-.rc-tickers .rc-pill{
-  padding: 8px 12px !important;
-  font-size: 12.5px !important;
+.rc-chip{
+  border: 1px solid rgba(0,255,128,.35);
+  background: rgba(0,255,128,.08);
+  box-shadow: 0 0 0 1px rgba(0,255,128,.07) inset;
+  border-radius: 14px;
+  padding: 8px 10px;     /* mais compacto */
 }
+.rc-chip--vertical{
+  display: flex; flex-direction: column; align-items: center;
+  min-width: 112px;      /* estreita um pouco pra caber 8 */
+}
+.rc-chip__pair  { color:#bfffdc; font-weight:700; letter-spacing:.2px; line-height:1; }
+.rc-chip__price { color:#18e273; font-weight:800; margin-top:6px; line-height:1; }
 
-/* ================== HERO (card grande) ================== */
-/* Fica logo abaixo das moedas e com “fim” visível à direita */
+/* ================== HERO (card grande, FLUORESCENTE e MAIOR) ================== */
+/* Compatível com os dois padrões de classe do TSX: _inner e __inner, etc. */
 .rc-hero{
-  position: relative;
-  z-index: 5;
-  margin: 14px auto 0 auto;                    /* respiro abaixo das moedas */
-  width: min(var(--hero-max), 92vw);           /* card mais estreito */
-  border-radius: 16px;
-  border: 1px solid rgba(255,255,255,.08);
-  background: linear-gradient(180deg, rgba(33,243,141,.08), rgba(33,243,141,.04));
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.06) inset,
-    0 18px 60px rgba(33,243,141,.08),
-    0 6px 22px rgba(33,243,141,.08) inset;
-  overflow: hidden;
-  /* puxa levemente à esquerda para mostrar a borda direita inteira */
+  position: relative; z-index: 5;
+  /* centraliza visualmente entre a coluna esquerda e a margem direita */
+  margin: 14px auto 56px;
+  width: min(var(--hero-max), calc(96vw - var(--tickers-col-w)));
+  /* afasta do bloco de moedas à esquerda */
+  margin-left: calc(var(--tickers-col-w) + 36px);
+  /* dá leve ênfase à borda direita visível */
   transform: translateX(-6px);
+  border-radius: 18px;
+  /* contorno fluorescente */
+  border: 1px solid rgba(0,255,128,.35);
+  background:
+    radial-gradient(80% 60% at 50% 40%, rgba(16,40,20,.65), rgba(10,22,14,.38)),
+    linear-gradient(180deg, rgba(33,243,141,.10), rgba(33,243,141,.06));
+  box-shadow:
+    0 0 0 1px rgba(0,255,128,.10) inset,
+    0 0 0 3px rgba(0,255,128,.10),
+    0 18px 70px rgba(33,243,141,.18);
+  overflow: hidden;
 }
-.rc-hero__inner{
-  min-height: 260px;
-  display: grid;
-  align-content: center;
-  gap: 10px;
-  padding: 16px;
+.rc-hero_inner, .rc-hero__inner{
+  min-height: 300px;
+  display: grid; align-content: center; gap: 12px;
+  padding: 32px 40px;
+  border-radius: 18px;
+  /* brilho interno suave */
+  box-shadow: 0 0 0 1px rgba(0,255,128,.18) inset;
+  backdrop-filter: blur(3px);
 }
-.rc-hero__eyebrow{ letter-spacing:.12em; font-size:12px; font-weight:800; opacity:.85; }
-.rc-hero__title{ font-size: clamp(28px, 5.2vw, 62px); line-height:1.05; font-weight:900; margin:0; }
-.rc-hero__desc{ max-width: 60ch; opacity:.92; }
+.rc-hero_eyebrow, .rc-hero__eyebrow{
+  letter-spacing:.12em; font-size:13px; font-weight:800; opacity:.9;
+}
+.rc-hero_title, .rc-hero__title{
+  color: #b8ffd8;                       /* base clara */
+  /* destaque FLUORESCENTE */
+  text-shadow:
+    0 0 12px rgba(24,226,115,.45),
+    0 0 40px rgba(24,226,115,.25);
+  font-size: clamp(34px, 5.8vw, 70px);  /* ↑ maior para mais impacto */
+  line-height: 1.02; font-weight: 900; margin: 0;
+}
+.rc-hero_desc, .rc-hero__desc{
+  max-width: 68ch; opacity:.95; font-size: clamp(15px, 1.45vw, 18px);
+}
+.rc-hero_phase{ margin-left: 8px; color:#7affc1; font-weight:700; }
 
-/* ================== Radar (fundo) ================== */
+/* ================== Radar (fundo leve) ================== */
 .rc-radar,
 .radarBg,
 [data-radar-bg]{
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  z-index: 0;
-  pointer-events: none;             /* nunca bloqueia clique dos botões */
+  position: absolute; inset: 0; display: grid; place-items: center;
+  z-index: 0; pointer-events: none;
 }
 .rc-radar > canvas,
 .rc-radar > svg,
@@ -155,136 +173,50 @@ a{ color: inherit; text-decoration: none; }
 [data-radar-bg] > svg{
   width: min(1200px, 90vw);
   height: min(1200px, 90vw);
-  max-width: none;
-  max-height: none;
-  opacity: .95;
+  max-width: none; max-height: none; opacity: .95;
 }
 
 /* ================== Internas / utilidades leves ================== */
 .tcBackBtn{ display:none !important; }         /* remove versões fantasmas do back */
 .panel{ background: rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); border-radius:14px; }
 
-/* ================== Responsivo ================== */
+/* ================== RESPONSIVO ================== */
+@media (max-width: 1200px){
+  .rc-hero{
+    width: min(calc(98vw - var(--tickers-col-w)), var(--hero-max));
+    margin-left: calc(var(--tickers-col-w) + 22px);
+    transform: none;
+  }
+}
 @media (max-width: 980px){
-  .rc-live-tickers,
-  .rc-tickers,
-  .rc-ticker-row{
-    flex-wrap: wrap !important;
-    gap: 8px !important;
+  /* Empilha: moedas podem quebrar em duas colunas; hero centraliza total */
+  .rc-tickers--leftColumn{
+    position: static; left: auto; top: auto;
+    flex-direction: row; flex-wrap: wrap; justify-content: center;
+    gap: 8px; padding-top: 8px; margin-bottom: 6px;
   }
   .rc-hero{
-    margin: 12px auto 0 auto;
-    width: min(680px, 94vw);
-    transform: none;                /* central no mobile */
+    margin: 12px auto 40px; width: min(680px, 94vw);
+    margin-left: auto; transform: none;
   }
+  .rc-hero_inner, .rc-hero__inner{ min-height: 260px; padding: 22px 24px; }
 }
 
-/* ================== Fim ================== */
-/* === RADARCRYPTO: HOME LAYOUT FIX ======================================= */
+/* ====== NAV/“Voltar ao início” (evita duplicados e tarjas) ============= */
+main .rc-backtop:not(:last-of-type){ display:none !important; }
+main, .rc-home, .rc-page { padding-top: 0 !important; margin-top: 0 !important; }
 
-/* Tickers no topo (sem tarja), com respiro mínimo */
-.rc-tickers { 
-  margin-top: 8px;
+/* ====== SIMULADOR: botão ao lado direito da área de controles ========== */
+.page-simulador .rc-controls{ position: relative; }
+.page-simulador .rc-backtop{
+  position: absolute; right: 12px; top: 8px; z-index: 50;
 }
-.rc-tickers > * { /* garante que os chips fiquem coladinhos ao topo */
-  margin-top: 0 !important;
-}
-
-/* Hero reduzido, mais à esquerda e com largura controlada para caber na tela 100% */
-.rc-hero {
-  position: relative;
-  margin: 20px auto 56px;
-  max-width: 980px;           /* ↓ diminui o “quadradão” */
-  transform: translateX(-20px); /* puxa um pouco para a esquerda */
-}
-@media (max-width: 1200px) {
-  .rc-hero { transform: none; max-width: 920px; }
-}
-@media (max-width: 992px) {
-  .rc-hero { max-width: 860px; }
+.page-simulador .rc-backtop .rc-btn{
+  height: 34px; padding: 0 14px; border-radius: 10px;
 }
 
-/* Mantém o contorno interno/externo sem exagero */
-.rc-hero__inner {
-  border-radius: 18px;
-  border: 1px solid rgba(0, 255, 128, 0.22);
-  background: radial-gradient(80% 60% at 50% 40%, rgba(16, 40, 20, 0.55), rgba(10, 22, 14, 0.35));
-  backdrop-filter: blur(3px);
-  padding: 28px 32px;
-}
-.rc-hero__glow { display:none; } /* evitamos que expanda demais o bloco */
-
-.rc-hero__title {
-  line-height: 0.95;
-}
-
-/* === RADAR ANIMADO (leve e sem JS) ====================================== */
-.rc-radar {
-  --line: rgba(0,255,128,0.18);
-  --beam: rgba(0,255,128,0.28);
-  position: absolute;
-  inset: 0 0 auto 50%;
-  width: 620px;
-  height: 620px;
-  transform: translateX(-50%);
-  pointer-events: none;
-  opacity: 0.9;
-}
-.rc-radar::before,
-.rc-radar::after {
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at center, var(--line) 1px, transparent 1px) 0 0/ 62px 62px,
-    radial-gradient(circle at center, var(--line) 1px, transparent 1px) 31px 31px/ 62px 62px;
-  mask: radial-gradient(circle at center, transparent 35%, #000 36%);
-  opacity: 0.7;
-}
-.rc-radar::after {
-  mask: none;
-  background: conic-gradient(from 0deg, var(--beam), transparent 35%);
-  animation: rc-sweep 3.4s linear infinite;
-  mix-blend-mode: screen;
-  opacity: 0.6;
-}
-@keyframes rc-sweep {
-  to { transform: rotate(360deg); }
-}
-
-/* === NAV: botões só na Home; já controlado no TopNav.tsx ================= */
-/* Aparência dos pills e hover fluorescente */
-.rc-topnav { margin-top: 6px; }
-.rc-topnav__inner {
-  display: flex; gap: 10px; flex-wrap: wrap;
-}
-.rc-pill {
-  display:inline-flex; align-items:center; justify-content:center;
-  height: 38px; padding: 0 14px; border-radius: 999px;
-  border: 1px solid rgba(0,255,128,0.35);
-  background: rgba(0,255,128,0.10);
-  color: #bfffdc; font-weight: 600; letter-spacing:.2px;
-  transition: transform .08s ease, background .12s ease, box-shadow .12s ease;
-}
-.rc-pill:hover { 
-  background: rgba(0,255,128,0.18);
-  box-shadow: 0 0 0 4px rgba(0,255,128,0.10) inset;
-  transform: translateY(-1px);
-}
-.rc-pill.is-active {
-  background: rgba(0,255,128,0.28);
-  color: #041d10;
-}
-
-/* Botão “Voltar ao início” */
-.rc-backtop { display:flex; justify-content:flex-end; margin: 14px 0 0; }
-.rc-btn { display:inline-flex; height: 38px; align-items:center; padding: 0 16px; border-radius: 10px; font-weight:700; }
-.rc-btn--green { background:#18e273; color:#01210f; }
-.rc-btn--green:hover { filter: brightness(1.1); }
-
-/* === ROBÔS: inputs/labels/cartões com “verde RadarCrypto” ================ */
-.panel {
+/* ====== Controles/inputs com “verde RadarCrypto” ======================= */
+.panel{
   border: 1px solid rgba(0,255,128,0.20);
   background: rgba(0, 20, 10, 0.55);
   border-radius: 16px;
@@ -304,7 +236,7 @@ a{ color: inherit; text-decoration: none; }
 .pnlPos{ color:#16f086; }
 .pnlNeg{ color:#ff6b6b; }
 
-/* === CARDS utilitários (p/ “Fale com a gente” etc.) ====================== */
+/* ====== Utilitários de card ============================================ */
 .rc-card {
   border: 1px solid rgba(0,255,128,0.20);
   background: rgba(0, 25, 12, 0.55);
@@ -312,251 +244,3 @@ a{ color: inherit; text-decoration: none; }
   padding: 14px;
 }
 .rc-card h3 { color:#bfffdc; margin:0 0 8px; }
-/* ====== TICKERS EM CHIPS, À ESQUERDA =================================== */
-.rc-tickers--left {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: max-content;
-  gap: 10px;
-  justify-content: start;      /* alinha à esquerda */
-  margin: 8px 0 0;
-}
-.rc-chip {
-  display: grid;
-  grid-template-columns: auto auto;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(0,255,128,0.35);
-  background: rgba(0,255,128,0.08);
-  box-shadow: 0 0 0 1px rgba(0,255,128,0.07) inset;
-}
-.rc-chip__pair  { color:#bfffdc; font-weight: 700; letter-spacing:.2px; }
-.rc-chip__price { color:#18e273; font-weight: 700; }
-
-/* ====== HERO MENOR E UM POUCO MAIS ALTO PARA CABER NO ZOOM 100% ======== */
-.rc-hero {
-  position: relative;
-  margin: 16px auto 56px;
-  max-width: 980px;
-}
-@media (max-width: 1200px){ .rc-hero{ max-width: 920px; } }
-@media (max-width: 992px) { .rc-hero{ max-width: 860px; } }
-
-.rc-hero__inner{
-  border-radius: 18px;
-  border: 1px solid rgba(0,255,128,0.22);
-  background: radial-gradient(80% 60% at 50% 40%, rgba(16, 40, 20, 0.55), rgba(10, 22, 14, 0.35));
-  padding: 28px 32px;
-}
-
-/* ====== RADAR LEVE ATRÁS DO HERO ====================================== */
-.rc-radar {
-  --line: rgba(0,255,128,0.18);
-  --beam: rgba(0,255,128,0.28);
-  position: absolute;
-  inset: 0 0 auto 50%;
-  width: 620px; height: 620px;
-  transform: translateX(-50%);
-  pointer-events: none; opacity: .9;
-}
-.rc-radar::before,
-.rc-radar::after{
-  content:""; position:absolute; inset:0; border-radius:50%;
-}
-.rc-radar::before{
-  background:
-    radial-gradient(circle at center, var(--line) 1px, transparent 1px) 0 0/ 62px 62px,
-    radial-gradient(circle at center, var(--line) 1px, transparent 1px) 31px 31px/ 62px 62px;
-  mask: radial-gradient(circle at center, transparent 35%, #000 36%);
-  opacity:.7;
-}
-.rc-radar::after{
-  background: conic-gradient(from 0deg, var(--beam), transparent 35%);
-  animation: rc-sweep 3.4s linear infinite;
-  mix-blend-mode: screen; opacity:.6;
-}
-@keyframes rc-sweep{ to{ transform: rotate(360deg); } }
-
-/* ====== NAV/“Voltar ao início” (evita duplicados e tarjas) ============= */
-main .rc-backtop:not(:last-of-type){ display:none !important; }  /* se surgir duplicado */
-main, .rc-home, .rc-page { padding-top: 0 !important; margin-top: 0 !important; }
-
-/* ====== SIMULADOR: botão ao lado direito da área de controles ========== */
-/* Sem refatorar o TSX: deixa o botão colado à direita e com tamanho ok. */
-.page-simulador .rc-backtop{
-  display:flex; justify-content:flex-end; margin: 10px 0 0;
-}
-.page-simulador .rc-backtop .rc-btn{ height: 36px; padding: 0 14px; }
-
-/* ====== PÁGINAS INTERNAS: só um botão e conteúdo colado ao topo ======== */
-.page-planos .rc-backtop,
-.page-sobre .rc-backtop,
-.page-fale .rc-backtop { margin: 8px 0 0; }
-
-/* ====== CORES “VERDE RADARCRYPTO” PARA CONTROLES/PAINÉIS =============== */
-.panel{
-  border: 1px solid rgba(0,255,128,0.20);
-  background: rgba(0,20,10,0.55);
-  border-radius: 16px;
-  box-shadow: 0 8px 28px rgba(0,0,0,.35) inset, 0 0 0 1px rgba(0,255,128,.08);
-}
-.lbl{ color:#b6ffdb; font-size:13px; display:flex; flex-direction:column; gap:6px; }
-.inp{
-  background: rgba(0,255,128,0.06);
-  border: 1px solid rgba(0,255,128,0.22);
-  border-radius: 10px; color:#eafff5; padding:10px 12px; outline:none;
-}
-.inp:focus{ border-color:#18e273; box-shadow:0 0 0 3px rgba(24,226,115,.18); }
-.btn{ background:#18e273; color:#052515; border-radius:10px; padding:8px 12px; font-weight:700; }
-.btn:hover{ filter:brightness(1.07); }
-/* ====== Tickers em coluna na lateral esquerda ========================= */
-.rc-home{ position: relative; }
-
-.rc-tickers--leftColumn{
-  position: absolute;
-  left: 18px;            /* encosta à esquerda */
-  top: 14px;             /* no topo */
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  z-index: 5;
-}
-
-/* chip verde */
-.rc-chip{
-  border: 1px solid rgba(0,255,128,.35);
-  background: rgba(0,255,128,.08);
-  box-shadow: 0 0 0 1px rgba(0,255,128,.07) inset;
-  border-radius: 14px;
-  padding: 10px 12px;
-}
-.rc-chip--vertical{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 120px;
-}
-.rc-chip__pair  { color:#bfffdc; font-weight: 700; letter-spacing:.2px; line-height: 1; }
-.rc-chip__price { color:#18e273; font-weight: 800; margin-top: 6px; line-height: 1; }
-
-/* Dá um respiro no hero para não colidir com os chips */
-.rc-hero{ margin-left: 150px; }
-
-/* ====== Simulador: “Voltar ao início” dentro/à frente do painel ======= */
-/* Sem alterar TSX: posiciona o botão colado ao topo-direito do painel,
-   sobrepondo-o de forma elegante no layout atual. */
-.page-simulador .rc-backtop{
-  position: sticky;
-  top: 8px;                 /* gruda no topo da área de controles */
-  display: flex;
-  justify-content: flex-end;
-  margin: 0 0 8px auto;     /* vai para a direita */
-  z-index: 40;              /* fica à frente do painel */
-}
-.page-simulador .rc-backtop .rc-btn{
-  height: 34px; padding: 0 14px; border-radius: 10px;
-}
-
-/* ====== Páginas internas: remover tarjas e duplicados, subir conteúdo == */
-main, .rc-page{ padding-top:0!important; margin-top:0!important; }
-main .rc-backtop:not(:last-of-type){ display:none!important; }
-
-/* Planos / Sobre / Fale: se houver um “Voltar ao início” no topo, some,
-   e mantenha apenas o da lateral/direita; conteúdo cola no topo. */
-.page-planos .rc-backtop:first-child,
-.page-sobre  .rc-backtop:first-child,
-.page-fale   .rc-backtop:first-child{ display:none!important; }
-/* ===== Tickers: coluna à esquerda, encostados no topo ===== */
-:root { --tickers-col-w: 150px; }
-
-.rc-tickers--leftColumn{
-  position: absolute;
-  inset-block-start: 0;     /* top: 0 */
-  inset-inline-start: 18px; /* left */
-  display: flex;
-  flex-direction: column;
-  gap: 8px;                 /* menor espaçamento p/ caber 8 */
-  z-index: 5;
-  padding-block: 8px;       /* respiro do topo */
-}
-
-.rc-chip{
-  border: 1px solid rgba(0,255,128,.35);
-  background: rgba(0,255,128,.08);
-  box-shadow: 0 0 0 1px rgba(0,255,128,.07) inset;
-  border-radius: 14px;
-  padding: 8px 10px;        /* um pouco menor */
-}
-.rc-chip--vertical{ min-width: 118px; }
-.rc-chip__pair  { color:#bfffdc; font-weight:700; line-height:1; }
-.rc-chip__price { color:#18e273; font-weight:800; margin-top:6px; line-height:1; }
-
-/* Hero com “folga” da coluna de tickers e centralizado visualmente */
-.rc-hero{
-  margin-inline: calc(var(--tickers-col-w) + 30px) 40px; /* empurra um pouco p/ a direita */
-}
-/* ===== Simulador: posiciona o botão dentro do painel de controles ===== */
-.page-simulador .rc-controls{ position: relative; }
-
-.page-simulador .rc-backtop{
-  position: absolute;
-  right: 12px;   /* encostado à direita do painel */
-  top: 6px;      /* logo abaixo da linha/contorno verde superior */
-  z-index: 50;   /* à frente do painel */
-}
-
-.page-simulador .rc-backtop .rc-btn{
-  height: 34px; padding: 0 14px; border-radius: 10px;
-}
-/* ===== 1) MOEDAS: coluna encostada no topo ===== */
-:root { --tickers-col-w: 150px; }
-
-.rc-home{              /* garante que nada empurre pra baixo */
-  position: relative;
-  padding-top: 0 !important;
-}
-
-.rc-tickers--leftColumn{
-  position: absolute;
-  top: 0 !important;          /* cola no topo */
-  left: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;                   /* cabem as 8 */
-  z-index: 5;
-  padding: 6px 0;             /* respiro sutil */
-}
-
-.rc-chip{
-  border: 1px solid rgba(0,255,128,.35);
-  background: rgba(0,255,128,.08);
-  box-shadow: 0 0 0 1px rgba(0,255,128,.07) inset;
-  border-radius: 14px;
-  padding: 8px 10px;
-}
-.rc-chip--vertical{ min-width: 118px; }
-.rc-chip__pair  { color:#bfffdc; font-weight:700; line-height:1; }
-.rc-chip__price { color:#18e273; font-weight:800; margin-top:6px; line-height:1; }
-
-/* ===== 2) HERO: mais centralizado e com menos espaço à direita ===== */
-.rc-hero{
-  /* empurra a partir da coluna de tickers e reduz margem direita */
-  margin-inline: calc(var(--tickers-col-w) + 26px) 12px;
-  max-width: 1150px;          /* evita ficar largo demais */
-}
-/* Painel do simulador precisa ser referência de posicionamento */
-.page-simulador .rc-controls{ position: relative; }
-
-/* Botão fixado no topo-direito do painel (à frente) */
-.page-simulador .rc-backtop{
-  position: absolute;
-  right: 12px;
-  top: 8px;            /* fica logo abaixo do contorno superior */
-  z-index: 50;         /* fica por cima de tudo do painel */
-}
-
-.page-simulador .rc-backtop .rc-btn{
-  height: 34px; padding: 0 14px; border-radius: 10px;
-}
