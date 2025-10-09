@@ -2,9 +2,9 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
-import TradingViewWidget from '@/components/TradingViewWidget';
-import TradeControls from '@/components/TradeControls';
-import { useLivePrice } from '@/lib/priceFeed';
+import TradingViewWidget from '../../components/TradingViewWidget';
+import TradeControls from '../../components/TradeControls';
+import { useLivePrice } from '../../lib/priceFeed';
 
 type Pair =
   | 'BTCUSDT'
@@ -18,8 +18,7 @@ type Pair =
 
 export default function SimPageClient() {
   const [symbol, setSymbol] = useState<Pair>('BTCUSDT');
-  // Mantemos o hook para uso futuro (não é obrigatório agora)
-  const livePrice = useLivePrice(symbol);
+  const livePrice = useLivePrice(symbol); // pode ser usado dentro do TradeControls depois
   const chartPanelRef = useRef<HTMLDivElement | null>(null);
 
   return (
@@ -30,8 +29,8 @@ export default function SimPageClient() {
         </div>
 
         <div className="rc-sim_controls">
-          {/* O componente interno cuida do layout; sem props por enquanto */}
-          <TradeControls />
+          {/* TradeControls requer 'symbol' — passamos a seleção atual */}
+          <TradeControls symbol={symbol} />
         </div>
       </section>
     </main>
