@@ -546,3 +546,94 @@ body:has(.page-robos) .rc-page-top{
   background: transparent !important;
   box-shadow: none !important;
 }
+/* ===== ROBÔS (SIM) — Layout & ênfase (escopo: .page-robos) =============== */
+
+/* Centraliza os chips de moedas no topo da página Robôs */
+.page-robos .rc-tickers,
+.page-robos .rc-ticker-row,
+.page-robos .rc-live-tickers,
+.page-robos .rc-tickers--left,
+.page-robos .rc-tickers--leftColumn{
+  position: static !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  gap: 8px !important;
+  margin: 8px auto 0 !important;
+  padding: 0 12px !important;
+  z-index: 5;
+}
+
+/* Centraliza o card principal do robô (pega o primeiro .panel da página) */
+.page-robos .panel:first-of-type{
+  margin: 14px auto !important;
+  max-width: 980px !important;
+  width: min(980px, 94vw) !important;
+  position: relative; /* âncora para o botão */
+}
+
+/* Título com um pouco mais de presença */
+.page-robos h1,
+.page-robos .rc-title,
+.page-robos .rc-heading{
+  font-size: clamp(22px, 3.2vw, 34px) !important;
+  line-height: 1.08 !important;
+  font-weight: 900 !important;
+  letter-spacing: .2px !important;
+  color: #bfffdc !important;
+  margin: 0 0 6px 0 !important;
+}
+
+/* Subtítulo/descrição mais legível */
+.page-robos .rc-subtitle,
+.page-robos p.lead{
+  max-width: 72ch;
+  opacity: .92;
+}
+
+/* Some qualquer “tarja” externa só nesta página */
+body:has(.page-robos) .rc-topbar,
+body:has(.page-robos) .rc-topband,
+body:has(.page-robos) .rc-topstrip,
+body:has(.page-robos) .rc-page-top{
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Move o "Voltar ao início" para dentro do card (topo-direito), verde */
+.page-robos .rc-backtop{ display: none !important; } /* barra antiga some */
+.page-robos .panel:first-of-type .rc-backtop{
+  display: block !important;
+  position: absolute !important;
+  top: 10px;
+  right: 12px;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  z-index: 6;
+  pointer-events: none; /* só o link é clicável */
+}
+.page-robos .panel:first-of-type .rc-backtop .rc-btn{
+  pointer-events: auto;
+  display: inline-flex;
+  height: 34px;
+  align-items: center;
+  padding: 0 14px;
+  border-radius: 8px;          /* quadrado (não pill) */
+  font-weight: 800;
+  background: #18e273;         /* verde RadarCrypto */
+  color: #052515;
+  box-shadow: 0 0 0 1px rgba(0,255,128,.28), 0 8px 24px rgba(0,0,0,.35);
+}
+.page-robos .panel:first-of-type .rc-backtop .rc-btn:hover{
+  filter: brightness(1.07);
+  transform: translateY(-1px);
+}
