@@ -920,3 +920,105 @@ body:has(.page-robos) .rc-page-top{
 .page-robos .rc-robotsShell > .rc-backtop .rc-btn:hover{
   filter: brightness(1.07); transform: translateY(-1px);
 }
+/* ===== ROBÔS (SIM) — centralização total + botão certo ================== */
+
+/* Shell central desta rota (mais espaço para leitura dos números) */
+.page-robos .rc-robotsShell{
+  width: 100%;
+  max-width: 1240px;
+  margin-inline: auto;
+  position: relative;                 /* âncora do botão verde */
+  padding-inline: 12px;
+}
+
+/* CENTRALIZAR chips/moedas no topo (sobrepõe layouts “left”) */
+.page-robos .rc-tickers,
+.page-robos .rc-live-tickers,
+.page-robos .rc-ticker-row,
+.page-robos .rc-tickers--left,
+.page-robos .rc-tickers--leftColumn{
+  position: static !important;        /* cancela absolute/left/top */
+  left: auto !important; top: auto !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important; /* centro real */
+  align-items: center !important;
+  gap: 8px !important;
+  margin: 8px auto 0 !important;
+  padding: 0 8px !important;
+  z-index: 5;
+}
+
+/* CENTRALIZAR o header/descrição da página */
+.page-robos .rc-robotsShell > h1,
+.page-robos .rc-robotsShell > .rc-title,
+.page-robos .rc-robotsShell > .rc-heading,
+.page-robos .rc-robotsShell > p.lead,
+.page-robos .rc-robotsShell > .rc-subtitle{
+  text-align: center;
+  margin-left: auto; margin-right: auto;
+}
+
+/* CARD principal do robô: central e mais largo */
+.page-robos .rc-robotsShell .panel:first-of-type{
+  margin: 14px auto !important;
+  width: 100% !important;
+  max-width: 1120px !important;       /* ↑ melhora leitura */
+  position: relative;                  /* âncora local, se necessário */
+}
+
+/* Dentro do card: qualquer linha que tenha .rc-pill vira linha central */
+.page-robos .rc-robotsShell .panel:first-of-type
+  :is(div,section,header,nav,ul,ol):has(> .rc-pill){
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;            /* centro real */
+  align-items: center;
+  gap: 8px;
+}
+
+/* Grades de inputs mais largas, porém centradas */
+.page-robos .rc-robotsShell .panel:first-of-type :is(.grid,.form-grid){
+  max-width: 1060px;
+  margin-inline: auto;
+}
+
+/* Remover QUALQUER “Voltar ao início” antigo da página Robôs */
+.page-robos .rc-backtop{ display: none !important; }                 /* barras antigas */
+.page-robos a.tcBackBtn{ display: none !important; }                  /* variantes */
+.page-robos a[href="/"].rc-btn:not(.rc-robotsShell > .rc-backtop .rc-btn){ 
+  display: none !important;                                           /* links soltos p/ home */
+}
+
+/* ÚNICO botão oficial desta página: verde, canto direito do SHELL */
+.page-robos .rc-robotsShell > .rc-backtop--robos{
+  position: absolute !important;
+  inset-block-start: 6px;             /* top */
+  inset-inline-end: 6px;              /* right */
+  margin: 0 !important; padding: 0 !important;
+  background: transparent !important; border: 0 !important; box-shadow: none !important;
+  z-index: 7;
+}
+.page-robos .rc-robotsShell > .rc-backtop--robos .rc-btn{
+  display: inline-flex; align-items: center;
+  height: 34px; padding: 0 14px;
+  border-radius: 8px;                 /* quadrado elegante */
+  font-weight: 800;
+  background: #18e273;                /* verde RadarCrypto */
+  color: #052515;
+  box-shadow: 0 0 0 1px rgba(0,255,128,.28), 0 8px 24px rgba(0,0,0,.35);
+}
+.page-robos .rc-robotsShell > .rc-backtop--robos .rc-btn:hover{
+  filter: brightness(1.07); transform: translateY(-1px);
+}
+
+/* E, para garantir ausência de tarjas no topo somente nesta rota */
+body:has(.page-robos) .rc-topbar,
+body:has(.page-robos) .rc-topband,
+body:has(.page-robos) .rc-topstrip,
+body:has(.page-robos) .rc-page-top{
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important; padding: 0 !important; border: 0 !important;
+  background: transparent !important; box-shadow: none !important;
+}
