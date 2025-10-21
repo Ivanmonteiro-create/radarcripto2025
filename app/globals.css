@@ -1120,3 +1120,102 @@ body:has(.page-robos) .rc-page-top{
   background: linear-gradient(90deg, transparent, rgba(0,255,128,.24), transparent);
   border-radius:1px;
 }
+/* ===== Destaque do item “Fale com a gente” na TopNav =================== */
+.rc-topnav a[href="/fale"],
+.rc-topnav__inner a[href="/fale"]{
+  position: relative;
+  border: 1px solid rgba(0,255,128,0.45) !important;
+  background:
+    radial-gradient(140% 140% at 90% 10%, rgba(40,255,160,0.22), rgba(0,255,128,0.10) 48%, rgba(0,255,128,0.06) 60%)!,
+    linear-gradient(180deg, rgba(0,255,128,0.16), rgba(0,255,128,0.08)) !important;
+  color: #bfffdc !important;
+  box-shadow:
+    0 0 0 1px rgba(0,255,128,0.20) inset,
+    0 10px 30px rgba(0,255,128,0.10) !important;
+  transform: translateY(0);
+  transition: transform .12s ease, box-shadow .14s ease, filter .14s ease;
+}
+.rc-topnav a[href="/fale"]:hover{
+  filter: brightness(1.08);
+  box-shadow:
+    0 0 0 2px rgba(0,255,128,0.18) inset,
+    0 18px 42px rgba(0,255,128,0.18);
+  transform: translateY(-1px);
+}
+
+/* ===== Página Fale — estilos “universais” sem depender de classes ====== */
+/* Escopo por URL: quando a rota contém /fale */
+html:has(body) body:has(a[href="/fale"]) :where(main, .rc-main){
+  /* container central para a página */
+  --fale-max: 980px;
+}
+
+/* Card principal: pega o primeiro .panel ou .rc-card do main */
+:where(main, .rc-main) > :is(.panel, .rc-card):first-of-type{
+  max-width: var(--fale-max, 980px);
+  margin: 10px auto;
+  border: 1px solid rgba(0,255,128,0.25);
+  background: rgba(0,25,12,0.55);
+  border-radius: 16px;
+  box-shadow: 0 8px 28px rgba(0,0,0,.35) inset, 0 0 0 1px rgba(0,255,128,.08);
+  padding: 16px;
+}
+
+/* Títulos e parágrafos do topo centralizados (primeiros elementos de texto) */
+:where(main, .rc-main) > :is(.panel, .rc-card):first-of-type
+  :where(h1, .rc-title, .rc-heading){ 
+    text-align:center; 
+    margin: 6px 0 6px; 
+    color:#bfffdc; 
+    font-weight:900; 
+    font-size: clamp(22px,3.2vw,34px);
+}
+:where(main, .rc-main) > :is(.panel, .rc-card):first-of-type
+  :where(p, .lead):first-of-type{
+    text-align:center; opacity:.92; margin: 0 0 14px;
+}
+
+/* Grade básica: se houver um wrapper que contenha inputs/labels, organiza em grid */
+:where(main, .rc-main) > :is(.panel, .rc-card):first-of-type
+  :where(form, .grid, .form, .form-grid){
+    display: grid; gap: 10px; grid-template-columns: 1fr 1fr;
+}
+@media (max-width: 820px){
+  :where(main, .rc-main) > :is(.panel, .rc-card):first-of-type
+    :where(form, .grid, .form, .form-grid){ grid-template-columns: 1fr; }
+}
+
+/* Inputs “verde RadarCrypto” (pega qualquer input/textarea/select dentro desse card) */
+:where(main, .rc-main) > :is(.panel, .rc-card):first-of-type
+  :where(input, textarea, select){
+    background: rgba(0,255,128,0.06);
+    border: 1px solid rgba(0,255,128,0.22);
+    border-radius: 10px; color:#eafff5; padding:10px 12px; outline:none;
+}
+:where(main, .rc-main) > :is(.panel, .rc-card):first-of-type
+  :where(input, textarea, select):focus{
+    border-color:#18e273; box-shadow:0 0 0 3px rgba(24,226,115,.18);
+}
+
+/* Linhas divisórias dentro do card: qualquer hr vira glow verde */
+:where(main, .rc-main) > :is(.panel, .rc-card):first-of-type hr{
+  height:1px; border:0; margin: 12px 0;
+  background: linear-gradient(90deg, transparent, rgba(0,255,128,.24), transparent);
+  border-radius:1px;
+}
+
+/* CTA verde no fim do card (pega primeiro button/link com “enviar” no texto) */
+:where(main, .rc-main) > :is(.panel, .rc-card):first-of-type
+  :is(button, a)[class*="btn"], 
+:where(main, .rc-main) > :is(.panel, .rc-card):first-of-type
+  :is(button, a):where([type="submit"]){
+    display:inline-flex; align-items:center; height:38px; padding:0 16px;
+    border-radius:10px; font-weight:800; background:#18e273; color:#052515;
+    box-shadow: 0 0 0 1px rgba(0,255,128,.28), 0 8px 24px rgba(0,0,0,.35);
+}
+:where(main, .rc-main) > :is(.panel, .rc-card):first-of-type
+  :is(button, a)[class*="btn"]:hover, 
+:where(main, .rc-main) > :is(.panel, .rc-card):first-of-type
+  :is(button, a):where([type="submit"]):hover{
+    filter: brightness(1.07); transform: translateY(-1px);
+}
