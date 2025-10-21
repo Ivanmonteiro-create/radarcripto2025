@@ -17,7 +17,6 @@ export default function SimPageClient() {
   const chartPanelRef = useRef<HTMLDivElement | null>(null);
   const [isFs, setIsFs] = useState(false);
 
-  // força recálculo de layout do TradingView ao mudar FS
   const pokeResize = () => {
     window.dispatchEvent(new Event('resize'));
     setTimeout(() => window.dispatchEvent(new Event('resize')), 120);
@@ -68,7 +67,6 @@ export default function SimPageClient() {
         overflow: 'hidden',
       }}
     >
-      {/* ===== CSS local — fullscreen + remoção total de tarjas ===== */}
       <style>{`
         /* 0) Remover QUALQUER tarja/nav/topbar apenas no simulador */
         body:has(.page-simulador) nav,
@@ -86,18 +84,18 @@ export default function SimPageClient() {
           background: transparent !important;
           box-shadow: none !important;
         }
-        .page-simulador > a:first-child { display: none !important; } /* caso exista um link solto no topo */
+        .page-simulador > a:first-child { display: none !important; }
         .page-simulador { padding-top: 0 !important; margin-top: 0 !important; }
 
-        /* 1) Cabeçalho compacto do gráfico (apenas fora do FS) */
-        .page-simulador .compactHeader{
-          display:flex; align-items:center; justify-content:space-between;
-          gap:8px; padding:6px 8px; margin:0;
-          border-bottom:1px solid rgba(255,255,255,.06);
-          background: rgba(0,0,0,.25);
+        /* 1) Remover a LINHA do topo (border-top) de ambos os painéis */
+        .page-simulador .panel{
+          border-top: 0 !important;
+          border-radius: 0 !important;
         }
-        .page-simulador .compactTitle{ margin:0; font-size:12.5px; font-weight:800; opacity:.85; }
+
+        /* 2) Botão Tela Cheia ABSOLUTO dentro do painel do gráfico (sem faixa) */
         .page-simulador .tvFsBtn{
+          position:absolute; top:8px; right:8px; z-index:40;
           width:28px; height:28px; border-radius:8px;
           display:grid; place-items:center;
           background:rgba(255,255,255,.12);
@@ -106,7 +104,7 @@ export default function SimPageClient() {
         }
         .page-simulador .tvFsBtn:hover{ filter:brightness(1.05); }
 
-        /* 2) Botão verde dentro do painel de controles (topo-direito) */
+        /* 3) Botão VERDE dentro do painel de controles (topo-direito) */
         .page-simulador .rc-controls{ position:relative; padding-top:8px; }
         .page-simulador .backBtnInPanel{
           position:absolute; top: 22px; right: 10px; z-index: 5;
@@ -121,19 +119,14 @@ export default function SimPageClient() {
           filter:brightness(1.07); transform:translateY(-1px);
         }
 
-        /* 3) FULLSCREEN: ocupa 100vw x 100dvh e deixa o wrapper crescer */
+        /* 4) FULLSCREEN: ocupa 100vw x 100dvh e deixa o wrapper crescer */
         .page-simulador :is(:fullscreen, :-webkit-full-screen, :-moz-full-screen){
-          width:100vw !important;
-          height:100dvh !important;
-          display:flex !important;
-          flex-direction:column !important;
-          background:#0a0f0d !important;
-          overflow:hidden !important;
+          width:100vw !important; height:100dvh !important;
+          display:flex !important; flex-direction:column !important;
+          background:#0a0f0d !important; overflow:hidden !important;
         }
         .page-simulador :is(:fullscreen, :-webkit-full-screen, :-moz-full-screen) .tvChartWrap{
-          flex:1 1 auto !important;
-          min-height:0 !important;
-          height:auto !important;
+          flex:1 1 auto !important; min-height:0 !important; height:auto !important;
         }
       `}</style>
 
@@ -145,27 +138,23 @@ export default function SimPageClient() {
           position: 'relative',
           minHeight: '100%',
           height: '100%',
-          borderRadius: 0,
           borderRight: '1px solid rgba(255,255,255,.06)',
           display: 'grid',
-          gridTemplateRows: 'auto 1fr',
+          gridTemplateRows: '1fr',
         }}
       >
+        {/* Botão de tela cheia dentro do painel, sem criar faixa */}
         {!isFs && (
-          <div className="compactHeader">
-            <h2 className="compactTitle">Gráfico — {symbol}</h2>
-            <button
-              aria-label="Tela cheia"
-              title="Tela cheia"
-              className="tvFsBtn"
-              onClick={toggleFs}
-            >
-              [ ]
-            </button>
-          </div>
+          <button
+            aria-label="Tela cheia"
+            title="Tela cheia"
+            className="tvFsBtn"
+            onClick={toggleFs}
+          >
+            [ ]
+          </button>
         )}
 
-        {/* Wrapper controla o tamanho no FS */}
         <div className="tvChartWrap" style={{ height: '100%', minHeight: 520 }}>
           <TradingViewWidget symbol={`BINANCE:${symbol}`} />
         </div>
@@ -180,11 +169,9 @@ export default function SimPageClient() {
           gap: 10,
           minHeight: '100%',
           height: '100%',
-          borderRadius: 0,
           borderLeft: '1px solid rgba(255,255,255,.06)',
         }}
       >
-        {/* Botão VERDE no topo-direito do painel de controles */}
         <div className="backBtnInPanel">
           <a href="/" className="rc-btn rc-btn--green">Voltar ao início</a>
         </div>
