@@ -17,10 +17,9 @@ export default function SimPageClient() {
   const chartPanelRef = useRef<HTMLDivElement | null>(null);
   const [isFs, setIsFs] = useState(false);
 
-  // Força a lib a recalcular tamanho
+  // força recálculo de layout do TradingView ao mudar FS
   const pokeResize = () => {
     window.dispatchEvent(new Event('resize'));
-    // um segundo "poke" pequeno ajuda em Safari/WebKit
     setTimeout(() => window.dispatchEvent(new Event('resize')), 120);
   };
 
@@ -39,7 +38,9 @@ export default function SimPageClient() {
     void el.requestFullscreen().then(pokeResize).catch(() => {});
   };
   const exitFs = () => {
-    if (document.fullscreenElement) void document.exitFullscreen().then(pokeResize).catch(() => {});
+    if (document.fullscreenElement) {
+      void document.exitFullscreen().then(pokeResize).catch(() => {});
+    }
   };
   const toggleFs = () => (document.fullscreenElement ? exitFs() : enterFs());
 
@@ -67,9 +68,12 @@ export default function SimPageClient() {
         overflow: 'hidden',
       }}
     >
-      {/* ===== CSS local — fullscreen fix + alinhamentos ===== */}
+      {/* ===== CSS local — fullscreen + remoção total de tarjas ===== */}
       <style>{`
-        /* Remove qualquer barra/tarja superior nesta página */
+        /* 0) Remover QUALQUER tarja/nav/topbar apenas no simulador */
+        body:has(.page-simulador) nav,
+        body:has(.page-simulador) header,
+        body:has(.page-simulador) .rc-topnav,
         body:has(.page-simulador) .rc-topbar,
         body:has(.page-simulador) .rc-topband,
         body:has(.page-simulador) .rc-topstrip,
@@ -82,9 +86,10 @@ export default function SimPageClient() {
           background: transparent !important;
           box-shadow: none !important;
         }
-        main.page-simulador::after{ content:none !important; display:none !important; }
+        .page-simulador > a:first-child { display: none !important; } /* caso exista um link solto no topo */
+        .page-simulador { padding-top: 0 !important; margin-top: 0 !important; }
 
-        /* Cabeçalho compacto do gráfico (visível só fora do FS) */
+        /* 1) Cabeçalho compacto do gráfico (apenas fora do FS) */
         .page-simulador .compactHeader{
           display:flex; align-items:center; justify-content:space-between;
           gap:8px; padding:6px 8px; margin:0;
@@ -101,7 +106,7 @@ export default function SimPageClient() {
         }
         .page-simulador .tvFsBtn:hover{ filter:brightness(1.05); }
 
-        /* Botão verde dentro do painel de controles */
+        /* 2) Botão verde dentro do painel de controles (topo-direito) */
         .page-simulador .rc-controls{ position:relative; padding-top:8px; }
         .page-simulador .backBtnInPanel{
           position:absolute; top: 22px; right: 10px; z-index: 5;
@@ -116,27 +121,19 @@ export default function SimPageClient() {
           filter:brightness(1.07); transform:translateY(-1px);
         }
 
-        /* ================= FULLSCREEN FIX =================
-           Quando o PAINEL entra em tela cheia, garantimos que:
-           1) ele ocupe 100vw x 100dvh
-           2) o wrapper do TradingView cresça até o final (flex:1)
-           3) WebKit/Firefox reconheçam o mesmo comportamento
-        */
+        /* 3) FULLSCREEN: ocupa 100vw x 100dvh e deixa o wrapper crescer */
         .page-simulador :is(:fullscreen, :-webkit-full-screen, :-moz-full-screen){
           width:100vw !important;
           height:100dvh !important;
           display:flex !important;
           flex-direction:column !important;
-          background: #0a0f0d !important;
+          background:#0a0f0d !important;
+          overflow:hidden !important;
         }
         .page-simulador :is(:fullscreen, :-webkit-full-screen, :-moz-full-screen) .tvChartWrap{
           flex:1 1 auto !important;
           min-height:0 !important;
-          height:auto !important;     /* deixa o flex controlar a altura */
-        }
-        /* Evita barras de rolagem acidentais no FS */
-        .page-simulador :is(:fullscreen, :-webkit-full-screen, :-moz-full-screen){
-          overflow:hidden !important;
+          height:auto !important;
         }
       `}</style>
 
@@ -168,7 +165,7 @@ export default function SimPageClient() {
           </div>
         )}
 
-        {/* Wrapper específico do gráfico — controla o tamanho no FS */}
+        {/* Wrapper controla o tamanho no FS */}
         <div className="tvChartWrap" style={{ height: '100%', minHeight: 520 }}>
           <TradingViewWidget symbol={`BINANCE:${symbol}`} />
         </div>
