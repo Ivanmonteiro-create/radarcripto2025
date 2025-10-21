@@ -17,8 +17,18 @@ export default function SimPageClient() {
   const chartPanelRef = useRef<HTMLDivElement | null>(null);
   const [isFs, setIsFs] = useState(false);
 
+  // Força a lib a recalcular tamanho
+  const pokeResize = () => {
+    window.dispatchEvent(new Event('resize'));
+    // um segundo "poke" pequeno ajuda em Safari/WebKit
+    setTimeout(() => window.dispatchEvent(new Event('resize')), 120);
+  };
+
   useEffect(() => {
-    const onChange = () => setIsFs(Boolean(document.fullscreenElement));
+    const onChange = () => {
+      setIsFs(Boolean(document.fullscreenElement));
+      pokeResize();
+    };
     document.addEventListener('fullscreenchange', onChange);
     return () => document.removeEventListener('fullscreenchange', onChange);
   }, []);
@@ -26,9 +36,11 @@ export default function SimPageClient() {
   const enterFs = () => {
     const el = chartPanelRef.current;
     if (!el || document.fullscreenElement) return;
-    void el.requestFullscreen();
+    void el.requestFullscreen().then(pokeResize).catch(() => {});
   };
-  const exitFs = () => { if (document.fullscreenElement) void document.exitFullscreen(); };
+  const exitFs = () => {
+    if (document.fullscreenElement) void document.exitFullscreen().then(pokeResize).catch(() => {});
+  };
   const toggleFs = () => (document.fullscreenElement ? exitFs() : enterFs());
 
   useEffect(() => {
@@ -55,10 +67,9 @@ export default function SimPageClient() {
         overflow: 'hidden',
       }}
     >
-      {/* ===== CSS local — somente nesta página ===== */}
+      {/* ===== CSS local — fullscreen fix + alinhamentos ===== */}
       <style>{`
-        /* Remover quaisquer tarjas/linhas superiores e o pseudo-elemento (bolinha) */
-        body:has(.page-simulador) .rc-backtop,
+        /* Remove qualquer barra/tarja superior nesta página */
         body:has(.page-simulador) .rc-topbar,
         body:has(.page-simulador) .rc-topband,
         body:has(.page-simulador) .rc-topstrip,
@@ -71,10 +82,9 @@ export default function SimPageClient() {
           background: transparent !important;
           box-shadow: none !important;
         }
-        .page-simulador{ padding-top:0 !important; margin-top:0 !important; }
         main.page-simulador::after{ content:none !important; display:none !important; }
 
-        /* Cabeçalho do gráfico (mantém) */
+        /* Cabeçalho compacto do gráfico (visível só fora do FS) */
         .page-simulador .compactHeader{
           display:flex; align-items:center; justify-content:space-between;
           gap:8px; padding:6px 8px; margin:0;
@@ -91,31 +101,42 @@ export default function SimPageClient() {
         }
         .page-simulador .tvFsBtn:hover{ filter:brightness(1.05); }
 
-        /* Painel de controles como referência */
+        /* Botão verde dentro do painel de controles */
         .page-simulador .rc-controls{ position:relative; padding-top:8px; }
-
-        /* Botão "Voltar ao início" DENTRO do painel, na MESMA LINHA do título */
         .page-simulador .backBtnInPanel{
-          position:absolute;
-          top: 22px;         /* ajuste fino pra ficar nivelado ao texto do título */
-          right: 10px;
-          z-index: 5;
-          display:inline-flex; align-items:center; height:34px;
-          white-space:nowrap;
+          position:absolute; top: 22px; right: 10px; z-index: 5;
+          display:inline-flex; align-items:center; height:34px; white-space:nowrap;
         }
-        /* Botão verde quadrado */
         .page-simulador .backBtnInPanel .rc-btn--green{
-          display:inline-flex;
-          height: 34px; padding: 0 14px;
-          border-radius: 8px;             /* quadrado (sem pill) */
-          font-weight: 800;
-          background: #18e273;            /* verde RadarCrypto */
-          color: #052515;
+          display:inline-flex; height:34px; padding:0 14px; border-radius:8px;
+          font-weight:800; background:#18e273; color:#052515;
           box-shadow: 0 0 0 1px rgba(0,255,128,.28), 0 8px 24px rgba(0,0,0,.35);
         }
         .page-simulador .backBtnInPanel .rc-btn--green:hover{
-          filter: brightness(1.07);
-          transform: translateY(-1px);
+          filter:brightness(1.07); transform:translateY(-1px);
+        }
+
+        /* ================= FULLSCREEN FIX =================
+           Quando o PAINEL entra em tela cheia, garantimos que:
+           1) ele ocupe 100vw x 100dvh
+           2) o wrapper do TradingView cresça até o final (flex:1)
+           3) WebKit/Firefox reconheçam o mesmo comportamento
+        */
+        .page-simulador :is(:fullscreen, :-webkit-full-screen, :-moz-full-screen){
+          width:100vw !important;
+          height:100dvh !important;
+          display:flex !important;
+          flex-direction:column !important;
+          background: #0a0f0d !important;
+        }
+        .page-simulador :is(:fullscreen, :-webkit-full-screen, :-moz-full-screen) .tvChartWrap{
+          flex:1 1 auto !important;
+          min-height:0 !important;
+          height:auto !important;     /* deixa o flex controlar a altura */
+        }
+        /* Evita barras de rolagem acidentais no FS */
+        .page-simulador :is(:fullscreen, :-webkit-full-screen, :-moz-full-screen){
+          overflow:hidden !important;
         }
       `}</style>
 
@@ -147,7 +168,8 @@ export default function SimPageClient() {
           </div>
         )}
 
-        <div style={{ height: '100%', minHeight: 520 }}>
+        {/* Wrapper específico do gráfico — controla o tamanho no FS */}
+        <div className="tvChartWrap" style={{ height: '100%', minHeight: 520 }}>
           <TradingViewWidget symbol={`BINANCE:${symbol}`} />
         </div>
       </section>
@@ -165,7 +187,7 @@ export default function SimPageClient() {
           borderLeft: '1px solid rgba(255,255,255,.06)',
         }}
       >
-        {/* Botão VERDE dentro do quadrado, alinhado à linha do título */}
+        {/* Botão VERDE no topo-direito do painel de controles */}
         <div className="backBtnInPanel">
           <a href="/" className="rc-btn rc-btn--green">Voltar ao início</a>
         </div>
