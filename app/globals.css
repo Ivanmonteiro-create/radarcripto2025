@@ -1022,3 +1022,101 @@ body:has(.page-robos) .rc-page-top{
   margin: 0 !important; padding: 0 !important; border: 0 !important;
   background: transparent !important; box-shadow: none !important;
 }
+/* ===== NAV: destaque do botão "Fale com a gente" ======================= */
+/* Aplica-se ao link que aponta para /fale (sem mudar TopNav.tsx) */
+.rc-topnav a[href="/fale"],
+.rc-topnav__inner a[href="/fale"]{
+  position: relative;
+  border: 1px solid rgba(0,255,128,0.45) !important;
+  background:
+    radial-gradient(140% 140% at 90% 10%, rgba(40,255,160,0.22), rgba(0,255,128,0.10) 48%, rgba(0,255,128,0.06) 60%)!,
+    linear-gradient(180deg, rgba(0,255,128,0.16), rgba(0,255,128,0.08)) !important;
+  color: #bfffdc !important;
+  box-shadow:
+    0 0 0 1px rgba(0,255,128,0.20) inset,
+    0 10px 30px rgba(0,255,128,0.10) !important;
+  transform: translateY(0); transition: transform .12s ease, box-shadow .14s ease, filter .14s ease;
+}
+.rc-topnav a[href="/fale"]:hover{
+  filter: brightness(1.08);
+  box-shadow:
+    0 0 0 2px rgba(0,255,128,0.18) inset,
+    0 18px 42px rgba(0,255,128,0.18);
+  transform: translateY(-1px);
+}
+
+/* Separador suave à esquerda do botão (para “respirar” visual) */
+.rc-topnav a[href="/fale"]::before{
+  content:""; position:absolute; inset: 6px auto 6px -10px; width:1px;
+  background: linear-gradient(180deg, transparent, rgba(0,255,128,.35), transparent);
+  border-radius: 1px;
+}
+
+/* Badge sutil “glow” (opcional) */
+.rc-topnav a[href="/fale"]::after{
+  content:""; position:absolute; right:10px; top:8px; width:6px; height:6px; border-radius:50%;
+  background: #18e273; box-shadow: 0 0 10px #18e273, 0 0 18px rgba(24,226,115,.7);
+  opacity:.85;
+}
+
+/* ===== /fale — card e separações (se existir a página) ================= */
+/* Escopo só quando estiver na página de contato */
+.page-fale .rc-page,
+.page-fale .rc-container{ max-width: 980px; margin: 0 auto; padding: 8px 12px; }
+
+/* Card principal de contato */
+.page-fale .rc-contact{
+  border: 1px solid rgba(0,255,128,0.25);
+  background: rgba(0,25,12,0.55);
+  border-radius: 16px;
+  box-shadow: 0 8px 28px rgba(0,0,0,.35) inset, 0 0 0 1px rgba(0,255,128,.08);
+  padding: 16px;
+}
+
+/* Título + subtítulo centralizados e com ênfase */
+.page-fale .rc-contact__title{
+  text-align:center; margin: 4px 0 6px; color:#bfffdc; font-weight:900;
+  font-size: clamp(22px,3.2vw,34px);
+}
+.page-fale .rc-contact__subtitle{
+  text-align:center; opacity:.92; margin: 0 0 14px;
+}
+
+/* Grade dos campos com separações limpas */
+.page-fale .rc-contact__grid{
+  display: grid; gap: 10px;
+  grid-template-columns: 1fr 1fr;
+}
+@media (max-width: 820px){
+  .page-fale .rc-contact__grid{ grid-template-columns: 1fr; }
+}
+
+/* Inputs/labels no “verde RadarCrypto” */
+.page-fale .lbl{ color:#b6ffdb; font-size:13px; display:flex; flex-direction:column; gap:6px; }
+.page-fale .inp{
+  background: rgba(0,255,128,0.06);
+  border: 1px solid rgba(0,255,128,0.22);
+  border-radius: 10px; color:#eafff5; padding:10px 12px; outline:none;
+}
+.page-fale .inp:focus{ border-color:#18e273; box-shadow:0 0 0 3px rgba(24,226,115,.18); }
+
+/* Área de mensagem ocupa a largura toda */
+.page-fale .rc-contact__grid .full{ grid-column: 1 / -1; }
+
+/* CTA: botão verde largo e alinhado à direita */
+.page-fale .rc-contact__actions{
+  display:flex; justify-content:flex-end; margin-top: 12px;
+}
+.page-fale .rc-btn--green{
+  display:inline-flex; align-items:center; height:38px; padding:0 16px; border-radius:10px;
+  font-weight:800; background:#18e273; color:#052515;
+  box-shadow: 0 0 0 1px rgba(0,255,128,.28), 0 8px 24px rgba(0,0,0,.35);
+}
+.page-fale .rc-btn--green:hover{ filter:brightness(1.07); transform: translateY(-1px); }
+
+/* Pequenas divisórias internas */
+.page-fale .rc-sep{
+  height:1px; margin: 12px 0;
+  background: linear-gradient(90deg, transparent, rgba(0,255,128,.24), transparent);
+  border-radius:1px;
+}
