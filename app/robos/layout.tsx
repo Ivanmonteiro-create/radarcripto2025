@@ -1,25 +1,48 @@
 // app/robos/layout.tsx
-import React from "react";
+import type { ReactNode } from "react";
 
 export const metadata = {
   title: "Robôs (SIM) — RadarCrypto",
-  description:
-    "Robôs de trading no modo SIM (simulação local). Teste estratégias com dados ao vivo, sem risco.",
 };
 
-export default function RobosLayout({ children }: { children: React.ReactNode }) {
+export default function RobosLayout({ children }: { children: ReactNode }) {
   return (
-    <main className="page-robos">
-      {/* Shell central desta rota */}
-      <div className="rc-robotsShell">
-        {/* ÚNICO botão de voltar desta página (verde, canto direito) */}
-        <div className="rc-backtop rc-backtop--robos">
-          <a href="/" className="rc-btn rc-btn--green">Voltar ao início</a>
-        </div>
+    <section className="page-robos">
+      {/* Conteúdo original da rota /robos */}
+      {children}
 
-        {/* Conteúdo atual da página Robôs */}
-        {children}
-      </div>
-    </main>
+      {/* CSS escopado apenas para /robos */}
+      <style>{`
+        /* 1) Some com a faixa preta de topo (qualquer .rc-backtop nessa rota) */
+        .page-robos .rc-backtop{
+          display: none !important;
+          height: 0 !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          border: 0 !important;
+          background: transparent !important;
+          box-shadow: none !important;
+        }
+
+        /* 2) Remove o botão verde "Voltar ao início" da direita nesta página
+              (âncora com href="/", sem afetar Iniciar/Habilitar que são <button>) */
+        .page-robos a.rc-btn--green[href="/"]{
+          display: none !important;
+        }
+
+        /* 3) Zera qualquer sobra de “top strip” relacionada */
+        .page-robos .rc-topbar,
+        .page-robos .rc-topstrip,
+        .page-robos .rc-page-top{
+          display: none !important;
+          height: 0 !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          border: 0 !important;
+          background: transparent !important;
+          box-shadow: none !important;
+        }
+      `}</style>
+    </section>
   );
 }
