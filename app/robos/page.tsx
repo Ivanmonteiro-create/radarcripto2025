@@ -1,97 +1,98 @@
 // app/robos/page.tsx
-'use client';
+"use client";
 
-import { useEffect } from 'react';
+import React, { useEffect, useState } from "react";
+import BotRunnerClient from "@/components/bots/BotRunnerClient";
+
+const PAIRS = [
+  "ADAUSDT",
+  "BTCUSDT",
+  "ETHUSDT",
+  "SOLUSDT",
+  "LINKUSDT",
+  "BNBUSDT",
+  "XRPUSDT",
+  "DOGEUSDT",
+] as const;
 
 export default function RobosPage() {
+  const [pair, setPair] = useState<string>("BTCUSDT");
+
+  // Leva para o topo ao abrir
   useEffect(() => {
-    // Remove elementos de topo (tarja preta e link azul) ao montar a página
-    const hideElements = () => {
-      document
-        .querySelectorAll('.rc-backtop, a.rc-btn.rc-btn--green[href="/"]')
-        .forEach((el) => ((el as HTMLElement).style.display = 'none'));
-    };
-    hideElements();
-    // Reaplica caso algo recarregue
-    const observer = new MutationObserver(hideElements);
-    observer.observe(document.body, { childList: true, subtree: true });
-    return () => observer.disconnect();
+    window.scrollTo(0, 0);
   }, []);
 
+  // Altera o <select id="robotPair"> dentro do formulário do robô (quando existir)
+  const onQuickPick = (p: string) => {
+    setPair(p);
+    const el = document.getElementById("robotPair") as
+      | HTMLInputElement
+      | HTMLSelectElement
+      | null;
+    if (el) {
+      el.value = p;
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+  };
+
   return (
-    <main className="page-robos">
-      <style>{`
-        /* remove completamente a tarja preta e o botão azul antigo */
-        .rc-backtop,
-        a.rc-btn.rc-btn--green[href="/"] {
-          display: none !important;
-          visibility: hidden !important;
-          height: 0 !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          border: 0 !important;
-          background: transparent !important;
-          box-shadow: none !important;
-        }
-
-        /* botão verde novo dentro do painel direito */
-        .btn-voltar-painel {
-          position: absolute;
-          top: 22px;
-          right: 10px;
-          z-index: 10;
-          background: #18e273;
-          color: #052515;
-          border-radius: 8px;
-          padding: 8px 16px;
-          font-weight: 800;
-          text-decoration: none;
-          box-shadow: 0 0 0 1px rgba(0,255,128,.28), 0 8px 24px rgba(0,0,0,.35);
-        }
-        .btn-voltar-painel:hover {
-          filter: brightness(1.07);
-          transform: translateY(-1px);
-        }
-
-        /* ajusta o container do robô */
-        .robot-container {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          min-height: 100dvh;
-          flex-direction: column;
-          position: relative;
-          gap: 16px;
-        }
-        .robot-card {
-          border: 1px solid rgba(255,255,255,.1);
-          padding: 24px;
-          border-radius: 12px;
-          background: rgba(0,0,0,.25);
-          width: 90%;
-          max-width: 860px;
-        }
-      `}</style>
-
-      <div className="robot-container">
-        {/* Novo botão verde padrão RadarCrypto */}
-        <a href="/" className="btn-voltar-painel">
-          Voltar ao início
-        </a>
-
-        <div className="robot-card">
-          <h1>Robôs de Trading (Modo Simulado)</h1>
-          <p>
-            Aqui você pode testar estratégias automatizadas em tempo real usando
-            dados ao vivo. Este é o modo SIM (simulação local).
-          </p>
-
-          {/* Aqui permanece o conteúdo dos robôs já existente */}
-          <div style={{ marginTop: '16px' }}>
-            {/* Conteúdo do robô / componentes existentes */}
+    <main className="page-robos rc-page">
+      <section className="rc-section" style={{ paddingTop: 12 }}>
+        {/* Cabeçalho + botão verde “Voltar ao início” à direita */}
+        <header
+          className="rc-robosHeader"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr auto",
+            alignItems: "center",
+            gap: 12,
+            marginBottom: 12,
+          }}
+        >
+          <div>
+            <h1 className="rc-title">
+              Robôs de Trading <span className="rc-green">(Modo Simulado)</span>
+            </h1>
+            <p className="rc-desc" style={{ opacity: 0.9 }}>
+              Aqui você pode testar estratégias automatizadas em tempo real usando dados ao vivo.
+              Este é o modo SIM (simulação local).
+            </p>
           </div>
+
+          <a href="/" className="rc-btn rc-btn--green">Voltar ao início</a>
+        </header>
+
+        {/* Seleção rápida de pares (centralizada) */}
+        <div
+          className="rc-quickpairs"
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 8,
+            justifyContent: "center",
+            margin: "8px 0 16px",
+          }}
+        >
+          {PAIRS.map((p) => (
+            <button
+              key={p}
+              type="button"
+              className={`rc-pill ${pair === p ? "is-active" : ""}`}
+              onClick={() => onQuickPick(p)}
+              aria-pressed={pair === p}
+              aria-label={`Selecionar par ${p}`}
+            >
+              {p}
+            </button>
+          ))}
         </div>
-      </div>
+
+        {/* Container do robô (mantém seu componente e estado de par) */}
+        <div className="rc-botcontainer">
+          <BotRunnerClient pair={pair} onPairChange={setPair} />
+        </div>
+      </section>
     </main>
   );
 }
