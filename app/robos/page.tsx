@@ -18,11 +18,16 @@ const PAIRS = [
 export default function RobosPage() {
   const [pair, setPair] = useState<string>("BTCUSDT");
 
+  // adiciona/Remove uma classe no <body> para podermos aplicar CSS global só nesta rota
   useEffect(() => {
+    document.body.classList.add("page-robos-active");
+    // rolar para topo ao abrir
     window.scrollTo(0, 0);
+    return () => {
+      document.body.classList.remove("page-robos-active");
+    };
   }, []);
 
-  // ao clicar no chip, atualiza o estado e (se existir) o <select id="robotPair">
   const onQuickPick = (p: string) => {
     setPair(p);
     const el = document.getElementById("robotPair") as
@@ -75,24 +80,26 @@ export default function RobosPage() {
         </div>
       </section>
 
-      {/* CSS escopado só desta página */}
-      <style jsx>{`
-        /* Esconde QUALQUER tarja/linha/backtop herdado no topo desta página */
-        .page-robos :global(.rc-backtop),
-        .page-robos :global(.rc-page-top),
-        .page-robos :global(.rc-topband),
-        .page-robos :global(.rc-topstrip) {
+      {/* CSS — parte GLOBAL (alvo: tarja preta geral do site; só nesta rota) */}
+      <style jsx global>{`
+        /* Esconde a tarja/backtop universal somente quando estamos em /robos */
+        body.page-robos-active .rc-backtop,
+        body.page-robos-active .rc-backtop::before,
+        body.page-robos-active .rc-backtop::after {
           display: none !important;
         }
+      `}</style>
 
+      {/* CSS — escopado da página */}
+      <style jsx>{`
         .robosHeader {
           display: grid;
           grid-template-columns: 1fr auto;
           align-items: center;
           gap: 12px;
           margin: 8px auto 12px;
-          max-width: 1200px;
-          width: min(1200px, 96vw);
+          max-width: 1240px;
+          width: min(1240px, 98vw);
         }
         .robosHeadText :global(.rc-title) {
           margin: 0 0 4px 0;
@@ -108,8 +115,8 @@ export default function RobosPage() {
           gap: 10px;
           justify-content: center;
           margin: 10px auto 18px;
-          max-width: 1200px;
-          width: min(1200px, 96vw);
+          max-width: 1240px;
+          width: min(1240px, 98vw);
         }
         /* chips maiores e legíveis */
         :global(.rc-pill.rc-pill--big) {
@@ -119,12 +126,26 @@ export default function RobosPage() {
           border-radius: 999px;
         }
 
-        /* container do robô mais robusto e centralizado */
+        /* Wrapper mais largo; força o filho a expandir 100%,
+           mesmo se o componente tiver max-width interno */
         .botWrap {
           margin: 0 auto 22px;
-          width: min(1250px, 99vw);
-          /* respiro extra ao conteúdo interno do card existente */
-          padding-inline: 6px;
+          max-width: 1240px;
+          width: min(1240px, 98vw);
+        }
+        .botWrap :global(> *),
+        .botWrap :global(> div),
+        .botWrap :global(> section) {
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+        /* casos comuns de containers internos (se existirem) */
+        .botWrap :global(.rc-panel),
+        .botWrap :global(.rc-card),
+        .botWrap :global(.rc-form),
+        .botWrap :global(.rc-botpanel) {
+          width: 100% !important;
+          max-width: 100% !important;
         }
 
         @media (max-width: 980px) {
