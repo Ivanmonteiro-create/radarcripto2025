@@ -122,7 +122,7 @@ export default function RobosPage() {
         /* container do robô mais robusto e centralizado */
         .botWrap {
           margin: 0 auto 22px;
-          width: min(1240px, 98vw);
+          width: min(1250px, 99vw);
           /* respiro extra ao conteúdo interno do card existente */
           padding-inline: 6px;
         }
