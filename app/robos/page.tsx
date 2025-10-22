@@ -16,7 +16,9 @@ const PAIRS = [
 ] as const;
 
 export default function RobosPage() {
-  // Só para os chips preencherem o campo "Par" dentro do BotRunnerClient (id="robotPair")
+  const [active, setActive] = useState<string>("BTCUSDT");
+
+  // atualiza o campo “Par” dentro do BotRunnerClient (id="robotPair")
   function setRobotPair(pair: string) {
     const el = document.getElementById("robotPair") as
       | HTMLInputElement
@@ -27,12 +29,9 @@ export default function RobosPage() {
     el.dispatchEvent(new Event("change", { bubbles: true }));
   }
 
-  // rolar para o topo ao abrir
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
-  const [active, setActive] = useState<string>("BTCUSDT");
 
   return (
     <main className="page-robos">
@@ -71,14 +70,13 @@ export default function RobosPage() {
           <a href="/" className="rc-btn rc-btn--green">Voltar ao início</a>
         </div>
 
-        {/* Componente do robô (sem alterações internas) */}
-        <BotRunnerClient />
+        {/* CORREÇÃO: props obrigatórias (pair e onPairChange) */}
+        <BotRunnerClient pair={active} onPairChange={setActive} />
       </section>
 
       <style jsx>{`
-        /* Layout da página */
         .page-robos {
-          --panel-w: min(1240px, 92vw); /* MAIS LARGO */
+          --panel-w: min(1240px, 92vw);
           --panel-pad: clamp(12px, 1.8vw, 20px);
           display: flex;
           flex-direction: column;
@@ -87,7 +85,6 @@ export default function RobosPage() {
           padding: 24px 0 64px;
         }
 
-        /* Título/descrição centralizados */
         .hero {
           width: var(--panel-w);
           text-align: center;
@@ -100,7 +97,7 @@ export default function RobosPage() {
           letter-spacing: 0.2px;
         }
         .hero h1 span {
-          color: #18e273; /* verde da marca */
+          color: #18e273;
         }
         .hero .sub {
           margin: 0 auto;
@@ -108,7 +105,6 @@ export default function RobosPage() {
           opacity: 0.9;
         }
 
-        /* Chips centralizados */
         .quickpairs {
           margin-top: 16px;
           display: flex;
@@ -136,13 +132,11 @@ export default function RobosPage() {
           box-shadow: 0 0 0 1px rgba(24, 226, 115, 0.55);
         }
 
-        /* Painel central ampliado */
         .panelWrap {
           position: relative;
           width: var(--panel-w);
           padding: var(--panel-pad);
           border-radius: 18px;
-          /* leve brilho verde ao redor para combinar com o resto do site */
           box-shadow: inset 0 0 0 1px rgba(24, 226, 115, 0.18),
             0 20px 60px rgba(0, 0, 0, 0.35);
           background: linear-gradient(
@@ -152,16 +146,14 @@ export default function RobosPage() {
           );
         }
 
-        /* Botão verde dentro do painel, alinhado à direita */
         .backBtnInPanel {
           position: absolute;
-          top: 14px; /* alinhar com cabeçalho do formulário */
+          top: 14px;
           right: 14px;
           z-index: 5;
           display: inline-flex;
         }
 
-        /* Botão padrão verde do projeto (mesmo visual das outras telas) */
         .rc-btn {
           display: inline-flex;
           align-items: center;
@@ -176,7 +168,7 @@ export default function RobosPage() {
           cursor: pointer;
         }
         .rc-btn--green {
-          background: #18e273; /* cor principal RadarCrypto */
+          background: #18e273;
           color: #052515;
           box-shadow: 0 0 0 1px rgba(0, 255, 128, 0.28),
             0 8px 24px rgba(0, 0, 0, 0.35);
@@ -186,7 +178,6 @@ export default function RobosPage() {
           transform: translateY(-1px);
         }
 
-        /* Ajuste de respiro no mobile */
         @media (max-width: 720px) {
           .backBtnInPanel {
             top: 10px;
