@@ -1120,3 +1120,38 @@ body:has(.page-robos) .rc-page-top{
   background: linear-gradient(90deg, transparent, rgba(0,255,128,.24), transparent);
   border-radius:1px;
 }
+/* === RADARCRYPTO — LIMPEZA TOTAL DE TOPBAR NA ROTA /simulador ========= */
+/* Escopo: quando a página tiver o <main class="page-simulador"> */
+body:has(main.page-simulador) nav,
+body:has(main.page-simulador) header,
+body:has(main.page-simulador) .rc-topnav,
+body:has(main.page-simulador) .rc-topbar,
+body:has(main.page-simulador) .rc-topband,
+body:has(main.page-simulador) .rc-topstrip,
+body:has(main.page-simulador) .rc-page-top,
+body:has(main.page-simulador) .rc-backtop {  /* aquele container do seu print */
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Sobe o conteúdo sem respiro */
+body:has(main.page-simulador) .rc-main,
+body:has(main.page-simulador) main.page-simulador{
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+/* Some QUALQUER link solto “Voltar ao início” que tenha escapado no topo */
+body:has(main.page-simulador) .rc-root > a:first-of-type{
+  display: none !important;
+}
+
+/* Remove borda superior dos painéis para não sobrar “linha” */
+body:has(main.page-simulador) .panel{
+  border-top: 0 !important;
+}
