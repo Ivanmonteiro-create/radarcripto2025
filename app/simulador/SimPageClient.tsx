@@ -17,6 +17,7 @@ export default function SimPageClient() {
   const chartPanelRef = useRef<HTMLDivElement | null>(null);
   const [isFs, setIsFs] = useState(false);
 
+  // força o TradingView a recalcular dimensões
   const pokeResize = () => {
     window.dispatchEvent(new Event('resize'));
     setTimeout(() => window.dispatchEvent(new Event('resize')), 120);
@@ -42,6 +43,17 @@ export default function SimPageClient() {
     }
   };
   const toggleFs = () => (document.fullscreenElement ? exitFs() : enterFs());
+
+  // ⌨️ Atalhos: F entra em fullscreen, X sai
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const k = e.key.toLowerCase();
+      if (k === 'f') { e.preventDefault(); enterFs(); }
+      if (k === 'x') { e.preventDefault(); exitFs(); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   return (
     <main
@@ -74,6 +86,13 @@ export default function SimPageClient() {
         body:has(main.page-simulador) .rc-main,
         body:has(main.page-simulador) main.page-simulador{ padding-top:0 !important; margin-top:0 !important; }
         body:has(main.page-simulador) .panel{ border-top:0 !important; border-radius:0 !important; }
+
+        /* 🚫 Remove qualquer pseudo (bolinha/selo verde) no main */
+        main.page-simulador::before,
+        main.page-simulador::after{
+          content: none !important;
+          display: none !important;
+        }
 
         /* ==== BARRA DO GRÁFICO (restaurada) ============================== */
         .chartHeader{
