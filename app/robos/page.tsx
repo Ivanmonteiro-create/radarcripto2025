@@ -18,7 +18,7 @@ const PAIRS = [
 export default function RobosPage() {
   const [active, setActive] = useState<string>("BTCUSDT");
 
-  // atualiza o campo “Par” dentro do BotRunnerClient (id="robotPair")
+  // Atualiza o campo “Par” dentro do BotRunnerClient (id="robotPair")
   function setRobotPair(pair: string) {
     const el = document.getElementById("robotPair") as
       | HTMLInputElement
@@ -63,14 +63,14 @@ export default function RobosPage() {
         </div>
       </section>
 
-      {/* Painel do robô ampliado e centralizado */}
+      {/* Painel centralizado */}
       <section className="panelWrap">
-        {/* Botão verde no lado direito do painel */}
+        {/* Botão verde à direita */}
         <div className="backBtnInPanel">
           <a href="/" className="rc-btn rc-btn--green">Voltar ao início</a>
         </div>
 
-        {/* CORREÇÃO: props obrigatórias (pair e onPairChange) */}
+        {/* Robô funcional */}
         <BotRunnerClient pair={active} onPairChange={setActive} />
       </section>
 
@@ -98,6 +98,7 @@ export default function RobosPage() {
         }
         .hero h1 span {
           color: #18e273;
+          text-shadow: 0 0 10px rgba(24, 226, 115, 0.8);
         }
         .hero .sub {
           margin: 0 auto;
@@ -120,16 +121,16 @@ export default function RobosPage() {
           color: #cfe;
           font-weight: 700;
           transition: transform 120ms ease, box-shadow 120ms ease,
-            background 120ms ease;
+            background 120ms ease, filter 120ms ease;
         }
         .pill:hover {
           transform: translateY(-1px);
-          box-shadow: 0 0 0 1px rgba(24, 226, 115, 0.3),
-            0 8px 24px rgba(0, 0, 0, 0.35);
+          filter: brightness(1.5);
+          box-shadow: 0 0 10px rgba(24, 226, 115, 0.6);
         }
         .pill.is-active {
           background: rgba(24, 226, 115, 0.22);
-          box-shadow: 0 0 0 1px rgba(24, 226, 115, 0.55);
+          box-shadow: 0 0 10px rgba(24, 226, 115, 0.6);
         }
 
         .panelWrap {
@@ -151,41 +152,45 @@ export default function RobosPage() {
           top: 14px;
           right: 14px;
           z-index: 5;
-          display: inline-flex;
         }
 
+        /* Botão verde fluorescente */
         .rc-btn {
           display: inline-flex;
           align-items: center;
-          height: 34px;
-          padding: 0 14px;
-          border-radius: 8px;
+          justify-content: center;
+          height: 36px;
+          padding: 0 18px;
+          border-radius: 10px;
           font-weight: 800;
           text-decoration: none;
           line-height: 1;
           white-space: nowrap;
-          border: 0;
+          border: none;
           cursor: pointer;
+          transition: all 0.2s ease;
         }
         .rc-btn--green {
           background: #18e273;
           color: #052515;
-          box-shadow: 0 0 0 1px rgba(0, 255, 128, 0.28),
-            0 8px 24px rgba(0, 0, 0, 0.35);
+          box-shadow: 0 0 15px rgba(24, 226, 115, 0.7),
+            inset 0 0 10px rgba(24, 226, 115, 0.4);
         }
         .rc-btn--green:hover {
-          filter: brightness(1.07);
-          transform: translateY(-1px);
+          filter: brightness(1.3);
+          transform: translateY(-2px);
+          box-shadow: 0 0 25px rgba(24, 226, 115, 0.9),
+            inset 0 0 14px rgba(24, 226, 115, 0.5);
         }
 
         @media (max-width: 720px) {
+          .rc-btn {
+            height: 32px;
+            padding: 0 14px;
+          }
           .backBtnInPanel {
             top: 10px;
             right: 10px;
-          }
-          .rc-btn {
-            height: 32px;
-            padding: 0 12px;
           }
         }
       `}</style>
