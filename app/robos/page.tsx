@@ -18,6 +18,7 @@ const PAIRS = [
 export default function RobosPage() {
   const [active, setActive] = useState<string>("BTCUSDT");
 
+  // Atualiza o select do BotRunnerClient (id="robotPair")
   function setRobotPair(pair: string) {
     const el = document.getElementById("robotPair") as
       | HTMLInputElement
@@ -34,12 +35,15 @@ export default function RobosPage() {
 
   return (
     <main className="page-robos">
+      {/* --- CORREÇÕES GLOBAIS EXCLUSIVAS PARA ESTA PÁGINA --- */}
       <style jsx global>{`
+        /* Esconde o botão superior antigo de “Voltar ao início” */
         .rc-backtop,
         .rc-backtop * {
           display: none !important;
         }
 
+        /* Botão verde fluorescente (padrão global RadarCrypto) */
         .rc-btn {
           display: inline-flex;
           align-items: center;
@@ -55,14 +59,12 @@ export default function RobosPage() {
           cursor: pointer;
           transition: all 0.2s ease;
         }
-
         .rc-btn--green {
           background: #18e273 !important;
           color: #052515 !important;
           box-shadow: 0 0 18px rgba(24, 226, 115, 0.8),
             inset 0 0 10px rgba(24, 226, 115, 0.5);
         }
-
         .rc-btn--green:hover {
           filter: brightness(1.35);
           transform: translateY(-2px);
@@ -70,6 +72,7 @@ export default function RobosPage() {
             inset 0 0 16px rgba(24, 226, 115, 0.7);
         }
 
+        /* Chips (botões das moedas) — aumentados e espaçados */
         .page-robos .pill {
           border: 1px solid rgba(24, 226, 115, 0.6) !important;
           background: rgba(24, 226, 115, 0.18) !important;
@@ -82,13 +85,11 @@ export default function RobosPage() {
           transition: transform 150ms ease, box-shadow 150ms ease,
             background 150ms ease, filter 150ms ease !important;
         }
-
         .page-robos .pill:hover {
           transform: translateY(-1px);
           filter: brightness(1.5);
           box-shadow: 0 0 22px rgba(24, 226, 115, 0.95) !important;
         }
-
         .page-robos .pill.is-active {
           background: rgba(24, 226, 115, 0.3) !important;
           box-shadow: 0 0 22px rgba(24, 226, 115, 0.95) !important;
@@ -101,30 +102,19 @@ export default function RobosPage() {
           flex-wrap: wrap !important;
           gap: 16px !important;
         }
-
-        /* Botão flutuante (Voltar ao início) no canto direito da linha do título */
-        .rc-return-btn {
-          position: absolute;
-          top: 0;
-          right: 0;
-        }
       `}</style>
 
-      <section className="hero" style={{ position: "relative" }}>
+      {/* --- CABEÇALHO --- */}
+      <section className="hero">
         <h1>
           Robôs de Trading <span>(Modo Simulado)</span>
         </h1>
-
-        {/* Botão verde no canto direito */}
-        <a href="/" className="rc-btn rc-btn--green rc-return-btn">
-          Voltar ao início
-        </a>
-
         <p className="sub">
           Aqui você pode testar estratégias automatizadas em tempo real usando
           dados ao vivo. Este é o modo SIM (simulação local).
         </p>
 
+        {/* Chips das moedas */}
         <div className="quickpairs" role="group" aria-label="Atalhos de pares">
           {PAIRS.map((p) => (
             <button
@@ -143,10 +133,18 @@ export default function RobosPage() {
         </div>
       </section>
 
+      {/* --- PAINEL CENTRAL COM BOTÃO À DIREITA --- */}
       <section className="panelWrap">
+        <div className="backBtnInPanel">
+          <a href="/" className="rc-btn rc-btn--green">
+            Voltar ao início
+          </a>
+        </div>
+
         <BotRunnerClient pair={active} onPairChange={setActive} />
       </section>
 
+      {/* --- ESTILOS LOCAIS --- */}
       <style jsx>{`
         .page-robos {
           --panel-w: min(1240px, 92vw);
@@ -162,7 +160,6 @@ export default function RobosPage() {
           width: var(--panel-w);
           text-align: center;
         }
-
         .hero h1 {
           font-size: clamp(28px, 3.6vw, 44px);
           line-height: 1.05;
@@ -170,12 +167,10 @@ export default function RobosPage() {
           font-weight: 900;
           letter-spacing: 0.2px;
         }
-
         .hero h1 span {
           color: #18e273;
           text-shadow: 0 0 10px rgba(24, 226, 115, 0.8);
         }
-
         .hero .sub {
           margin: 0 auto;
           max-width: 900px;
@@ -194,6 +189,21 @@ export default function RobosPage() {
             rgba(8, 24, 16, 0.55) 0%,
             rgba(6, 18, 12, 0.45) 100%
           );
+        }
+
+        /* Botão dentro do painel (lado direito) */
+        .backBtnInPanel {
+          position: absolute;
+          top: 14px;
+          right: 18px;
+          z-index: 5;
+        }
+
+        @media (max-width: 720px) {
+          .backBtnInPanel {
+            top: 10px;
+            right: 10px;
+          }
         }
       `}</style>
     </main>
