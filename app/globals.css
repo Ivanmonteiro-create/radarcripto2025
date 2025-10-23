@@ -1405,3 +1405,54 @@ a.rc-btn.rc-btn--green[aria-label="Voltar ao início"]:not(.rc-back-right) {
 .page-planos .row4 {
   margin-bottom: 24px !important;
 }
+/* ===== COMPACTAÇÃO EXTRA — só para fechar tudo na dobra ===== */
+
+.page-planos .plan-card,
+.page-planos .card {
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+
+/* Título do plano (ex.: Start, Trader, Pro, Elite) */
+.page-planos .plan-card h3,
+.page-planos .card h3,
+.page-planos .plan-title {
+  font-size: clamp(17px, 1.6vw, 21px) !important;
+  margin: 0 0 8px 0 !important;
+  line-height: 1.15 !important;
+}
+
+/* Lista de recursos: um pouco mais enxuta */
+.page-planos .plan-card ul li,
+.page-planos .card ul li {
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+  line-height: 1.20 !important;
+  font-size: 0.90rem !important;   /* ↓ bem leve */
+}
+
+/* Preço: ligeiramente menor para ganhar alguns px de altura */
+.page-planos .plan-card .price,
+.page-planos .card .price {
+  font-size: clamp(15px, 1.4vw, 18px) !important;
+  margin-bottom: 6px !important;
+}
+
+/* Reduz a folga entre cards/linhas da grade */
+.page-planos .plans-grid,
+.page-planos .row4 {
+  row-gap: 14px !important;
+}
+
+/* Só em telas grandes, apertar mais um tiquinho */
+@media (min-width: 1200px) {
+  .page-planos .plan-card ul li,
+  .page-planos .card ul li {
+    font-size: 0.88rem !important;
+  }
+  .page-planos .plan-card,
+  .page-planos .card {
+    padding-top: 7px !important;
+    padding-bottom: 7px !important;
+  }
+}
