@@ -1304,3 +1304,22 @@ a.rc-btn.rc-btn--green[aria-label="Voltar ao início"]:not(.rc-back-right) {
 .rc-backtop, .rc-backtop * {
   display: none !important;
 }
+/* ===== AJUSTE FINO — altura e tamanho do preço ===== */
+
+/* 1) Sobe levemente os planos (≈ 2 cm visuais) */
+.page-planos .plans-grid,
+.page-planos .row4 {
+  margin-top: -30px !important; /* sobe o bloco dos cards */
+}
+
+/* 2) Ajusta o tamanho do preço (levemente menor, mesma cor) */
+.page-planos .plan-card .price,
+.page-planos .card .price {
+  font-size: clamp(17px, 1.8vw, 22px) !important;
+  font-weight: 800 !important;
+  color: #18e273 !important;
+  text-shadow:
+    0 0 10px rgba(24, 226, 115, 0.55),
+    0 0 4px rgba(24, 226, 115, 0.45) !important;
+  margin-bottom: 8px !important;
+}
