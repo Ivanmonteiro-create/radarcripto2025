@@ -1,48 +1,62 @@
 // app/robos/layout.tsx
-import type { ReactNode } from "react";
+import React from "react";
 
-export const metadata = {
-  title: "Robôs (SIM) — RadarCrypto",
-};
-
-export default function RobosLayout({ children }: { children: ReactNode }) {
+export default function RobosLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <section className="page-robos">
-      {/* Conteúdo original da rota /robos */}
+    <>
+      {/* Botão fixo no canto superior direito, só nesta rota (/robos) */}
+      <a href="/" className="robos-back-home" aria-label="Voltar ao início">
+        Voltar ao início
+      </a>
+
       {children}
 
-      {/* CSS escopado apenas para /robos */}
-      <style>{`
-        /* 1) Some com a faixa preta de topo (qualquer .rc-backtop nessa rota) */
-        .page-robos .rc-backtop{
-          display: none !important;
-          height: 0 !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          border: 0 !important;
-          background: transparent !important;
-          box-shadow: none !important;
+      {/* Estilos isolados do botão (sem conflitar com classes existentes) */}
+      <style jsx>{`
+        .robos-back-home {
+          position: fixed;
+          top: 12px;
+          right: 16px;
+          z-index: 9999;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          height: 38px;
+          padding: 0 20px;
+          border-radius: 10px;
+          font-weight: 800;
+          text-decoration: none;
+          line-height: 1;
+          white-space: nowrap;
+          border: none;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          /* Verde fluorescente padrão RadarCrypto */
+          background: #18e273;
+          color: #052515;
+          box-shadow: 0 0 18px rgba(24, 226, 115, 0.8),
+            inset 0 0 10px rgba(24, 226, 115, 0.5);
+        }
+        .robos-back-home:hover {
+          filter: brightness(1.35);
+          transform: translateY(-2px);
+          box-shadow: 0 0 28px rgba(24, 226, 115, 1),
+            inset 0 0 16px rgba(24, 226, 115, 0.7);
         }
 
-        /* 2) Remove o botão verde "Voltar ao início" da direita nesta página
-              (âncora com href="/", sem afetar Iniciar/Habilitar que são <button>) */
-        .page-robos a.rc-btn--green[href="/"]{
-          display: none !important;
-        }
-
-        /* 3) Zera qualquer sobra de “top strip” relacionada */
-        .page-robos .rc-topbar,
-        .page-robos .rc-topstrip,
-        .page-robos .rc-page-top{
-          display: none !important;
-          height: 0 !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          border: 0 !important;
-          background: transparent !important;
-          box-shadow: none !important;
+        @media (max-width: 640px) {
+          .robos-back-home {
+            top: 10px;
+            right: 10px;
+            height: 36px;
+            padding: 0 16px;
+          }
         }
       `}</style>
-    </section>
+    </>
   );
 }
