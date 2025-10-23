@@ -1343,3 +1343,30 @@ a.rc-btn.rc-btn--green[aria-label="Voltar ao início"]:not(.rc-back-right) {
     0 0 4px rgba(24, 226, 115, 0.45) !important;
   margin-bottom: 8px !important;
 }
+/* ===== AJUSTE FINAL — redução leve da altura dos cards ===== */
+
+.page-planos .plan-card,
+.page-planos .card {
+  padding-top: 14px !important;      /* antes era ~20px */
+  padding-bottom: 14px !important;
+  min-height: auto !important;       /* garante altura flexível */
+}
+
+.page-planos .plan-card ul li,
+.page-planos .card ul li {
+  padding-top: 4px !important;       /* encurta o espaçamento interno */
+  padding-bottom: 4px !important;
+  line-height: 1.35 !important;      /* reduz um pouco a altura de linha */
+}
+
+/* mantém o equilíbrio dos botões na parte inferior */
+.page-planos .plan-card .price,
+.page-planos .card .price {
+  font-size: clamp(17px, 1.8vw, 22px) !important;
+  font-weight: 800 !important;
+  color: #18e273 !important;
+  text-shadow:
+    0 0 10px rgba(24, 226, 115, 0.55),
+    0 0 4px rgba(24, 226, 115, 0.45) !important;
+  margin-bottom: 8px !important;
+}
