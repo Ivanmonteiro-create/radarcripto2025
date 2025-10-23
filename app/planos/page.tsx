@@ -84,38 +84,45 @@ const PLANS: PlanCard[] = [
 export default function PlanosPage() {
   return (
     <main className="page-planos">
-      {/* Força ocultar qualquer botão "Voltar ao início" herdado da navbar/layout */}
+      {/* 1) Some com QUALQUER botão 'Voltar ao início' herdado,
+            e libere só o nosso (id=backtop-planos). */}
       <style jsx global>{`
-        /* Se houver qualquer link ou botão com esse texto dentro da página (fora do nosso fixo), esconde */
-        .page-planos a:not(.backtop):not([aria-label="Voltar ao início"]) {
+        /* esconde a barra antiga, se existir */
+        .page-planos .rc-backtop { display: none !important; }
+
+        /* esconde qualquer botão/link 'Voltar ao início' verde que venha do layout,
+           identificado por aria-label, exceto o nosso id */
+        .page-planos a.rc-btn.rc-btn--green[aria-label="Voltar ao início"] {
           display: none !important;
         }
-        /* Fallback: oculta também botões do layout ou navbar que contenham esse texto */
-        .page-planos :where(button, a):not(.backtop):where(:has(> span:contains("Voltar ao início"))),
-        .page-planos :where(button, a):not(.backtop):where(:has(> *:contains("Voltar ao início"))) {
-          display: none !important;
-        }
-        /* Ajuste extra: qualquer .rc-btn--green à esquerda dentro do layout */
-        .page-planos .rc-btn--green:not(.backtop) {
-          display: none !important;
+        .page-planos #backtop-planos {
+          display: inline-flex !important;
         }
       `}</style>
 
-      {/* Botão fixo à direita (oficial da página Planos) */}
-      <a href="/" className="rc-btn rc-btn--green backtop" aria-label="Voltar ao início">
+      {/* 2) Nosso botão oficial (direita) */}
+      <a
+        id="backtop-planos"
+        href="/"
+        className="rc-btn rc-btn--green backtop"
+        aria-label="Voltar ao início"
+      >
         Voltar ao início
       </a>
 
+      {/* 3) Conteúdo */}
       <header className="hero">
         <h1>
           Planos do <span>RadarCrypto</span>
         </h1>
         <p className="sub">
-          Escolha seu caminho. Comece no SIM (simulador) sem riscos e evolua para gráficos, quando quiser, com robôs e ferramentas profissionais.
+          Escolha seu caminho. Comece no SIM (simulador) sem riscos e evolua para gráficos,
+          quando quiser, com robôs e ferramentas profissionais.
         </p>
       </header>
 
-      <section className="grid">
+      {/* 4) Grade em UMA LINHA (4 colunas) no desktop 100% */}
+      <section className="row4">
         {PLANS.map((plan) => (
           <article key={plan.id} className={`card tone-${plan.tone || "primary"}`}>
             <div className="card__topline">
@@ -142,14 +149,15 @@ export default function PlanosPage() {
         ))}
       </section>
 
+      {/* 5) Estilos locais (mantém o look & feel e garante 4 colunas) */}
       <style jsx>{`
         .page-planos {
           --fluor: #18e273;
           --fluorText: #052515;
-          --panelW: min(1180px, 94vw);
           --ring: rgba(24, 226, 115, 0.2);
           --glassTop: rgba(8, 24, 16, 0.55);
           --glassBot: rgba(6, 18, 12, 0.45);
+          --panelW: min(1420px, 98vw); /* largura maior p/ caber 4 cards */
           position: relative;
           padding: 18px 0 40px;
           display: flex;
@@ -159,12 +167,11 @@ export default function PlanosPage() {
         }
 
         .backtop {
-          position: fixed !important;
-          top: 14px !important;
-          right: 18px !important;
-          z-index: 999 !important;
+          position: fixed;
+          top: 14px;
+          right: 18px;
+          z-index: 999;
         }
-
         .rc-btn {
           display: inline-flex;
           align-items: center;
@@ -173,28 +180,26 @@ export default function PlanosPage() {
           padding: 0 16px;
           border-radius: 12px;
           font-weight: 800;
-          text-decoration: none;
           line-height: 1;
           border: 0;
           cursor: pointer;
-          transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
           white-space: nowrap;
+          transition: transform .15s ease, filter .15s ease, box-shadow .15s ease;
         }
         .rc-btn--green {
           background: var(--fluor);
           color: var(--fluorText);
-          box-shadow: 0 0 16px rgba(24, 226, 115, 0.8), inset 0 0 8px rgba(24, 226, 115, 0.5);
+          box-shadow: 0 0 16px rgba(24,226,115,.8), inset 0 0 8px rgba(24,226,115,.5);
         }
         .rc-btn--green:hover {
           filter: brightness(1.35);
           transform: translateY(-2px);
-          box-shadow: 0 0 24px rgba(24, 226, 115, 1), inset 0 0 14px rgba(24, 226, 115, 0.7);
+          box-shadow: 0 0 24px rgba(24,226,115,1), inset 0 0 14px rgba(24,226,115,.7);
         }
 
         .hero {
           width: var(--panelW);
           text-align: center;
-          padding-top: 4px;
         }
         .hero h1 {
           margin: 0 0 2px 0;
@@ -207,33 +212,33 @@ export default function PlanosPage() {
         }
         .hero .sub {
           margin: 0 auto;
-          max-width: 820px;
+          max-width: 980px;
           opacity: 0.9;
           font-size: 13px;
         }
 
-        .grid {
+        /* 4 cards na horizontal */
+        .row4 {
           width: var(--panelW);
           display: grid;
-          gap: 10px;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-        @media (max-width: 980px) {
-          .grid { grid-template-columns: 1fr; }
+          grid-template-columns: repeat(4, 1fr);
+          gap: 12px;
+          align-items: start;
         }
 
         .card {
           border-radius: 14px;
-          padding: 8px 10px;
+          padding: 10px;
           background: linear-gradient(180deg, var(--glassTop) 0%, var(--glassBot) 100%);
-          box-shadow: inset 0 0 0 1px var(--ring), 0 16px 48px rgba(0, 0, 0, 0.32);
+          box-shadow: inset 0 0 0 1px var(--ring), 0 16px 48px rgba(0,0,0,.32);
+          min-width: 0; /* evita overflow de grid */
         }
         .card__topline {
           display: grid;
           grid-template-columns: 1fr auto;
           align-items: center;
           gap: 4px 8px;
-          margin-bottom: 4px;
+          margin-bottom: 6px;
         }
         .badge {
           grid-column: 1 / -1;
@@ -255,7 +260,7 @@ export default function PlanosPage() {
           justify-self: end;
           font-weight: 800;
           font-size: 12px;
-          opacity: 0.95;
+          opacity: .95;
         }
 
         .features {
@@ -269,18 +274,17 @@ export default function PlanosPage() {
         .features li {
           display: grid;
           grid-template-columns: 16px 1fr;
-          align-items: start;
           gap: 6px;
           padding: 6px 8px;
           border-radius: 10px;
-          background: rgba(255, 255, 255, 0.02);
-          box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+          background: rgba(255,255,255,.02);
+          box-shadow: inset 0 0 0 1px rgba(255,255,255,.05);
           font-size: 13px;
         }
         .tick {
           color: var(--fluor);
           font-weight: 900;
-          text-shadow: 0 0 8px rgba(24, 226, 115, 0.8);
+          text-shadow: 0 0 8px rgba(24,226,115,.8);
         }
         .soonTag {
           font-style: normal;
@@ -294,9 +298,12 @@ export default function PlanosPage() {
           padding-top: 2px;
         }
 
-        @media (max-height: 820px) {
-          .card { padding: 7px 8px; }
-          .features li { font-size: 12.5px; padding: 5px 7px; }
+        /* Responsivo: em telas menores, cai p/ 2 colunas; no mobile, 1 coluna */
+        @media (max-width: 1280px) {
+          .row4 { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 720px) {
+          .row4 { grid-template-columns: 1fr; }
         }
       `}</style>
     </main>
