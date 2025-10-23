@@ -3,25 +3,13 @@
 
 import React from "react";
 
-/**
- * Página de Planos – RadarCrypto
- * - Mantém o layout atual (verde fluorescente)
- * - Sem dependências externas
- * - “Voltar ao início” no canto superior direito
- * - Nada de globais: estilos isolados via styled-jsx
- */
-
-type Feature = {
-  text: string;
-  soon?: boolean; // marca “Em breve”
-};
-
+type Feature = { text: string; soon?: boolean };
 type PlanCard = {
   id: "start" | "trader" | "pro" | "elite";
   title: string;
   badge?: string;
-  price: string; // ex: "€ 0,00 /mês"
-  cta: string;   // texto do botão
+  price: string;
+  cta: string;
   tone?: "primary" | "recommended" | "pro" | "elite";
   features: Feature[];
 };
@@ -96,7 +84,7 @@ const PLANS: PlanCard[] = [
 export default function PlanosPage() {
   return (
     <main className="page-planos">
-      {/* BOTÃO topo à direita */}
+      {/* FIXO no canto superior direito */}
       <a href="/" className="rc-btn rc-btn--green backtop" aria-label="Voltar ao início">
         Voltar ao início
       </a>
@@ -106,8 +94,8 @@ export default function PlanosPage() {
           Planos do <span>RadarCrypto</span>
         </h1>
         <p className="sub">
-          Escolha seu caminho. Comece no SIM (simulador) sem riscos e evolua para gráficos,
-          quando quiser, com robôs e ferramentas profissionais.
+          Escolha seu caminho. Comece no SIM (simulador) sem riscos e evolua para
+          gráficos, quando quiser, com robôs e ferramentas profissionais.
         </p>
       </header>
 
@@ -139,7 +127,6 @@ export default function PlanosPage() {
       </section>
 
       <style jsx>{`
-        /* Container base da página (não interfere em outras) */
         .page-planos {
           --fluor: #18e273;
           --fluorText: #052515;
@@ -147,30 +134,30 @@ export default function PlanosPage() {
           --ring: rgba(24, 226, 115, 0.2);
           --glassTop: rgba(8, 24, 16, 0.55);
           --glassBot: rgba(6, 18, 12, 0.45);
-
           position: relative;
           min-height: 100%;
-          padding: 32px 0 72px;
+          padding: 24px 0 56px;
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 24px;
+          gap: 18px;
         }
 
+        /* garante direita SEMPRE (mais forte + fixed) */
         .backtop {
-          position: absolute;
-          top: 18px;
-          right: 18px;
-          z-index: 10;
+          position: fixed !important;
+          top: 16px !important;
+          right: 18px !important;
+          z-index: 999 !important;
         }
 
-        /* Botões padrão fluorescentes (isolados aqui também) */
+        /* Botão fluorescente (isolado) */
         .rc-btn {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          height: 38px;
-          padding: 0 20px;
+          height: 36px;
+          padding: 0 18px;
           border-radius: 12px;
           font-weight: 800;
           text-decoration: none;
@@ -183,143 +170,130 @@ export default function PlanosPage() {
         .rc-btn--green {
           background: var(--fluor);
           color: var(--fluorText);
-          box-shadow:
-            0 0 18px rgba(24, 226, 115, 0.8),
-            inset 0 0 10px rgba(24, 226, 115, 0.5);
+          box-shadow: 0 0 16px rgba(24,226,115,.8), inset 0 0 8px rgba(24,226,115,.5);
         }
         .rc-btn--green:hover {
           filter: brightness(1.35);
           transform: translateY(-2px);
-          box-shadow:
-            0 0 28px rgba(24, 226, 115, 1),
-            inset 0 0 16px rgba(24, 226, 115, 0.7);
+          box-shadow: 0 0 24px rgba(24,226,115,1), inset 0 0 14px rgba(24,226,115,.7);
         }
 
-        /* Hero */
+        /* Hero compacto */
         .hero {
           width: var(--panelW);
           text-align: center;
-          padding-top: 12px;
+          padding-top: 8px;
         }
         .hero h1 {
-          margin: 0 0 6px 0;
-          font-size: clamp(28px, 3.6vw, 44px);
+          margin: 0 0 4px 0;
+          font-size: clamp(26px, 3.2vw, 40px);
           font-weight: 900;
-          letter-spacing: 0.2px;
+          letter-spacing: .2px;
         }
         .hero h1 span {
           color: var(--fluor);
-          text-shadow: 0 0 10px rgba(24, 226, 115, 0.8);
+          text-shadow: 0 0 10px rgba(24,226,115,.8);
         }
         .hero .sub {
           margin: 0 auto;
-          max-width: 920px;
-          opacity: 0.9;
+          max-width: 900px;
+          opacity: .9;
+          font-size: 14px;
         }
 
-        /* Grid dos cards */
+        /* Grid 2x2 */
         .grid {
           width: var(--panelW);
           display: grid;
-          gap: 18px;
+          gap: 14px;
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
         @media (max-width: 980px) {
-          .grid {
-            grid-template-columns: 1fr;
-          }
+          .grid { grid-template-columns: 1fr; }
         }
 
-        /* Card */
+        /* Card (compacto por padrão) */
         .card {
-          border-radius: 18px;
-          padding: 16px 16px 14px;
+          border-radius: 16px;
+          padding: 12px 12px 10px;
           background: linear-gradient(180deg, var(--glassTop) 0%, var(--glassBot) 100%);
-          box-shadow:
-            inset 0 0 0 1px var(--ring),
-            0 20px 60px rgba(0,0,0,0.35);
+          box-shadow: inset 0 0 0 1px var(--ring), 0 18px 54px rgba(0,0,0,.35);
         }
-
         .card__topline {
           display: grid;
           grid-template-columns: 1fr auto;
           align-items: center;
-          gap: 8px 12px;
-          margin-bottom: 8px;
+          gap: 6px 10px;
+          margin-bottom: 6px;
         }
-
         .badge {
           grid-column: 1 / -1;
           justify-self: start;
-          font-size: 12px;
+          font-size: 11px;
           font-weight: 800;
           letter-spacing: .4px;
-          padding: 6px 10px;
+          padding: 5px 9px;
           color: var(--fluorText);
           background: var(--fluor);
           border-radius: 999px;
-          box-shadow: 0 0 14px rgba(24, 226, 115, .55);
+          box-shadow: 0 0 12px rgba(24,226,115,.55);
         }
-
         .title {
           margin: 0;
-          font-size: 22px;
+          font-size: 20px;
           font-weight: 900;
         }
         .price {
           justify-self: end;
           font-weight: 800;
+          font-size: 14px;
           opacity: .95;
         }
 
-        /* Lista de features */
         .features {
           list-style: none;
-          margin: 10px 0 14px;
+          margin: 8px 0 10px;
           padding: 0;
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 6px;
         }
         .features li {
           display: grid;
-          grid-template-columns: 22px 1fr;
+          grid-template-columns: 18px 1fr;
           align-items: start;
-          gap: 8px;
-          padding: 10px 12px;
+          gap: 6px;
+          padding: 8px 10px;
           border-radius: 10px;
           background: rgba(255,255,255,0.02);
           box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+          font-size: 14px;
+          line-height: 1.25;
         }
-        .features li .tick {
-          color: var(--fluor);
-          font-weight: 900;
-          text-shadow: 0 0 10px rgba(24, 226, 115, 0.8);
-        }
-        .features li .txt {
-          line-height: 1.2;
-        }
-        .features li.soon .txt {
-          opacity: .8;
-        }
-        .soonTag {
-          font-style: normal;
-          font-size: 12px;
-          padding-left: 4px;
-          opacity: .9;
-          color: var(--fluor);
-        }
+        .tick { color: var(--fluor); font-weight: 900; text-shadow: 0 0 8px rgba(24,226,115,.8); }
+        .soon .txt { opacity: .85; }
+        .soonTag { font-style: normal; font-size: 12px; padding-left: 4px; color: var(--fluor); }
 
-        .cta {
-          display: flex;
-          justify-content: flex-end;
-          padding-top: 6px;
-        }
+        .cta { display: flex; justify-content: flex-end; padding-top: 4px; }
 
-        /* Tonalidades sutis por plano (bordas/brilhos) */
-        .tone-recommended { box-shadow: inset 0 0 0 1px rgba(24,226,115,.32), 0 24px 72px rgba(0,0,0,.45); }
-        .tone-pro          { box-shadow: inset 0 0 0 1px rgba(24,226,115,.26), 0 24px 72px rgba(0,0,0,.42); }
-        .tone-elite        { box-shadow: inset 0 0 0 1px rgba(24,226,115,.36), 0 26px 76px rgba(0,0,0,.46); }
+        /* Tonalidades */
+        .tone-recommended { box-shadow: inset 0 0 0 1px rgba(24,226,115,.32), 0 22px 64px rgba(0,0,0,.42); }
+        .tone-pro          { box-shadow: inset 0 0 0 1px rgba(24,226,115,.26), 0 22px 64px rgba(0,0,0,.40); }
+        .tone-elite        { box-shadow: inset 0 0 0 1px rgba(24,226,115,.36), 0 24px 68px rgba(0,0,0,.44); }
+
+        /* >>> MODO COMPACTO por ALTURA (cabem 4 cards sem scroll em 13") */
+        @media (max-height: 860px) {
+          .page-planos { padding-top: 18px; gap: 14px; }
+          .hero .sub { font-size: 13px; max-width: 820px; }
+          .grid { gap: 12px; }
+          .card { padding: 10px 10px 8px; border-radius: 14px; }
+          .title { font-size: 18px; }
+          .price { font-size: 13px; }
+          .badge { font-size: 10px; padding: 4px 8px; }
+          .features { gap: 5px; }
+          .features li { padding: 7px 9px; font-size: 13px; grid-template-columns: 16px 1fr; }
+          .rc-btn { height: 34px; padding: 0 16px; }
+        }
       `}</style>
     </main>
   );
