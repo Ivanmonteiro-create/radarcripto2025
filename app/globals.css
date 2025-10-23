@@ -1262,3 +1262,45 @@ a.rc-btn.rc-btn--green[aria-label="Voltar ao início"]:not(.rc-back-right) {
 @media (max-width: 720px) {
   .page-planos .row4 { grid-template-columns: 1fr !important; }
 }
+/* ===== PLANOS — realces de header, preço e respiro ===== */
+
+/* 1) Frase logo abaixo do título (mais destaque) */
+.page-planos h1 + p {
+  margin-top: 10px !important;
+  margin-bottom: 18px !important;           /* empurra os cards um pouco */
+  font-size: clamp(16px, 1.6vw, 20px) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.2px !important;
+  color: #dbffef !important;
+  text-shadow: 0 0 10px rgba(24, 226, 115, 0.35) !important;
+  opacity: 0.95 !important;
+}
+
+/* 2) Um pouco mais de “respiro” antes do grid de planos */
+.page-planos .plans-grid,
+.page-planos .row4 {
+  margin-top: 10px !important;
+}
+
+/* 3) Preço mais evidente nos cards */
+.page-planos .plan-card .price,
+.page-planos .card .price {
+  font-size: clamp(20px, 2.3vw, 28px) !important;
+  font-weight: 900 !important;
+  color: #18e273 !important;
+  text-shadow:
+    0 0 14px rgba(24, 226, 115, 0.65),
+    0 0 4px rgba(24, 226, 115, 0.55) !important;
+  margin-bottom: 8px !important;
+}
+
+/* 4) Opcional: subtítulo “badge” do plano (ex.: RECOMENDADO) com leve glow */
+.page-planos .plan-card .badge,
+.page-planos .card .badge {
+  box-shadow: 0 0 10px rgba(24, 226, 115, 0.45) !important;
+}
+
+/* 5) Mantém o botão antigo da esquerda oculto (caso alguém volte a injetá-lo) */
+.rc-backtop, .rc-backtop * {
+  display: none !important;
+}
