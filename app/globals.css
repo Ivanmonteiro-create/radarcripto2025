@@ -1197,3 +1197,68 @@ body:has(main.page-simulador) .panel{
   transform: translateY(-2px);
   box-shadow: 0 0 28px rgba(24,226,115,1), inset 0 0 16px rgba(24,226,115,.7);
 }
+/* ======= PLANOS – HOTFIX SEGURO (somente estilos) ======= */
+
+/* 1) Esconde o "Voltar ao início" antigo (o da esquerda / barra superior) */
+.rc-backtop,
+.rc-backtop * {
+  display: none !important;
+}
+/* Se algum tema antigo injeta um botão-âncora solto, escondemos também */
+a.rc-btn.rc-btn--green[aria-label="Voltar ao início"]:not(.rc-back-right) {
+  display: none !important;
+}
+
+/* 2) Mais respiro nas linhas das features (frases) */
+.page-planos .plan-card .plan-features,
+.page-planos .card .features {
+  margin: 10px 0 14px !important;
+}
+
+.page-planos .plan-card .plan-features li,
+.page-planos .card .features li {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 10px !important;
+  padding: 12px 16px !important;      /* ↑ altura/espessura de cada linha  */
+  margin-bottom: 8px !important;       /* ↑ espaço entre linhas             */
+  line-height: 1.4 !important;         /* ↑ legibilidade                     */
+  font-size: 15px !important;          /* ↑ levemente o tamanho da fonte     */
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.035) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Ícone (check) e texto das features mais alinhados */
+.page-planos .plan-card .plan-features li .tick,
+.page-planos .card .features li .tick {
+  flex: 0 0 auto !important;
+  transform: translateY(2px);
+}
+.page-planos .plan-card .plan-features li .txt,
+.page-planos .card .features li .txt {
+  flex: 1 1 auto !important;
+  white-space: normal !important;      /* evita truncar texto                */
+}
+
+/* 3) Pequenos ajustes de títulos/preços (sem mexer no layout) */
+.page-planos .plan-card .title { margin: 6px 0 2px !important; }
+.page-planos .plan-card .price { margin: 0 0 8px !important; }
+
+/* (Opcional) se sua grade for .row4, mantemos 4 colunas no desktop */
+@media (min-width: 1201px) {
+  .page-planos .row4 {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    align-items: start !important;
+    width: min(1420px, 98vw) !important;
+    margin: 0 auto !important;
+  }
+}
+@media (max-width: 1200px) and (min-width: 721px) {
+  .page-planos .row4 { grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media (max-width: 720px) {
+  .page-planos .row4 { grid-template-columns: 1fr !important; }
+}
