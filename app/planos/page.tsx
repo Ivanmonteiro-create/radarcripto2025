@@ -1,7 +1,7 @@
 // app/planos/page.tsx
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 
 type Feature = { text: string; soon?: boolean };
 type PlanCard = {
@@ -82,25 +82,31 @@ const PLANS: PlanCard[] = [
 ];
 
 export default function PlanosPage() {
+  // Mata qualquer “Voltar ao início” antigo que apareça no topo esquerdo
+  useEffect(() => {
+    const links = Array.from(document.querySelectorAll("a"));
+    links.forEach((a) => {
+      const text = (a.textContent || "").trim().toLowerCase();
+      if (text === "voltar ao início" && !(a as HTMLElement).id.includes("backtop-planos")) {
+        (a as HTMLElement).style.display = "none";
+      }
+    });
+    const bars = document.querySelectorAll(".rc-backtop");
+    bars.forEach((el) => ((el as HTMLElement).style.display = "none"));
+  }, []);
+
   return (
     <main className="page-planos">
-      {/* 1) Some com QUALQUER botão 'Voltar ao início' herdado,
-            e libere só o nosso (id=backtop-planos). */}
+      {/* Esconde o botão antigo caso algum CSS global o reexiba */}
       <style jsx global>{`
-        /* esconde a barra antiga, se existir */
         .page-planos .rc-backtop { display: none !important; }
-
-        /* esconde qualquer botão/link 'Voltar ao início' verde que venha do layout,
-           identificado por aria-label, exceto o nosso id */
         .page-planos a.rc-btn.rc-btn--green[aria-label="Voltar ao início"] {
           display: none !important;
         }
-        .page-planos #backtop-planos {
-          display: inline-flex !important;
-        }
+        .page-planos #backtop-planos { display: inline-flex !important; }
       `}</style>
 
-      {/* 2) Nosso botão oficial (direita) */}
+      {/* Nosso botão fixo (direita) */}
       <a
         id="backtop-planos"
         href="/"
@@ -110,7 +116,6 @@ export default function PlanosPage() {
         Voltar ao início
       </a>
 
-      {/* 3) Conteúdo */}
       <header className="hero">
         <h1>
           Planos do <span>RadarCrypto</span>
@@ -121,7 +126,6 @@ export default function PlanosPage() {
         </p>
       </header>
 
-      {/* 4) Grade em UMA LINHA (4 colunas) no desktop 100% */}
       <section className="row4">
         {PLANS.map((plan) => (
           <article key={plan.id} className={`card tone-${plan.tone || "primary"}`}>
@@ -149,7 +153,6 @@ export default function PlanosPage() {
         ))}
       </section>
 
-      {/* 5) Estilos locais (mantém o look & feel e garante 4 colunas) */}
       <style jsx>{`
         .page-planos {
           --fluor: #18e273;
@@ -157,7 +160,7 @@ export default function PlanosPage() {
           --ring: rgba(24, 226, 115, 0.2);
           --glassTop: rgba(8, 24, 16, 0.55);
           --glassBot: rgba(6, 18, 12, 0.45);
-          --panelW: min(1420px, 98vw); /* largura maior p/ caber 4 cards */
+          --panelW: min(1420px, 98vw);
           position: relative;
           padding: 18px 0 40px;
           display: flex;
@@ -217,7 +220,6 @@ export default function PlanosPage() {
           font-size: 13px;
         }
 
-        /* 4 cards na horizontal */
         .row4 {
           width: var(--panelW);
           display: grid;
@@ -228,17 +230,17 @@ export default function PlanosPage() {
 
         .card {
           border-radius: 14px;
-          padding: 10px;
+          padding: 14px; /* +2px */
           background: linear-gradient(180deg, var(--glassTop) 0%, var(--glassBot) 100%);
           box-shadow: inset 0 0 0 1px var(--ring), 0 16px 48px rgba(0,0,0,.32);
-          min-width: 0; /* evita overflow de grid */
+          min-width: 0;
         }
         .card__topline {
           display: grid;
           grid-template-columns: 1fr auto;
           align-items: center;
-          gap: 4px 8px;
-          margin-bottom: 6px;
+          gap: 6px 10px;
+          margin-bottom: 8px; /* +2px */
         }
         .badge {
           grid-column: 1 / -1;
@@ -251,35 +253,28 @@ export default function PlanosPage() {
           border-radius: 999px;
           box-shadow: 0 0 12px rgba(24, 226, 115, 0.55);
         }
-        .title {
-          margin: 0;
-          font-size: 18px;
-          font-weight: 900;
-        }
-        .price {
-          justify-self: end;
-          font-weight: 800;
-          font-size: 12px;
-          opacity: .95;
-        }
+        .title { margin: 0; font-size: 18px; font-weight: 900; }
+        .price { justify-self: end; font-weight: 800; font-size: 12px; opacity: .95; }
 
+        /* >>> Mais espaço/legibilidade nos bullets <<< */
         .features {
           list-style: none;
-          margin: 6px 0 8px;
+          margin: 8px 0 10px;     /* +2px em cima e baixo */
           padding: 0;
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          gap: 8px;               /* +4px */
         }
         .features li {
           display: grid;
-          grid-template-columns: 16px 1fr;
-          gap: 6px;
-          padding: 6px 8px;
-          border-radius: 10px;
-          background: rgba(255,255,255,.02);
-          box-shadow: inset 0 0 0 1px rgba(255,255,255,.05);
-          font-size: 13px;
+          grid-template-columns: 18px 1fr;  /* +2px p/ ícone */
+          gap: 8px;                          /* +2px */
+          padding: 10px 12px;                /* +4px vertical */
+          border-radius: 12px;               /* +2px */
+          background: rgba(255,255,255,.03);
+          box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+          font-size: 14.5px;                 /* era ~13px */
+          line-height: 1.32;                  /* mais “corpo” */
         }
         .tick {
           color: var(--fluor);
@@ -288,24 +283,16 @@ export default function PlanosPage() {
         }
         .soonTag {
           font-style: normal;
-          font-size: 11px;
-          padding-left: 4px;
+          font-size: 12px;     /* +1px */
+          padding-left: 6px;   /* +2px */
           color: var(--fluor);
         }
-        .cta {
-          display: flex;
-          justify-content: flex-end;
-          padding-top: 2px;
-        }
 
-        /* Responsivo: em telas menores, cai p/ 2 colunas; no mobile, 1 coluna */
-        @media (max-width: 1280px) {
-          .row4 { grid-template-columns: repeat(2, 1fr); }
-        }
-        @media (max-width: 720px) {
-          .row4 { grid-template-columns: 1fr; }
-        }
-      `}</style>
+        .cta { display: flex; justify-content: flex-end; padding-top: 4px; }
+
+        @media (max-width: 1280px) { .row4 { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 720px)  { .row4 { grid-template-columns: 1fr; } }
+      </style>
     </main>
   );
 }
