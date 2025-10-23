@@ -106,6 +106,13 @@ export default function RobosPage() {
 
       {/* --- CABEÇALHO --- */}
       <section className="hero">
+        {/* BOTÃO NOVO - lado direito superior */}
+        <div className="hero__back">
+          <a href="/" className="rc-btn rc-btn--green">
+            Voltar ao início
+          </a>
+        </div>
+
         <h1>
           Robôs de Trading <span>(Modo Simulado)</span>
         </h1>
@@ -133,14 +140,8 @@ export default function RobosPage() {
         </div>
       </section>
 
-      {/* --- PAINEL CENTRAL COM BOTÃO À DIREITA --- */}
+      {/* --- PAINEL CENTRAL --- */}
       <section className="panelWrap">
-        <div className="backBtnInPanel">
-          <a href="/" className="rc-btn rc-btn--green">
-            Voltar ao início
-          </a>
-        </div>
-
         <BotRunnerClient pair={active} onPairChange={setActive} />
       </section>
 
@@ -159,7 +160,17 @@ export default function RobosPage() {
         .hero {
           width: var(--panel-w);
           text-align: center;
+          position: relative; /* importante para o botão */
         }
+
+        /* BOTÃO LADO DIREITO */
+        .hero__back {
+          position: absolute;
+          top: 8px;
+          right: 0;
+          z-index: 10;
+        }
+
         .hero h1 {
           font-size: clamp(28px, 3.6vw, 44px);
           line-height: 1.05;
@@ -191,18 +202,10 @@ export default function RobosPage() {
           );
         }
 
-        /* Botão dentro do painel (lado direito) */
-        .backBtnInPanel {
-          position: absolute;
-          top: 14px;
-          right: 18px;
-          z-index: 5;
-        }
-
         @media (max-width: 720px) {
-          .backBtnInPanel {
-            top: 10px;
-            right: 10px;
+          .hero__back {
+            top: 6px;
+            right: 8px;
           }
         }
       `}</style>
