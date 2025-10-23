@@ -3,306 +3,323 @@
 
 import React from "react";
 
+/**
+ * Página de Planos – RadarCrypto
+ * - Mantém o layout atual (verde fluorescente)
+ * - Sem dependências externas
+ * - “Voltar ao início” no canto superior direito
+ * - Nada de globais: estilos isolados via styled-jsx
+ */
+
+type Feature = {
+  text: string;
+  soon?: boolean; // marca “Em breve”
+};
+
+type PlanCard = {
+  id: "start" | "trader" | "pro" | "elite";
+  title: string;
+  badge?: string;
+  price: string; // ex: "€ 0,00 /mês"
+  cta: string;   // texto do botão
+  tone?: "primary" | "recommended" | "pro" | "elite";
+  features: Feature[];
+};
+
+const PLANS: PlanCard[] = [
+  {
+    id: "start",
+    title: "Start",
+    badge: "PRONTO PARA COMEÇAR",
+    price: "€ 0,00 /mês",
+    cta: "Começar de graça",
+    tone: "primary",
+    features: [
+      { text: "Simulador spot básico" },
+      { text: "Capital virtual de 10.000 USDT" },
+      { text: "PnL (resultado) e histórico básico" },
+      { text: "Exportar CSV" },
+      { text: "8 pares principais habilitados" },
+      { text: "Gráfico de evolução mensal (equity)", soon: true },
+    ],
+  },
+  {
+    id: "trader",
+    title: "Trader",
+    badge: "RECOMENDADO",
+    price: "€ 9,99 /mês",
+    cta: "Quero ser Trader",
+    tone: "recommended",
+    features: [
+      { text: "Tudo do plano Start" },
+      { text: "Robôs automáticos (EMA Cross SIM)" },
+      { text: "Controle de risco manual (TP/SL)" },
+      { text: "Histórico expandido (visual e CSV)" },
+      { text: "Troca rápida entre pares" },
+      { text: "Painel de performance resumida", soon: true },
+    ],
+  },
+  {
+    id: "pro",
+    title: "Pro",
+    badge: "TURBO ACELERADOR",
+    price: "€ 19,99 /mês",
+    cta: "Subir para Pro",
+    tone: "pro",
+    features: [
+      { text: "Tudo do plano Trader" },
+      { text: "Gerenciamento de risco automático" },
+      { text: "Relatórios filtráveis/detalhados" },
+      { text: "Estatísticas avançadas (win rate, DD, etc.)" },
+      { text: "Exportar relatórios detalhados" },
+      { text: "Notificações de performance", soon: true },
+    ],
+  },
+  {
+    id: "elite",
+    title: "Elite",
+    badge: "TUDO DESEBLOQUEADO",
+    price: "€ 29,99 /mês",
+    cta: "Virar Elite",
+    tone: "elite",
+    features: [
+      { text: "Tudo do plano Pro" },
+      { text: "Backtesting de estratégias" },
+      { text: "Comparação de estratégias" },
+      { text: "Histórico mensal/anual salvo (equity curves)" },
+      { text: "Acesso antecipado a novidades (beta)" },
+      { text: "Suporte prioritário + comunidade privada" },
+    ],
+  },
+];
+
 export default function PlanosPage() {
   return (
     <main className="page-planos">
-      {/* ---------- Ajustes globais só desta página ---------- */}
-      <style jsx global>{`
-        /* Esconde a tarja/toolbar antiga de back (se existir) */
-        .rc-backtop,
-        .rc-backtop * {
-          display: none !important;
-        }
+      {/* BOTÃO topo à direita */}
+      <a href="/" className="rc-btn rc-btn--green backtop" aria-label="Voltar ao início">
+        Voltar ao início
+      </a>
 
-        /* Botão padrão verde fluorescente RadarCrypto */
-        .rc-btn {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          height: 38px;
-          padding: 0 18px;
-          border-radius: 10px;
-          font-weight: 800;
-          line-height: 1;
-          text-decoration: none;
-          border: none;
-          cursor: pointer;
-          white-space: nowrap;
-          transition: transform 0.15s ease, filter 0.15s ease,
-            box-shadow 0.2s ease;
-        }
-        .rc-btn--green {
-          background: #18e273 !important;
-          color: #052515 !important;
-          box-shadow: 0 0 18px rgba(24, 226, 115, 0.8),
-            inset 0 0 10px rgba(24, 226, 115, 0.5);
-        }
-        .rc-btn--green:hover {
-          filter: brightness(1.35);
-          transform: translateY(-2px);
-          box-shadow: 0 0 28px rgba(24, 226, 115, 1),
-            inset 0 0 16px rgba(24, 226, 115, 0.7);
-        }
-        .rc-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 4px 10px;
-          border-radius: 999px;
-          font-weight: 800;
-          font-size: 12px;
-          letter-spacing: 0.2px;
-          color: #caffee;
-          background: rgba(24, 226, 115, 0.12);
-          border: 1px solid rgba(24, 226, 115, 0.3);
-          text-transform: uppercase;
-        }
-        .rc-badge--soon {
-          background: rgba(255, 212, 0, 0.12);
-          border-color: rgba(255, 212, 0, 0.35);
-          color: #ffeaa3;
-        }
-      `}</style>
-
-      {/* ---------- Cabeçalho ---------- */}
-      <section className="hero">
-        <h1 className="rc-title">
+      <header className="hero">
+        <h1>
           Planos do <span>RadarCrypto</span>
         </h1>
-        <p className="rc-sub">
-          Escolha seu caminho. Comece no <strong>SIM</strong> com dados ao vivo,
-          evolua para relatórios e, quando quiser, automatize com os robôs. Sem
-          pressa, passo a passo.
+        <p className="sub">
+          Escolha seu caminho. Comece no SIM (simulador) sem riscos e evolua para gráficos,
+          quando quiser, com robôs e ferramentas profissionais.
         </p>
+      </header>
 
-        {/* Botão no topo direito (fixo dentro do hero) */}
-        <div className="backBtn">
-          <a href="/" className="rc-btn rc-btn--green">Voltar ao início</a>
-        </div>
-      </section>
-
-      {/* ---------- Grid de Planos ---------- */}
       <section className="grid">
-        {/* START */}
-        <article className="card">
-          <header className="card-head">
-            <div className="pill">Plano de Entrada</div>
-            <h2>Start</h2>
-            <div className="price">€ 0,00 <span>/ mês</span></div>
-          </header>
-          <ul className="features">
-            <li>Simulador Spot básico</li>
-            <li>Capital inicial: <strong>10.000 USDT</strong></li>
-            <li>Exportação <strong>CSV</strong> dos trades</li>
-            <li><strong>PnL</strong> (lucro/prejuízo) em tempo real</li>
-            <li>Indicadores configuráveis (EMA e outros)</li>
-            <li>
-              <span className="rc-badge rc-badge--soon">em breve</span>
-              &nbsp;Evolução de performance (gráficos históricos)
-            </li>
-          </ul>
-          <footer className="card-foot">
-            <a href="/simulador" className="rc-btn rc-btn--green">Começar de graça</a>
-          </footer>
-        </article>
+        {PLANS.map((plan) => (
+          <article key={plan.id} className={`card tone-${plan.tone || "primary"}`}>
+            <div className="card__topline">
+              {plan.badge && <span className="badge">{plan.badge}</span>}
+              <h2 className="title">{plan.title}</h2>
+              <div className="price">{plan.price}</div>
+            </div>
 
-        {/* TRADER */}
-        <article className="card">
-          <header className="card-head">
-            <div className="pill pill--promo">Recomendado</div>
-            <h2>Trader</h2>
-            <div className="price">€ 9,99 <span>/ mês</span></div>
-          </header>
-          <ul className="features">
-            <li>Tudo do plano <strong>Start</strong></li>
-            <li>Histórico <strong>expandido</strong> de operações</li>
-            <li><strong>PnL</strong> realista com atualização ao vivo</li>
-            <li>Indicadores personalizados e <strong>8 pares</strong></li>
-            <li>
-              <span className="rc-badge rc-badge--soon">em breve</span>
-              &nbsp;Relatórios comparativos e filtros avançados
-            </li>
-          </ul>
-          <footer className="card-foot">
-            <a href="/simulador" className="rc-btn rc-btn--green">Quero ser Trader</a>
-          </footer>
-        </article>
+            <ul className="features">
+              {plan.features.map((f, i) => (
+                <li key={i} className={f.soon ? "soon" : ""}>
+                  <span className="tick" aria-hidden>✓</span>
+                  <span className="txt">
+                    {f.text} {f.soon && <em className="soonTag">• em breve</em>}
+                  </span>
+                </li>
+              ))}
+            </ul>
 
-        {/* PRO */}
-        <article className="card">
-          <header className="card-head">
-            <div className="pill">Turbo Acelerador</div>
-            <h2>Pro</h2>
-            <div className="price">€ 19,99 <span>/ mês</span></div>
-          </header>
-          <ul className="features">
-            <li>Tudo do plano <strong>Trader</strong></li>
-            <li>Análise gráfica integrada (<strong>TradingView</strong>)</li>
-            <li>
-              <span className="rc-badge rc-badge--soon">em dev</span>
-              &nbsp;Gerenciamento de risco automático
-            </li>
-            <li>
-              <span className="rc-badge rc-badge--soon">em breve</span>
-              &nbsp;Relatórios detalhados e estatísticas por período
-            </li>
-          </ul>
-          <footer className="card-foot">
-            <a href="/simulador" className="rc-btn rc-btn--green">Subir para Pro</a>
-          </footer>
-        </article>
-
-        {/* ELITE */}
-        <article className="card">
-          <header className="card-head">
-            <div className="pill pill--vip">Tudo Desbloqueado</div>
-            <h2>Elite</h2>
-            <div className="price">€ 29,99 <span>/ mês</span></div>
-          </header>
-          <ul className="features">
-            <li>Tudo do plano <strong>Pro</strong></li>
-            <li>Robôs de trading (<strong>modo SIM</strong>) operacionais</li>
-            <li>
-              <span className="rc-badge rc-badge--soon">em dev</span>
-              &nbsp;Backtesting de estratégias
-            </li>
-            <li>Acesso antecipado a versões <strong>VIP</strong> e novas ferramentas</li>
-          </ul>
-          <footer className="card-foot">
-            <a href="/robos" className="rc-btn rc-btn--green">Virar Elite</a>
-          </footer>
-        </article>
+            <div className="cta">
+              <button className="rc-btn rc-btn--green">{plan.cta}</button>
+            </div>
+          </article>
+        ))}
       </section>
 
-      {/* ---------- Estilos locais ---------- */}
       <style jsx>{`
+        /* Container base da página (não interfere em outras) */
         .page-planos {
-          --w: min(1240px, 92vw);
-          --gap: clamp(16px, 2.4vw, 28px);
-          padding: 28px 0 64px;
+          --fluor: #18e273;
+          --fluorText: #052515;
+          --panelW: min(1240px, 94vw);
+          --ring: rgba(24, 226, 115, 0.2);
+          --glassTop: rgba(8, 24, 16, 0.55);
+          --glassBot: rgba(6, 18, 12, 0.45);
+
+          position: relative;
+          min-height: 100%;
+          padding: 32px 0 72px;
           display: flex;
           flex-direction: column;
           align-items: center;
           gap: 24px;
         }
 
-        .hero {
-          position: relative;
-          width: var(--w);
-          text-align: center;
+        .backtop {
+          position: absolute;
+          top: 18px;
+          right: 18px;
+          z-index: 10;
         }
-        .rc-title {
-          margin: 0 0 8px;
+
+        /* Botões padrão fluorescentes (isolados aqui também) */
+        .rc-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          height: 38px;
+          padding: 0 20px;
+          border-radius: 12px;
+          font-weight: 800;
+          text-decoration: none;
+          line-height: 1;
+          border: 0;
+          cursor: pointer;
+          transition: transform .15s ease, filter .15s ease, box-shadow .15s ease;
+          white-space: nowrap;
+        }
+        .rc-btn--green {
+          background: var(--fluor);
+          color: var(--fluorText);
+          box-shadow:
+            0 0 18px rgba(24, 226, 115, 0.8),
+            inset 0 0 10px rgba(24, 226, 115, 0.5);
+        }
+        .rc-btn--green:hover {
+          filter: brightness(1.35);
+          transform: translateY(-2px);
+          box-shadow:
+            0 0 28px rgba(24, 226, 115, 1),
+            inset 0 0 16px rgba(24, 226, 115, 0.7);
+        }
+
+        /* Hero */
+        .hero {
+          width: var(--panelW);
+          text-align: center;
+          padding-top: 12px;
+        }
+        .hero h1 {
+          margin: 0 0 6px 0;
           font-size: clamp(28px, 3.6vw, 44px);
           font-weight: 900;
           letter-spacing: 0.2px;
         }
-        .rc-title span {
-          color: #18e273;
+        .hero h1 span {
+          color: var(--fluor);
           text-shadow: 0 0 10px rgba(24, 226, 115, 0.8);
         }
-        .rc-sub {
-          margin: 0 auto 8px;
-          max-width: 900px;
+        .hero .sub {
+          margin: 0 auto;
+          max-width: 920px;
           opacity: 0.9;
         }
-        .backBtn {
-          position: absolute;
-          top: 0;
-          right: 0;
-        }
 
+        /* Grid dos cards */
         .grid {
-          width: var(--w);
+          width: var(--panelW);
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: var(--gap);
+          gap: 18px;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
         }
-        @media (max-width: 1100px) {
-          .grid { grid-template-columns: repeat(2, 1fr); }
-        }
-        @media (max-width: 680px) {
-          .grid { grid-template-columns: 1fr; }
+        @media (max-width: 980px) {
+          .grid {
+            grid-template-columns: 1fr;
+          }
         }
 
+        /* Card */
         .card {
-          border-radius: 16px;
-          padding: 18px;
-          background: radial-gradient(
-              120% 120% at 100% 0%,
-              rgba(24, 226, 115, 0.06) 0%,
-              rgba(0, 0, 0, 0) 60%
-            ),
-            rgba(9, 20, 15, 0.55);
-          box-shadow: inset 0 0 0 1px rgba(24, 226, 115, 0.16),
-            0 18px 40px rgba(0, 0, 0, 0.35);
+          border-radius: 18px;
+          padding: 16px 16px 14px;
+          background: linear-gradient(180deg, var(--glassTop) 0%, var(--glassBot) 100%);
+          box-shadow:
+            inset 0 0 0 1px var(--ring),
+            0 20px 60px rgba(0,0,0,0.35);
         }
-        .card-head {
+
+        .card__topline {
           display: grid;
           grid-template-columns: 1fr auto;
-          grid-template-areas:
-            "pill price"
-            "title price";
           align-items: center;
-          gap: 8px;
-          margin-bottom: 12px;
+          gap: 8px 12px;
+          margin-bottom: 8px;
         }
-        .card-head .pill {
-          grid-area: pill;
-          justify-self: start;
-          padding: 4px 10px;
-          border-radius: 999px;
-          border: 1px solid rgba(24, 226, 115, 0.35);
-          background: rgba(24, 226, 115, 0.12);
-          color: #caffee;
-          font-weight: 800;
-          font-size: 12px;
-          text-transform: uppercase;
-          letter-spacing: 0.3px;
-        }
-        .pill--promo { background: rgba(0, 180, 255, 0.14); border-color: rgba(0,180,255,0.35); }
-        .pill--vip   { background: rgba(255, 212, 0, 0.14);  border-color: rgba(255,212,0,0.35); }
 
-        .card-head h2 {
-          grid-area: title;
+        .badge {
+          grid-column: 1 / -1;
+          justify-self: start;
+          font-size: 12px;
+          font-weight: 800;
+          letter-spacing: .4px;
+          padding: 6px 10px;
+          color: var(--fluorText);
+          background: var(--fluor);
+          border-radius: 999px;
+          box-shadow: 0 0 14px rgba(24, 226, 115, .55);
+        }
+
+        .title {
           margin: 0;
           font-size: 22px;
           font-weight: 900;
         }
-        .card-head .price {
-          grid-area: price;
+        .price {
           justify-self: end;
-          font-size: 22px;
-          font-weight: 900;
-        }
-        .card-head .price span {
-          font-size: 12px;
-          font-weight: 700;
-          opacity: 0.8;
+          font-weight: 800;
+          opacity: .95;
         }
 
+        /* Lista de features */
         .features {
           list-style: none;
+          margin: 10px 0 14px;
           padding: 0;
-          margin: 0 0 14px;
-          display: grid;
+          display: flex;
+          flex-direction: column;
           gap: 8px;
-          font-size: 14px;
         }
         .features li {
-          padding-left: 18px;
-          position: relative;
+          display: grid;
+          grid-template-columns: 22px 1fr;
+          align-items: start;
+          gap: 8px;
+          padding: 10px 12px;
+          border-radius: 10px;
+          background: rgba(255,255,255,0.02);
+          box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
         }
-        .features li::before {
-          content: "✓";
-          position: absolute;
-          left: 0;
-          top: 0;
-          color: #18e273;
-          text-shadow: 0 0 8px rgba(24, 226, 115, 0.9);
+        .features li .tick {
+          color: var(--fluor);
+          font-weight: 900;
+          text-shadow: 0 0 10px rgba(24, 226, 115, 0.8);
+        }
+        .features li .txt {
+          line-height: 1.2;
+        }
+        .features li.soon .txt {
+          opacity: .8;
+        }
+        .soonTag {
+          font-style: normal;
+          font-size: 12px;
+          padding-left: 4px;
+          opacity: .9;
+          color: var(--fluor);
         }
 
-        .card-foot { display: flex; justify-content: flex-end; }
+        .cta {
+          display: flex;
+          justify-content: flex-end;
+          padding-top: 6px;
+        }
+
+        /* Tonalidades sutis por plano (bordas/brilhos) */
+        .tone-recommended { box-shadow: inset 0 0 0 1px rgba(24,226,115,.32), 0 24px 72px rgba(0,0,0,.45); }
+        .tone-pro          { box-shadow: inset 0 0 0 1px rgba(24,226,115,.26), 0 24px 72px rgba(0,0,0,.42); }
+        .tone-elite        { box-shadow: inset 0 0 0 1px rgba(24,226,115,.36), 0 26px 76px rgba(0,0,0,.46); }
       `}</style>
     </main>
   );
