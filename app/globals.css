@@ -1323,3 +1323,23 @@ a.rc-btn.rc-btn--green[aria-label="Voltar ao início"]:not(.rc-back-right) {
     0 0 4px rgba(24, 226, 115, 0.45) !important;
   margin-bottom: 8px !important;
 }
+/* ===== AJUSTE FINO FINAL – alinhamento vertical dos planos ===== */
+
+/* Baixa levemente a grade de planos (≈ 1.5 cm) para liberar espaço inferior */
+.page-planos .plans-grid,
+.page-planos .row4 {
+  margin-top: -10px !important;   /* sobe só 10px, mais suave */
+  margin-bottom: 20px !important; /* adiciona folga abaixo dos cards */
+}
+
+/* Mantém tamanhos e estilos anteriores */
+.page-planos .plan-card .price,
+.page-planos .card .price {
+  font-size: clamp(17px, 1.8vw, 22px) !important;
+  font-weight: 800 !important;
+  color: #18e273 !important;
+  text-shadow:
+    0 0 10px rgba(24, 226, 115, 0.55),
+    0 0 4px rgba(24, 226, 115, 0.45) !important;
+  margin-bottom: 8px !important;
+}
