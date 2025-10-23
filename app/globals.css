@@ -1155,3 +1155,45 @@ body:has(main.page-simulador) .rc-root > a:first-of-type{
 body:has(main.page-simulador) .panel{
   border-top: 0 !important;
 }
+/* ROBÔS – reexibe e reposiciona o botão, sem a barra */
+.page-robos .rc-backtop { 
+  display: block !important;           /* desfaz o “display:none” */
+  position: relative !important;
+  background: transparent !important;  /* some com a faixa preta */
+  border: 0 !important;
+  height: 0 !important;                /* não ocupa espaço vertical */
+  overflow: visible !important;
+}
+
+.page-robos .rc-backtop::before,
+.page-robos .rc-backtop::after {
+  display: none !important;            /* garante que não reste traço/linha */
+}
+
+/* Link do botão no canto superior direito, no padrão verde fluorescente */
+.page-robos .rc-backtop a {
+  position: absolute !important;
+  top: -10px;                          /* ajuste fino vertical (use -6 a -14 se precisar) */
+  right: min(24px, 3vw);
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  padding: 0 20px;
+  border-radius: 10px;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+  background: #18e273 !important;      /* verde fluorescente do site */
+  color: #052515 !important;
+  box-shadow: 0 0 18px rgba(24,226,115,.8), inset 0 0 10px rgba(24,226,115,.5);
+  border: none !important;
+  z-index: 50;                          /* acima do painel */
+  transition: transform .2s ease, filter .2s ease, box-shadow .2s ease;
+}
+
+.page-robos .rc-backtop a:hover {
+  filter: brightness(1.35);
+  transform: translateY(-2px);
+  box-shadow: 0 0 28px rgba(24,226,115,1), inset 0 0 16px rgba(24,226,115,.7);
+}
