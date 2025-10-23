@@ -109,6 +109,14 @@ export default function RobosPage() {
         <h1>
           Robôs de Trading <span>(Modo Simulado)</span>
         </h1>
+
+        {/* Botão à direita na linha do título */}
+        <div className="heroBack">
+          <a href="/" className="rc-btn rc-btn--green">
+            Voltar ao início
+          </a>
+        </div>
+
         <p className="sub">
           Aqui você pode testar estratégias automatizadas em tempo real usando
           dados ao vivo. Este é o modo SIM (simulação local).
@@ -133,14 +141,8 @@ export default function RobosPage() {
         </div>
       </section>
 
-      {/* --- PAINEL CENTRAL COM BOTÃO À DIREITA --- */}
+      {/* --- PAINEL CENTRAL --- */}
       <section className="panelWrap">
-        <div className="backBtnInPanel">
-          <a href="/" className="rc-btn rc-btn--green">
-            Voltar ao início
-          </a>
-        </div>
-
         <BotRunnerClient pair={active} onPairChange={setActive} />
       </section>
 
@@ -157,8 +159,10 @@ export default function RobosPage() {
         }
 
         .hero {
+          position: relative;
           width: var(--panel-w);
           text-align: center;
+          padding-right: 180px; /* espaço pro botão à direita */
         }
         .hero h1 {
           font-size: clamp(28px, 3.6vw, 44px);
@@ -177,6 +181,27 @@ export default function RobosPage() {
           opacity: 0.9;
         }
 
+        /* Botão na mesma linha do título, canto direito */
+        .heroBack {
+          position: absolute;
+          top: 0;
+          right: 0;
+          height: 38px;
+          display: flex;
+          align-items: center;
+        }
+
+        @media (max-width: 720px) {
+          .hero {
+            padding-right: 0;
+          }
+          .heroBack {
+            position: static;
+            justify-content: flex-end;
+            margin-top: 10px;
+          }
+        }
+
         .panelWrap {
           position: relative;
           width: var(--panel-w);
@@ -189,21 +214,6 @@ export default function RobosPage() {
             rgba(8, 24, 16, 0.55) 0%,
             rgba(6, 18, 12, 0.45) 100%
           );
-        }
-
-        /* Botão dentro do painel (lado direito) */
-        .backBtnInPanel {
-          position: absolute;
-          top: 14px;
-          right: 18px;
-          z-index: 5;
-        }
-
-        @media (max-width: 720px) {
-          .backBtnInPanel {
-            top: 10px;
-            right: 10px;
-          }
         }
       `}</style>
     </main>
