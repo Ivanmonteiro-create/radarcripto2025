@@ -1370,3 +1370,38 @@ a.rc-btn.rc-btn--green[aria-label="Voltar ao início"]:not(.rc-back-right) {
     0 0 4px rgba(24, 226, 115, 0.45) !important;
   margin-bottom: 8px !important;
 }
+/* ===== AJUSTE FINAL REAL — compactação vertical dos cards ===== */
+
+.page-planos .plan-card,
+.page-planos .card {
+  padding-top: 10px !important;     /* diminui o espaço interno */
+  padding-bottom: 10px !important;
+  min-height: unset !important;
+}
+
+/* Compacta o conteúdo interno (lista de recursos) */
+.page-planos .plan-card ul li,
+.page-planos .card ul li {
+  padding-top: 3px !important;
+  padding-bottom: 3px !important;
+  line-height: 1.25 !important;      /* reduz leve altura das linhas */
+  font-size: 0.93rem !important;     /* letras ligeiramente menores */
+}
+
+/* Mantém a formatação dos preços */
+.page-planos .plan-card .price,
+.page-planos .card .price {
+  font-size: clamp(16px, 1.6vw, 20px) !important;
+  font-weight: 800 !important;
+  color: #18e273 !important;
+  text-shadow:
+    0 0 10px rgba(24, 226, 115, 0.55),
+    0 0 4px rgba(24, 226, 115, 0.45) !important;
+  margin-bottom: 8px !important;
+}
+
+/* Pequena folga abaixo da grade */
+.page-planos .plans-grid,
+.page-planos .row4 {
+  margin-bottom: 24px !important;
+}
