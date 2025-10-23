@@ -18,7 +18,7 @@ const PAIRS = [
 export default function RobosPage() {
   const [active, setActive] = useState<string>("BTCUSDT");
 
-  // Atualiza o select do BotRunnerClient pelo id="robotPair"
+  // Atualiza o select do BotRunnerClient (id="robotPair")
   function setRobotPair(pair: string) {
     const el = document.getElementById("robotPair") as
       | HTMLInputElement
@@ -35,21 +35,21 @@ export default function RobosPage() {
 
   return (
     <main className="page-robos">
-      {/* --- OVERRIDES GLOBAIS PARA ESTA PÁGINA --- */}
+      {/* --- CORREÇÕES GLOBAIS EXCLUSIVAS PARA ESTA PÁGINA --- */}
       <style jsx global>{`
-        /* Esconde a faixa preta antiga e qualquer "Voltar ao início" superior */
-        .page-robos .rc-backtop,
-        .page-robos .rc-backtop * {
+        /* Esconde o botão superior antigo de “Voltar ao início” */
+        .rc-backtop,
+        .rc-backtop * {
           display: none !important;
         }
 
-        /* Padrão do botão verde fluorescente (mesmo das demais telas) */
-        .page-robos .rc-btn {
+        /* Botão verde fluorescente (padrão global RadarCrypto) */
+        .rc-btn {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          height: 36px;
-          padding: 0 18px;
+          height: 38px;
+          padding: 0 20px;
           border-radius: 10px;
           font-weight: 800;
           text-decoration: none;
@@ -59,41 +59,52 @@ export default function RobosPage() {
           cursor: pointer;
           transition: all 0.2s ease;
         }
-        .page-robos .rc-btn--green {
-          background: #18e273;
-          color: #052515;
-          box-shadow: 0 0 16px rgba(24, 226, 115, 0.75),
-            inset 0 0 10px rgba(24, 226, 115, 0.45);
+        .rc-btn--green {
+          background: #18e273 !important;
+          color: #052515 !important;
+          box-shadow: 0 0 18px rgba(24, 226, 115, 0.8),
+            inset 0 0 10px rgba(24, 226, 115, 0.5);
         }
-        .page-robos .rc-btn--green:hover {
-          filter: brightness(1.28);
+        .rc-btn--green:hover {
+          filter: brightness(1.35);
           transform: translateY(-2px);
-          box-shadow: 0 0 26px rgba(24, 226, 115, 0.95),
-            inset 0 0 14px rgba(24, 226, 115, 0.55);
+          box-shadow: 0 0 28px rgba(24, 226, 115, 1),
+            inset 0 0 16px rgba(24, 226, 115, 0.7);
         }
 
-        /* Chips mais fluorescentes (verde forte + brilho) */
+        /* Chips (botões das moedas) — aumentados e espaçados */
         .page-robos .pill {
-          border: 1px solid rgba(24, 226, 115, 0.55) !important;
-          background: rgba(24, 226, 115, 0.16) !important;
+          border: 1px solid rgba(24, 226, 115, 0.6) !important;
+          background: rgba(24, 226, 115, 0.18) !important;
           color: #dbffef !important;
           font-weight: 800 !important;
-          box-shadow: 0 0 12px rgba(24, 226, 115, 0.5) !important;
-          transition: transform 120ms ease, box-shadow 120ms ease,
-            background 120ms ease, filter 120ms ease !important;
+          font-size: 17px !important;
+          padding: 14px 22px !important;
+          border-radius: 999px !important;
+          box-shadow: 0 0 14px rgba(24, 226, 115, 0.55) !important;
+          transition: transform 150ms ease, box-shadow 150ms ease,
+            background 150ms ease, filter 150ms ease !important;
         }
         .page-robos .pill:hover {
           transform: translateY(-1px);
-          filter: brightness(1.45);
-          box-shadow: 0 0 18px rgba(24, 226, 115, 0.9) !important;
+          filter: brightness(1.5);
+          box-shadow: 0 0 22px rgba(24, 226, 115, 0.95) !important;
         }
         .page-robos .pill.is-active {
-          background: rgba(24, 226, 115, 0.28) !important;
-          box-shadow: 0 0 18px rgba(24, 226, 115, 0.9) !important;
+          background: rgba(24, 226, 115, 0.3) !important;
+          box-shadow: 0 0 22px rgba(24, 226, 115, 0.95) !important;
+        }
+
+        .page-robos .quickpairs {
+          margin-top: 18px !important;
+          display: flex !important;
+          justify-content: center !important;
+          flex-wrap: wrap !important;
+          gap: 16px !important;
         }
       `}</style>
 
-      {/* Cabeçalho / descrição centralizados */}
+      {/* --- CABEÇALHO --- */}
       <section className="hero">
         <h1>
           Robôs de Trading <span>(Modo Simulado)</span>
@@ -103,7 +114,7 @@ export default function RobosPage() {
           dados ao vivo. Este é o modo SIM (simulação local).
         </p>
 
-        {/* Atalhos de pares */}
+        {/* Chips das moedas */}
         <div className="quickpairs" role="group" aria-label="Atalhos de pares">
           {PAIRS.map((p) => (
             <button
@@ -122,16 +133,18 @@ export default function RobosPage() {
         </div>
       </section>
 
-      {/* Painel central com botão à direita */}
+      {/* --- PAINEL CENTRAL COM BOTÃO À DIREITA --- */}
       <section className="panelWrap">
         <div className="backBtnInPanel">
-          <a href="/" className="rc-btn rc-btn--green">Voltar ao início</a>
+          <a href="/" className="rc-btn rc-btn--green">
+            Voltar ao início
+          </a>
         </div>
 
         <BotRunnerClient pair={active} onPairChange={setActive} />
       </section>
 
-      {/* Estilos locais do layout desta página */}
+      {/* --- ESTILOS LOCAIS --- */}
       <style jsx>{`
         .page-robos {
           --panel-w: min(1240px, 92vw);
@@ -164,14 +177,6 @@ export default function RobosPage() {
           opacity: 0.9;
         }
 
-        .quickpairs {
-          margin-top: 16px;
-          display: flex;
-          justify-content: center;
-          flex-wrap: wrap;
-          gap: 10px;
-        }
-
         .panelWrap {
           position: relative;
           width: var(--panel-w);
@@ -186,11 +191,11 @@ export default function RobosPage() {
           );
         }
 
-        /* Botão verde fica fixo no canto superior direito do painel */
+        /* Botão dentro do painel (lado direito) */
         .backBtnInPanel {
           position: absolute;
           top: 14px;
-          right: 14px;
+          right: 18px;
           z-index: 5;
         }
 
