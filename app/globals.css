@@ -1841,3 +1841,51 @@ a.rc-btn.rc-btn--green[aria-label="Voltar ao início"]:not(.rc-back-right) {
   .page-planos .features li { padding-top: 4px !important; padding-bottom: 4px !important; }
   .page-planos .price { font-size: 17px !important; }
 }
+/* === Ajuste fino final – Encaixe completo dos botões + centralização === */
+
+/* 1️⃣ Reduz levemente o espaçamento superior entre título e cards */
+.page-planos h1 {
+  font-size: 1.7rem !important;      /* -0.1rem */
+  margin-bottom: 8px !important;     /* sobe ~1cm visual */
+}
+
+/* 2️⃣ Frase “Escolha seu caminho...” mais próxima dos cards */
+.page-planos p {
+  font-size: 0.95rem !important;     /* -0.05rem */
+  line-height: 1.3 !important;
+  margin-bottom: 12px !important;    /* era maior, agora sobe o bloco todo */
+}
+
+/* 3️⃣ Diminui fonte e altura das features para liberar espaço */
+.page-planos .plan-card ul li,
+.page-planos .card ul li {
+  font-size: 0.74rem !important;     /* -0.03rem */
+  line-height: 1.04 !important;      /* -0.02 */
+  padding-top: 3px !important;
+  padding-bottom: 3px !important;
+  margin: 0 !important;
+}
+
+/* 4️⃣ Ajuste global dos cards */
+.page-planos .plan-card,
+.page-planos .card {
+  padding-top: 8px !important;
+  padding-bottom: 6px !important;
+}
+
+/* 5️⃣ Reduz leve espaçamento entre colunas */
+.page-planos .plans-grid,
+.page-planos .row4 {
+  gap: 10px !important;
+  margin-top: 4px !important;
+}
+
+/* 6️⃣ Dá leve respiro no rodapé de cada card p/ mostrar todo o contorno */
+.page-planos .cta {
+  margin-top: 8px !important;
+  margin-bottom: 6px !important; /* suficiente p/ ver todo o botão */
+}
+
+/* 7️⃣ Título, selos e preços um pouco menores para compactar visualmente */
+.page-planos .badge { transform: scale(0.94); }
+.page-planos .price { font-size: 17px !important; }
