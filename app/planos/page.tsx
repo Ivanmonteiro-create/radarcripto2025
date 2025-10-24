@@ -6,22 +6,55 @@ import Link from "next/link";
 export default function PlanosPage() {
   return (
     <main className="planos-container">
-      <h1 className="titulo-principal">Planos do <span className="verde">RadarCrypto</span></h1>
+      {/* Botão fixo no topo direito */}
+      <Link href="/" className="btn-voltar-fixo">Voltar ao início</Link>
 
-      {/* 🔹 BLOCO AOB - Oferta (logo abaixo do título) */}
-      <p className="aob-offer">
+      <h1 className="titulo-principal fade-in">
+        Planos do <span className="verde">RadarCrypto</span>
+      </h1>
+
+      {/* 🔹 Frase de oferta (AOB) */}
+      <p className="aob-offer fade-in-delay">
         Aprenda trading na prática, com as mesmas ferramentas dos traders reais —{" "}
         <strong>sem arriscar nada</strong>.
       </p>
 
-      {/* Frase original já existente */}
-      <p className="subfrase">
+      {/* 🔹 Microprovas de autoridade */}
+      <section className="aob-microproofs slide-up">
+        <div className="aob-proof">
+          <span className="aob-ic">💬</span>
+          <span>Mais de <strong>2.000</strong> traders já testaram</span>
+        </div>
+        <div className="aob-proof">
+          <span className="aob-ic">🔒</span>
+          <span>Dados 100% locais — <strong>segurança</strong> e <strong>privacidade</strong></span>
+        </div>
+        <div className="aob-proof">
+          <span className="aob-ic">⚙️</span>
+          <span>Ferramentas criadas por quem vive o mercado</span>
+        </div>
+      </section>
+
+      {/* 🔹 Benefícios principais */}
+      <section className="aob-benefits fade-in">
+        <div className="aob-benefit">
+          <span className="aob-dot" /> Ganhe <strong>confiança</strong> antes de colocar dinheiro real.
+        </div>
+        <div className="aob-benefit">
+          <span className="aob-dot" /> Domine <strong>estratégias</strong> com resultados simulados em tempo real.
+        </div>
+        <div className="aob-benefit">
+          <span className="aob-dot" /> Erre e aprenda <strong>sem perder</strong> — depois evolua com segurança.
+        </div>
+      </section>
+
+      {/* 🔹 Frase padrão e grid dos planos */}
+      <p className="subfrase fade-in">
         Escolha seu caminho. Comece no SIM (simulador) sem riscos e evolua para gráficos, quando quiser,
         com robôs e ferramentas profissionais.
       </p>
 
-      {/* 🔹 GRID DOS PLANOS (mantido igual ao seu layout atual) */}
-      <div className="grid-planos">
+      <div className="grid-planos slide-up-delay">
         {/* START */}
         <div className="plano-card">
           <div className="plano-header">
@@ -95,51 +128,18 @@ export default function PlanosPage() {
         </div>
       </div>
 
-      {/* 🔹 BLOCO AOB - Autoridade (microprovas) */}
-      <section className="aob-microproofs" aria-label="Provas de confiança">
-        <div className="aob-proof">
-          <span className="aob-ic">💬</span>
-          <span>Mais de <strong>2.000</strong> traders já testaram</span>
-        </div>
-        <div className="aob-proof">
-          <span className="aob-ic">🔒</span>
-          <span>Dados 100% locais — <strong>segurança</strong> e <strong>privacidade</strong></span>
-        </div>
-        <div className="aob-proof">
-          <span className="aob-ic">⚙️</span>
-          <span>Ferramentas criadas por quem vive o mercado</span>
-        </div>
-      </section>
-
-      {/* 🔹 BLOCO AOB - Benefícios emocionais */}
-      <section className="aob-benefits" aria-label="Benefícios principais">
-        <div className="aob-benefit">
-          <span className="aob-dot" /> Ganhe <strong>confiança</strong> antes de colocar dinheiro real.
-        </div>
-        <div className="aob-benefit">
-          <span className="aob-dot" /> Domine <strong>estratégias</strong> com resultados simulados em tempo real.
-        </div>
-        <div className="aob-benefit">
-          <span className="aob-dot" /> Erre e aprenda <strong>sem perder</strong> — depois evolua com segurança.
-        </div>
-      </section>
-
-      {/* Botão voltar */}
-      <div className="voltar-container">
-        <Link href="/" className="btn-voltar">Voltar ao início</Link>
-      </div>
-
-      {/* 🔹 ESTILOS INLINE (você pode mover depois para globals.css se quiser) */}
       <style jsx global>{`
         .planos-container {
-          padding: 40px 24px 60px 24px;
+          padding: 30px 20px 60px 20px;
           text-align: center;
           color: #dfffee;
+          overflow-x: hidden;
         }
 
         .titulo-principal {
           font-size: clamp(22px, 3vw, 28px);
           font-weight: 700;
+          margin-bottom: 8px;
         }
 
         .verde {
@@ -149,36 +149,42 @@ export default function PlanosPage() {
         .subfrase {
           font-size: clamp(14px, 1.4vw, 17px);
           opacity: 0.9;
-          margin-top: 8px;
-          margin-bottom: 30px;
+          margin-top: 10px;
+          margin-bottom: 24px;
         }
 
         .grid-planos {
           display: grid;
           grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-          gap: 18px;
+          gap: 14px;
           justify-items: center;
-          max-width: 1100px;
-          margin: 0 auto 24px auto;
+          max-width: 1080px;
+          margin: 0 auto;
         }
 
         .plano-card {
           background: rgba(10, 28, 18, 0.55);
           border: 1px solid rgba(24, 226, 115, 0.25);
           border-radius: 14px;
-          padding: 16px 12px 20px 12px;
+          padding: 12px 10px 16px 10px;
           text-align: left;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          min-height: 420px;
+          min-height: 390px;
+          max-width: 250px;
           width: 100%;
-          max-width: 260px;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .plano-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 0 10px rgba(24, 226, 115, 0.3);
         }
 
         .plano-header {
           text-align: center;
-          margin-bottom: 10px;
+          margin-bottom: 8px;
         }
 
         .tag {
@@ -200,7 +206,7 @@ export default function PlanosPage() {
         .plano-card ul {
           list-style: none;
           padding-left: 0;
-          margin: 8px 0 16px 0;
+          margin: 8px 0 14px 0;
         }
 
         .plano-card li {
@@ -208,53 +214,46 @@ export default function PlanosPage() {
           font-size: 13px;
         }
 
-        .plano-card em {
-          color: #aaa;
-          font-style: normal;
-          font-size: 12px;
-        }
-
-        .btn {
-          border: none;
-          border-radius: 10px;
-          padding: 8px 12px;
-          font-weight: 600;
-          cursor: pointer;
-        }
-
         .btn.verde {
           background: #18e273;
           color: #0f1c11;
+          font-weight: 600;
+          border: none;
+          border-radius: 10px;
+          padding: 8px 10px;
+          cursor: pointer;
         }
 
-        .btn-voltar {
-          display: inline-block;
-          margin-top: 20px;
+        /* Botão fixo no topo direito */
+        .btn-voltar-fixo {
+          position: fixed;
+          top: 20px;
+          right: 24px;
           background: #18e273;
           color: #0f1c11;
           padding: 8px 14px;
           border-radius: 8px;
           font-weight: 600;
+          z-index: 999;
+          transition: all 0.2s ease;
+        }
+        .btn-voltar-fixo:hover {
+          background: #14c665;
         }
 
-        .voltar-container {
-          margin-top: 25px;
-        }
-
-        /* ===== BLOCO AOB ===== */
+        /* ===== AOB ===== */
         .aob-offer {
-          margin: 10px auto 14px auto !important;
-          max-width: 980px;
+          margin: 6px auto 16px auto;
+          max-width: 940px;
           text-align: center;
           font-size: clamp(14px, 1.6vw, 18px);
-          line-height: 1.45;
           color: rgba(223, 255, 238, 0.92);
           text-shadow: 0 0 10px rgba(24, 226, 115, 0.18);
         }
 
         .aob-microproofs {
-          margin: 20px auto 8px auto !important;
-          max-width: 1100px;
+          margin: 16px auto 10px auto;
+          max-width: 1000px;
           display: grid;
           grid-template-columns: repeat(3, 1fr);
           gap: clamp(8px, 1.6vw, 14px);
@@ -270,19 +269,14 @@ export default function PlanosPage() {
           box-shadow: inset 0 0 0 1px rgba(24, 226, 115, 0.16);
           color: #dfffee;
           font-size: clamp(12px, 1.4vw, 15px);
-          line-height: 1.35;
-        }
-
-        .aob-ic {
-          filter: saturate(1.2) drop-shadow(0 0 6px rgba(24, 226, 115, 0.35));
         }
 
         .aob-benefits {
-          margin: 6px auto 0 auto !important;
-          max-width: 980px;
+          margin: 10px auto 8px auto;
+          max-width: 940px;
           display: grid;
           grid-template-columns: 1fr;
-          gap: 8px;
+          gap: 6px;
         }
 
         .aob-benefit {
@@ -291,8 +285,6 @@ export default function PlanosPage() {
           gap: 10px;
           color: #dfffee;
           font-size: clamp(13px, 1.5vw, 16px);
-          line-height: 1.45;
-          opacity: 0.95;
         }
 
         .aob-dot {
@@ -301,13 +293,52 @@ export default function PlanosPage() {
           border-radius: 999px;
           background: #18e273;
           box-shadow: 0 0 8px rgba(24, 226, 115, 0.9);
-          display: inline-block;
-          flex: 0 0 auto;
+        }
+
+        /* ===== ANIMAÇÕES ===== */
+        .fade-in {
+          opacity: 0;
+          animation: fadeIn 0.8s ease forwards;
+        }
+
+        .fade-in-delay {
+          opacity: 0;
+          animation: fadeIn 0.8s ease 0.3s forwards;
+        }
+
+        .slide-up {
+          opacity: 0;
+          transform: translateY(20px);
+          animation: slideUp 0.8s ease forwards;
+        }
+
+        .slide-up-delay {
+          opacity: 0;
+          transform: translateY(25px);
+          animation: slideUp 0.9s ease 0.3s forwards;
+        }
+
+        @keyframes fadeIn {
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes slideUp {
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
 
         @media (max-width: 980px) {
           .aob-microproofs {
             grid-template-columns: 1fr;
+          }
+          .btn-voltar-fixo {
+            top: 12px;
+            right: 12px;
+            padding: 6px 10px;
           }
         }
       `}</style>
