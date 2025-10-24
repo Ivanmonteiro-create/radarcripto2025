@@ -1456,3 +1456,64 @@ a.rc-btn.rc-btn--green[aria-label="Voltar ao início"]:not(.rc-back-right) {
     padding-bottom: 7px !important;
   }
 }
+/* ===== COMPACTAÇÃO EXTRA++ (cabendo 100% na tela a 100% de zoom) ===== */
+
+.page-planos .plan-card,
+.page-planos .card {
+  padding: 6px 12px !important;           /* ↓ ainda menor */
+}
+
+/* Título do plano (Start/Trader/Pro/Elite) */
+.page-planos .plan-card h3,
+.page-planos .card h3,
+.page-planos .plan-title {
+  font-size: clamp(16px, 1.4vw, 20px) !important;  /* ↓ sutil */
+  margin: 0 0 6px 0 !important;
+  line-height: 1.12 !important;
+}
+
+/* Lista de recursos — mais enxuta */
+.page-planos .plan-card ul li,
+.page-planos .card ul li {
+  padding-top: 1px !important;            /* ↓ */
+  padding-bottom: 1px !important;         /* ↓ */
+  line-height: 1.16 !important;           /* ↓ */
+  font-size: 0.86rem !important;          /* ↓ */
+}
+
+/* Se houver espaçamento entre os <li>, reduz também */
+.page-planos .plan-card ul li + li,
+.page-planos .card ul li + li {
+  margin-top: 4px !important;
+}
+
+/* Preço — ligeiramente menor e colado */
+.page-planos .plan-card .price,
+.page-planos .card .price {
+  font-size: clamp(14px, 1.25vw, 17px) !important; /* ↓ */
+  margin-bottom: 4px !important;
+}
+
+/* Botão CTA dentro do card (garante que não “coma” a borda inferior) */
+.page-planos .plan-card .cta,
+.page-planos .card .cta {
+  margin-top: 8px !important;             /* ↓ caso estivesse muito largo */
+}
+
+/* Grade: linhas ainda mais próximas */
+.page-planos .plans-grid,
+.page-planos .row4 {
+  row-gap: 10px !important;               /* ↓ */
+}
+
+/* Em telas grandes dá para enxugar 1% a mais */
+@media (min-width: 1200px) {
+  .page-planos .plan-card ul li,
+  .page-planos .card ul li {
+    font-size: 0.84rem !important;        /* ↓ */
+  }
+  .page-planos .plan-card,
+  .page-planos .card {
+    padding: 5px 12px !important;         /* ↓ */
+  }
+}
