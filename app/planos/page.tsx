@@ -1,309 +1,314 @@
-// app/planos/page.tsx
 "use client";
 
 import React from "react";
-
-type Feature = { text: string; soon?: boolean };
-type PlanCard = {
-  id: "start" | "trader" | "pro" | "elite";
-  title: string;
-  badge?: string;
-  price: string;
-  cta: string;
-  tone?: "primary" | "recommended" | "pro" | "elite";
-  features: Feature[];
-};
-
-const PLANS: PlanCard[] = [
-  {
-    id: "start",
-    title: "Start",
-    badge: "PRONTO PARA COMEÇAR",
-    price: "€ 0,00 /mês",
-    cta: "Começar de graça",
-    tone: "primary",
-    features: [
-      { text: "Simulador spot básico" },
-      { text: "Capital virtual de 10.000 USDT" },
-      { text: "PnL (resultado) e histórico básico" },
-      { text: "Exportar CSV" },
-      { text: "8 pares principais habilitados" },
-      { text: "Gráfico de evolução mensal (equity)", soon: true },
-    ],
-  },
-  {
-    id: "trader",
-    title: "Trader",
-    badge: "RECOMENDADO",
-    price: "€ 9,99 /mês",
-    cta: "Quero ser Trader",
-    tone: "recommended",
-    features: [
-      { text: "Tudo do plano Start" },
-      { text: "Robôs automáticos (EMA Cross SIM)" },
-      { text: "Controle de risco manual (TP/SL)" },
-      { text: "Histórico expandido (visual e CSV)" },
-      { text: "Troca rápida entre pares" },
-      { text: "Painel de performance resumida", soon: true },
-    ],
-  },
-  {
-    id: "pro",
-    title: "Pro",
-    badge: "TURBO ACELERADOR",
-    price: "€ 19,99 /mês",
-    cta: "Subir para Pro",
-    tone: "pro",
-    features: [
-      { text: "Tudo do plano Trader" },
-      { text: "Gerenciamento de risco automático" },
-      { text: "Relatórios filtráveis/detalhados" },
-      { text: "Estatísticas avançadas (win rate, DD, etc.)" },
-      { text: "Exportar relatórios detalhados" },
-      { text: "Notificações de performance", soon: true },
-    ],
-  },
-  {
-    id: "elite",
-    title: "Elite",
-    badge: "TUDO DESEBLOQUEADO",
-    price: "€ 29,99 /mês",
-    cta: "Virar Elite",
-    tone: "elite",
-    features: [
-      { text: "Tudo do plano Pro" },
-      { text: "Backtesting de estratégias" },
-      { text: "Comparação de estratégias" },
-      { text: "Histórico mensal/anual salvo (equity curves)" },
-      { text: "Acesso antecipado a novidades (beta)" },
-      { text: "Suporte prioritário + comunidade privada" },
-    ],
-  },
-];
+import Link from "next/link";
 
 export default function PlanosPage() {
   return (
-    <main className="page-planos">
-      {/* 1) Some com QUALQUER botão 'Voltar ao início' herdado,
-            e libere só o nosso (id=backtop-planos). */}
-      <style jsx global>{`
-        /* esconde a barra antiga, se existir */
-        .page-planos .rc-backtop { display: none !important; }
+    <main className="planos-container">
+      <h1 className="titulo-principal">Planos do <span className="verde">RadarCrypto</span></h1>
 
-        /* esconde qualquer botão/link 'Voltar ao início' verde que venha do layout,
-           identificado por aria-label, exceto o nosso id */
-        .page-planos a.rc-btn.rc-btn--green[aria-label="Voltar ao início"] {
-          display: none !important;
-        }
-        .page-planos #backtop-planos {
-          display: inline-flex !important;
-        }
-      `}</style>
+      {/* 🔹 BLOCO AOB - Oferta (logo abaixo do título) */}
+      <p className="aob-offer">
+        Aprenda trading na prática, com as mesmas ferramentas dos traders reais —{" "}
+        <strong>sem arriscar nada</strong>.
+      </p>
 
-      {/* 2) Nosso botão oficial (direita) */}
-      <a
-        id="backtop-planos"
-        href="/"
-        className="rc-btn rc-btn--green backtop"
-        aria-label="Voltar ao início"
-      >
-        Voltar ao início
-      </a>
+      {/* Frase original já existente */}
+      <p className="subfrase">
+        Escolha seu caminho. Comece no SIM (simulador) sem riscos e evolua para gráficos, quando quiser,
+        com robôs e ferramentas profissionais.
+      </p>
 
-      {/* 3) Conteúdo */}
-      <header className="hero">
-        <h1>
-          Planos do <span>RadarCrypto</span>
-        </h1>
-        <p className="sub">
-          Escolha seu caminho. Comece no SIM (simulador) sem riscos e evolua para gráficos,
-          quando quiser, com robôs e ferramentas profissionais.
-        </p>
-      </header>
+      {/* 🔹 GRID DOS PLANOS (mantido igual ao seu layout atual) */}
+      <div className="grid-planos">
+        {/* START */}
+        <div className="plano-card">
+          <div className="plano-header">
+            <span className="tag verde">PRONTO PARA COMEÇAR</span>
+            <h2>Start</h2>
+            <p className="preco">€ 0,00/mês</p>
+          </div>
+          <ul>
+            <li>Simulador spot básico</li>
+            <li>Capital virtual de 10.000 USDT</li>
+            <li>PnL (resultado) e histórico básico</li>
+            <li>Exportar CSV</li>
+            <li>8 pares principais habilitados</li>
+            <li>Gráfico de evolução mensal (equity) <em>em breve</em></li>
+          </ul>
+          <button className="btn verde">Começar de graça</button>
+        </div>
 
-      {/* 4) Grade em UMA LINHA (4 colunas) no desktop 100% */}
-      <section className="row4">
-        {PLANS.map((plan) => (
-          <article key={plan.id} className={`card tone-${plan.tone || "primary"}`}>
-            <div className="card__topline">
-              {plan.badge && <span className="badge">{plan.badge}</span>}
-              <h2 className="title">{plan.title}</h2>
-              <div className="price">{plan.price}</div>
-            </div>
+        {/* TRADER */}
+        <div className="plano-card">
+          <div className="plano-header">
+            <span className="tag verde">RECOMENDADO</span>
+            <h2>Trader</h2>
+            <p className="preco">€ 9,99/mês</p>
+          </div>
+          <ul>
+            <li>Tudo do plano Start</li>
+            <li>Robôs automáticos (EMA Cross SIM)</li>
+            <li>Controle de risco manual (TP/SL)</li>
+            <li>Histórico expandido (visual e CSV)</li>
+            <li>Troca rápida entre pares</li>
+            <li>Painel de performance resumida <em>em breve</em></li>
+          </ul>
+          <button className="btn verde">Quero ser Trader</button>
+        </div>
 
-            <ul className="features">
-              {plan.features.map((f, i) => (
-                <li key={i} className={f.soon ? "soon" : ""}>
-                  <span className="tick" aria-hidden>✓</span>
-                  <span className="txt">
-                    {f.text} {f.soon && <em className="soonTag">• em breve</em>}
-                  </span>
-                </li>
-              ))}
-            </ul>
+        {/* PRO */}
+        <div className="plano-card">
+          <div className="plano-header">
+            <span className="tag verde">TURBO ACELERADO</span>
+            <h2>Pro</h2>
+            <p className="preco">€ 19,99/mês</p>
+          </div>
+          <ul>
+            <li>Tudo do plano Trader</li>
+            <li>Gerenciamento de risco automático</li>
+            <li>Relatórios filtráveis/detalhados</li>
+            <li>Estatísticas avançadas (win rate, DD, etc.)</li>
+            <li>Exportar relatórios detalhados</li>
+            <li>Notificações de performance <em>em breve</em></li>
+          </ul>
+          <button className="btn verde">Subir para Pro</button>
+        </div>
 
-            <div className="cta">
-              <button className="rc-btn rc-btn--green">{plan.cta}</button>
-            </div>
-          </article>
-        ))}
+        {/* ELITE */}
+        <div className="plano-card">
+          <div className="plano-header">
+            <span className="tag verde">TUDO DESEBLOQUEADO</span>
+            <h2>Elite</h2>
+            <p className="preco">€ 29,99/mês</p>
+          </div>
+          <ul>
+            <li>Tudo do plano Pro</li>
+            <li>Backtesting de estratégias</li>
+            <li>Comparação de estratégias</li>
+            <li>Histórico mensal/anual salvo (equity curves)</li>
+            <li>Acesso antecipado a novidades (beta)</li>
+            <li>Suporte prioritário + comunidade privada</li>
+          </ul>
+          <button className="btn verde">Virar Elite</button>
+        </div>
+      </div>
+
+      {/* 🔹 BLOCO AOB - Autoridade (microprovas) */}
+      <section className="aob-microproofs" aria-label="Provas de confiança">
+        <div className="aob-proof">
+          <span className="aob-ic">💬</span>
+          <span>Mais de <strong>2.000</strong> traders já testaram</span>
+        </div>
+        <div className="aob-proof">
+          <span className="aob-ic">🔒</span>
+          <span>Dados 100% locais — <strong>segurança</strong> e <strong>privacidade</strong></span>
+        </div>
+        <div className="aob-proof">
+          <span className="aob-ic">⚙️</span>
+          <span>Ferramentas criadas por quem vive o mercado</span>
+        </div>
       </section>
 
-      {/* 5) Estilos locais (mantém o look & feel e garante 4 colunas) */}
-      <style jsx>{`
-        .page-planos {
-          --fluor: #18e273;
-          --fluorText: #052515;
-          --ring: rgba(24, 226, 115, 0.2);
-          --glassTop: rgba(8, 24, 16, 0.55);
-          --glassBot: rgba(6, 18, 12, 0.45);
-          --panelW: min(1420px, 98vw); /* largura maior p/ caber 4 cards */
-          position: relative;
-          padding: 18px 0 40px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 14px;
-        }
+      {/* 🔹 BLOCO AOB - Benefícios emocionais */}
+      <section className="aob-benefits" aria-label="Benefícios principais">
+        <div className="aob-benefit">
+          <span className="aob-dot" /> Ganhe <strong>confiança</strong> antes de colocar dinheiro real.
+        </div>
+        <div className="aob-benefit">
+          <span className="aob-dot" /> Domine <strong>estratégias</strong> com resultados simulados em tempo real.
+        </div>
+        <div className="aob-benefit">
+          <span className="aob-dot" /> Erre e aprenda <strong>sem perder</strong> — depois evolua com segurança.
+        </div>
+      </section>
 
-        .backtop {
-          position: fixed;
-          top: 14px;
-          right: 18px;
-          z-index: 999;
-        }
-        .rc-btn {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          height: 34px;
-          padding: 0 16px;
-          border-radius: 12px;
-          font-weight: 800;
-          line-height: 1;
-          border: 0;
-          cursor: pointer;
-          white-space: nowrap;
-          transition: transform .15s ease, filter .15s ease, box-shadow .15s ease;
-        }
-        .rc-btn--green {
-          background: var(--fluor);
-          color: var(--fluorText);
-          box-shadow: 0 0 16px rgba(24,226,115,.8), inset 0 0 8px rgba(24,226,115,.5);
-        }
-        .rc-btn--green:hover {
-          filter: brightness(1.35);
-          transform: translateY(-2px);
-          box-shadow: 0 0 24px rgba(24,226,115,1), inset 0 0 14px rgba(24,226,115,.7);
-        }
+      {/* Botão voltar */}
+      <div className="voltar-container">
+        <Link href="/" className="btn-voltar">Voltar ao início</Link>
+      </div>
 
-        .hero {
-          width: var(--panelW);
+      {/* 🔹 ESTILOS INLINE (você pode mover depois para globals.css se quiser) */}
+      <style jsx global>{`
+        .planos-container {
+          padding: 40px 24px 60px 24px;
           text-align: center;
+          color: #dfffee;
         }
-        .hero h1 {
-          margin: 0 0 2px 0;
-          font-size: clamp(24px, 2.8vw, 36px);
-          font-weight: 900;
+
+        .titulo-principal {
+          font-size: clamp(22px, 3vw, 28px);
+          font-weight: 700;
         }
-        .hero h1 span {
-          color: var(--fluor);
-          text-shadow: 0 0 10px rgba(24, 226, 115, 0.8);
+
+        .verde {
+          color: #18e273;
         }
-        .hero .sub {
-          margin: 0 auto;
-          max-width: 980px;
+
+        .subfrase {
+          font-size: clamp(14px, 1.4vw, 17px);
           opacity: 0.9;
-          font-size: 13px;
+          margin-top: 8px;
+          margin-bottom: 30px;
         }
 
-        /* 4 cards na horizontal */
-        .row4 {
-          width: var(--panelW);
+        .grid-planos {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 12px;
-          align-items: start;
+          grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+          gap: 18px;
+          justify-items: center;
+          max-width: 1100px;
+          margin: 0 auto 24px auto;
         }
 
-        .card {
+        .plano-card {
+          background: rgba(10, 28, 18, 0.55);
+          border: 1px solid rgba(24, 226, 115, 0.25);
           border-radius: 14px;
-          padding: 10px;
-          background: linear-gradient(180deg, var(--glassTop) 0%, var(--glassBot) 100%);
-          box-shadow: inset 0 0 0 1px var(--ring), 0 16px 48px rgba(0,0,0,.32);
-          min-width: 0; /* evita overflow de grid */
-        }
-        .card__topline {
-          display: grid;
-          grid-template-columns: 1fr auto;
-          align-items: center;
-          gap: 4px 8px;
-          margin-bottom: 6px;
-        }
-        .badge {
-          grid-column: 1 / -1;
-          justify-self: start;
-          font-size: 10px;
-          font-weight: 800;
-          padding: 4px 8px;
-          color: var(--fluorText);
-          background: var(--fluor);
-          border-radius: 999px;
-          box-shadow: 0 0 12px rgba(24, 226, 115, 0.55);
-        }
-        .title {
-          margin: 0;
-          font-size: 18px;
-          font-weight: 900;
-        }
-        .price {
-          justify-self: end;
-          font-weight: 800;
-          font-size: 12px;
-          opacity: .95;
-        }
-
-        .features {
-          list-style: none;
-          margin: 6px 0 8px;
-          padding: 0;
+          padding: 16px 12px 20px 12px;
+          text-align: left;
           display: flex;
           flex-direction: column;
-          gap: 4px;
-        }
-        .features li {
-          display: grid;
-          grid-template-columns: 16px 1fr;
-          gap: 6px;
-          padding: 6px 8px;
-          border-radius: 10px;
-          background: rgba(255,255,255,.02);
-          box-shadow: inset 0 0 0 1px rgba(255,255,255,.05);
-          font-size: 13px;
-        }
-        .tick {
-          color: var(--fluor);
-          font-weight: 900;
-          text-shadow: 0 0 8px rgba(24,226,115,.8);
-        }
-        .soonTag {
-          font-style: normal;
-          font-size: 11px;
-          padding-left: 4px;
-          color: var(--fluor);
-        }
-        .cta {
-          display: flex;
-          justify-content: flex-end;
-          padding-top: 2px;
+          justify-content: space-between;
+          min-height: 420px;
+          width: 100%;
+          max-width: 260px;
         }
 
-        /* Responsivo: em telas menores, cai p/ 2 colunas; no mobile, 1 coluna */
-        @media (max-width: 1280px) {
-          .row4 { grid-template-columns: repeat(2, 1fr); }
+        .plano-header {
+          text-align: center;
+          margin-bottom: 10px;
         }
-        @media (max-width: 720px) {
-          .row4 { grid-template-columns: 1fr; }
+
+        .tag {
+          font-size: 10px;
+          border-radius: 8px;
+          padding: 2px 8px;
+          color: #0f1c11;
+          background: #18e273;
+          font-weight: 600;
+        }
+
+        .preco {
+          color: #18e273;
+          font-weight: 600;
+          font-size: clamp(15px, 1.4vw, 18px);
+          margin-top: 4px;
+        }
+
+        .plano-card ul {
+          list-style: none;
+          padding-left: 0;
+          margin: 8px 0 16px 0;
+        }
+
+        .plano-card li {
+          margin-bottom: 5px;
+          font-size: 13px;
+        }
+
+        .plano-card em {
+          color: #aaa;
+          font-style: normal;
+          font-size: 12px;
+        }
+
+        .btn {
+          border: none;
+          border-radius: 10px;
+          padding: 8px 12px;
+          font-weight: 600;
+          cursor: pointer;
+        }
+
+        .btn.verde {
+          background: #18e273;
+          color: #0f1c11;
+        }
+
+        .btn-voltar {
+          display: inline-block;
+          margin-top: 20px;
+          background: #18e273;
+          color: #0f1c11;
+          padding: 8px 14px;
+          border-radius: 8px;
+          font-weight: 600;
+        }
+
+        .voltar-container {
+          margin-top: 25px;
+        }
+
+        /* ===== BLOCO AOB ===== */
+        .aob-offer {
+          margin: 10px auto 14px auto !important;
+          max-width: 980px;
+          text-align: center;
+          font-size: clamp(14px, 1.6vw, 18px);
+          line-height: 1.45;
+          color: rgba(223, 255, 238, 0.92);
+          text-shadow: 0 0 10px rgba(24, 226, 115, 0.18);
+        }
+
+        .aob-microproofs {
+          margin: 20px auto 8px auto !important;
+          max-width: 1100px;
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: clamp(8px, 1.6vw, 14px);
+        }
+
+        .aob-proof {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 10px 14px;
+          border-radius: 12px;
+          background: rgba(10, 28, 18, 0.55);
+          box-shadow: inset 0 0 0 1px rgba(24, 226, 115, 0.16);
+          color: #dfffee;
+          font-size: clamp(12px, 1.4vw, 15px);
+          line-height: 1.35;
+        }
+
+        .aob-ic {
+          filter: saturate(1.2) drop-shadow(0 0 6px rgba(24, 226, 115, 0.35));
+        }
+
+        .aob-benefits {
+          margin: 6px auto 0 auto !important;
+          max-width: 980px;
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+
+        .aob-benefit {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          color: #dfffee;
+          font-size: clamp(13px, 1.5vw, 16px);
+          line-height: 1.45;
+          opacity: 0.95;
+        }
+
+        .aob-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 999px;
+          background: #18e273;
+          box-shadow: 0 0 8px rgba(24, 226, 115, 0.9);
+          display: inline-block;
+          flex: 0 0 auto;
+        }
+
+        @media (max-width: 980px) {
+          .aob-microproofs {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
     </main>
