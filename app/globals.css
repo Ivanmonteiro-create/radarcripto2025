@@ -1775,3 +1775,31 @@ a.rc-btn.rc-btn--green[aria-label="Voltar ao início"]:not(.rc-back-right) {
     margin-bottom: 4px !important;   /* +1px de respiro controlado */
   }
 }
+/* ===== AJUSTE FINAL ABSOLUTO – encaixe completo do botão "Virar Elite" ===== */
+.page-planos .plan-card,
+.page-planos .card {
+  padding-top: 1px !important;         /* -1px */
+  padding-bottom: 1px !important;      /* -1px */
+  margin-bottom: 1px !important;       /* -1px */
+}
+
+.page-planos .plan-card ul li,
+.page-planos .card ul li {
+  line-height: 1.02 !important;        /* ligeiramente mais compacto */
+  font-size: 0.77rem !important;       /* redução mínima */
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Dá um respiro inferior extra p/ o botão final aparecer inteiro */
+.page-planos .plan-card .cta,
+.page-planos .card .cta {
+  margin-bottom: 6px !important;       /* +2px comparado à versão anterior */
+}
+
+/* Mantém harmonia entre colunas */
+.page-planos .plans-grid,
+.page-planos .row4 {
+  row-gap: 3px !important;
+  margin-bottom: 10px !important;
+}
