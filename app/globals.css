@@ -1707,3 +1707,45 @@ a.rc-btn.rc-btn--green[aria-label="Voltar ao início"]:not(.rc-back-right) {
     line-height: 1.04 !important;
   }
 }
+/* ===== COMPACTAÇÃO ULTRA PRECISA v2 — ajuste final de 1px no rodapé ===== */
+
+.page-planos .plan-card,
+.page-planos .card {
+  padding: 2px 8px !important;
+  margin-bottom: 2px !important;
+}
+
+/* Itens internos */
+.page-planos .plan-card ul li,
+.page-planos .card ul li {
+  padding: 0 !important;
+  line-height: 1.05 !important;
+  font-size: 0.78rem !important;
+}
+
+/* Botões — libera 1px extra para o último card */
+.page-planos .plan-card .cta,
+.page-planos .card .cta {
+  margin-top: 5px !important;
+  margin-bottom: 5px !important; /* era 3px — +2px de respiro */
+}
+
+/* Grade geral */
+.page-planos .plans-grid,
+.page-planos .row4 {
+  row-gap: 4px !important;
+  margin-bottom: 12px !important; /* +4px de folga inferior */
+}
+
+/* Desktop grande */
+@media (min-width: 1200px) {
+  .page-planos .plan-card,
+  .page-planos .card {
+    padding: 1px 8px !important;
+  }
+  .page-planos .plan-card ul li,
+  .page-planos .card ul li {
+    font-size: 0.77rem !important;
+    line-height: 1.04 !important;
+  }
+}
