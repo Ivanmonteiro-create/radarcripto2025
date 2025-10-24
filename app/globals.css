@@ -1749,3 +1749,29 @@ a.rc-btn.rc-btn--green[aria-label="Voltar ao início"]:not(.rc-back-right) {
     line-height: 1.04 !important;
   }
 }
+/* === Ajuste fino: liberar o contorno do botão "Virar Elite" === */
+/* Aplica somente na 4ª coluna (Elite) em telas desktop */
+@media (min-width: 1000px) {
+  /* Compacta discretamente a tipografia dos itens do Elite */
+  .page-planos .plans-grid > *:nth-child(4) .plan-card ul li,
+  .page-planos .row4 > *:nth-child(4) .plan-card ul li,
+  .page-planos .plans-grid > *:nth-child(4) ul li {
+    font-size: 0.76rem !important;  /* -0.02rem */
+    line-height: 1.03 !important;   /* -0.01 */
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Reduz só um pouco o “respiro” interno do card Elite */
+  .page-planos .plans-grid > *:nth-child(4) .plan-card,
+  .page-planos .row4 > *:nth-child(4) .plan-card,
+  .page-planos .plans-grid > *:nth-child(4) {
+    padding-bottom: 2px !important;  /* -1~2px */
+  }
+
+  /* Sobra 1–2px a mais para o botão aparecer completo */
+  .page-planos .plans-grid > *:nth-child(4) .cta,
+  .page-planos .row4 > *:nth-child(4) .cta {
+    margin-bottom: 4px !important;   /* +1px de respiro controlado */
+  }
+}
