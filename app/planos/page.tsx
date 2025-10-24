@@ -194,8 +194,6 @@ export default function PlanosPage() {
           color: #18e273;
           text-shadow: 0 0 8px rgba(24, 226, 115, 0.8);
         }
-
-        /* ↓ frase menor */
         .hero .sub {
           margin: 0 auto 6px;
           max-width: 880px;
@@ -203,12 +201,12 @@ export default function PlanosPage() {
           opacity: 0.9;
         }
 
-        /* ↓ chips um pouco mais próximos */
+        /* PROVAS – subidas um pouco e com mais espaço abaixo */
         .proofs {
           display: flex;
           gap: 8px;
           justify-content: center;
-          margin: 0 0 4px;
+          margin: 0 0 12px; /* ↑ era 4px */
         }
         .proof {
           border: 1px solid rgba(24, 226, 115, 0.45);
@@ -226,13 +224,13 @@ export default function PlanosPage() {
           right: 0;
         }
 
-        /* ↓ grid subido */
+        /* GRID – subiu menos para não encostar nos chips */
         .plansGrid {
           width: var(--w);
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           gap: 12px;
-          margin-top: -10px; /* sobe todo o bloco */
+          margin-top: -2px; /* ↓ era -10px */
         }
 
         .plan {
@@ -242,7 +240,7 @@ export default function PlanosPage() {
           padding: 12px;
           background: linear-gradient(180deg, var(--card-bg1), var(--card-bg2));
           box-shadow: inset 0 0 0 1px var(--glow), 0 16px 48px rgba(0, 0, 0, 0.35);
-          min-height: 398px; /* ligeiramente menor ainda */
+          min-height: 398px;
         }
 
         .plan-head {
