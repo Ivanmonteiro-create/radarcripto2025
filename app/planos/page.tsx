@@ -182,7 +182,6 @@ export default function PlanosPage() {
           position: relative;
           width: var(--w);
           text-align: center;
-          margin-bottom: 2px;
         }
         .hero h1 {
           font-size: clamp(25px, 2.8vw, 34px);
@@ -201,12 +200,12 @@ export default function PlanosPage() {
           opacity: 0.9;
         }
 
-        /* PROVAS – subidas um pouco e com mais espaço abaixo */
+        /* SUBIR PROVAS UM POUCO */
         .proofs {
           display: flex;
           gap: 8px;
           justify-content: center;
-          margin: 0 0 12px; /* ↑ era 4px */
+          margin: 0 0 4px; /* ↓ sobe uns 8px */
         }
         .proof {
           border: 1px solid rgba(24, 226, 115, 0.45);
@@ -224,13 +223,13 @@ export default function PlanosPage() {
           right: 0;
         }
 
-        /* GRID – subiu menos para não encostar nos chips */
+        /* SUBIR CARDS ~1cm */
         .plansGrid {
           width: var(--w);
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           gap: 12px;
-          margin-top: -2px; /* ↓ era -10px */
+          margin-top: -6px; /* ↑ subiu levemente */
         }
 
         .plan {
