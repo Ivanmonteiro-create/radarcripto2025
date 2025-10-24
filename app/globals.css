@@ -1889,3 +1889,23 @@ a.rc-btn.rc-btn--green[aria-label="Voltar ao início"]:not(.rc-back-right) {
 /* 7️⃣ Título, selos e preços um pouco menores para compactar visualmente */
 .page-planos .badge { transform: scale(0.94); }
 .page-planos .price { font-size: 17px !important; }
+/* === Planos: aproximar os 4 cards do subtítulo (~2 cm) === */
+
+/* 1) Menor espaço abaixo da frase */
+.page-planos p {
+  margin-bottom: 6px !important;   /* estava 12px */
+}
+
+/* 2) Puxar o grid de cards para cima */
+.page-planos .plans-grid,
+.page-planos .row4,
+.page-planos .cardsRow {
+  margin-top: -18px !important;    /* puxa o bloco todo ~18px (~1.8 cm na prática) */
+}
+
+/* 3) Só por garantia, tira respiro extra no contêiner da seção, se existir */
+.page-planos .plans-section,
+.page-planos .cards-wrap {
+  padding-top: 0 !important;
+  margin-top: -6px !important;
+}
