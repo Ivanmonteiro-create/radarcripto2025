@@ -1,4 +1,3 @@
-// app/planos/page.tsx
 "use client";
 
 import React from "react";
@@ -79,10 +78,6 @@ export default function PlanosPage() {
   return (
     <main className="page-planos">
       <style jsx global>{`
-        .rc-backtop,
-        .rc-backtop * {
-          display: none !important;
-        }
         .rc-btn {
           display: inline-flex;
           align-items: center;
@@ -124,9 +119,9 @@ export default function PlanosPage() {
         </p>
 
         <div className="proofs" role="list">
-          <span className="proof" role="listitem">+2.000 traders já testaram</span>
-          <span className="proof" role="listitem">100% local e seguro</span>
-          <span className="proof" role="listitem">Ferramentas de quem vive o mercado</span>
+          <span className="proof">+2.000 traders já testaram</span>
+          <span className="proof">100% local e seguro</span>
+          <span className="proof">Ferramentas de quem vive o mercado</span>
         </div>
 
         <div className="backTopRight">
@@ -134,19 +129,19 @@ export default function PlanosPage() {
         </div>
       </header>
 
-      <section className="plansGrid" aria-label="Planos disponíveis">
+      <section className="plansGrid">
         {PLANS.map((p) => (
-          <article key={p.slug} className={`plan plan--${p.slug}`} aria-labelledby={`plan-${p.slug}-title`}>
+          <article key={p.slug} className={`plan plan--${p.slug}`}>
             <div className="plan-head">
               <span className="ribbon">{p.ribbon}</span>
-              <h3 id={`plan-${p.slug}-title`}>{p.title}</h3>
+              <h3>{p.title}</h3>
               <div className="price">{p.price}</div>
             </div>
 
             <ul className="featList">
               {p.features.map((f, i) => (
                 <li key={i}>
-                  <span className="tick" aria-hidden>✓</span>
+                  <span className="tick">✓</span>
                   <span>{f}</span>
                 </li>
               ))}
@@ -164,7 +159,7 @@ export default function PlanosPage() {
         ))}
       </section>
 
-      <aside className="ctaDock" aria-label="Ações rápidas de planos">
+      <aside className="ctaDock">
         <a href="/simulador" className="rc-btn rc-btn--green">Começar de graça</a>
         <a href="/login?plan=trader" className="rc-btn rc-btn--green">Quero ser Trader</a>
         <a href="/login?plan=pro" className="rc-btn rc-btn--green">Subir para Pro</a>
@@ -180,52 +175,49 @@ export default function PlanosPage() {
           display: flex;
           flex-direction: column;
           align-items: center;
-          padding: 14px 0 72px;
-          gap: 14px;
+          padding: 10px 0 68px;
         }
 
         .hero {
           position: relative;
           width: var(--w);
           text-align: center;
-          margin-bottom: 4px;
+          margin-bottom: 2px;
         }
         .hero h1 {
-          font-size: clamp(26px, 3vw, 36px);
-          line-height: 1.04;
-          margin: 0 0 8px 0;
+          font-size: clamp(25px, 2.8vw, 34px);
+          line-height: 1.03;
+          margin: 0 0 6px;
           font-weight: 900;
-          letter-spacing: 0.2px;
         }
         .hero h1 span {
           color: #18e273;
-          text-shadow: 0 0 10px rgba(24, 226, 115, 0.8);
-        }
-        /* ↓ Subtítulo ligeiramente menor e com menos espaçamento */
-        .hero .sub {
-          margin: 0 auto 8px;
-          max-width: 920px;
-          font-size: clamp(13px, 1.25vw, 16px);
-          opacity: 0.95;
+          text-shadow: 0 0 8px rgba(24, 226, 115, 0.8);
         }
 
-        /* Chips mais próximos do grid */
+        /* ↓ frase menor */
+        .hero .sub {
+          margin: 0 auto 6px;
+          max-width: 880px;
+          font-size: clamp(12px, 1.1vw, 15px);
+          opacity: 0.9;
+        }
+
+        /* ↓ chips um pouco mais próximos */
         .proofs {
           display: flex;
           gap: 8px;
           justify-content: center;
-          flex-wrap: nowrap;
-          margin: 0 0 6px; /* ↓ estava 10px */
+          margin: 0 0 4px;
         }
         .proof {
           border: 1px solid rgba(24, 226, 115, 0.45);
           background: rgba(24, 226, 115, 0.12);
           color: #d8ffe9;
           font-weight: 700;
-          padding: 5px 9px;
+          padding: 4px 9px;
           border-radius: 999px;
-          font-size: 12px;
-          white-space: nowrap;
+          font-size: 11.5px;
         }
 
         .backTopRight {
@@ -234,89 +226,79 @@ export default function PlanosPage() {
           right: 0;
         }
 
-        /* Grid subido e mais compacto */
+        /* ↓ grid subido */
         .plansGrid {
           width: var(--w);
           display: grid;
           grid-template-columns: repeat(4, 1fr);
-          gap: 12px;            /* ↓ gap menor */
-          margin-top: 0;        /* ↓ antes 6px */
+          gap: 12px;
+          margin-top: -10px; /* sobe todo o bloco */
         }
 
         .plan {
           display: grid;
           grid-template-rows: auto 1fr auto;
           border-radius: 16px;
-          padding: 12px;        /* ↓ padding menor */
-          background: linear-gradient(180deg, var(--card-bg1) 0%, var(--card-bg2) 100%);
+          padding: 12px;
+          background: linear-gradient(180deg, var(--card-bg1), var(--card-bg2));
           box-shadow: inset 0 0 0 1px var(--glow), 0 16px 48px rgba(0, 0, 0, 0.35);
-          min-height: 406px;    /* ↓ um pouco menor para caber o CTA */
+          min-height: 398px; /* ligeiramente menor ainda */
         }
 
         .plan-head {
           display: grid;
-          grid-template-columns: 1fr;
           gap: 6px;
-          align-items: center;
-          justify-items: start;
+          align-items: start;
         }
         .ribbon {
-          display: inline-flex;
-          align-items: center;
-          padding: 4px 9px;
+          padding: 3px 9px;
           border-radius: 999px;
           background: rgba(24, 226, 115, 0.18);
           border: 1px solid rgba(24, 226, 115, 0.45);
           color: #bfffd6;
           font-weight: 800;
-          font-size: 10.5px;
-          letter-spacing: 0.3px;
+          font-size: 10px;
           text-transform: uppercase;
-          box-shadow: 0 0 10px rgba(24, 226, 115, 0.35) inset;
         }
         .plan-head h3 {
           margin: 0;
+          font-size: 16.5px;
           font-weight: 900;
-          font-size: 17px;
         }
         .price {
-          margin-top: -2px;
-          font-weight: 900;
-          font-size: 17px;  /* ↓ ligeiramente menor */
+          font-size: 16.5px;
           color: #18e273;
-          text-shadow: 0 0 8px rgba(24, 226, 115, 0.6);
+          font-weight: 900;
         }
 
         .featList {
           list-style: none;
-          margin: 6px 0 8px; /* ↓ menos margem */
+          margin: 6px 0 8px;
           padding: 0;
           display: flex;
           flex-direction: column;
-          gap: 5px;          /* ↓ menos gap */
+          gap: 4.5px;
         }
         .featList li {
           display: grid;
           grid-template-columns: 18px 1fr;
           align-items: center;
-          min-height: 28px;  /* ↓ compacata */
-          padding: 5px 9px;  /* ↓ padding */
+          min-height: 26px;
+          padding: 5px 8px;
           border-radius: 10px;
           border: 1px solid rgba(24, 226, 115, 0.16);
           background: rgba(24, 226, 115, 0.06);
-          box-shadow: inset 0 0 0 1px rgba(24, 226, 115, 0.05);
-          font-size: 13.25px; /* ↓ fonte interna */
+          font-size: 13px;
         }
         .featList .tick {
           color: #18e273;
           font-weight: 900;
-          margin-right: 6px;
         }
 
         .plan-cta {
           display: flex;
           justify-content: center;
-          margin-top: 6px;
+          margin-top: 4px;
         }
 
         .ctaDock {
@@ -329,7 +311,6 @@ export default function PlanosPage() {
           background: rgba(0, 0, 0, 0.35);
           backdrop-filter: blur(6px);
           border-radius: 14px;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.32);
           width: calc(100% - 24px);
           margin: 0 auto;
           justify-content: space-between;
@@ -338,11 +319,11 @@ export default function PlanosPage() {
         @media (max-width: 1200px) {
           .plansGrid {
             grid-template-columns: repeat(2, 1fr);
+            margin-top: 0;
           }
         }
         @media (max-width: 960px) {
-          .proofs { flex-wrap: wrap; }
-          .plansGrid { grid-template-columns: 1fr; }
+          .plansGrid { grid-template-columns: 1fr; margin-top: 0; }
           .ctaDock { display: flex; }
         }
       `}</style>
