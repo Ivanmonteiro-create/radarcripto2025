@@ -1,222 +1,103 @@
-// app/sobre/page.tsx
-import Link from "next/link";
+"use client";
 
-function ChipIcon({ children, hue = 140 }: { children: React.ReactNode; hue?: number }) {
-  // hue 140 ≈ verde; mude para dar variações leves nos chips
-  return (
-    <div
-      aria-hidden
-      style={{
-        width: 40,
-        height: 40,
-        borderRadius: 12,
-        display: "grid",
-        placeItems: "center",
-        background: `linear-gradient(180deg, hsla(${hue},70%,42%,.22), hsla(${hue},70%,28%,.12))`,
-        border: `1px solid hsla(${hue},70%,52%,.35)`,
-        boxShadow: `0 0 0 2px hsla(${hue},70%,42%,.10) inset, 0 10px 30px hsla(${hue},70%,24%,.25)`,
-        fontSize: 20,
-        color: "var(--accent-strong)",
-      }}
-    >
-      {children}
-    </div>
-  );
-}
+import Link from "next/link";
 
 export default function SobrePage() {
   return (
-    <main
-      className="sobrePage"
-      style={{
-        minHeight: "100dvh",
-        position: "relative",
-        padding: 16,
-        display: "grid",
-        gap: 14,
-      }}
-    >
-      {/* Fundo chamativo (camadas) */}
-      <div
-        aria-hidden
-        style={{
-          position: "absolute",
-          inset: 0,
-          pointerEvents: "none",
-          background:
-            `radial-gradient(1200px 600px at 15% -10%, rgba(33,243,141,.10), transparent 55%),
-             radial-gradient(800px 600px at 100% 120%, rgba(33,243,141,.10), transparent 60%)`,
-          maskImage:
-            "linear-gradient(to bottom, rgba(0,0,0,.9), rgba(0,0,0,.7) 40%, rgba(0,0,0,.9))",
-          zIndex: 0,
-        }}
-      />
-
-      {/* Cabeçalho fino + Voltar */}
-      <header
-        className="panel"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr auto",
-          alignItems: "center",
-          gap: 10,
-          padding: 14,
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        {/* SOBRE – maior e com tom de verde */}
-        <div
-          style={{
-            color: "var(--accent-strong)",
-            textTransform: "uppercase",
-            letterSpacing: ".18em",
-            fontSize: 13,                 // ↑ levemente maior
-            fontWeight: 800,
-            textShadow: "0 0 10px rgba(33,243,141,.35)", // brilho sutil
-          }}
-        >
-          SOBRE
+    <main className="flex flex-col items-center justify-center min-h-screen bg-black text-white px-6 py-16">
+      <section className="max-w-5xl w-full text-center space-y-8">
+        <div className="flex justify-end">
+          <Link
+            href="/"
+            className="bg-[#18e273] text-black font-semibold px-4 py-2 rounded-full hover:opacity-90 transition"
+          >
+            Voltar ao início
+          </Link>
         </div>
 
-        <Link
-          href="/"
-          className="btn btn-primary"
-          style={{ padding: "10px 14px", borderRadius: 10, fontWeight: 800 }}
-        >
-          Voltar ao início
-        </Link>
-      </header>
-
-      {/* Hero mais forte */}
-      <section
-        className="panel"
-        style={{
-          position: "relative",
-          overflow: "hidden",
-          padding: "22px 16px",
-          textAlign: "center",
-          zIndex: 1,
-        }}
-      >
-        {/* brilho sutil atrás do título */}
-        <div
-          aria-hidden
-          style={{
-            position: "absolute",
-            insetInline: "15%",
-            top: -80,
-            height: 200,
-            borderRadius: 999,
-            background:
-              "radial-gradient(closest-side, rgba(33,243,141,.22), rgba(33,243,141,0))",
-            filter: "blur(24px)",
-          }}
-        />
-        <h1
-          style={{
-            margin: 0,
-            fontSize: 36,         // ↑ um pouco maior
-            fontWeight: 900,
-            letterSpacing: "-0.01em",
-            textTransform: "uppercase",
-          }}
-        >
-          Sobre o <span style={{ color: "var(--accent-strong)" }}>RadarCripto</span>
+        <h1 className="text-4xl font-bold text-[#18e273] uppercase tracking-wide mt-4">
+          SOBRE O RADARCRYPTO
         </h1>
-        <p
-          style={{
-            margin: "8px auto 0",
-            color: "var(--muted)",
-            fontSize: 16,
-            maxWidth: 860,
-            lineHeight: 1.45,
-          }}
-        >
-          <strong>RadarCripto</strong>: onde você erra, aprende e evolui.
-          Treine no <strong>Spot</strong> ou no <strong>Futuro</strong> com saldo virtual
-          e prepare-se para ganhar confiança no mercado real.
+        <p className="text-lg text-gray-300 leading-relaxed max-w-3xl mx-auto">
+          Onde o aprendizado encontra a prática — e o risco fica de fora.
         </p>
-      </section>
 
-      {/* Cartões mais vivos */}
-      <section
-        className="cards"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, minmax(260px, 1fr))",
-          gap: 14,
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        <article
-          className="panel"
-          style={{
-            display: "grid",
-            gap: 12,
-            padding: 14,
-            borderColor: "rgba(33,243,141,.28)",
-            boxShadow: "0 0 0 1px rgba(33,243,141,.10) inset",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <ChipIcon hue={140}>🧪</ChipIcon>
-            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 900 }}>Errar sem riscos</h2>
-          </div>
-          <p style={{ margin: 0, color: "var(--muted)", fontSize: 14, lineHeight: 1.5 }}>
-            Simulador com <strong>10.000 USDT</strong> virtuais para testar ideias sem
-            arriscar dinheiro real.
-          </p>
-        </article>
-
-        <article
-          className="panel"
-          style={{
-            display: "grid",
-            gap: 12,
-            padding: 14,
-            borderColor: "rgba(33,243,141,.28)",
-            boxShadow: "0 0 0 1px rgba(33,243,141,.10) inset",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <ChipIcon hue={150}>📈</ChipIcon>
-            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 900 }}>Aprender de verdade</h2>
-          </div>
-          <p style={{ margin: 0, color: "var(--muted)", fontSize: 14, lineHeight: 1.5 }}>
-            Pratique <strong>Spot</strong> e <strong>Futuro</strong> com noções de risco
-            aplicadas ao dia a dia e métricas claras.
-          </p>
-        </article>
-
-        <article
-          className="panel"
-          style={{
-            display: "grid",
-            gap: 12,
-            padding: 14,
-            borderColor: "rgba(33,243,141,.28)",
-            boxShadow: "0 0 0 1px rgba(33,243,141,.10) inset",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <ChipIcon hue={160}>🚀</ChipIcon>
-            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 900 }}>Evoluir sempre</h2>
-          </div>
-          <p style={{ margin: 0, color: "var(--muted)", fontSize: 14, lineHeight: 1.5 }}>
-            Ganhe <strong>confiança</strong> antes de operar no real. Ajuste estratégias
-            e acompanhe sua evolução no histórico.
-          </p>
-        </article>
-      </section>
-
-      {/* Fechamento curto */}
-      <section className="panel" style={{ padding: 14, textAlign: "center", zIndex: 1 }}>
-        <p style={{ margin: 0, fontSize: 14 }}>
-          O RadarCripto é mais que um simulador — é a sua{" "}
-          <strong>escola de trading</strong>.
+        <p className="text-gray-400 max-w-3xl mx-auto leading-relaxed">
+          O RadarCrypto nasceu com um propósito simples:{" "}
+          <strong className="text-white">
+            ajudar pessoas a aprender trading sem perder dinheiro real.
+          </strong>{" "}
+          Aqui, você erra, aprende, ajusta e evolui — tudo dentro de um ambiente
+          virtual seguro, moderno e acessível.
         </p>
+
+        {/* Cards principais */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+          <div className="border border-[#18e273] rounded-2xl p-6 text-left bg-black/40 hover:bg-black/60 transition">
+            <h3 className="text-xl font-semibold text-[#18e273] mb-3">
+              Erre sem riscos
+            </h3>
+            <p className="text-gray-300">
+              Treine estratégias no simulador com{" "}
+              <strong className="text-white">10.000 USDT virtuais</strong> e
+              descubra como o mercado se comporta —{" "}
+              <strong className="text-white">sem arriscar um centavo</strong>.
+            </p>
+          </div>
+
+          <div className="border border-[#18e273] rounded-2xl p-6 text-left bg-black/40 hover:bg-black/60 transition">
+            <h3 className="text-xl font-semibold text-[#18e273] mb-3">
+              Aprenda de verdade
+            </h3>
+            <p className="text-gray-300">
+              Experimente operações no{" "}
+              <strong className="text-white">Spot</strong> ou{" "}
+              <strong className="text-white">Futuro</strong>, pratique leitura
+              de gráficos e desenvolva controle emocional — o RadarCrypto é{" "}
+              <strong className="text-white">sua escola de prática real</strong>.
+            </p>
+          </div>
+
+          <div className="border border-[#18e273] rounded-2xl p-6 text-left bg-black/40 hover:bg-black/60 transition">
+            <h3 className="text-xl font-semibold text-[#18e273] mb-3">
+              Evolua sempre
+            </h3>
+            <p className="text-gray-300">
+              Revise seus resultados, teste novas ideias e acompanhe sua
+              performance com clareza. Quanto mais você pratica, mais se prepara
+              para o mercado real.
+            </p>
+          </div>
+        </div>
+
+        {/* Novo bloco - Nosso propósito */}
+        <div className="max-w-3xl mx-auto text-center mt-14 space-y-5">
+          <h2 className="text-2xl font-semibold text-[#18e273]">
+            Nosso propósito
+          </h2>
+          <p className="text-gray-300 leading-relaxed">
+            Acreditamos que todo trader merece{" "}
+            <strong className="text-white">
+              aprender com liberdade e consciência
+            </strong>
+            , e não com perdas. Por isso, criamos uma ferramenta que une{" "}
+            <strong className="text-white">
+              simulação, estratégia e evolução contínua
+            </strong>{" "}
+            — um ambiente para treinar como profissional, sem o peso do risco.
+          </p>
+
+          <p className="text-[#18e273] font-medium text-lg mt-8">
+            +2.000 traders já começaram por aqui.
+          </p>
+
+          <Link
+            href="/simulador"
+            className="inline-block bg-[#18e273] text-black font-semibold px-6 py-3 rounded-full mt-4 hover:opacity-90 transition"
+          >
+            Começar no simulador
+          </Link>
+        </div>
       </section>
     </main>
   );
