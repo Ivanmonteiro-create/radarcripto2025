@@ -1,327 +1,343 @@
+// app/planos/page.tsx
 "use client";
 
 import React from "react";
 
+type Feature = { text: string; soon?: boolean };
 type Plan = {
-  slug: "start" | "trader" | "pro" | "elite";
-  ribbon: string;
+  id: "start" | "trader" | "pro" | "elite";
   title: string;
-  price: string;
-  cta: string;
-  features: string[];
+  price: string; // ex: "€ 0,00/mês"
+  ribbon?: "RECOMENDADO" | "PRONTO PARA COMEÇAR" | "TURBO ACELERADO" | "TUDO DESBLOQUEADO";
+  features: Feature[];
+  cta: { label: string; href: string; aria: string };
+  mutedRibbon?: boolean; // deixa ribbon levemente opaco p/ não concorrer com “RECOMENDADO”
 };
 
 const PLANS: Plan[] = [
   {
-    slug: "start",
-    ribbon: "PRONTO PARA COMEÇAR",
+    id: "start",
     title: "Start",
     price: "€ 0,00/mês",
-    cta: "Começar de graça",
+    ribbon: "PRONTO PARA COMEÇAR",
+    mutedRibbon: true,
     features: [
-      "Simulador spot básico",
-      "Capital virtual de 10.000 USDT",
-      "P&L (resultado) e histórico básico",
-      "Exportar CSV",
-      "8 pares principais habilitados",
-      "Gráfico de evolução mensal (equity) · em breve",
+      { text: "Simulador spot básico" },
+      { text: "Capital virtual de 10.000 USDT" },
+      { text: "PnL (resultado) e histórico básico" },
+      { text: "Exportar CSV" },
+      { text: "8 pares principais habilitados" },
+      { text: "Gráfico de evolução mensal (equity)", soon: true },
     ],
+    cta: { label: "Começar de graça", href: "/simulador", aria: "Assinar plano Start — gratuito" },
   },
   {
-    slug: "trader",
-    ribbon: "RECOMENDADO",
+    id: "trader",
     title: "Trader",
     price: "€ 9,99/mês",
-    cta: "Quero ser Trader",
+    ribbon: "RECOMENDADO",
     features: [
-      "Tudo do plano Start",
-      "Robôs automáticos (EMA Cross SIM)",
-      "Controle de risco manual (TP/SL)",
-      "Histórico expandido (visual e CSV)",
-      "Troca rápida entre pares",
-      "Painel de performance resumida · em breve",
+      { text: "Tudo do plano Start" },
+      { text: "Robôs automáticos (EMA Cross SIM)" },
+      { text: "Controle de risco manual (TP/SL)" },
+      { text: "Histórico expandido (visual e CSV)" },
+      { text: "Troca rápida entre pares" },
+      { text: "Painel de performance resumida", soon: true },
     ],
+    cta: { label: "Quero ser Trader", href: "/simulador", aria: "Assinar plano Trader — 9,99 €/mês" },
   },
   {
-    slug: "pro",
-    ribbon: "TURBO ACELERADO",
+    id: "pro",
     title: "Pro",
     price: "€ 19,99/mês",
-    cta: "Subir para Pro",
+    ribbon: "TURBO ACELERADO",
+    mutedRibbon: true,
     features: [
-      "Tudo do plano Trader",
-      "Gerenciamento de risco automático",
-      "Relatórios filtráveis/detalhados",
-      "Estatísticas avançadas (win rate, DD, etc.)",
-      "Exportar relatórios detalhados",
-      "Notificações de performance · em breve",
+      { text: "Tudo do plano Trader" },
+      { text: "Gerenciamento de risco automático" },
+      { text: "Relatórios filtráveis/detalhados" },
+      { text: "Estatísticas avançadas (win rate, DD, etc.)" },
+      { text: "Exportar relatórios detalhados" },
+      { text: "Notificações de performance", soon: true },
     ],
+    cta: { label: "Subir para Pro", href: "/simulador", aria: "Assinar plano Pro — 19,99 €/mês" },
   },
   {
-    slug: "elite",
-    ribbon: "TUDO DESEBLOQUEADO",
+    id: "elite",
     title: "Elite",
     price: "€ 29,99/mês",
-    cta: "Virar Elite",
+    ribbon: "TUDO DESBLOQUEADO",
+    mutedRibbon: true,
     features: [
-      "Tudo do plano Pro",
-      "Backtesting de estratégias",
-      "Comparação de estratégias",
-      "Histórico mensal/anual salvo (equity curves)",
-      "Acesso antecipado a novidades (beta)",
-      "Suporte prioritário + comunidade privada",
+      { text: "Tudo do plano Pro" },
+      { text: "Backtesting de estratégias" },
+      { text: "Comparação de estratégias" },
+      { text: "Histórico mensal/anual salvo (equity curves)" },
+      { text: "Acesso antecipado a novidades (beta)" },
+      { text: "Suporte prioritário + comunidade privada" },
     ],
+    cta: { label: "Virar Elite", href: "/simulador", aria: "Assinar plano Elite — 29,99 €/mês" },
   },
 ];
 
 export default function PlanosPage() {
   return (
     <main className="page-planos">
+      {/* Botão verde no topo direito */}
+      <a href="/" className="rc-btn rc-btn--green backTop" aria-label="Voltar ao início">
+        Voltar ao início
+      </a>
+
+      <section className="hero">
+        <h1>
+          Planos do <span>RadarCrypto</span>
+        </h1>
+        <p className="sub">
+          Escolha seu caminho. Comece no SIM (simulador) sem riscos e evolua para gráficos, quando
+          quiser, com robôs e ferramentas profissionais.
+        </p>
+
+        {/* Provas sociais */}
+        <div className="proof">
+          <div className="proofCard">
+            <strong>+2.000 traders</strong> já testaram
+          </div>
+          <div className="proofCard">
+            <strong>100% local</strong> e seguro
+          </div>
+          <div className="proofCard">
+            Ferramentas de <strong>quem vive o mercado</strong>
+          </div>
+        </div>
+      </section>
+
+      {/* Grid dos quatro planos */}
+      <section className="plansGrid" aria-label="Planos disponíveis">
+        {PLANS.map((p) => (
+          <article key={p.id} className="planCard" aria-labelledby={`${p.id}-title`}>
+            {p.ribbon && (
+              <div className={`ribbon ${p.mutedRibbon ? "ribbon--muted" : ""}`}>{p.ribbon}</div>
+            )}
+
+            <header className="planHead">
+              <h3 id={`${p.id}-title`}>{p.title}</h3>
+              <div className="price" aria-label={`Preço do plano ${p.title}`}>{p.price}</div>
+            </header>
+
+            <ul className="featList">
+              {p.features.map((f, idx) => (
+                <li key={idx} className="feat">
+                  <span className="tick" aria-hidden>✔</span>
+                  <span className="txt">
+                    {f.text}
+                    {f.soon && <em className="soon"> · em breve</em>}
+                  </span>
+                </li>
+              ))}
+            </ul>
+
+            <footer className="planCta">
+              <a
+                href={p.cta.href}
+                className="rc-btn rc-btn--green ctaBtn"
+                aria-label={p.cta.aria}
+              >
+                {p.cta.label}
+              </a>
+            </footer>
+          </article>
+        ))}
+      </section>
+
+      {/* Estilos locais + micro ajustes */}
+      <style jsx>{`
+        .page-planos {
+          --maxw: min(1200px, 92vw);
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 28px 0 72px;
+          gap: 16px;
+        }
+
+        .backTop {
+          position: absolute;
+          top: 16px;
+          right: 18px;
+          z-index: 10;
+        }
+
+        .hero {
+          width: var(--maxw);
+          text-align: center;
+          margin-top: 18px;
+        }
+        .hero h1 {
+          font-size: clamp(26px, 3.4vw, 40px); /* ligeiramente menor p/ ganhar espaço */
+          line-height: 1.08;
+          margin: 0 0 6px 0;
+          font-weight: 900;
+          letter-spacing: 0.2px;
+        }
+        .hero h1 span {
+          color: #18e273;
+          text-shadow: 0 0 10px rgba(24, 226, 115, 0.75);
+        }
+        .hero .sub {
+          margin: 0 auto 14px;
+          max-width: 980px;
+          font-size: clamp(14px, 1.65vw, 17px);
+          color: rgba(223, 255, 238, 0.95); /* + contraste */
+          text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+        }
+
+        .proof {
+          width: var(--maxw);
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 12px;
+          margin: 8px auto 14px; /* levemente mais perto do título */
+        }
+        .proofCard {
+          border: 1px solid rgba(24, 226, 115, 0.45);
+          background: rgba(24, 226, 115, 0.08);
+          border-radius: 12px;
+          padding: 10px 12px;
+          font-weight: 600;
+          text-align: center;
+          box-shadow: inset 0 0 0 1px rgba(24, 226, 115, 0.15);
+        }
+
+        .plansGrid {
+          width: var(--maxw);
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 16px;
+          margin-top: 6px;  /* aproximado da faixa de provas sociais */
+        }
+
+        .planCard {
+          position: relative;
+          border-radius: 16px;
+          padding: 14px 14px 12px;
+          background: linear-gradient(180deg, rgba(8, 24, 16, 0.55) 0%, rgba(6, 18, 12, 0.45) 100%);
+          box-shadow:
+            inset 0 0 0 1px rgba(24, 226, 115, 0.18),
+            0 12px 40px rgba(0, 0, 0, 0.35);
+        }
+
+        .ribbon {
+          position: absolute;
+          top: -12px;
+          right: 12px;
+          padding: 6px 10px;
+          border-radius: 999px;
+          background: #18e273;
+          color: #052515;
+          font-size: 11px;
+          font-weight: 900;
+          letter-spacing: 0.3px;
+          box-shadow: 0 0 14px rgba(24, 226, 115, 0.9);
+        }
+        .ribbon--muted { opacity: 0.85; } /* Start/Pro/Elite ficam um pouco mais sutis */
+
+        .planHead {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 8px;
+          margin-bottom: 6px;
+        }
+        .planHead h3 {
+          margin: 0;
+          font-size: clamp(16px, 1.9vw, 18px);
+          font-weight: 900;
+        }
+        .price {
+          font-weight: 900;
+          font-size: clamp(14px, 1.7vw, 16px);
+          color: #18e273;
+          text-shadow: 0 0 8px rgba(24, 226, 115, 0.8);
+          white-space: nowrap;
+        }
+
+        .featList {
+          list-style: none;
+          padding: 0;
+          margin: 0 0 10px 0;
+          display: grid;
+          gap: 8px;
+        }
+        .feat {
+          display: grid;
+          grid-template-columns: 18px 1fr;
+          align-items: start;
+          gap: 8px;
+          padding: 8px 10px;
+          border-radius: 10px;
+          background: rgba(24, 226, 115, 0.06);
+          border: 1px solid rgba(24, 226, 115, 0.22);
+        }
+        .tick { opacity: 0.9; }
+        .txt { font-size: 13.5px; line-height: 1.25; }
+        .soon { font-style: italic; font-size: 12.5px; opacity: 0.85; } /* 1px menor e em itálico */
+
+        .planCta {
+          display: flex;
+          justify-content: center;
+          margin-top: 6px;
+        }
+        .ctaBtn {
+          min-width: 160px;
+          transition: transform 120ms ease, filter 150ms ease, box-shadow 150ms ease;
+        }
+        .ctaBtn:hover { transform: translateY(-1px); filter: brightness(1.12); }
+        .ctaBtn:active { transform: scale(0.98); } /* “press” suave */
+
+        /* Responsivo */
+        @media (max-width: 1024px) {
+          .plansGrid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 640px) {
+          .proof { grid-template-columns: 1fr; }
+          .plansGrid { grid-template-columns: 1fr; }
+          .backTop { top: 12px; right: 12px; }
+        }
+        @media (max-width: 360px) {
+          .proofCard { font-size: 13px; }
+          .hero .sub { font-size: 14px; }
+        }
+      `}</style>
+
+      {/* Botão base (verde fluorescente) — caso o projeto não tenha essas utilitárias globalmente */}
       <style jsx global>{`
         .rc-btn {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          gap: 8px;
-          height: 40px;
+          height: 38px;
           padding: 0 18px;
           border-radius: 999px;
-          font-weight: 800;
+          font-weight: 900;
           text-decoration: none;
           line-height: 1;
           white-space: nowrap;
           border: none;
           cursor: pointer;
-          transition: transform 0.15s ease, filter 0.15s ease,
-            box-shadow 0.15s ease;
+          transition: all 0.18s ease;
         }
         .rc-btn--green {
           background: #18e273 !important;
           color: #052515 !important;
-          box-shadow: 0 0 18px rgba(24, 226, 115, 0.6),
-            inset 0 0 10px rgba(24, 226, 115, 0.35);
+          box-shadow: 0 0 18px rgba(24, 226, 115, 0.85),
+                      inset 0 0 10px rgba(24, 226, 115, 0.5);
         }
         .rc-btn--green:hover {
-          transform: translateY(-2px);
           filter: brightness(1.2);
-          box-shadow: 0 0 26px rgba(24, 226, 115, 0.9),
-            inset 0 0 14px rgba(24, 226, 115, 0.5);
-        }
-      `}</style>
-
-      <header className="hero">
-        <h1>
-          Planos do <span>RadarCrypto</span>
-        </h1>
-        <p className="sub">
-          Escolha seu caminho. Comece no SIM (simulador) sem riscos e evolua
-          para gráficos, quando quiser, com robôs e ferramentas profissionais.
-        </p>
-
-        <div className="proofs" role="list">
-          <span className="proof">+2.000 traders já testaram</span>
-          <span className="proof">100% local e seguro</span>
-          <span className="proof">Ferramentas de quem vive o mercado</span>
-        </div>
-
-        <div className="backTopRight">
-          <a href="/" className="rc-btn rc-btn--green">Voltar ao início</a>
-        </div>
-      </header>
-
-      <section className="plansGrid">
-        {PLANS.map((p) => (
-          <article key={p.slug} className={`plan plan--${p.slug}`}>
-            <div className="plan-head">
-              <span className="ribbon">{p.ribbon}</span>
-              <h3>{p.title}</h3>
-              <div className="price">{p.price}</div>
-            </div>
-
-            <ul className="featList">
-              {p.features.map((f, i) => (
-                <li key={i}>
-                  <span className="tick">✓</span>
-                  <span>{f}</span>
-                </li>
-              ))}
-            </ul>
-
-            <div className="plan-cta">
-              <a
-                href={p.slug === "start" ? "/simulador" : "/login"}
-                className="rc-btn rc-btn--green"
-              >
-                {p.cta}
-              </a>
-            </div>
-          </article>
-        ))}
-      </section>
-
-      <aside className="ctaDock">
-        <a href="/simulador" className="rc-btn rc-btn--green">Começar de graça</a>
-        <a href="/login?plan=trader" className="rc-btn rc-btn--green">Quero ser Trader</a>
-        <a href="/login?plan=pro" className="rc-btn rc-btn--green">Subir para Pro</a>
-        <a href="/login?plan=elite" className="rc-btn rc-btn--green">Virar Elite</a>
-      </aside>
-
-      <style jsx>{`
-        .page-planos {
-          --w: min(1240px, 92vw);
-          --glow: rgba(24, 226, 115, 0.18);
-          --card-bg1: rgba(8, 24, 16, 0.55);
-          --card-bg2: rgba(6, 18, 12, 0.45);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          padding: 10px 0 68px;
-        }
-
-        .hero {
-          position: relative;
-          width: var(--w);
-          text-align: center;
-        }
-        .hero h1 {
-          font-size: clamp(25px, 2.8vw, 34px);
-          line-height: 1.03;
-          margin: 0 0 6px;
-          font-weight: 900;
-        }
-        .hero h1 span {
-          color: #18e273;
-          text-shadow: 0 0 8px rgba(24, 226, 115, 0.8);
-        }
-        .hero .sub {
-          margin: 0 auto 6px;
-          max-width: 880px;
-          font-size: clamp(12px, 1.1vw, 15px);
-          opacity: 0.9;
-        }
-
-        /* SUBIR PROVAS UM POUCO */
-        .proofs {
-          display: flex;
-          gap: 8px;
-          justify-content: center;
-          margin: 0 0 4px; /* ↓ sobe uns 8px */
-        }
-        .proof {
-          border: 1px solid rgba(24, 226, 115, 0.45);
-          background: rgba(24, 226, 115, 0.12);
-          color: #d8ffe9;
-          font-weight: 700;
-          padding: 4px 9px;
-          border-radius: 999px;
-          font-size: 11.5px;
-        }
-
-        .backTopRight {
-          position: absolute;
-          top: 0;
-          right: 0;
-        }
-
-        /* SUBIR CARDS ~1cm */
-        .plansGrid {
-          width: var(--w);
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 12px;
-          margin-top: -6px; /* ↑ subiu levemente */
-        }
-
-        .plan {
-          display: grid;
-          grid-template-rows: auto 1fr auto;
-          border-radius: 16px;
-          padding: 12px;
-          background: linear-gradient(180deg, var(--card-bg1), var(--card-bg2));
-          box-shadow: inset 0 0 0 1px var(--glow), 0 16px 48px rgba(0, 0, 0, 0.35);
-          min-height: 398px;
-        }
-
-        .plan-head {
-          display: grid;
-          gap: 6px;
-          align-items: start;
-        }
-        .ribbon {
-          padding: 3px 9px;
-          border-radius: 999px;
-          background: rgba(24, 226, 115, 0.18);
-          border: 1px solid rgba(24, 226, 115, 0.45);
-          color: #bfffd6;
-          font-weight: 800;
-          font-size: 10px;
-          text-transform: uppercase;
-        }
-        .plan-head h3 {
-          margin: 0;
-          font-size: 16.5px;
-          font-weight: 900;
-        }
-        .price {
-          font-size: 16.5px;
-          color: #18e273;
-          font-weight: 900;
-        }
-
-        .featList {
-          list-style: none;
-          margin: 6px 0 8px;
-          padding: 0;
-          display: flex;
-          flex-direction: column;
-          gap: 4.5px;
-        }
-        .featList li {
-          display: grid;
-          grid-template-columns: 18px 1fr;
-          align-items: center;
-          min-height: 26px;
-          padding: 5px 8px;
-          border-radius: 10px;
-          border: 1px solid rgba(24, 226, 115, 0.16);
-          background: rgba(24, 226, 115, 0.06);
-          font-size: 13px;
-        }
-        .featList .tick {
-          color: #18e273;
-          font-weight: 900;
-        }
-
-        .plan-cta {
-          display: flex;
-          justify-content: center;
-          margin-top: 4px;
-        }
-
-        .ctaDock {
-          position: sticky;
-          bottom: 10px;
-          display: none;
-          z-index: 20;
-          gap: 8px;
-          padding: 8px;
-          background: rgba(0, 0, 0, 0.35);
-          backdrop-filter: blur(6px);
-          border-radius: 14px;
-          width: calc(100% - 24px);
-          margin: 0 auto;
-          justify-content: space-between;
-        }
-
-        @media (max-width: 1200px) {
-          .plansGrid {
-            grid-template-columns: repeat(2, 1fr);
-            margin-top: 0;
-          }
-        }
-        @media (max-width: 960px) {
-          .plansGrid { grid-template-columns: 1fr; margin-top: 0; }
-          .ctaDock { display: flex; }
+          transform: translateY(-1px);
+          box-shadow: 0 0 26px rgba(24, 226, 115, 1),
+                      inset 0 0 14px rgba(24, 226, 115, 0.7);
         }
       `}</style>
     </main>
