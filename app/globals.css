@@ -1803,3 +1803,41 @@ a.rc-btn.rc-btn--green[aria-label="Voltar ao início"]:not(.rc-back-right) {
   row-gap: 3px !important;
   margin-bottom: 10px !important;
 }
+/* === PLANOS – redução fina para caber tudo no viewport (zoom 100%) === */
+.page-planos .plans-grid,
+.page-planos .row4 {
+  row-gap: 10px !important;           /* um pouco menos de respiro vertical */
+}
+
+/* Card um pouco mais compacto */
+.page-planos .plan-card,
+.page-planos .card {
+  padding-top: 8px !important;        /* -2px */
+  padding-bottom: 8px !important;     /* -2px */
+}
+
+/* Título, selo e preço com micro-redução */
+.page-planos .card-head { margin-bottom: 8px !important; }  /* -2px */
+.page-planos .price { font-size: 18px !important; }         /* -1px */
+.page-planos .badge { transform: scale(0.96); }             /* -4% visual */
+
+/* Lista de features mais baixinha */
+.page-planos .features li,
+.page-planos .card ul li {
+  padding: 5px 10px !important;       /* era ~7–8px; -2/3px por item */
+  font-size: 0.76rem !important;      /* -0.02–0.04rem */
+  line-height: 1.06 !important;       /* leve compactação */
+  margin: 0 !important;
+}
+
+/* Botão final com folga extra no pé do card (pra contorno aparecer) */
+.page-planos .cta {
+  margin-top: 10px !important;        /* espaço acima */
+  margin-bottom: 8px !important;      /* +2px de folga abaixo */
+}
+
+/* Em telas menores que 1366px, aparar só mais um tiquinho */
+@media (max-width: 1366px) {
+  .page-planos .features li { padding-top: 4px !important; padding-bottom: 4px !important; }
+  .page-planos .price { font-size: 17px !important; }
+}
