@@ -1645,3 +1645,65 @@ a.rc-btn.rc-btn--green[aria-label="Voltar ao início"]:not(.rc-back-right) {
     line-height: 1.06 !important;
   }
 }
+/* ===== COMPACTAÇÃO ULTRA PRECISA (versão final milimétrica) ===== */
+
+.page-planos .plan-card,
+.page-planos .card {
+  padding: 2px 8px !important;       /* reduzindo levemente */
+  margin-bottom: 2px !important;     /* aproxima cards */
+}
+
+/* Título */
+.page-planos .plan-card h3,
+.page-planos .card h3,
+.page-planos .plan-title {
+  font-size: clamp(14px, 1.1vw, 16px) !important;
+  line-height: 1.05 !important;
+  margin-bottom: 2px !important;
+}
+
+/* Itens da lista */
+.page-planos .plan-card ul li,
+.page-planos .card ul li {
+  padding: 0 !important;
+  line-height: 1.05 !important;
+  font-size: 0.78rem !important;
+}
+.page-planos .plan-card ul li + li,
+.page-planos .card ul li + li {
+  margin-top: 1px !important;
+}
+
+/* Preço */
+.page-planos .plan-card .price,
+.page-planos .card .price {
+  font-size: clamp(12px, 1vw, 14px) !important;
+  margin-bottom: 2px !important;
+}
+
+/* Botão CTA — leve respiro para o último card */
+.page-planos .plan-card .cta,
+.page-planos .card .cta {
+  margin-top: 5px !important;
+  margin-bottom: 3px !important;    /* garante contorno completo visível */
+}
+
+/* Grade geral */
+.page-planos .plans-grid,
+.page-planos .row4 {
+  row-gap: 4px !important;
+  margin-bottom: 8px !important;
+}
+
+/* Desktop grande */
+@media (min-width: 1200px) {
+  .page-planos .plan-card,
+  .page-planos .card {
+    padding: 1px 8px !important;
+  }
+  .page-planos .plan-card ul li,
+  .page-planos .card ul li {
+    font-size: 0.77rem !important;
+    line-height: 1.04 !important;
+  }
+}
