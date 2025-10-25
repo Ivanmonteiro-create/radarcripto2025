@@ -1,311 +1,398 @@
-// app/fale/page.tsx
+// app/fale-com-a-gente/page.tsx
 "use client";
 
 import React, { useState } from "react";
 
-const WHATSAPP_LINK = "https://wa.me/5511999999999"; // <- TROCAR
-const CONTACT_EMAIL = "contato@radarcrypto.space";   // <- TROCAR
+type Topic = "duvida" | "conta" | "outros";
 
-type Topic =
-  | "planos"
-  | "pagamentos"
-  | "bugs"
-  | "sugestoes"
-  | "parcerias"
-  | "outros";
-
-export default function FalePage() {
-  const [form, setForm] = useState({
-    nome: "",
-    email: "",
-    assunto: "outros" as Topic,
-    mensagem: "",
-    aceitaContato: true,
-  });
-  const [sending, setSending] = useState(false);
-  const [ok, setOk] = useState<string | null>(null);
-  const [err, setErr] = useState<string | null>(null);
-
-  function update<K extends keyof typeof form>(k: K, v: (typeof form)[K]) {
-    setForm((f) => ({ ...f, [k]: v }));
-  }
-
-  function validateEmail(v: string) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-  }
+export default function FaleComAGentePage() {
+  // --- estado do formulário ---
+  const [topic, setTopic] = useState<Topic>("duvida");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [sent, setSent] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setOk(null);
-    setErr(null);
+    if (submitting) return;
+    setSubmitting(true);
 
-    if (!form.nome.trim()) return setErr("Informe seu nome.");
-    if (!validateEmail(form.email)) return setErr("E-mail inválido.");
-    if (!form.mensagem.trim() || form.mensagem.trim().length < 8)
-      return setErr("Escreva uma mensagem (mín. 8 caracteres).");
+    // Simulação de envio local (substitua aqui pela sua API quando quiser)
+    await new Promise((r) => setTimeout(r, 900));
 
-    setSending(true);
-    try {
-      // Envio SIMULADO (grave aqui no futuro: /api/contato, Resend etc.)
-      await new Promise((r) => setTimeout(r, 900));
-      setOk("Mensagem enviada! Responderemos em breve.");
-      setForm({
-        nome: "",
-        email: "",
-        assunto: "outros",
-        mensagem: "",
-        aceitaContato: true,
-      });
-    } catch {
-      setErr("Não foi possível enviar agora. Tente novamente.");
-    } finally {
-      setSending(false);
-    }
+    setSubmitting(false);
+    setSent(true);
+    // reseta a animação de sucesso após 2.2s
+    setTimeout(() => setSent(false), 2200);
   }
 
   return (
-    <main className="page-fale">
-      {/* Botão superior direito */}
-      <div className="top-button">
-        <a href="/" className="rc-btn rc-btn--green">Voltar ao início</a>
-      </div>
+    <main className="contact-page">
+      {/* Botão fixo no topo-direito */}
+      <a href="/" className="rc-btn rc-btn--green back-fixed" aria-label="Voltar ao início">
+        Voltar ao início
+      </a>
 
-      {/* Hero */}
+      {/* Cabeçalho */}
       <section className="hero">
-        <h1>Fale com a <span>gente</span></h1>
-        <p className="sub">
-          Dúvidas, sugestões ou parcerias? Escolha um canal abaixo ou envie sua
-          mensagem pelo formulário. Respondemos rápido.
+        <h1>Fale com a gente</h1>
+        <p className="lead">
+          Dúvidas, sugestões ou parceria? Escreva pra gente pelo formulário. Respondemos, rápido.
         </p>
-
-        {/* Atalhos rápidos */}
-        <div className="quick">
-          <a className="rc-chip rc-chip--wa" href={WHATSAPP_LINK} target="_blank" rel="noreferrer">
-            WhatsApp agora
-          </a>
-          <a className="rc-chip rc-chip--mail" href={`mailto:${CONTACT_EMAIL}`}>
-            Enviar e-mail
-          </a>
-        </div>
       </section>
 
-      {/* Grid principal */}
+      {/* Grid principal: Form (maior) + FAQ (menor) */}
       <section className="grid">
-        {/* Formulário */}
-        <form className="card form" onSubmit={onSubmit} noValidate>
-          <h2>Envie uma mensagem</h2>
+        {/* Coluna: Formulário */}
+        <form className={`card form ${sent ? "form--sent" : ""}`} onSubmit={onSubmit}>
+          <div className="card-title">Envie uma mensagem</div>
 
-          <label>
-            <span>Seu nome</span>
-            <input
-              type="text"
-              value={form.nome}
-              onChange={(e) => update("nome", e.target.value)}
-              placeholder="Como devemos te chamar?"
-              required
-            />
-          </label>
+          <div className="fieldrow">
+            <label className="label">Assunto</label>
+            <div className="segmented">
+              <button
+                type="button"
+                className={`seg ${topic === "duvida" ? "is-active" : ""}`}
+                onClick={() => setTopic("duvida")}
+              >
+                Dúvida
+              </button>
+              <button
+                type="button"
+                className={`seg ${topic === "conta" ? "is-active" : ""}`}
+                onClick={() => setTopic("conta")}
+              >
+                Conta
+              </button>
+              <button
+                type="button"
+                className={`seg ${topic === "outros" ? "is-active" : ""}`}
+                onClick={() => setTopic("outros")}
+              >
+                Outros
+              </button>
+            </div>
+          </div>
 
-          <label>
-            <span>E-mail</span>
-            <input
-              type="email"
-              value={form.email}
-              onChange={(e) => update("email", e.target.value)}
-              placeholder="voce@email.com"
-              required
-            />
-          </label>
+          <div className="fieldrow two">
+            <div className="field">
+              <label className="label">Seu nome</label>
+              <input
+                className="input"
+                type="text"
+                placeholder="Como devemos te chamar?"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
+            <div className="field">
+              <label className="label">E-mail</label>
+              <input
+                className="input"
+                type="email"
+                placeholder="voce@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+          </div>
 
-          <label>
-            <span>Assunto</span>
-            <select
-              value={form.assunto}
-              onChange={(e) => update("assunto", e.target.value as Topic)}
-            >
-              <option value="planos">Planos e recursos</option>
-              <option value="pagamentos">Pagamentos e faturas</option>
-              <option value="bugs">Relatar bug/erro</option>
-              <option value="sugestoes">Sugestões</option>
-              <option value="parcerias">Parcerias</option>
-              <option value="outros">Outros</option>
-            </select>
-          </label>
-
-          <label className="full">
-            <span>Mensagem</span>
+          <div className="fieldrow">
+            <label className="label">Mensagem</label>
             <textarea
+              className="textarea"
               rows={6}
-              value={form.mensagem}
-              onChange={(e) => update("mensagem", e.target.value)}
-              placeholder="Conte com detalhes como podemos ajudar…"
+              placeholder="Conte em detalhes como podemos ajudar…"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
               required
             />
-          </label>
-
-          <label className="check">
-            <input
-              type="checkbox"
-              checked={form.aceitaContato}
-              onChange={(e) => update("aceitaContato", e.target.checked)}
-            />
-            <span>Você autoriza nosso contato por e-mail/WhatsApp?</span>
-          </label>
-
-          {err && <div className="alert alert--err">{err}</div>}
-          {ok && <div className="alert alert--ok">{ok}</div>}
+          </div>
 
           <div className="actions">
-            <button type="submit" className="rc-btn rc-btn--green" disabled={sending}>
-              {sending ? "Enviando…" : "Enviar mensagem"}
+            <button className="rc-btn rc-btn--green" disabled={submitting}>
+              {submitting ? "Enviando…" : "Enviar mensagem"}
             </button>
-            <a className="rc-btn rc-btn--ghost" href={`mailto:${CONTACT_EMAIL}`}>
-              Prefero e-mail
-            </a>
+
+            {/* animação de sucesso */}
+            <div className="sent-wrap" aria-live="polite" aria-atomic="true">
+              {sent && (
+                <div className="sent-badge">
+                  <span className="dot" /> Enviado com sucesso!
+                </div>
+              )}
+            </div>
           </div>
         </form>
 
-        {/* FAQ / Ajuda rápida */}
-        <div className="card faq">
-          <h2>Dúvidas rápidas</h2>
-          <details>
-            <summary>O simulador usa dados reais?</summary>
-            <p>Sim, o modo SIM utiliza dados em tempo real do mercado. Suas operações são locais (sem risco real).</p>
-          </details>
-          <details>
-            <summary>Posso exportar meu histórico?</summary>
-            <p>Sim. No simulador você encontra o botão <em>Exportar CSV</em> para baixar suas operações.</p>
-          </details>
-          <details>
-            <summary>Qual plano preciso para usar robôs?</summary>
-            <p>Os robôs (EMA Cross SIM) estão no plano Trader em diante. Você pode testar no SIM antes de assinar.</p>
-          </details>
-          <details>
-            <summary>Como reporto um bug?</summary>
-            <p>Use o assunto “Relatar bug/erro” no formulário ao lado e descreva os passos para reproduzir.</p>
-          </details>
-          <details>
-            <summary>Vocês têm WhatsApp?</summary>
-            <p>Sim! Clique em <a href={WHATSAPP_LINK} target="_blank" rel="noreferrer">WhatsApp agora</a> e nos chame.</p>
+        {/* Coluna: FAQ / Atalhos */}
+        <aside className="card faq">
+          <div className="card-title">Dúvidas rápidas</div>
+
+          <details className="qa">
+            <summary>O simulador usa dados ao vivo?</summary>
+            <p>Sim. No modo SIM, os preços são atualizados em tempo real no seu navegador.</p>
           </details>
 
-          <div className="side-ctas">
-            <a className="rc-chip rc-chip--wa" href={WHATSAPP_LINK} target="_blank" rel="noreferrer">Chamar no Whats</a>
-            <a className="rc-chip rc-chip--mail" href={`mailto:${CONTACT_EMAIL}`}>Enviar e-mail</a>
-          </div>
-        </div>
+          <details className="qa">
+            <summary>Posso exportar meu histórico?</summary>
+            <p>Sim. Use o botão <em>Exportar CSV</em> na página do simulador para baixar as operações.</p>
+          </details>
+
+          <details className="qa">
+            <summary>Vocês têm WhatsApp?</summary>
+            <p>Preferimos contato por e-mail, mas você pode iniciar por aqui e respondemos rápido.</p>
+          </details>
+
+          <details className="qa">
+            <summary>Como migrar para um plano pago?</summary>
+            <p>Vá em <strong>Planos</strong> e escolha o que faz sentido. A migração é instantânea.</p>
+          </details>
+        </aside>
       </section>
 
-      {/* Estilos locais */}
+      {/* Estilos */}
       <style jsx>{`
-        .page-fale {
-          --w: min(1200px, 92vw);
+        .contact-page {
+          --w: min(1320px, 92vw); /* mais largo para caber em 100% */
+          --gap: 22px;
+          --radius: 16px;
+          --panel-bg: linear-gradient(180deg, rgba(8, 24, 16, 0.55) 0%, rgba(6, 18, 12, 0.45) 100%);
+          --stroke: rgba(24, 226, 115, 0.18);
+          --glow: rgba(24, 226, 115, 0.75);
+          position: relative;
           display: flex;
           flex-direction: column;
           align-items: center;
-          padding: 28px 0 64px;
-          color: #e6fff5;
-          position: relative;
+          padding: 18px 0 46px;
           isolation: isolate;
-          background: radial-gradient(60% 60% at 50% 35%, rgba(24,226,115,0.10), transparent 65%);
         }
 
-        .top-button {
-          position: absolute;
+        /* Botão fixo de voltar */
+        .back-fixed {
+          position: fixed;
           top: 18px;
-          right: 28px;
-          z-index: 10;
+          right: clamp(10px, 3vw, 28px);
+          z-index: 20;
         }
 
+        .hero {
+          width: var(--w);
+          margin: 10px 0 14px; /* menor para caber em 100% */
+          text-align: center;
+        }
+        .hero h1 {
+          font-size: clamp(28px, 3.4vw, 40px);
+          margin: 0 0 6px 0;
+          font-weight: 900;
+          letter-spacing: 0.2px;
+        }
+        .hero .lead {
+          opacity: 0.9;
+          margin: 0 auto;
+          max-width: 820px;
+        }
+
+        .grid {
+          width: var(--w);
+          display: grid;
+          grid-template-columns: 1.25fr 0.75fr; /* form maior que FAQ */
+          gap: var(--gap);
+          align-items: start;
+        }
+
+        .card {
+          background: var(--panel-bg);
+          border-radius: 18px;
+          box-shadow: inset 0 0 0 1px var(--stroke), 0 20px 60px rgba(0, 0, 0, 0.35);
+          padding: 16px;
+        }
+        .card-title {
+          font-weight: 800;
+          margin: 2px 0 12px;
+        }
+
+        /* formulário */
+        .form .fieldrow {
+          margin-bottom: 12px;
+        }
+        .form .fieldrow.two {
+          display: grid;
+          gap: 12px;
+          grid-template-columns: 1fr 1fr;
+        }
+        .label {
+          font-size: 12px;
+          opacity: 0.85;
+          margin-bottom: 6px;
+          display: block;
+        }
+        .input,
+        .textarea {
+          width: 100%;
+          background: rgba(10, 30, 20, 0.6);
+          border: 1px solid rgba(24, 226, 115, 0.25);
+          border-radius: 12px;
+          padding: 10px 12px;
+          color: #e8fff3;
+          outline: none;
+          transition: box-shadow 0.15s ease, border-color 0.15s ease;
+        }
+        .input:focus,
+        .textarea:focus {
+          border-color: rgba(24, 226, 115, 0.6);
+          box-shadow: 0 0 0 3px rgba(24, 226, 115, 0.2);
+        }
+
+        .segmented {
+          display: inline-flex;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+        .seg {
+          background: rgba(10, 30, 20, 0.6);
+          border: 1px solid rgba(24, 226, 115, 0.25);
+          border-radius: 999px;
+          padding: 8px 12px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: transform 0.12s ease, filter 0.12s ease, border-color 0.12s ease;
+        }
+        .seg:hover {
+          transform: translateY(-1px);
+          filter: brightness(1.2);
+          border-color: rgba(24, 226, 115, 0.5);
+        }
+        .seg.is-active {
+          background: rgba(24, 226, 115, 0.18);
+          border-color: rgba(24, 226, 115, 0.7);
+          box-shadow: 0 0 14px rgba(24, 226, 115, 0.45);
+        }
+
+        .actions {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-top: 6px;
+          min-height: 40px;
+        }
+        .sent-wrap {
+          min-width: 180px;
+        }
+        .sent-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          font-weight: 800;
+          padding: 8px 12px;
+          border-radius: 999px;
+          background: rgba(24, 226, 115, 0.14);
+          border: 1px solid rgba(24, 226, 115, 0.4);
+          box-shadow: 0 0 14px rgba(24, 226, 115, 0.35);
+          animation: pop 220ms ease-out;
+        }
+        .sent-badge .dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 999px;
+          background: #18e273;
+          box-shadow: 0 0 12px var(--glow);
+          animation: pulse 1.2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+          0% { transform: scale(1); opacity: 0.9; }
+          50% { transform: scale(1.25); opacity: 1; }
+          100% { transform: scale(1); opacity: 0.9; }
+        }
+        @keyframes pop {
+          0% { transform: scale(0.9); opacity: 0; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* FAQ */
+        .faq .qa {
+          background: rgba(10, 30, 20, 0.5);
+          border: 1px solid rgba(24, 226, 115, 0.22);
+          border-radius: 12px;
+          padding: 12px 14px;
+          margin-bottom: 10px;
+        }
+        .faq .qa summary {
+          cursor: pointer;
+          font-weight: 700;
+          outline: none;
+          list-style: none;
+        }
+        .faq .qa[open] {
+          border-color: rgba(24, 226, 115, 0.55);
+          box-shadow: 0 0 14px rgba(24, 226, 115, 0.35) inset;
+        }
+        .faq .qa p {
+          margin: 8px 0 0;
+          opacity: 0.9;
+        }
+
+        /* Botão base (mesmo visual global) */
         .rc-btn {
           display: inline-flex;
           align-items: center;
           justify-content: center;
           height: 38px;
-          padding: 0 18px;
-          border-radius: 999px;
+          padding: 0 20px;
+          border-radius: 10px;
           font-weight: 800;
           text-decoration: none;
           line-height: 1;
           white-space: nowrap;
-          cursor: pointer;
           border: none;
-          transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+          cursor: pointer;
+          transition: all 0.2s ease;
         }
         .rc-btn--green {
-          background: #18e273;
-          color: #052515;
-          box-shadow: 0 0 16px rgba(24,226,115,.8), inset 0 0 10px rgba(24,226,115,.4);
+          background: #18e273 !important;
+          color: #052515 !important;
+          box-shadow: 0 0 18px rgba(24, 226, 115, 0.8), inset 0 0 10px rgba(24, 226, 115, 0.5);
         }
-        .rc-btn--green:hover { transform: translateY(-2px); box-shadow: 0 0 26px rgba(24,226,115,1), inset 0 0 12px rgba(24,226,115,.6); }
-        .rc-btn--ghost { background: rgba(24,226,115,.12); color:#dbffef; border:1px solid rgba(24,226,115,.35); }
-        .rc-btn--ghost:hover { filter: brightness(1.2); }
-
-        .rc-chip {
-          display:inline-flex; align-items:center; gap:8px;
-          padding:8px 14px; border-radius:999px; font-weight:800;
-          border:1px solid rgba(24,226,115,.45);
-          background: rgba(24,226,115,.12);
-          box-shadow: 0 0 12px rgba(24,226,115,.25);
+        .rc-btn--green:hover {
+          filter: brightness(1.35);
+          transform: translateY(-2px);
+          box-shadow: 0 0 28px rgba(24, 226, 115, 1), inset 0 0 16px rgba(24, 226, 115, 0.7);
         }
-        .rc-chip--wa { }
-        .rc-chip--mail { }
-
-        .hero { width: var(--w); text-align:center; margin-top: 56px; }
-        .hero h1 { font-size: clamp(28px, 4vw, 46px); font-weight:900; margin:0 0 8px; }
-        .hero h1 span { color:#18e273; text-shadow:0 0 14px rgba(24,226,115,.8); }
-        .hero .sub { max-width: 900px; margin: 0 auto; opacity:.95; }
-        .quick { margin-top:14px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
-
-        .grid {
-          width: var(--w);
-          margin-top: 26px;
-          display: grid;
-          grid-template-columns: 1.1fr .9fr;
-          gap: 18px;
+        .rc-btn[disabled] {
+          opacity: 0.65;
+          cursor: not-allowed;
         }
-        .card {
-          border-radius: 16px;
-          padding: 18px;
-          background: rgba(12,28,20,.5);
-          border:1px solid rgba(24,226,115,.22);
-          backdrop-filter: blur(6px);
-          box-shadow: inset 0 0 0 1px rgba(24,226,115,.08), 0 12px 30px rgba(0,0,0,.4);
-        }
-        .form h2, .faq h2 { margin: 0 0 10px; font-size: 20px; font-weight: 900; }
 
-        .form label { display:flex; flex-direction:column; gap:6px; margin-top:10px; }
-        .form label span { font-weight:700; font-size: 13.5px; color:#c9ffe6; }
-        .form input, .form select, .form textarea {
-          background: rgba(8,20,14,.6);
-          border:1px solid rgba(24,226,115,.28);
-          color:#eafff5;
-          border-radius:10px;
-          padding:10px 12px;
-          outline:none;
-          transition: box-shadow .15s ease, border-color .15s ease;
-        }
-        .form input:focus, .form select:focus, .form textarea:focus {
-          box-shadow: 0 0 0 3px rgba(24,226,115,.18);
-          border-color: rgba(24,226,115,.55);
-        }
-        .form .check { flex-direction:row; align-items:center; gap:10px; margin-top:8px; }
-        .form .full { grid-column: 1 / -1; }
-        .actions { display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
-
-        .alert { margin-top:10px; padding:10px 12px; border-radius:10px; font-weight:700; }
-        .alert--ok { background: rgba(24,226,115,.14); border:1px solid rgba(24,226,115,.45); color:#d8ffe9; }
-        .alert--err { background: rgba(255,83,83,.12); border:1px solid rgba(255,83,83,.45); color:#ffdcdc; }
-
-        .faq details { border:1px solid rgba(24,226,115,.22); border-radius:12px; padding:12px 14px; background: rgba(8,20,14,.5); margin-top:10px; }
-        .faq summary { font-weight:800; cursor:pointer; }
-        .faq p { margin:8px 0 0; opacity:.95; }
-        .faq .side-ctas { display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
-
+        /* Responsivo */
         @media (max-width: 980px) {
-          .grid { grid-template-columns: 1fr; }
-          .top-button { position: static; display:flex; width:var(--w); justify-content:flex-end; margin-top:8px; }
-          .hero { margin-top: 16px; }
+          .grid {
+            grid-template-columns: 1fr;
+          }
+          .back-fixed {
+            top: 12px;
+          }
+        }
+      `}</style>
+
+      {/* Decor: leve brilho radial de fundo */}
+      <style jsx global>{`
+        .contact-page::before {
+          content: "";
+          position: absolute;
+          inset: -10% -5% auto -5%;
+          height: 60%;
+          background: radial-gradient(
+            60% 60% at 50% 40%,
+            rgba(24, 226, 115, 0.12),
+            transparent 60%
+          );
+          pointer-events: none;
+          z-index: -1;
+          filter: blur(8px);
         }
       `}</style>
     </main>
