@@ -6,55 +6,23 @@ import React from "react";
 export default function SobrePage() {
   return (
     <main className="page-sobre">
-      {/* ---- ESTILOS GLOBAIS SÓ PARA ESTA PÁGINA ---- */}
-      <style jsx global>{`
-        /* Botão padrão verde fluorescente (mesma identidade do site) */
-        .rc-btn {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          height: 38px;
-          padding: 0 18px;
-          border: 0;
-          border-radius: 999px;
-          font-weight: 800;
-          text-decoration: none;
-          line-height: 1;
-          cursor: pointer;
-          transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
-          white-space: nowrap;
-        }
-        .rc-btn--green {
-          background: #18e273 !important;
-          color: #052515 !important;
-          box-shadow: 0 0 18px rgba(24, 226, 115, 0.8),
-            inset 0 0 10px rgba(24, 226, 115, 0.5);
-        }
-        .rc-btn--green:hover {
-          transform: translateY(-1px);
-          filter: brightness(1.15);
-          box-shadow: 0 0 28px rgba(24, 226, 115, 1),
-            inset 0 0 16px rgba(24, 226, 115, 0.7);
-        }
-      `}</style>
+      {/* ---- BOTÃO SUPERIOR DIREITO ---- */}
+      <div className="top-button">
+        <a href="/" className="rc-btn rc-btn--green">Voltar ao início</a>
+      </div>
 
       {/* ---- HERO / CABEÇALHO ---- */}
       <section className="hero">
-        {/* Botão fixo do lado direito (dentro do hero) */}
-        <div className="backTopRight">
-          <a href="/" className="rc-btn rc-btn--green" aria-label="Voltar ao início">
-            Voltar ao início
-          </a>
-        </div>
-
-        <h1>SOBRE O <span>RADARCRYPTO</span></h1>
+        <h1>
+          SOBRE O <span>RADARCRYPTO</span>
+        </h1>
         <p className="sub">
           Onde o aprendizado encontra a prática — o risco fica de fora. Aqui, você
           aprende trading sem perder <strong>dinheiro real</strong>, dentro de um ambiente
           virtual seguro, moderno e acessível.
         </p>
 
-        {/* Sinais de prova social / autoridade (apenas 2 pills) */}
+        {/* ---- PILLS ---- */}
         <div className="pills">
           <div className="pill">+2.000 traders já começaram por aqui</div>
           <div className="pill">Ferramentas de quem vive o mercado</div>
@@ -96,14 +64,15 @@ export default function SobrePage() {
 
       {/* ---- FECHO ---- */}
       <section className="closer">
-        <p>Treine hoje. Entenda amanhã. <strong>Aja com confiança.</strong></p>
+        <p>
+          Treine hoje. Entenda amanhã. <strong>Aja com confiança.</strong>
+        </p>
       </section>
 
-      {/* ---- ESTILOS LOCAIS ---- */}
+      {/* ---- ESTILOS ---- */}
       <style jsx>{`
         .page-sobre {
           --w: min(1200px, 92vw);
-          --gap: clamp(12px, 2vw, 20px);
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -111,62 +80,85 @@ export default function SobrePage() {
           color: #e6fff5;
           position: relative;
           isolation: isolate;
+          background: radial-gradient(
+            60% 60% at 50% 45%,
+            rgba(24, 226, 115, 0.12),
+            transparent 70%
+          );
         }
 
-        /* Radar / fundo sutil via gradient, sem imagem externa */
-        .page-sobre::before {
-          content: "";
+        /* ===== BOTÃO SUPERIOR DIREITO ===== */
+        .top-button {
           position: absolute;
-          inset: 0;
-          background:
-            radial-gradient(60% 60% at 55% 45%, rgba(24, 226, 115, 0.18), transparent 60%),
-            radial-gradient(35% 35% at 65% 35%, rgba(24, 226, 115, 0.12), transparent 60%);
-          filter: blur(2px);
-          z-index: -1;
+          top: 20px;
+          right: 30px;
+          z-index: 5;
         }
 
+        .rc-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          height: 38px;
+          padding: 0 18px;
+          border-radius: 999px;
+          font-weight: 800;
+          text-decoration: none;
+          cursor: pointer;
+          line-height: 1;
+          transition: transform 0.15s ease, box-shadow 0.15s ease;
+          white-space: nowrap;
+        }
+
+        .rc-btn--green {
+          background: #18e273;
+          color: #052515;
+          box-shadow: 0 0 16px rgba(24, 226, 115, 0.8),
+            inset 0 0 10px rgba(24, 226, 115, 0.4);
+        }
+
+        .rc-btn--green:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 0 26px rgba(24, 226, 115, 1),
+            inset 0 0 12px rgba(24, 226, 115, 0.6);
+        }
+
+        /* ===== HERO ===== */
         .hero {
           width: var(--w);
           text-align: center;
-          margin-bottom: 10px;
-          position: relative;
-        }
-
-        .backTopRight {
-          position: absolute;
-          top: 0;
-          right: 0;
+          margin-top: 50px;
         }
 
         .hero h1 {
-          font-size: clamp(28px, 4.4vw, 54px);
+          font-size: clamp(28px, 4vw, 54px);
           font-weight: 900;
-          letter-spacing: 0.2px;
-          margin: 0 0 8px 0;
-          text-shadow: 0 0 10px rgba(24, 226, 115, 0.45);
+          margin-bottom: 10px;
+          text-shadow: 0 0 12px rgba(24, 226, 115, 0.4);
         }
+
         .hero h1 span {
           color: #18e273;
-          text-shadow: 0 0 10px rgba(24, 226, 115, 0.8);
+          text-shadow: 0 0 14px rgba(24, 226, 115, 0.8);
         }
 
         .hero .sub {
           max-width: 900px;
           margin: 0 auto;
-          opacity: 0.92;
           color: #eafff5;
-          font-size: clamp(14px, 1.6vw, 18px);
+          font-size: clamp(14px, 1.5vw, 18px);
           line-height: 1.6;
         }
 
+        /* ===== PILLS ===== */
         .pills {
-          margin: 16px auto 0;
+          margin-top: 18px;
           display: flex;
-          gap: 12px;
           justify-content: center;
           flex-wrap: wrap;
-          max-width: 900px;
+          gap: 12px;
         }
+
         .pill {
           border: 1px solid rgba(24, 226, 115, 0.45);
           background: rgba(24, 226, 115, 0.12);
@@ -174,35 +166,33 @@ export default function SobrePage() {
           padding: 10px 14px;
           border-radius: 999px;
           font-weight: 700;
-          font-size: 14px;
-          box-shadow: 0 0 12px rgba(24, 226, 115, 0.35);
+          box-shadow: 0 0 12px rgba(24, 226, 115, 0.25);
         }
 
+        /* ===== CARDS ===== */
         .cardsWrap {
           width: var(--w);
-          margin-top: 18px; /* aproxima dos textos, sem encostar */
+          margin-top: 28px;
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: var(--gap);
+          gap: 18px;
         }
 
         .card {
-          position: relative;
           border-radius: 16px;
-          padding: 18px 18px 16px;
+          padding: 20px 18px 18px;
           background: rgba(12, 28, 20, 0.5);
           border: 1px solid rgba(24, 226, 115, 0.22);
-          box-shadow: inset 0 0 0 1px rgba(24, 226, 115, 0.08),
-            0 12px 40px rgba(0, 0, 0, 0.35);
           backdrop-filter: blur(6px);
-          transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease;
-          min-height: 164px;
+          box-shadow: inset 0 0 0 1px rgba(24, 226, 115, 0.08),
+            0 12px 30px rgba(0, 0, 0, 0.4);
+          transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
         }
+
         .card:hover {
           transform: translateY(-2px);
-          background: rgba(16, 38, 28, 0.66);
-          box-shadow: 0 0 22px rgba(24, 226, 115, 0.28),
-            inset 0 0 0 1px rgba(24, 226, 115, 0.35);
+          background: rgba(16, 38, 28, 0.65);
+          box-shadow: 0 0 20px rgba(24, 226, 115, 0.25);
         }
 
         .cardTitle {
@@ -212,45 +202,42 @@ export default function SobrePage() {
           align-items: center;
           gap: 8px;
           font-size: 17px;
+          color: #18e273;
         }
-        .icon {
-          font-size: 18px;
-        }
+
         .card p {
           margin: 0;
-          opacity: 0.96;
           line-height: 1.55;
         }
 
+        /* ===== FECHO ===== */
         .closer {
           width: var(--w);
           text-align: center;
-          margin-top: 18px;
+          margin-top: 24px;
         }
+
         .closer p {
           font-size: clamp(16px, 2vw, 20px);
           font-weight: 800;
           color: #dcffef;
-          text-shadow: 0 0 10px rgba(24, 226, 115, 0.35);
-          margin: 0;
+          text-shadow: 0 0 10px rgba(24, 226, 115, 0.4);
         }
 
+        /* ===== RESPONSIVO ===== */
         @media (max-width: 960px) {
           .cardsWrap {
             grid-template-columns: 1fr;
           }
-          .backTopRight {
+          .top-button {
             position: static;
-            margin-bottom: 10px;
+            margin: 0 auto 10px;
             display: flex;
             justify-content: flex-end;
+            width: var(--w);
           }
           .hero {
-            text-align: left;
-          }
-          .hero .sub,
-          .pills {
-            justify-content: flex-start;
+            margin-top: 10px;
           }
         }
       `}</style>
