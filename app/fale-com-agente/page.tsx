@@ -346,7 +346,18 @@ export default function FaleComAGentePage() {
           #rc-backtop.back-fixed { top: 10px; }
         }
       `}</style>
-
+/* Botão WhatsApp — agora com mesmo brilho e animação do botão Enviar mensagem */
+.rc-btn--whatsapp {
+  background: #18e273 !important;
+  color: #052515 !important;
+  box-shadow: 0 0 18px rgba(24, 226, 115, 0.8), inset 0 0 10px rgba(24, 226, 115, 0.5);
+  transition: all 0.2s ease;
+}
+.rc-btn--whatsapp:hover {
+  filter: brightness(1.35);
+  transform: translateY(-2px);
+  box-shadow: 0 0 28px rgba(24, 226, 115, 1), inset 0 0 16px rgba(24, 226, 115, 0.7);
+}
       {/* Glow radial suave no fundo */}
       <style jsx global>{`
         .contact-page::before {
