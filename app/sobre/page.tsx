@@ -2,13 +2,14 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 
 export default function SobrePage() {
   return (
     <main className="page-sobre">
       {/* ---- BOTÃO SUPERIOR DIREITO ---- */}
       <div className="top-button">
-        <a href="/" className="rc-btn rc-btn--green">Voltar ao início</a>
+        <Link href="/" className="rc-btn rc-btn--green">Voltar ao início</Link>
       </div>
 
       {/* ---- HERO / CABEÇALHO ---- */}
@@ -24,7 +25,7 @@ export default function SobrePage() {
 
         {/* ---- PILLS ---- */}
         <div className="pills">
-          <div className="pill">+2.000 traders já começaram por aqui</div>
+          <div className="pill">Produto experimental · modo SIM</div>
           <div className="pill">Ferramentas de quem vive o mercado</div>
         </div>
       </section>

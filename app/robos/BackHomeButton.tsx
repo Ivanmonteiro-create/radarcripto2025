@@ -1,13 +1,14 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 
 export default function BackHomeButton() {
   return (
     <>
-      <a href="/" className="robos-back-home" aria-label="Voltar ao início">
+      <Link href="/" className="robos-back-home" aria-label="Voltar ao início">
         Voltar ao início
-      </a>
+      </Link>
 
       {/* Estilos só do botão (ok em Client Component) */}
       <style jsx>{`

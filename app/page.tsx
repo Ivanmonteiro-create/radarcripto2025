@@ -21,9 +21,9 @@ export default function HomePage() {
             Aprenda trading na prática, sem arriscar um centavo.
           </h1>
           <p className="rc-hero_desc">
-            Pratique com saldo virtual e evolua sem risco — histórico local no
-            navegador.
-            <span className="rc-hero_phase">Fase 1 (site base online)</span>
+            Pratique no simulador Spot. A automação está em fase experimental e
+            limitada aos modos SIM e Testnet — sem Binance Live.
+            <span className="rc-hero_phase">Fundação técnica experimental</span>
           </p>
         </div>
       </section>

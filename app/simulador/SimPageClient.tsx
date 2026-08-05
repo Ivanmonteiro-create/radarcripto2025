@@ -1,10 +1,11 @@
 // app/simulador/SimPageClient.tsx
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import TradingViewWidget from '../../components/TradingViewWidget';
 import TradeControls from '../../components/TradeControls';
-import { useLivePrice } from '../../lib/priceFeed';
+import { useLivePrice } from '../../lib/useLivePrice';
 
 type Pair =
   | 'BTCUSDT' | 'ETHUSDT' | 'BNBUSDT' | 'SOLUSDT'
@@ -12,16 +13,16 @@ type Pair =
 
 export default function SimPageClient() {
   const [symbol, setSymbol] = useState<Pair>('BTCUSDT');
-  const livePrice = useLivePrice(symbol);
+  const { price: livePrice } = useLivePrice(symbol);
 
   const chartPanelRef = useRef<HTMLDivElement | null>(null);
   const [isFs, setIsFs] = useState(false);
 
   // força o TradingView a recalcular dimensões
-  const pokeResize = () => {
+  const pokeResize = useCallback(() => {
     window.dispatchEvent(new Event('resize'));
     setTimeout(() => window.dispatchEvent(new Event('resize')), 120);
-  };
+  }, []);
 
   useEffect(() => {
     const onChange = () => {
@@ -30,18 +31,18 @@ export default function SimPageClient() {
     };
     document.addEventListener('fullscreenchange', onChange);
     return () => document.removeEventListener('fullscreenchange', onChange);
-  }, []);
+  }, [pokeResize]);
 
-  const enterFs = () => {
+  const enterFs = useCallback(() => {
     const el = chartPanelRef.current;
     if (!el || document.fullscreenElement) return;
     void el.requestFullscreen().then(pokeResize).catch(() => {});
-  };
-  const exitFs = () => {
+  }, [pokeResize]);
+  const exitFs = useCallback(() => {
     if (document.fullscreenElement) {
       void document.exitFullscreen().then(pokeResize).catch(() => {});
     }
-  };
+  }, [pokeResize]);
   const toggleFs = () => (document.fullscreenElement ? exitFs() : enterFs());
 
   // ⌨️ Atalhos: F entra em fullscreen, X sai
@@ -53,7 +54,7 @@ export default function SimPageClient() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, []);
+  }, [enterFs, exitFs]);
 
   return (
     <main
@@ -190,13 +191,13 @@ export default function SimPageClient() {
       >
         {/* Botão verde dentro do painel de controles */}
         <div className="backBtnInPanel">
-          <a href="/" className="rc-btn rc-btn--green">Voltar ao início</a>
+          <Link href="/" className="rc-btn rc-btn--green">Voltar ao início</Link>
         </div>
 
         <TradeControls
           symbol={symbol}
           onSymbolChange={(s: string) => setSymbol(s as Pair)}
-          livePrice={livePrice}
+          livePrice={livePrice ?? undefined}
         />
       </section>
     </main>

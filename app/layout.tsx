@@ -4,9 +4,9 @@ import "./globals.css";
 import TopNav from "@/components/TopNav";
 
 export const metadata: Metadata = {
-  title: "RadarCrypto — Simulador & Robôs (SIM)",
+  title: "RadarCrypto — Fundação Experimental SIM & Testnet",
   description:
-    "Aprenda trading na prática, sem arriscar um centavo. Simulador e robôs no modo SIM (dados em tempo real, sem risco).",
+    "Projeto experimental com simulador Spot e fundação para Binance Spot Testnet. Sem operação Live.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

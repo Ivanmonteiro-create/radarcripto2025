@@ -1,13 +1,16 @@
-// app/api/trades/route.ts
 import { NextResponse } from "next/server";
+import { apiErrorResponse } from "@/lib/server/api";
+import { requireApiAuth } from "@/lib/server/auth";
+import { prisma } from "@/lib/server/prisma";
 
-// GET apenas retorna um array vazio por enquanto
-export async function GET() {
-  return NextResponse.json({ ok: true, trades: [] });
-}
-
-// POST apenas ecoa o que recebeu, sem salvar em banco
-export async function POST(req: Request) {
-  const data = await req.json().catch(() => ({}));
-  return NextResponse.json({ ok: true, created: data });
+export async function GET(request: Request) {
+  const unauthorized = await requireApiAuth();
+  if (unauthorized) return unauthorized;
+  try {
+    const botId = new URL(request.url).searchParams.get("botId") ?? undefined;
+    const trades = await prisma.trade.findMany({ where: botId ? { botId } : {}, orderBy: { timestamp: "desc" }, take: 200 });
+    return NextResponse.json({ ok: true, trades });
+  } catch (error) {
+    return apiErrorResponse(error);
+  }
 }

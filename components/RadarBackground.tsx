@@ -92,7 +92,6 @@ export default function RadarBackground({
       ctx.restore();
     };
 
-    let t0 = performance.now();
 
     const loop = (t: number) => {
       if (!running) return;
@@ -113,9 +112,6 @@ export default function RadarBackground({
       drawGrid(cx, cy, r);
 
       // feixe
-      const dt = (t - t0) / 1000;
-      t0 = t;
-
       const beamWidthRad = (beamWidthDeg * Math.PI) / 180;
       const angle = ((t / 1000) * sweepSpeed) % (Math.PI * 2);
 

@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import BotRunnerClient from "@/components/bots/BotRunnerClient";
 
 const PAIRS = [
@@ -136,9 +137,9 @@ export default function RobosPage() {
       {/* --- PAINEL CENTRAL COM BOTÃO À DIREITA --- */}
       <section className="panelWrap">
         <div className="backBtnInPanel">
-          <a href="/" className="rc-btn rc-btn--green">
+          <Link href="/" className="rc-btn rc-btn--green">
             Voltar ao início
-          </a>
+          </Link>
         </div>
 
         <BotRunnerClient pair={active} onPairChange={setActive} />

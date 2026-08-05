@@ -1029,7 +1029,7 @@ body:has(.page-robos) .rc-page-top{
   position: relative;
   border: 1px solid rgba(0,255,128,0.45) !important;
   background:
-    radial-gradient(140% 140% at 90% 10%, rgba(40,255,160,0.22), rgba(0,255,128,0.10) 48%, rgba(0,255,128,0.06) 60%)!,
+    radial-gradient(140% 140% at 90% 10%, rgba(40,255,160,0.22), rgba(0,255,128,0.10) 48%, rgba(0,255,128,0.06) 60%),
     linear-gradient(180deg, rgba(0,255,128,0.16), rgba(0,255,128,0.08)) !important;
   color: #bfffdc !important;
   box-shadow:

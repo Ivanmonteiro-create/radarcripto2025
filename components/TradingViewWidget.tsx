@@ -11,8 +11,9 @@ export default function TradingViewWidget({ symbol }: Props) {
   const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!ref.current) return;
-    ref.current.innerHTML = '';
+    const container = ref.current;
+    if (!container) return;
+    container.innerHTML = '';
 
     const script = document.createElement('script');
     script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
@@ -45,10 +46,10 @@ export default function TradingViewWidget({ symbol }: Props) {
     };
 
     script.innerHTML = JSON.stringify(config);
-    ref.current.appendChild(script);
+    container.appendChild(script);
 
     return () => {
-      if (ref.current) ref.current.innerHTML = '';
+      container.innerHTML = '';
     };
   }, [symbol]);
 

@@ -3,16 +3,266 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ExchangeMode {
+  SIM
+  TESTNET
+}
+
+enum BotStatus {
+  STOPPED
+  RUNNING
+  PAUSED
+  ERROR
+}
+
+enum StrategyKind {
+  EMA_CROSS
+  PERCENT_CYCLE
+}
+
+enum OrderSide {
+  BUY
+  SELL
+}
+
+enum OrderType {
+  MARKET
+  LIMIT
+}
+
+enum OrderStatus {
+  PENDING
+  OPEN
+  PARTIALLY_FILLED
+  FILLED
+  CANCELLED
+  REJECTED
+}
+
+model User {
+  id               String            @id @default(cuid())
+  email            String            @unique
+  displayName      String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  exchangeAccounts ExchangeAccount[]
+  botConfigs       BotConfig[]
+}
+
+model ExchangeAccount {
+  id                    String       @id @default(cuid())
+  userId                String
+  name                  String
+  mode                  ExchangeMode
+  encryptedApiKey       String?
+  encryptedApiSecret    String?
+  encryptionKeyVersion Int          @default(1)
+  enabled               Boolean      @default(false)
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+  user                  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bots                  BotConfig[]
+
+  @@unique([userId, name])
+  @@index([userId, mode])
+}
+
+model Strategy {
+  id        String       @id @default(cuid())
+  kind      StrategyKind
+  name      String
+  version   Int          @default(1)
+  schema    Json
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  bots      BotConfig[]
+
+  @@unique([kind, version])
+}
+
+model BotConfig {
+  id                   String           @id @default(cuid())
+  userId               String
+  exchangeAccountId    String?
+  strategyId           String
+  name                 String
+  symbol               String
+  mode                 ExchangeMode     @default(SIM)
+  status               BotStatus        @default(STOPPED)
+  strategyParams       Json
+  capitalUSDT          Decimal          @db.Decimal(24, 8)
+  maxCapitalUSDT       Decimal          @db.Decimal(24, 8)
+  maxOrderUSDT         Decimal          @db.Decimal(24, 8)
+  maxPositions         Int              @default(1)
+  maxDailyLossUSDT     Decimal          @db.Decimal(24, 8)
+  maxDrawdownPct       Decimal          @db.Decimal(10, 6)
+  minOrderIntervalMs   Int              @default(1000)
+  takeProfitPct        Decimal?         @db.Decimal(10, 6)
+  stopLossPct          Decimal?         @db.Decimal(10, 6)
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  user                 User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exchangeAccount      ExchangeAccount? @relation(fields: [exchangeAccountId], references: [id])
+  strategy             Strategy         @relation(fields: [strategyId], references: [id])
+  runtime              BotRuntime?
+  orders               Order[]
+  fills                Fill[]
+  positions            Position[]
+  trades               Trade[]
+  balanceSnapshots     BalanceSnapshot[]
+  riskEvents           RiskEvent[]
+  logs                 BotLog[]
+
+  @@index([status, mode])
+  @@index([userId])
+}
+
+model BotRuntime {
+  id               String    @id @default(cuid())
+  botId            String    @unique
+  status           BotStatus @default(STOPPED)
+  lastPrice         Decimal?  @db.Decimal(24, 8)
+  lastSignal        String?
+  lastSignalReason  String?
+  lastOrderAt       DateTime?
+  lastError         String?
+  peakEquity        Decimal   @default(0) @db.Decimal(24, 8)
+  dailyRealizedPnl  Decimal   @default(0) @db.Decimal(24, 8)
+  dailyPnlDate      DateTime  @default(now())
+  strategyState     Json
+  workerHeartbeatAt DateTime?
+  updatedAt         DateTime  @updatedAt
+  bot               BotConfig @relation(fields: [botId], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id                  String      @id @default(cuid())
+  botId               String
+  exchangeOrderId     String?
+  clientOrderId       String      @unique
+  symbol              String
+  side                OrderSide
+  type                OrderType
+  status              OrderStatus
+  requestedQuantity   Decimal     @db.Decimal(36, 18)
+  executedQuantity    Decimal     @default(0) @db.Decimal(36, 18)
+  requestedPrice      Decimal?    @db.Decimal(24, 8)
+  averageFillPrice    Decimal?    @db.Decimal(24, 8)
+  rejectReason        String?
+  rawResponseRedacted Json?
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  bot                 BotConfig   @relation(fields: [botId], references: [id], onDelete: Cascade)
+  fills               Fill[]
+  trades              Trade[]
+
+  @@index([botId, status])
+  @@index([exchangeOrderId])
+}
+
+model Fill {
+  id          String    @id @default(cuid())
+  botId       String
+  orderId     String
+  exchangeFillId String?
+  symbol      String
+  side        OrderSide
+  price       Decimal   @db.Decimal(24, 8)
+  quantity    Decimal   @db.Decimal(36, 18)
+  feeQuote    Decimal   @default(0) @db.Decimal(24, 8)
+  timestamp   DateTime
+  createdAt   DateTime  @default(now())
+  bot         BotConfig @relation(fields: [botId], references: [id], onDelete: Cascade)
+  order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@unique([orderId, exchangeFillId])
+  @@index([botId, timestamp])
+}
+
+model Position {
+  id                String    @id @default(cuid())
+  botId             String
+  symbol            String
+  quantity          Decimal   @db.Decimal(36, 18)
+  averageEntryPrice Decimal   @db.Decimal(24, 8)
+  side              String    @default("LONG")
+  costBasisQuote    Decimal   @db.Decimal(24, 8)
+  realizedPnl       Decimal   @default(0) @db.Decimal(24, 8)
+  unrealizedPnl     Decimal   @default(0) @db.Decimal(24, 8)
+  isOpen            Boolean   @default(true)
+  openedAt          DateTime
+  closedAt          DateTime?
+  updatedAt         DateTime  @updatedAt
+  bot               BotConfig @relation(fields: [botId], references: [id], onDelete: Cascade)
+
+  @@index([botId, isOpen])
 }
 
 model Trade {
-  id        Int      @id @default(autoincrement())
-  ts        DateTime @default(now())
-  side      String
-  symbol    String
-  price     Float
-  sizeUSDT  Float
-  pnl       Float?
+  id            String    @id @default(cuid())
+  botId         String
+  orderId       String
+  symbol        String
+  side          OrderSide
+  price         Decimal   @db.Decimal(24, 8)
+  quantity      Decimal   @db.Decimal(36, 18)
+  notionalQuote Decimal   @db.Decimal(24, 8)
+  feeQuote      Decimal   @default(0) @db.Decimal(24, 8)
+  realizedPnl   Decimal   @default(0) @db.Decimal(24, 8)
+  timestamp     DateTime
+  bot           BotConfig @relation(fields: [botId], references: [id], onDelete: Cascade)
+  order         Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([botId, timestamp])
+}
+
+model BalanceSnapshot {
+  id         String    @id @default(cuid())
+  botId      String
+  asset      String
+  free       Decimal   @db.Decimal(24, 8)
+  locked     Decimal   @db.Decimal(24, 8)
+  total      Decimal   @db.Decimal(24, 8)
+  equityUSDT Decimal   @db.Decimal(24, 8)
+  timestamp  DateTime  @default(now())
+  bot        BotConfig @relation(fields: [botId], references: [id], onDelete: Cascade)
+
+  @@index([botId, timestamp])
+}
+
+model RiskEvent {
+  id        String    @id @default(cuid())
+  botId     String
+  allowed   Boolean
+  code      String
+  reason    String
+  signal    Json?
+  createdAt DateTime  @default(now())
+  bot       BotConfig @relation(fields: [botId], references: [id], onDelete: Cascade)
+
+  @@index([botId, createdAt])
+}
+
+model BotLog {
+  id        String    @id @default(cuid())
+  botId     String
+  level     String
+  event     String
+  message   String
+  metadata  Json?
+  createdAt DateTime  @default(now())
+  bot       BotConfig @relation(fields: [botId], references: [id], onDelete: Cascade)
+
+  @@index([botId, createdAt])
+}
+
+model SystemControl {
+  id               String   @id @default("global")
+  killSwitchActive Boolean  @default(false)
+  reason           String?
+  updatedAt        DateTime @updatedAt
 }

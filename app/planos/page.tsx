@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 
 type Plan = {
   slug: "start" | "trader" | "pro" | "elite";
@@ -114,18 +115,18 @@ export default function PlanosPage() {
           Planos do <span>RadarCrypto</span>
         </h1>
         <p className="sub">
-          Escolha seu caminho. Comece no SIM (simulador) sem riscos e evolua
-          para gráficos, quando quiser, com robôs e ferramentas profissionais.
+          Produto experimental em desenvolvimento. O modo SIM está disponível;
+          planos pagos, Testnet e operação com dinheiro real não estão à venda nesta fase.
         </p>
 
         <div className="proofs" role="list">
-          <span className="proof">+2.000 traders já testaram</span>
-          <span className="proof">100% local e seguro</span>
-          <span className="proof">Ferramentas de quem vive o mercado</span>
+          <span className="proof">Fase experimental</span>
+          <span className="proof">SIM disponível</span>
+          <span className="proof">Sem operação Live</span>
         </div>
 
         <div className="backTopRight">
-          <a href="/" className="rc-btn rc-btn--green">Voltar ao início</a>
+          <Link href="/" className="rc-btn rc-btn--green">Voltar ao início</Link>
         </div>
       </header>
 
@@ -148,12 +149,11 @@ export default function PlanosPage() {
             </ul>
 
             <div className="plan-cta">
-              <a
-                href={p.slug === "start" ? "/simulador" : "/login"}
-                className="rc-btn rc-btn--green"
-              >
-                {p.cta}
-              </a>
+              {p.slug === "start" ? (
+                <a href="/simulador" className="rc-btn rc-btn--green">{p.cta}</a>
+              ) : (
+                <span className="rc-btn" aria-disabled="true">Em desenvolvimento</span>
+              )}
             </div>
           </article>
         ))}
@@ -161,9 +161,6 @@ export default function PlanosPage() {
 
       <aside className="ctaDock">
         <a href="/simulador" className="rc-btn rc-btn--green">Começar de graça</a>
-        <a href="/login?plan=trader" className="rc-btn rc-btn--green">Quero ser Trader</a>
-        <a href="/login?plan=pro" className="rc-btn rc-btn--green">Subir para Pro</a>
-        <a href="/login?plan=elite" className="rc-btn rc-btn--green">Virar Elite</a>
       </aside>
 
       <style jsx>{`

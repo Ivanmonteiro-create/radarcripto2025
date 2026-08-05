@@ -1,0 +1,34 @@
+-- RadarCrypto trading foundation. Generated for PostgreSQL only.
+CREATE TYPE "ExchangeMode" AS ENUM ('SIM', 'TESTNET');
+CREATE TYPE "BotStatus" AS ENUM ('STOPPED', 'RUNNING', 'PAUSED', 'ERROR');
+CREATE TYPE "StrategyKind" AS ENUM ('EMA_CROSS', 'PERCENT_CYCLE');
+CREATE TYPE "OrderSide" AS ENUM ('BUY', 'SELL');
+CREATE TYPE "OrderType" AS ENUM ('MARKET', 'LIMIT');
+CREATE TYPE "OrderStatus" AS ENUM ('PENDING', 'OPEN', 'PARTIALLY_FILLED', 'FILLED', 'CANCELLED', 'REJECTED');
+
+CREATE TABLE "User" ("id" TEXT PRIMARY KEY, "email" TEXT NOT NULL UNIQUE, "displayName" TEXT, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL);
+CREATE TABLE "ExchangeAccount" ("id" TEXT PRIMARY KEY, "userId" TEXT NOT NULL REFERENCES "User"("id") ON DELETE CASCADE, "name" TEXT NOT NULL, "mode" "ExchangeMode" NOT NULL, "encryptedApiKey" TEXT, "encryptedApiSecret" TEXT, "encryptionKeyVersion" INTEGER NOT NULL DEFAULT 1, "enabled" BOOLEAN NOT NULL DEFAULT false, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL, UNIQUE("userId", "name"));
+CREATE TABLE "Strategy" ("id" TEXT PRIMARY KEY, "kind" "StrategyKind" NOT NULL, "name" TEXT NOT NULL, "version" INTEGER NOT NULL DEFAULT 1, "schema" JSONB NOT NULL, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL, UNIQUE("kind", "version"));
+CREATE TABLE "BotConfig" ("id" TEXT PRIMARY KEY, "userId" TEXT NOT NULL REFERENCES "User"("id") ON DELETE CASCADE, "exchangeAccountId" TEXT REFERENCES "ExchangeAccount"("id"), "strategyId" TEXT NOT NULL REFERENCES "Strategy"("id"), "name" TEXT NOT NULL, "symbol" TEXT NOT NULL, "mode" "ExchangeMode" NOT NULL DEFAULT 'SIM', "status" "BotStatus" NOT NULL DEFAULT 'STOPPED', "strategyParams" JSONB NOT NULL, "capitalUSDT" DECIMAL(24,8) NOT NULL, "maxCapitalUSDT" DECIMAL(24,8) NOT NULL, "maxOrderUSDT" DECIMAL(24,8) NOT NULL, "maxPositions" INTEGER NOT NULL DEFAULT 1, "maxDailyLossUSDT" DECIMAL(24,8) NOT NULL, "maxDrawdownPct" DECIMAL(10,6) NOT NULL, "minOrderIntervalMs" INTEGER NOT NULL DEFAULT 1000, "takeProfitPct" DECIMAL(10,6), "stopLossPct" DECIMAL(10,6), "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL);
+CREATE TABLE "BotRuntime" ("id" TEXT PRIMARY KEY, "botId" TEXT NOT NULL UNIQUE REFERENCES "BotConfig"("id") ON DELETE CASCADE, "status" "BotStatus" NOT NULL DEFAULT 'STOPPED', "lastPrice" DECIMAL(24,8), "lastSignal" TEXT, "lastSignalReason" TEXT, "lastOrderAt" TIMESTAMP(3), "lastError" TEXT, "peakEquity" DECIMAL(24,8) NOT NULL DEFAULT 0, "dailyRealizedPnl" DECIMAL(24,8) NOT NULL DEFAULT 0, "dailyPnlDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "strategyState" JSONB NOT NULL, "workerHeartbeatAt" TIMESTAMP(3), "updatedAt" TIMESTAMP(3) NOT NULL);
+CREATE TABLE "Order" ("id" TEXT PRIMARY KEY, "botId" TEXT NOT NULL REFERENCES "BotConfig"("id") ON DELETE CASCADE, "exchangeOrderId" TEXT, "clientOrderId" TEXT NOT NULL UNIQUE, "symbol" TEXT NOT NULL, "side" "OrderSide" NOT NULL, "type" "OrderType" NOT NULL, "status" "OrderStatus" NOT NULL, "requestedQuantity" DECIMAL(36,18) NOT NULL, "executedQuantity" DECIMAL(36,18) NOT NULL DEFAULT 0, "requestedPrice" DECIMAL(24,8), "averageFillPrice" DECIMAL(24,8), "rejectReason" TEXT, "rawResponseRedacted" JSONB, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, "updatedAt" TIMESTAMP(3) NOT NULL);
+CREATE TABLE "Fill" ("id" TEXT PRIMARY KEY, "botId" TEXT NOT NULL REFERENCES "BotConfig"("id") ON DELETE CASCADE, "orderId" TEXT NOT NULL REFERENCES "Order"("id") ON DELETE CASCADE, "exchangeFillId" TEXT, "symbol" TEXT NOT NULL, "side" "OrderSide" NOT NULL, "price" DECIMAL(24,8) NOT NULL, "quantity" DECIMAL(36,18) NOT NULL, "feeQuote" DECIMAL(24,8) NOT NULL DEFAULT 0, "timestamp" TIMESTAMP(3) NOT NULL, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP, UNIQUE("orderId", "exchangeFillId"));
+CREATE TABLE "Position" ("id" TEXT PRIMARY KEY, "botId" TEXT NOT NULL REFERENCES "BotConfig"("id") ON DELETE CASCADE, "symbol" TEXT NOT NULL, "quantity" DECIMAL(36,18) NOT NULL, "averageEntryPrice" DECIMAL(24,8) NOT NULL, "side" TEXT NOT NULL DEFAULT 'LONG', "costBasisQuote" DECIMAL(24,8) NOT NULL, "realizedPnl" DECIMAL(24,8) NOT NULL DEFAULT 0, "unrealizedPnl" DECIMAL(24,8) NOT NULL DEFAULT 0, "isOpen" BOOLEAN NOT NULL DEFAULT true, "openedAt" TIMESTAMP(3) NOT NULL, "closedAt" TIMESTAMP(3), "updatedAt" TIMESTAMP(3) NOT NULL);
+CREATE TABLE "Trade" ("id" TEXT PRIMARY KEY, "botId" TEXT NOT NULL REFERENCES "BotConfig"("id") ON DELETE CASCADE, "orderId" TEXT NOT NULL REFERENCES "Order"("id") ON DELETE CASCADE, "symbol" TEXT NOT NULL, "side" "OrderSide" NOT NULL, "price" DECIMAL(24,8) NOT NULL, "quantity" DECIMAL(36,18) NOT NULL, "notionalQuote" DECIMAL(24,8) NOT NULL, "feeQuote" DECIMAL(24,8) NOT NULL DEFAULT 0, "realizedPnl" DECIMAL(24,8) NOT NULL DEFAULT 0, "timestamp" TIMESTAMP(3) NOT NULL);
+CREATE TABLE "BalanceSnapshot" ("id" TEXT PRIMARY KEY, "botId" TEXT NOT NULL REFERENCES "BotConfig"("id") ON DELETE CASCADE, "asset" TEXT NOT NULL, "free" DECIMAL(24,8) NOT NULL, "locked" DECIMAL(24,8) NOT NULL, "total" DECIMAL(24,8) NOT NULL, "equityUSDT" DECIMAL(24,8) NOT NULL, "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE "RiskEvent" ("id" TEXT PRIMARY KEY, "botId" TEXT NOT NULL REFERENCES "BotConfig"("id") ON DELETE CASCADE, "allowed" BOOLEAN NOT NULL, "code" TEXT NOT NULL, "reason" TEXT NOT NULL, "signal" JSONB, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE "BotLog" ("id" TEXT PRIMARY KEY, "botId" TEXT NOT NULL REFERENCES "BotConfig"("id") ON DELETE CASCADE, "level" TEXT NOT NULL, "event" TEXT NOT NULL, "message" TEXT NOT NULL, "metadata" JSONB, "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE "SystemControl" ("id" TEXT PRIMARY KEY DEFAULT 'global', "killSwitchActive" BOOLEAN NOT NULL DEFAULT false, "reason" TEXT, "updatedAt" TIMESTAMP(3) NOT NULL);
+
+CREATE INDEX "BotConfig_status_mode_idx" ON "BotConfig"("status", "mode");
+CREATE INDEX "BotConfig_userId_idx" ON "BotConfig"("userId");
+CREATE INDEX "ExchangeAccount_userId_mode_idx" ON "ExchangeAccount"("userId", "mode");
+CREATE INDEX "Order_botId_status_idx" ON "Order"("botId", "status");
+CREATE INDEX "Order_exchangeOrderId_idx" ON "Order"("exchangeOrderId");
+CREATE INDEX "Fill_botId_timestamp_idx" ON "Fill"("botId", "timestamp");
+CREATE INDEX "Position_botId_isOpen_idx" ON "Position"("botId", "isOpen");
+CREATE UNIQUE INDEX "Position_one_open_per_symbol" ON "Position"("botId", "symbol") WHERE "isOpen" = true;
+CREATE INDEX "Trade_botId_timestamp_idx" ON "Trade"("botId", "timestamp");
+CREATE INDEX "BalanceSnapshot_botId_timestamp_idx" ON "BalanceSnapshot"("botId", "timestamp");
+CREATE INDEX "RiskEvent_botId_createdAt_idx" ON "RiskEvent"("botId", "createdAt");
+CREATE INDEX "BotLog_botId_createdAt_idx" ON "BotLog"("botId", "createdAt");

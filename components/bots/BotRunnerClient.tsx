@@ -1,166 +1,166 @@
-// components/bots/BotRunnerClient.tsx
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { BotConfig } from "@/lib/bots/types";
-import { upsertConfig } from "@/lib/bots/store";
-import { SimEngine } from "@/lib/bots/simEngine";
-import { useLivePrice } from "@/lib/useLivePrice";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
 
-type Props = {
-  pair: string;
-  onPairChange?: (next: string) => void;
+type Props = { pair: string; onPairChange?: (next: string) => void };
+type Runtime = {
+  status: string; lastPrice?: string; lastSignal?: string; lastSignalReason?: string;
+  lastError?: string; workerHeartbeatAt?: string; dailyRealizedPnl?: string; updatedAt: string;
+};
+type Position = {
+  symbol: string; quantity: string; averageEntryPrice: string; realizedPnl: string;
+  unrealizedPnl: string; updatedAt: string;
+};
+type Order = { id: string; side: string; status: string; averageFillPrice?: string; createdAt: string };
+type Log = { id: string; level: string; message: string; createdAt: string };
+type ApiBot = {
+  id: string; name: string; symbol: string; mode: "SIM" | "TESTNET"; status: string;
+  capitalUSDT: string; strategyParams: Record<string, unknown>; runtime?: Runtime;
+  positions: Position[]; orders: Order[]; logs: Log[];
 };
 
-const DEFAULT: BotConfig = {
-  id: "bot-1",
-  name: "EMA Cross (SIM)",
-  pair: "BTCUSDT",
-  mode: "SIM",
-  strategy: { kind: "ema-cross", params: { short: 9, long: 21 } },
-  risk: { capitalUSDT: 1000, orderSizePct: 10, takeProfitPct: 2, stopLossPct: 1 },
-  enabled: false,
-  createdAt: Date.now(),
-};
-
-const norm = (v: string) => String(v).replace(/[^a-z0-9]/gi, "").toUpperCase();
+const money = (value: string | number | undefined) => Number(value ?? 0).toLocaleString("pt-PT", { maximumFractionDigits: 2 });
 
 export default function BotRunnerClient({ pair, onPairChange }: Props) {
-  const [cfg, setCfg] = useState<BotConfig>({ ...DEFAULT, pair: norm(pair) });
-  const [running, setRunning] = useState(false);
-  const [rt, setRt] = useState<any>(null);
+  const [bot, setBot] = useState<ApiBot | null>(null);
+  const [unauthorized, setUnauthorized] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+  const [now, setNow] = useState(0);
 
-  // sincroniza cfg.pair quando a prop "pair" mudar nos chips
+  const load = useCallback(async () => {
+    const response = await fetch("/api/bots", { cache: "no-store" });
+    if (response.status === 401) { setUnauthorized(true); return; }
+    const payload = await response.json() as { ok: boolean; bots?: ApiBot[]; message?: string };
+    if (!response.ok) { setMessage(payload.message ?? "Falha ao consultar o motor."); return; }
+    setUnauthorized(false);
+    setBot(payload.bots?.[0] ?? null);
+  }, []);
+
   useEffect(() => {
-    setCfg((c) => (c.pair === norm(pair) ? c : { ...c, pair: norm(pair) }));
-  }, [pair]);
+    const initial = window.setTimeout(() => { setNow(Date.now()); void load(); }, 0);
+    const timer = window.setInterval(() => { setNow(Date.now()); void load(); }, 3_000);
+    return () => { window.clearTimeout(initial); window.clearInterval(timer); };
+  }, [load]);
 
-  // persistência
-  useEffect(() => { upsertConfig(cfg); }, [cfg]);
+  async function createBot() {
+    setBusy(true); setMessage("");
+    const response = await fetch("/api/bots", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        name: "EMA Cross", symbol: pair, mode: "SIM", strategy: "EMA_CROSS",
+        strategyParams: { shortPeriod: 9, longPeriod: 21 }, capitalUSDT: 1_000,
+        maxCapitalUSDT: 1_000, maxOrderUSDT: 100, maxPositions: 1,
+        maxDailyLossUSDT: 50, maxDrawdownPct: 10, minOrderIntervalMs: 60_000,
+        takeProfitPct: 2, stopLossPct: 1,
+      }),
+    });
+    setBusy(false);
+    if (!response.ok) setMessage("Não foi possível criar o bot. Verifique banco e configuração.");
+    await load();
+  }
 
-  // engine + preço ao vivo
-  const engine = useMemo(() => new SimEngine(setRt), []);
-  const { price } = useLivePrice(cfg.pair);
+  async function action(type: "start" | "pause" | "stop") {
+    if (!bot || !window.confirm(`Confirmar ação: ${type.toUpperCase()}?`)) return;
+    setBusy(true);
+    const response = await fetch(`/api/bots/${bot.id}/action?type=${type}`, {
+      method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ confirmation: true }),
+    });
+    setBusy(false);
+    if (!response.ok) setMessage(`Ação ${type} recusada pelo servidor.`);
+    await load();
+  }
 
-  // loop de simulação suave
-  const lastTs = useRef(0);
-  useEffect(() => {
-    if (!running || !price) return;
-    const now = Date.now();
-    if (now - lastTs.current < 800) return;
-    lastTs.current = now;
-    engine.step(cfg, price, now);
-  }, [running, price, engine, cfg]);
+  async function closePosition() {
+    if (!bot || !window.confirm("Fechar integralmente a posição Spot atual?")) return;
+    setBusy(true);
+    const response = await fetch(`/api/bots/${bot.id}/close-position`, {
+      method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ confirmation: true }),
+    });
+    setBusy(false);
+    if (!response.ok) setMessage("Fechamento recusado. Consulte os logs.");
+    await load();
+  }
 
-  // quando usuário digita manualmente no input
-  const handleManualPair = (v: string) => {
-    const next = norm(v);
-    setCfg((c) => ({ ...c, pair: next }));
-    onPairChange?.(next); // mantém chips em sincronia
-  };
+  async function killSwitch() {
+    if (!window.confirm("ATIVAR KILL SWITCH GLOBAL e pausar todos os bots?")) return;
+    setBusy(true);
+    const response = await fetch("/api/kill-switch", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ active: true, reason: "Activated from RadarCrypto dashboard" }),
+    });
+    setBusy(false);
+    if (!response.ok) setMessage("Kill switch não foi aplicado.");
+    await load();
+  }
+
+  async function applyPair() {
+    if (!bot || bot.status === "RUNNING") return setMessage("Pause o bot antes de alterar o símbolo.");
+    if (!window.confirm(`Alterar símbolo do bot para ${pair} e reiniciar indicadores?`)) return;
+    const response = await fetch(`/api/bots/${bot.id}`, {
+      method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ symbol: pair }),
+    });
+    if (!response.ok) setMessage("Símbolo não alterado.");
+    else onPairChange?.(pair);
+    await load();
+  }
+
+  if (unauthorized) {
+    return <div className="panel" style={{ padding: 18 }}><p>O painel do motor exige autenticação interna.</p><Link className="btn" href="/login">Entrar</Link></div>;
+  }
+  if (!bot) {
+    return <div className="panel" style={{ padding: 18 }}><p>Nenhum bot persistido. O primeiro bot será criado em modo SIM.</p><button className="btn" disabled={busy} onClick={createBot}>Criar bot EMA Cross SIM</button>{message && <p className="pnlNeg">{message}</p>}</div>;
+  }
+
+  const position = bot.positions[0];
+  const lastOrder = bot.orders[0];
+  const heartbeat = bot.runtime?.workerHeartbeatAt ? new Date(bot.runtime.workerHeartbeatAt).getTime() : 0;
+  const workerOnline = now > 0 && now - heartbeat < 15_000;
+  const equity = Number(bot.capitalUSDT) + Number(bot.runtime?.dailyRealizedPnl ?? 0) + Number(position?.unrealizedPnl ?? 0);
 
   return (
-    <div className="panel" style={{ padding: 12 }}>
+    <div className="panel" style={{ padding: 14, display: "grid", gap: 12 }}>
       <div className="compactHeader">
-        <div className="compactTitle">Robô (SIM) — {cfg.name}</div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <button className="btn" onClick={() => setRunning((v) => !v)}>
-            {running ? "Parar" : "Iniciar"}
-          </button>
-          <button className="btn" onClick={() => setCfg((c) => ({ ...c, enabled: !c.enabled }))}>
-            {cfg.enabled ? "Desabilitar" : "Habilitar"}
-          </button>
+        <div><div className="compactTitle">{bot.name}</div><small className="muted">Dados do worker e PostgreSQL</small></div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <button className="btn" disabled={busy || bot.status === "RUNNING"} onClick={() => action("start")}>Iniciar</button>
+          <button className="btn" disabled={busy || bot.status !== "RUNNING"} onClick={() => action("pause")}>Pausar</button>
+          <button className="btn" disabled={busy || bot.status === "STOPPED"} onClick={() => action("stop")}>Parar</button>
+          <button className="btn" disabled={busy || !position} onClick={closePosition}>Fechar posição</button>
+          <button className="btn btnSell" disabled={busy} onClick={killSwitch}>Kill Switch</button>
         </div>
       </div>
 
-      <div style={{ display: "grid", gap: 10, marginTop: 10 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
-          <label className="lbl">Par
-            <input
-              className="inp"
-              value={cfg.pair}
-              onChange={(e) => handleManualPair(e.target.value)}
-              placeholder="ex.: BTCUSDT"
-            />
-          </label>
-          <label className="lbl">Capital (USDT)
-            <input
-              className="inp"
-              type="number"
-              value={cfg.risk.capitalUSDT}
-              onChange={(e) =>
-                setCfg((c) => ({ ...c, risk: { ...c.risk, capitalUSDT: Number(e.target.value) || 0 } }))
-              }
-            />
-          </label>
-          <label className="lbl">% por trade
-            <input
-              className="inp"
-              type="number"
-              value={cfg.risk.orderSizePct}
-              onChange={(e) =>
-                setCfg((c) => ({ ...c, risk: { ...c.risk, orderSizePct: Number(e.target.value) || 0 } }))
-              }
-            />
-          </label>
-        </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8 }}>
-          <label className="lbl">EMA curta
-            <input
-              className="inp"
-              type="number"
-              value={(cfg.strategy.params as any).short as number}
-              onChange={(e) =>
-                setCfg((c) => ({
-                  ...c,
-                  strategy: { ...c.strategy, params: { ...(c.strategy.params as any), short: Number(e.target.value) || 0 } },
-                }))
-              }
-            />
-          </label>
-          <label className="lbl">EMA longa
-            <input
-              className="inp"
-              type="number"
-              value={(cfg.strategy.params as any).long as number}
-              onChange={(e) =>
-                setCfg((c) => ({
-                  ...c,
-                  strategy: { ...c.strategy, params: { ...(c.strategy.params as any), long: Number(e.target.value) || 0 } },
-                }))
-              }
-            />
-          </label>
-          <label className="lbl">TP (%)
-            <input
-              className="inp"
-              type="number"
-              value={cfg.risk.takeProfitPct ?? 0}
-              onChange={(e) =>
-                setCfg((c) => ({ ...c, risk: { ...c.risk, takeProfitPct: Number(e.target.value) || 0 } }))
-              }
-            />
-          </label>
-          <label className="lbl">SL (%)
-            <input
-              className="inp"
-              type="number"
-              value={cfg.risk.stopLossPct ?? 0}
-              onChange={(e) =>
-                setCfg((c) => ({ ...c, risk: { ...c.risk, stopLossPct: Number(e.target.value) || 0 } }))
-              }
-            />
-          </label>
-        </div>
-
-        <div className="highlight" style={{ padding: 10, display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8 }}>
-          <div><small className="muted">Preço</small><div className="bold">{price ? price.toLocaleString("pt-PT") : "—"}</div></div>
-          <div><small className="muted">Equity</small><div className="bold">{rt?.equityUSDT !== undefined ? rt.equityUSDT.toFixed(2) : "—"}</div></div>
-          <div><small className="muted">PnL</small><div className={rt?.pnlUSDT >= 0 ? "pnlPos" : "pnlNeg"}>{rt?.pnlUSDT !== undefined ? rt.pnlUSDT.toFixed(2) : "—"}</div></div>
-          <div><small className="muted">Aberta</small><div>{rt?.openPos ? `${rt.openPos.side} @ ${rt.openPos.entryPrice.toFixed(2)}` : "—"}</div></div>
-        </div>
+      <div className="highlight" style={{ padding: 10, display: "grid", gridTemplateColumns: "repeat(4,minmax(0,1fr))", gap: 10 }}>
+        <Metric label="Modo" value={bot.mode} />
+        <Metric label="Status" value={bot.status} />
+        <Metric label="Worker" value={workerOnline ? "ONLINE" : "SEM HEARTBEAT"} />
+        <Metric label="Símbolo" value={bot.symbol} />
+        <Metric label="Estratégia" value={String(bot.strategyParams.kind ?? "EMA_CROSS")} />
+        <Metric label="Preço atual" value={money(bot.runtime?.lastPrice)} />
+        <Metric label="Saldo/Capital" value={`${money(bot.capitalUSDT)} USDT`} />
+        <Metric label="Equity" value={`${money(equity)} USDT`} />
+        <Metric label="Quantidade" value={position ? Number(position.quantity).toFixed(8) : "—"} />
+        <Metric label="Preço médio" value={position ? money(position.averageEntryPrice) : "—"} />
+        <Metric label="PNL realizado" value={money(bot.runtime?.dailyRealizedPnl)} />
+        <Metric label="PNL não realizado" value={money(position?.unrealizedPnl)} />
+        <Metric label="Última ordem" value={lastOrder ? `${lastOrder.side} · ${lastOrder.status}` : "—"} />
+        <Metric label="Próximo alvo" value="Definido pela estratégia/TP-SL" />
+        <Metric label="Último sinal" value={`${bot.runtime?.lastSignal ?? "—"}: ${bot.runtime?.lastSignalReason ?? ""}`} />
+        <Metric label="Atualização" value={bot.runtime?.updatedAt ? new Date(bot.runtime.updatedAt).toLocaleString() : "—"} />
       </div>
+
+      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <span>Par selecionado: {pair}</span><button className="btn" disabled={busy || pair === bot.symbol} onClick={applyPair}>Aplicar par ao bot</button>
+      </div>
+      {bot.runtime?.lastError && <p className="pnlNeg">Erro: {bot.runtime.lastError}</p>}
+      {message && <p className="pnlNeg">{message}</p>}
+      <div><strong>Logs recentes</strong>{bot.logs.length ? bot.logs.map((log) => <div key={log.id} className="muted">{new Date(log.createdAt).toLocaleString()} · {log.level} · {log.message}</div>) : <div className="muted">Sem logs.</div>}</div>
     </div>
   );
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return <div><small className="muted">{label}</small><div className="bold" style={{ overflowWrap: "anywhere" }}>{value}</div></div>;
 }

@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import Link from "next/link";
 
 type Topic = "duvida" | "conta" | "outros";
 
@@ -37,9 +38,9 @@ export default function FaleComAGentePage() {
   return (
     <main className="contact-page">
       {/* Botão fixo topo-direito (ID exclusivo para não ser afetado por estilos globais antigos) */}
-      <a id="rc-backtop" href="/" aria-label="Voltar ao início" className="rc-btn rc-btn--green back-fixed">
+      <Link id="rc-backtop" href="/" aria-label="Voltar ao início" className="rc-btn rc-btn--green back-fixed">
         Voltar ao início
-      </a>
+      </Link>
 
       {/* Cabeçalho */}
       <section className="hero">
@@ -157,12 +158,12 @@ export default function FaleComAGentePage() {
 
           <details className="qa">
             <summary>O simulador usa dados ao vivo?</summary>
-            <p>Sim. No modo SIM, os preços são atualizados em tempo real no seu navegador.</p>
+            <p>Os preços vêm de endpoints públicos da Binance; o produto permanece experimental.</p>
           </details>
 
           <details className="qa">
             <summary>Posso exportar meu histórico?</summary>
-            <p>Sim. Use o botão <em>Exportar CSV</em> na página do simulador para baixar as operações.</p>
+            <p>Sim. O CSV representa a sessão atual do simulador manual.</p>
           </details>
 
           <details className="qa">
@@ -172,7 +173,7 @@ export default function FaleComAGentePage() {
 
           <details className="qa">
             <summary>Como migrar para um plano pago?</summary>
-            <p>Vá em <strong>Planos</strong> e escolha o que faz sentido. A migração é instantânea.</p>
+            <p>Os planos pagos estão em desenvolvimento e ainda não aceitam contratação.</p>
           </details>
         </aside>
       </section>
