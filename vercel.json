@@ -1,0 +1,14 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "app/api/exchange-credentials/route.ts": {
+      "regions": ["fra1"]
+    },
+    "app/api/health/route.ts": {
+      "regions": ["fra1"]
+    },
+    "app/api/health/binance/route.ts": {
+      "regions": ["fra1"]
+    }
+  }
+}
