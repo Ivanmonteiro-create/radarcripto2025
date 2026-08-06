@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { apiErrorResponse, parseJson } from "@/lib/server/api";
-import { requireApiAuth } from "@/lib/server/auth";
+import { requireApiAuth, requireMutationAuth } from "@/lib/server/auth";
 import { prisma } from "@/lib/server/prisma";
 import { killSwitchSchema } from "@/lib/server/schemas";
 
@@ -13,7 +13,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const unauthorized = await requireApiAuth(); if (unauthorized) return unauthorized;
+  const unauthorized = await requireMutationAuth(request); if (unauthorized) return unauthorized;
   try {
     const input = await parseJson(request, killSwitchSchema);
     const control = await prisma.$transaction(async (tx) => {

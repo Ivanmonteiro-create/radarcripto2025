@@ -97,9 +97,12 @@ export class SimExchange implements IExchange {
     return this.createMarketOrder(request);
   }
 
-  async getOrder(_symbol: string, orderId: string): Promise<Order> {
-    const order = this.engine.snapshot().orders.find((item) => item.id === orderId || item.clientOrderId === orderId);
-    if (!order) throw new Error(`Simulated order ${orderId} not found`);
+  async getOrder(_symbol: string, reference: { orderId?: string; clientOrderId?: string }): Promise<Order> {
+    const order = this.engine.snapshot().orders.find((item) =>
+      (reference.orderId && item.id === reference.orderId)
+      || (reference.clientOrderId && item.clientOrderId === reference.clientOrderId),
+    );
+    if (!order) throw new Error("Simulated order not found");
     return order;
   }
 
@@ -111,7 +114,7 @@ export class SimExchange implements IExchange {
   }
 
   async cancelOrder(symbol: string, orderId: string): Promise<Order> {
-    const order = await this.getOrder(symbol, orderId);
+    const order = await this.getOrder(symbol, { orderId });
     if (order.status !== "OPEN" && order.status !== "PENDING") {
       throw new Error(`Order ${orderId} cannot be cancelled from ${order.status}`);
     }

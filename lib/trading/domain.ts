@@ -2,6 +2,7 @@ export type ExchangeMode = "SIM" | "TESTNET";
 export type BotStatus = "STOPPED" | "RUNNING" | "PAUSED" | "ERROR";
 export type OrderStatus =
   | "PENDING"
+  | "UNKNOWN"
   | "OPEN"
   | "PARTIALLY_FILLED"
   | "FILLED"
@@ -51,6 +52,8 @@ export interface Fill {
   price: number;
   quantity: number;
   feeQuote: number;
+  feeAsset?: string;
+  feeAmount?: number;
   timestamp: number;
 }
 
@@ -63,6 +66,8 @@ export interface Trade {
   quantity: number;
   notionalQuote: number;
   feeQuote: number;
+  feeAsset?: string;
+  feeAmount?: number;
   realizedPnl: number;
   timestamp: number;
 }

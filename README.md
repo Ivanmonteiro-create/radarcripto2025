@@ -114,13 +114,17 @@ preço -> estratégia -> sinal -> gestor de risco -> ordem PENDING persistida
       -> reconciliação transacional -> posição/trade/runtime/log
 ```
 
-Uma ordem enviada não é considerada executada: os estados `PENDING`, `OPEN`, `PARTIALLY_FILLED`, `FILLED`, `CANCELLED` e `REJECTED` são distintos.
+Uma ordem enviada não é considerada executada: os estados `PENDING`, `UNKNOWN`, `OPEN`, `PARTIALLY_FILLED`, `FILLED`, `CANCELLED` e `REJECTED` são distintos. Respostas perdidas ficam `UNKNOWN` e são consultadas pelo `clientOrderId`, sem reenvio automático.
 
 ## Limitações desta fundação
 
 - Nenhum adapter Live existe.
 - A Testnet exige credenciais válidas e PostgreSQL configurado; os testes não enviam ordens.
-- O worker usa polling; streaming de candles e fila distribuída ficam para o próximo patch.
+- O worker usa polling com heartbeat, lock, reconciliação e backoff; streaming de candles e fila distribuída ficam para um patch futuro.
 - A autenticação atual é de um único operador interno, não uma plataforma multiusuário pública.
-- A gestão de chaves tem primitivas de criptografia, mas ainda não possui tela/endpoint de cadastro de conta.
-- Reconciliação periódica de ordens parcialmente preenchidas após reinício deve ser ampliada antes de uso prolongado na Testnet.
+- O PostgreSQL externo, o serviço persistente e as credenciais Testnet ainda precisam ser fornecidos pelo operador.
+- Nenhuma ordem Testnet é enviada automaticamente pelo deploy, seed ou tela de credenciais.
+
+## Integração PATCH 02
+
+Consulte [`docs/PATCH02_RUNBOOK.md`](docs/PATCH02_RUNBOOK.md) para configurar PostgreSQL dedicado, Preview, worker persistente, credenciais criptografadas e a primeira ordem manual controlada.

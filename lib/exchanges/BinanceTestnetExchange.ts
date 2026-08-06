@@ -18,7 +18,14 @@ interface BinanceConfig {
 }
 
 type BinanceFilter = { filterType: string; minPrice?: string; maxPrice?: string; tickSize?: string; minQty?: string; maxQty?: string; stepSize?: string; minNotional?: string };
-type BinanceOrder = Record<string, unknown> & { orderId: number; clientOrderId: string; symbol: string; side: "BUY" | "SELL"; type: "MARKET" | "LIMIT"; status: string; origQty: string; executedQty: string; price?: string; transactTime?: number; updateTime?: number; fills?: Array<{ price: string; qty: string; commission: string; commissionAsset: string }> };
+type BinanceOrder = Record<string, unknown> & { orderId: number; clientOrderId: string; symbol: string; side: "BUY" | "SELL"; type: "MARKET" | "LIMIT"; status: string; origQty: string; executedQty: string; cummulativeQuoteQty?: string; price?: string; transactTime?: number; updateTime?: number; fills?: Array<{ price: string; qty: string; commission: string; commissionAsset: string }> };
+
+export interface BinanceReadOnlyValidation {
+  serverTime: number;
+  symbol: SymbolInfo;
+  nonZeroBalanceCount: number;
+  openOrderCount: number;
+}
 
 export class BinanceTestnetExchange implements IExchange {
   readonly mode = "TESTNET" as const;
@@ -94,9 +101,28 @@ export class BinanceTestnetExchange implements IExchange {
     }));
   }
 
-  async getOrder(symbol: string, orderId: string): Promise<Order> {
-    const raw = await this.signedRequest<BinanceOrder>("GET", "/api/v3/order", { symbol: normalizeSymbol(symbol), orderId });
+  async getOrder(symbol: string, reference: { orderId?: string; clientOrderId?: string }): Promise<Order> {
+    if (!reference.orderId && !reference.clientOrderId) throw new Error("Order reference is required");
+    const raw = await this.signedRequest<BinanceOrder>("GET", "/api/v3/order", {
+      symbol: normalizeSymbol(symbol),
+      ...(reference.orderId ? { orderId: reference.orderId } : { origClientOrderId: reference.clientOrderId! }),
+    });
     return this.mapOrder(raw).order;
+  }
+
+  async validateReadOnly(symbol = "BTCUSDT"): Promise<BinanceReadOnlyValidation> {
+    const [serverTime, symbolInfo, balances, openOrders] = await Promise.all([
+      this.getServerTime(),
+      this.getSymbolInfo(symbol),
+      this.getAccountBalances(),
+      this.getOpenOrders(symbol),
+    ]);
+    return {
+      serverTime,
+      symbol: symbolInfo,
+      nonZeroBalanceCount: balances.filter((balance) => balance.free + balance.locked > 0).length,
+      openOrderCount: openOrders.length,
+    };
   }
 
   async getOpenOrders(symbol?: string): Promise<Order[]> {
@@ -114,7 +140,9 @@ export class BinanceTestnetExchange implements IExchange {
     return raw.map((item) => ({
       id: String(item.id), orderId: String(item.orderId), symbol: String(item.symbol),
       side: item.isBuyer ? "BUY" : "SELL", price: Number(item.price), quantity: Number(item.qty),
-      notionalQuote: Number(item.quoteQty), feeQuote: Number(item.commission), realizedPnl: 0,
+      notionalQuote: Number(item.quoteQty),
+      feeQuote: String(item.commissionAsset) === "USDT" ? Number(item.commission) : 0,
+      feeAsset: String(item.commissionAsset), feeAmount: Number(item.commission), realizedPnl: 0,
       timestamp: Number(item.time),
     }));
   }
@@ -152,8 +180,14 @@ export class BinanceTestnetExchange implements IExchange {
     this.lastTimeSync = ended;
   }
 
+  async getServerTime(): Promise<number> {
+    const data = await this.publicRequest<{ serverTime: number }>("/api/v3/time");
+    if (!Number.isFinite(data.serverTime)) throw new Error("Invalid Binance Testnet server time");
+    return data.serverTime;
+  }
+
   private async publicRequest<T>(path: string): Promise<T> {
-    const response = await fetch(`${this.baseUrl}${path}`, { cache: "no-store" });
+    const response = await fetch(`${this.baseUrl}${path}`, { cache: "no-store", signal: AbortSignal.timeout(8_000) });
     return this.parseResponse<T>(response);
   }
 
@@ -170,6 +204,7 @@ export class BinanceTestnetExchange implements IExchange {
       method,
       headers: { "X-MBX-APIKEY": this.config.apiKey },
       cache: "no-store",
+      signal: AbortSignal.timeout(8_000),
     });
     return this.parseResponse<T>(response);
   }
@@ -184,10 +219,12 @@ export class BinanceTestnetExchange implements IExchange {
     const timestamp = Number(raw.updateTime ?? raw.transactTime ?? Date.now());
     const fills: Fill[] = (raw.fills ?? []).map((fill, index) => ({
       id: `${raw.orderId}-${index}`, orderId: String(raw.orderId), symbol: raw.symbol, side: raw.side,
-      price: Number(fill.price), quantity: Number(fill.qty), feeQuote: Number(fill.commission), timestamp,
+      price: Number(fill.price), quantity: Number(fill.qty),
+      feeQuote: fill.commissionAsset === "USDT" ? Number(fill.commission) : 0,
+      feeAsset: fill.commissionAsset, feeAmount: Number(fill.commission), timestamp,
     }));
     const executedQuantity = Number(raw.executedQty);
-    const totalQuote = fills.reduce((sum, fill) => sum + fill.price * fill.quantity, 0);
+    const totalQuote = Number(raw.cummulativeQuoteQty ?? 0) || fills.reduce((sum, fill) => sum + fill.price * fill.quantity, 0);
     return {
       order: {
         id: String(raw.orderId), exchangeOrderId: String(raw.orderId), clientOrderId: raw.clientOrderId,

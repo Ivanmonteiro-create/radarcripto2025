@@ -47,7 +47,7 @@ export default function BotRunnerClient({ pair, onPairChange }: Props) {
   async function createBot() {
     setBusy(true); setMessage("");
     const response = await fetch("/api/bots", {
-      method: "POST", headers: { "content-type": "application/json" },
+      method: "POST", headers: { "content-type": "application/json", "x-radarcrypto-csrf": "1" },
       body: JSON.stringify({
         name: "EMA Cross", symbol: pair, mode: "SIM", strategy: "EMA_CROSS",
         strategyParams: { shortPeriod: 9, longPeriod: 21 }, capitalUSDT: 1_000,
@@ -65,7 +65,7 @@ export default function BotRunnerClient({ pair, onPairChange }: Props) {
     if (!bot || !window.confirm(`Confirmar ação: ${type.toUpperCase()}?`)) return;
     setBusy(true);
     const response = await fetch(`/api/bots/${bot.id}/action?type=${type}`, {
-      method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ confirmation: true }),
+      method: "POST", headers: { "content-type": "application/json", "x-radarcrypto-csrf": "1" }, body: JSON.stringify({ confirmation: true }),
     });
     setBusy(false);
     if (!response.ok) setMessage(`Ação ${type} recusada pelo servidor.`);
@@ -76,7 +76,7 @@ export default function BotRunnerClient({ pair, onPairChange }: Props) {
     if (!bot || !window.confirm("Fechar integralmente a posição Spot atual?")) return;
     setBusy(true);
     const response = await fetch(`/api/bots/${bot.id}/close-position`, {
-      method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ confirmation: true }),
+      method: "POST", headers: { "content-type": "application/json", "x-radarcrypto-csrf": "1" }, body: JSON.stringify({ confirmation: true }),
     });
     setBusy(false);
     if (!response.ok) setMessage("Fechamento recusado. Consulte os logs.");
@@ -87,7 +87,7 @@ export default function BotRunnerClient({ pair, onPairChange }: Props) {
     if (!window.confirm("ATIVAR KILL SWITCH GLOBAL e pausar todos os bots?")) return;
     setBusy(true);
     const response = await fetch("/api/kill-switch", {
-      method: "POST", headers: { "content-type": "application/json" },
+      method: "POST", headers: { "content-type": "application/json", "x-radarcrypto-csrf": "1" },
       body: JSON.stringify({ active: true, reason: "Activated from RadarCrypto dashboard" }),
     });
     setBusy(false);
@@ -99,7 +99,7 @@ export default function BotRunnerClient({ pair, onPairChange }: Props) {
     if (!bot || bot.status === "RUNNING") return setMessage("Pause o bot antes de alterar o símbolo.");
     if (!window.confirm(`Alterar símbolo do bot para ${pair} e reiniciar indicadores?`)) return;
     const response = await fetch(`/api/bots/${bot.id}`, {
-      method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ symbol: pair }),
+      method: "PATCH", headers: { "content-type": "application/json", "x-radarcrypto-csrf": "1" }, body: JSON.stringify({ symbol: pair }),
     });
     if (!response.ok) setMessage("Símbolo não alterado.");
     else onPairChange?.(pair);

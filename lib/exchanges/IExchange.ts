@@ -28,7 +28,7 @@ export interface IExchange {
   getTickerPrice(symbol: string): Promise<number>;
   createMarketOrder(request: MarketOrderRequest): Promise<ExchangeOrderResult>;
   createLimitOrder(request: LimitOrderRequest): Promise<ExchangeOrderResult>;
-  getOrder(symbol: string, orderId: string): Promise<Order>;
+  getOrder(symbol: string, reference: { orderId?: string; clientOrderId?: string }): Promise<Order>;
   getOpenOrders(symbol?: string): Promise<Order[]>;
   cancelOrder(symbol: string, orderId: string): Promise<Order>;
   getRecentTrades(symbol: string, limit?: number): Promise<Trade[]>;

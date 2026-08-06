@@ -4,6 +4,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import BotRunnerClient from "@/components/bots/BotRunnerClient";
+import TestnetAdminPanel from "@/components/bots/TestnetAdminPanel";
 
 const PAIRS = [
   "ADAUSDT",
@@ -133,6 +134,8 @@ export default function RobosPage() {
           ))}
         </div>
       </section>
+
+      <TestnetAdminPanel symbol={active} />
 
       {/* --- PAINEL CENTRAL COM BOTÃO À DIREITA --- */}
       <section className="panelWrap">

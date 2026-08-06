@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 export const SESSION_COOKIE = "rc_internal_session";
+export const CSRF_HEADER = "x-radarcrypto-csrf";
 const SESSION_DURATION_SECONDS = 8 * 60 * 60;
 
 function secret(): string {
@@ -50,4 +51,23 @@ export async function isAuthenticated(): Promise<boolean> {
 export async function requireApiAuth(): Promise<NextResponse | null> {
   if (await isAuthenticated()) return null;
   return NextResponse.json({ ok: false, error: "UNAUTHORIZED" }, { status: 401 });
+}
+
+export function requireCsrf(request: Request): NextResponse | null {
+  if (request.headers.get(CSRF_HEADER) !== "1") {
+    return NextResponse.json({ ok: false, error: "CSRF_CHECK_FAILED" }, { status: 403 });
+  }
+  const fetchSite = request.headers.get("sec-fetch-site");
+  if (fetchSite && fetchSite !== "same-origin" && fetchSite !== "none") {
+    return NextResponse.json({ ok: false, error: "CSRF_CHECK_FAILED" }, { status: 403 });
+  }
+  const origin = request.headers.get("origin");
+  if (origin && origin !== new URL(request.url).origin) {
+    return NextResponse.json({ ok: false, error: "CSRF_CHECK_FAILED" }, { status: 403 });
+  }
+  return null;
+}
+
+export async function requireMutationAuth(request: Request): Promise<NextResponse | null> {
+  return (await requireApiAuth()) ?? requireCsrf(request);
 }

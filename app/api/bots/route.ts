@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { ApiError, apiErrorResponse, parseJson } from "@/lib/server/api";
-import { requireApiAuth } from "@/lib/server/auth";
+import { requireApiAuth, requireMutationAuth } from "@/lib/server/auth";
 import { getTradingMode } from "@/lib/server/env";
 import { ensureInternalUser } from "@/lib/server/internalUser";
 import { prisma } from "@/lib/server/prisma";
@@ -27,7 +27,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const unauthorized = await requireApiAuth();
+  const unauthorized = await requireMutationAuth(request);
   if (unauthorized) return unauthorized;
   try {
     const input = await parseJson(request, botCreateSchema);

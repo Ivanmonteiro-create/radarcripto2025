@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { ApiError, apiErrorResponse, parseJson } from "@/lib/server/api";
-import { requireApiAuth } from "@/lib/server/auth";
+import { requireApiAuth, requireMutationAuth } from "@/lib/server/auth";
 import { prisma } from "@/lib/server/prisma";
 import { botPatchSchema } from "@/lib/server/schemas";
 import { botCreateSchema } from "@/lib/server/schemas";
@@ -32,7 +32,7 @@ export async function GET(_request: Request, context: Context) {
 }
 
 export async function PATCH(request: Request, context: Context) {
-  const unauthorized = await requireApiAuth();
+  const unauthorized = await requireMutationAuth(request);
   if (unauthorized) return unauthorized;
   try {
     const { id } = await context.params;

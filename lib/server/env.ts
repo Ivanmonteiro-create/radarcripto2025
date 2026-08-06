@@ -11,8 +11,12 @@ export function getTradingMode(): "SIM" | "TESTNET" {
 export function getWorkerConfig() {
   const enabled = process.env.BOT_WORKER_ENABLED === "true";
   const pollMs = Number(process.env.BOT_WORKER_POLL_MS ?? 5_000);
+  const retryLimit = Number(process.env.BOT_WORKER_RETRY_LIMIT ?? 5);
+  const maxBackoffMs = Number(process.env.BOT_WORKER_MAX_BACKOFF_MS ?? 60_000);
   if (!Number.isFinite(pollMs) || pollMs < 1_000) throw new Error("BOT_WORKER_POLL_MS must be at least 1000");
-  return { enabled, pollMs };
+  if (!Number.isInteger(retryLimit) || retryLimit < 1 || retryLimit > 20) throw new Error("BOT_WORKER_RETRY_LIMIT must be between 1 and 20");
+  if (!Number.isFinite(maxBackoffMs) || maxBackoffMs < pollMs) throw new Error("BOT_WORKER_MAX_BACKOFF_MS must be at least BOT_WORKER_POLL_MS");
+  return { enabled, pollMs, retryLimit, maxBackoffMs };
 }
 
 export function getBinanceTestnetConfig() {

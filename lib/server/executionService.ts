@@ -11,6 +11,7 @@ import { createExchange } from "./exchangeFactory";
 import { getTestnetSpotPrice } from "./publicPrice";
 import { prisma } from "./prisma";
 import { redactSensitive } from "./redact";
+import { getWorkerConfig } from "./env";
 
 type DbBotWithRuntime = DbBotConfig & { runtime: DbBotRuntime | null };
 const jsonValue = (value: unknown): Prisma.InputJsonValue => JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
@@ -40,7 +41,7 @@ export class ExecutionService {
       realizedPnl: Number(dbPosition.realizedPnl), unrealizedPnl: Number(dbPosition.unrealizedPnl),
       costBasisQuote: Number(dbPosition.costBasisQuote),
     };
-    const exchange = createExchange(bot.mode, bot.id);
+    const exchange = await createExchange(bot.mode, bot.id);
     if (exchange instanceof SimExchange) await this.hydrateSimExchange(bot, exchange);
     const price = bot.mode === "SIM" ? await getTestnetSpotPrice(bot.symbol) : await exchange.getTickerPrice(bot.symbol);
     if (exchange instanceof SimExchange) exchange.setTickerPrice(bot.symbol, price);
@@ -57,7 +58,10 @@ export class ExecutionService {
   }
 
   async runActiveBots(): Promise<void> {
-    const bots = await prisma.botConfig.findMany({ where: { status: "RUNNING" }, select: { id: true } });
+    const bots = await prisma.botConfig.findMany({
+      where: { status: "RUNNING", OR: [{ runtime: { nextRetryAt: null } }, { runtime: { nextRetryAt: { lte: new Date() } } }] },
+      select: { id: true },
+    });
     for (const bot of bots) {
       try {
         await this.runBotCycle(bot.id);
@@ -65,6 +69,31 @@ export class ExecutionService {
         await this.recordFailure(bot.id, error);
       }
     }
+  }
+
+  async reconcileOpenOrders(): Promise<void> {
+    const orders = await prisma.order.findMany({
+      where: { status: { in: ["PENDING", "UNKNOWN", "OPEN", "PARTIALLY_FILLED"] } },
+      select: { id: true, reconciliationAttempts: true, lastReconciledAt: true },
+      orderBy: { createdAt: "asc" },
+      take: 200,
+    });
+    for (const order of orders) {
+      const delayMs = Math.min(60_000, 1_000 * (2 ** Math.min(order.reconciliationAttempts, 6)));
+      if (order.lastReconciledAt && Date.now() - order.lastReconciledAt.getTime() < delayMs) continue;
+      await this.reconcileOrder(order.id);
+    }
+  }
+
+  async reconcileOrder(orderId: string): Promise<void> {
+    await prisma.$transaction(async (lockTx) => {
+      const lockKey = `order:${orderId}`;
+      const rows = await lockTx.$queryRaw<Array<{ locked: boolean }>>`
+        SELECT pg_try_advisory_xact_lock(hashtext(${lockKey})) AS locked
+      `;
+      if (!rows[0]?.locked) return;
+      await this.reconcileOrderLocked(orderId);
+    }, { maxWait: 5_000, timeout: 60_000 });
   }
 
   async runBotCycle(botId: string): Promise<void> {
@@ -82,7 +111,7 @@ export class ExecutionService {
     if (!record || record.status !== "RUNNING") return;
     const bot = this.mapBot(record);
     const runtime = this.mapRuntime(record);
-    const exchange = createExchange(bot.mode, bot.id);
+    const exchange = await createExchange(bot.mode, bot.id);
     if (exchange instanceof SimExchange) await this.hydrateSimExchange(bot, exchange);
     const price = bot.mode === "SIM" ? await getTestnetSpotPrice(bot.symbol) : await exchange.getTickerPrice(bot.symbol);
     if (exchange instanceof SimExchange) exchange.setTickerPrice(bot.symbol, price);
@@ -116,12 +145,14 @@ export class ExecutionService {
         botId, status: "RUNNING", lastPrice: price, lastSignal: signal.kind,
         lastSignalReason: signal.reason,
         strategyState: jsonValue(runtime.strategyState), workerHeartbeatAt: new Date(), peakEquity: Math.max(runtime.peakEquity, estimatedEquity),
+        consecutiveFailures: 0, nextRetryAt: null, lastSuccessAt: new Date(),
       },
       update: {
         status: "RUNNING", lastPrice: price, lastSignal: signal.kind,
         lastSignalReason: signal.reason, strategyState: jsonValue(runtime.strategyState),
         workerHeartbeatAt: new Date(), lastError: null,
         peakEquity: Math.max(runtime.peakEquity, estimatedEquity),
+        consecutiveFailures: 0, nextRetryAt: null, lastSuccessAt: new Date(),
         ...(this.isSameUtcDay(runtime.dailyPnlDate, Date.now()) ? {} : { dailyRealizedPnl: 0, dailyPnlDate: new Date() }),
       },
     });
@@ -133,7 +164,7 @@ export class ExecutionService {
       ? Math.min(bot.capitalUSDT * 0.1, bot.maxOrderUSDT)
       : (currentPosition?.quantity ?? 0) * price;
     const duplicate = await prisma.order.findFirst({
-      where: { botId, symbol: bot.symbol, side: signal.kind, status: { in: ["PENDING", "OPEN", "PARTIALLY_FILLED"] } },
+      where: { botId, symbol: bot.symbol, side: signal.kind, status: { in: ["PENDING", "UNKNOWN", "OPEN", "PARTIALLY_FILLED"] } },
       select: { id: true },
     });
     const system = await prisma.systemControl.findUnique({ where: { id: "global" } });
@@ -218,11 +249,12 @@ export class ExecutionService {
             averageFillPrice: result.order.averageFillPrice, rejectReason: result.order.rejectReason,
           },
         });
-        for (const fill of result.fills) {
+        for (const fill of bot.mode === "SIM" ? result.fills : []) {
           const dbFill = await tx.fill.create({
             data: {
               botId: bot.id, orderId: pending.id, exchangeFillId: fill.id, symbol: fill.symbol,
               side: fill.side, price: fill.price, quantity: fill.quantity, feeQuote: fill.feeQuote,
+              feeAsset: fill.feeAsset, feeAmount: fill.feeAmount ?? fill.feeQuote,
               timestamp: new Date(fill.timestamp),
             },
           });
@@ -232,6 +264,7 @@ export class ExecutionService {
               botId: bot.id, orderId: pending.id, symbol: fill.symbol, side: fill.side,
               price: fill.price, quantity: fill.quantity, notionalQuote: fill.price * fill.quantity,
               feeQuote: fill.feeQuote, realizedPnl, timestamp: new Date(fill.timestamp),
+              feeAsset: fill.feeAsset, feeAmount: fill.feeAmount ?? fill.feeQuote,
             },
           });
           if (realizedPnl !== 0) {
@@ -243,10 +276,100 @@ export class ExecutionService {
         });
         await tx.botLog.create({ data: { botId: bot.id, level: "INFO", event: "ORDER_RECONCILED", message: `Order ${pending.id} reconciled as ${result.order.status}` } });
       });
+      if (bot.mode === "TESTNET") await this.reconcileOrder(pending.id);
     } catch (error) {
       const message = redactSensitive(error instanceof Error ? error.message : "Order failed");
-      await prisma.order.update({ where: { id: pending.id }, data: { status: "REJECTED", rejectReason: message } });
+      await prisma.order.update({
+        where: { id: pending.id },
+        data: { status: "UNKNOWN", submissionUncertain: true, lastReconciliationError: message },
+      });
       throw error;
+    }
+  }
+
+  private async reconcileOrderLocked(orderId: string): Promise<void> {
+    const local = await prisma.order.findUnique({ where: { id: orderId }, include: { bot: true } });
+    if (!local || local.bot.mode !== "TESTNET") return;
+    try {
+      const exchange = await createExchange("TESTNET", local.botId);
+      const remote = await exchange.getOrder(local.symbol, local.exchangeOrderId
+        ? { orderId: local.exchangeOrderId }
+        : { clientOrderId: local.clientOrderId });
+      const trades = (await exchange.getRecentTrades(local.symbol, 1_000))
+        .filter((trade) => trade.orderId === (remote.exchangeOrderId ?? remote.id));
+      const divergence = local.status !== remote.status || Number(local.executedQuantity) !== remote.executedQuantity;
+      await prisma.$transaction(async (tx) => {
+        await tx.order.update({
+          where: { id: local.id },
+          data: {
+            exchangeOrderId: remote.exchangeOrderId ?? remote.id,
+            status: remote.status,
+            executedQuantity: remote.executedQuantity,
+            averageFillPrice: remote.averageFillPrice,
+            submissionUncertain: false,
+            reconciliationAttempts: { increment: 1 },
+            lastReconciledAt: new Date(),
+            lastReconciliationError: null,
+            exchangeUpdatedAt: new Date(remote.updatedAt),
+          },
+        });
+        for (const trade of trades) {
+          const existing = await tx.fill.findUnique({
+            where: { orderId_exchangeFillId: { orderId: local.id, exchangeFillId: trade.id } },
+          });
+          if (existing) continue;
+          const fill = await tx.fill.create({ data: {
+            botId: local.botId,
+            orderId: local.id,
+            exchangeFillId: trade.id,
+            symbol: trade.symbol,
+            side: trade.side,
+            price: trade.price,
+            quantity: trade.quantity,
+            feeQuote: trade.feeQuote,
+            feeAsset: trade.feeAsset,
+            feeAmount: trade.feeAmount ?? trade.feeQuote,
+            timestamp: new Date(trade.timestamp),
+          } });
+          const realizedPnl = await this.applyPersistedFill(
+            tx, local.botId, fill.symbol, fill.side, Number(fill.quantity), Number(fill.price), Number(fill.feeQuote),
+          );
+          await tx.trade.create({ data: {
+            botId: local.botId,
+            orderId: local.id,
+            exchangeTradeId: trade.id,
+            symbol: trade.symbol,
+            side: trade.side,
+            price: trade.price,
+            quantity: trade.quantity,
+            notionalQuote: trade.notionalQuote,
+            feeQuote: trade.feeQuote,
+            feeAsset: trade.feeAsset,
+            feeAmount: trade.feeAmount ?? trade.feeQuote,
+            realizedPnl,
+            timestamp: new Date(trade.timestamp),
+          } });
+          if (realizedPnl !== 0) {
+            await tx.botRuntime.update({ where: { botId: local.botId }, data: { dailyRealizedPnl: { increment: realizedPnl }, dailyPnlDate: new Date() } });
+          }
+        }
+        await tx.botLog.create({ data: {
+          botId: local.botId,
+          level: divergence ? "WARN" : "INFO",
+          event: divergence ? "ORDER_DIVERGENCE_RECONCILED" : "ORDER_RECONCILED",
+          message: `Order ${local.id} reconciled as ${remote.status}`,
+          metadata: { persistedFillCount: trades.length },
+        } });
+      });
+      const bot = this.mapBot({ ...local.bot, runtime: null });
+      const price = await exchange.getTickerPrice(local.symbol);
+      await this.recordBalances(bot, exchange, price);
+    } catch (error) {
+      const message = redactSensitive(error instanceof Error ? error.message : "Order reconciliation failed");
+      await prisma.order.update({
+        where: { id: orderId },
+        data: { reconciliationAttempts: { increment: 1 }, lastReconciledAt: new Date(), lastReconciliationError: message },
+      });
     }
   }
 
@@ -347,10 +470,22 @@ export class ExecutionService {
 
   private async recordFailure(botId: string, error: unknown): Promise<void> {
     const message = redactSensitive(error instanceof Error ? error.message : "Unknown worker error");
+    const current = await prisma.botRuntime.findUnique({ where: { botId }, select: { consecutiveFailures: true } });
+    const failures = (current?.consecutiveFailures ?? 0) + 1;
+    const config = getWorkerConfig();
+    const exhausted = failures >= config.retryLimit;
+    const delayMs = Math.min(config.maxBackoffMs, config.pollMs * (2 ** Math.min(failures - 1, config.retryLimit - 1)));
     await prisma.$transaction([
-      prisma.botConfig.update({ where: { id: botId }, data: { status: "ERROR" } }),
-      prisma.botRuntime.upsert({ where: { botId }, create: { botId, status: "ERROR", lastError: message, strategyState: {} }, update: { status: "ERROR", lastError: message } }),
-      prisma.botLog.create({ data: { botId, level: "ERROR", event: "WORKER_CYCLE_FAILED", message } }),
+      prisma.botConfig.update({ where: { id: botId }, data: { status: exhausted ? "ERROR" : "RUNNING" } }),
+      prisma.botRuntime.upsert({
+        where: { botId },
+        create: { botId, status: exhausted ? "ERROR" : "RUNNING", lastError: message, strategyState: {}, consecutiveFailures: failures, nextRetryAt: exhausted ? null : new Date(Date.now() + delayMs) },
+        update: { status: exhausted ? "ERROR" : "RUNNING", lastError: message, consecutiveFailures: failures, nextRetryAt: exhausted ? null : new Date(Date.now() + delayMs) },
+      }),
+      prisma.botLog.create({ data: {
+        botId, level: "ERROR", event: exhausted ? "WORKER_RETRY_EXHAUSTED" : "WORKER_CYCLE_RETRY_SCHEDULED", message,
+        metadata: { failures, retryLimit: config.retryLimit, nextRetryInMs: exhausted ? null : delayMs },
+      } }),
     ]);
   }
 

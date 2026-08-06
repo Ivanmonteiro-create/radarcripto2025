@@ -14,7 +14,7 @@ export default function LoginPage() {
     setBusy(true);
     setError("");
     const response = await fetch("/api/auth/login", {
-      method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ token }),
+      method: "POST", headers: { "content-type": "application/json", "x-radarcrypto-csrf": "1" }, body: JSON.stringify({ token }),
     });
     setBusy(false);
     if (!response.ok) return setError("Credencial interna inválida.");
