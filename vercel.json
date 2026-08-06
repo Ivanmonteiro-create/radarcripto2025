@@ -9,6 +9,9 @@
     },
     "app/api/health/binance/route.ts": {
       "regions": ["fra1"]
+    },
+    "app/api/testnet/orders/route.ts": {
+      "regions": ["fra1"]
     }
   }
 }
