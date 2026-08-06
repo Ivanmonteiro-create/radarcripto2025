@@ -117,6 +117,7 @@ export default function BotRunnerClient({ pair, onPairChange }: Props) {
   const lastOrder = bot.orders[0];
   const heartbeat = bot.runtime?.workerHeartbeatAt ? new Date(bot.runtime.workerHeartbeatAt).getTime() : 0;
   const workerOnline = now > 0 && now - heartbeat < 15_000;
+  const botExecutionStatus = bot.status === "RUNNING" ? (workerOnline ? "ATIVO" : "SEM HEARTBEAT") : bot.status;
   const equity = Number(bot.capitalUSDT) + Number(bot.runtime?.dailyRealizedPnl ?? 0) + Number(position?.unrealizedPnl ?? 0);
 
   return (
@@ -135,7 +136,7 @@ export default function BotRunnerClient({ pair, onPairChange }: Props) {
       <div className="highlight" style={{ padding: 10, display: "grid", gridTemplateColumns: "repeat(4,minmax(0,1fr))", gap: 10 }}>
         <Metric label="Modo" value={bot.mode} />
         <Metric label="Status" value={bot.status} />
-        <Metric label="Worker" value={workerOnline ? "ONLINE" : "SEM HEARTBEAT"} />
+        <Metric label="Execução do bot" value={botExecutionStatus} />
         <Metric label="Símbolo" value={bot.symbol} />
         <Metric label="Estratégia" value={String(bot.strategyParams.kind ?? "EMA_CROSS")} />
         <Metric label="Preço atual" value={money(bot.runtime?.lastPrice)} />
