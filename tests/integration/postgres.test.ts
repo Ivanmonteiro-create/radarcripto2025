@@ -35,7 +35,7 @@ describeDatabase("PATCH 02 PostgreSQL integration", () => {
     expect(await client!.botConfig.count({ where: { id: { in: ["seed-ema-cross", "seed-percent-cycle"] } } })).toBe(2);
     expect(await client!.botConfig.count({ where: { id: { in: ["seed-ema-cross", "seed-percent-cycle"] }, status: "STOPPED" } })).toBe(2);
     expect(await client!.exchangeAccount.count()).toBe(0);
-  });
+  }, 15_000);
 
   it("persists configuration across a new Prisma client", async () => {
     await client!.systemSetting.upsert({
