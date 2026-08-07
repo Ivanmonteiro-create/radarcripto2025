@@ -6,6 +6,7 @@ import { botActionSchema } from "@/lib/server/schemas";
 import { getTradingMode } from "@/lib/server/env";
 import { getTestnetCredentialSummary } from "@/lib/server/exchangeCredentials";
 import { workerHealth } from "@/lib/server/health";
+import { activeTimedTest, finalizeTestRun, requestTimedTestStop } from "@/lib/server/botTestService";
 
 type Context = { params: Promise<{ id: string }> };
 const allowedActions = new Set(["start", "pause", "stop"]);
@@ -67,6 +68,13 @@ export async function POST(request: Request, context: Context) {
       }
       return updated;
     });
+    if (action !== "start") {
+      const activeTest = await activeTimedTest(id);
+      if (activeTest) {
+        await requestTimedTestStop(id, action === "pause" ? "OPERATOR_PAUSED" : "OPERATOR_STOPPED");
+        await finalizeTestRun(activeTest.id);
+      }
+    }
     return NextResponse.json({ ok: true, bot });
   } catch (error) {
     return apiErrorResponse(error);

@@ -3,6 +3,7 @@ import { getWorkerConfig } from "@/lib/server/env";
 import { ExecutionService } from "@/lib/server/executionService";
 import { prisma } from "@/lib/server/prisma";
 import { redactSensitive } from "@/lib/server/redact";
+import { finalizeStoppingTests, processTimedTests } from "@/lib/server/botTestService";
 
 async function main() {
   const config = getWorkerConfig();
@@ -30,8 +31,10 @@ async function main() {
         where: { id: "primary" },
         data: { status: "HEALTHY", lastHeartbeatAt: new Date(), lastCycleStartedAt: new Date(), lastError: null },
       });
+      await processTimedTests();
       await service.reconcileOpenOrders();
       await prisma.workerHeartbeat.update({ where: { id: "primary" }, data: { lastReconciliationAt: new Date() } });
+      await finalizeStoppingTests();
       await service.runActiveBots();
       consecutiveFailures = 0;
       await prisma.workerHeartbeat.update({

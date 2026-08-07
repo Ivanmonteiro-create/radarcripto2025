@@ -50,6 +50,13 @@ enum HealthState {
   UNHEALTHY
 }
 
+enum BotTestStatus {
+  IN_PROGRESS
+  COMPLETED
+  INTERRUPTED
+  ERROR
+}
+
 model User {
   id               String            @id @default(cuid())
   email            String            @unique
@@ -127,6 +134,7 @@ model BotConfig {
   balanceSnapshots   BalanceSnapshot[]
   riskEvents         RiskEvent[]
   logs               BotLog[]
+  testRuns           BotTestRun[]
 
   @@index([status, mode])
   @@index([userId])
@@ -156,6 +164,7 @@ model BotRuntime {
 model Order {
   id                      String      @id @default(cuid())
   botId                   String
+  testRunId               String?
   exchangeOrderId         String?
   clientOrderId           String      @unique
   symbol                  String
@@ -176,32 +185,37 @@ model Order {
   createdAt               DateTime    @default(now())
   updatedAt               DateTime    @updatedAt
   bot                     BotConfig   @relation(fields: [botId], references: [id], onDelete: Cascade)
+  testRun                 BotTestRun? @relation(fields: [testRunId], references: [id], onDelete: SetNull)
   fills                   Fill[]
   trades                  Trade[]
 
   @@index([botId, status])
+  @@index([testRunId, createdAt])
   @@index([exchangeOrderId])
 }
 
 model Fill {
-  id             String    @id @default(cuid())
+  id             String      @id @default(cuid())
   botId          String
+  testRunId      String?
   orderId        String
   exchangeFillId String?
   symbol         String
   side           OrderSide
-  price          Decimal   @db.Decimal(24, 8)
-  quantity       Decimal   @db.Decimal(36, 18)
-  feeQuote       Decimal   @default(0) @db.Decimal(24, 8)
+  price          Decimal     @db.Decimal(24, 8)
+  quantity       Decimal     @db.Decimal(36, 18)
+  feeQuote       Decimal     @default(0) @db.Decimal(24, 8)
   feeAsset       String?
-  feeAmount      Decimal   @default(0) @db.Decimal(36, 18)
+  feeAmount      Decimal     @default(0) @db.Decimal(36, 18)
   timestamp      DateTime
-  createdAt      DateTime  @default(now())
-  bot            BotConfig @relation(fields: [botId], references: [id], onDelete: Cascade)
-  order          Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  createdAt      DateTime    @default(now())
+  bot            BotConfig   @relation(fields: [botId], references: [id], onDelete: Cascade)
+  order          Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  testRun        BotTestRun? @relation(fields: [testRunId], references: [id], onDelete: SetNull)
 
   @@unique([orderId, exchangeFillId])
   @@index([botId, timestamp])
+  @@index([testRunId, createdAt])
 }
 
 model Position {
@@ -224,25 +238,28 @@ model Position {
 }
 
 model Trade {
-  id              String    @id @default(cuid())
+  id              String      @id @default(cuid())
   botId           String
+  testRunId       String?
   orderId         String
   exchangeTradeId String?
   symbol          String
   side            OrderSide
-  price           Decimal   @db.Decimal(24, 8)
-  quantity        Decimal   @db.Decimal(36, 18)
-  notionalQuote   Decimal   @db.Decimal(24, 8)
-  feeQuote        Decimal   @default(0) @db.Decimal(24, 8)
+  price           Decimal     @db.Decimal(24, 8)
+  quantity        Decimal     @db.Decimal(36, 18)
+  notionalQuote   Decimal     @db.Decimal(24, 8)
+  feeQuote        Decimal     @default(0) @db.Decimal(24, 8)
   feeAsset        String?
-  feeAmount       Decimal   @default(0) @db.Decimal(36, 18)
-  realizedPnl     Decimal   @default(0) @db.Decimal(24, 8)
+  feeAmount       Decimal     @default(0) @db.Decimal(36, 18)
+  realizedPnl     Decimal     @default(0) @db.Decimal(24, 8)
   timestamp       DateTime
-  bot             BotConfig @relation(fields: [botId], references: [id], onDelete: Cascade)
-  order           Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  bot             BotConfig   @relation(fields: [botId], references: [id], onDelete: Cascade)
+  order           Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  testRun         BotTestRun? @relation(fields: [testRunId], references: [id], onDelete: SetNull)
 
   @@unique([orderId, exchangeTradeId])
   @@index([botId, timestamp])
+  @@index([testRunId, timestamp])
 }
 
 model BalanceSnapshot {
@@ -260,16 +277,70 @@ model BalanceSnapshot {
 }
 
 model RiskEvent {
-  id        String    @id @default(cuid())
+  id        String      @id @default(cuid())
   botId     String
+  testRunId String?
   allowed   Boolean
   code      String
   reason    String
   signal    Json?
-  createdAt DateTime  @default(now())
-  bot       BotConfig @relation(fields: [botId], references: [id], onDelete: Cascade)
+  createdAt DateTime    @default(now())
+  bot       BotConfig   @relation(fields: [botId], references: [id], onDelete: Cascade)
+  testRun   BotTestRun? @relation(fields: [testRunId], references: [id], onDelete: SetNull)
 
   @@index([botId, createdAt])
+  @@index([testRunId, createdAt])
+}
+
+model BotTestRun {
+  id                    String        @id @default(cuid())
+  botId                 String
+  status                BotTestStatus @default(IN_PROGRESS)
+  testStartedAt         DateTime
+  testEndsAt            DateTime
+  durationMinutes       Int
+  requestedDurationMs   Int
+  actualDurationMs      Int?
+  stopRequestedAt       DateTime?
+  completedAt           DateTime?
+  stopReason            String?
+  configuration         Json
+  mode                  ExchangeMode
+  symbol                String
+  strategy              StrategyKind
+  observations          Int           @default(0)
+  crossoverCount        Int           @default(0)
+  buySignals            Int           @default(0)
+  sellSignals           Int           @default(0)
+  holdSignals           Int           @default(0)
+  buyBlocked            Int           @default(0)
+  sellIgnored           Int           @default(0)
+  cooldownBlocks        Int           @default(0)
+  errorCount            Int           @default(0)
+  initialEquity         Decimal       @db.Decimal(24, 8)
+  peakEquity            Decimal       @db.Decimal(24, 8)
+  finalEquity           Decimal?      @db.Decimal(24, 8)
+  realizedPnl           Decimal       @default(0) @db.Decimal(24, 8)
+  unrealizedPnl         Decimal       @default(0) @db.Decimal(24, 8)
+  finalPnl              Decimal?      @db.Decimal(24, 8)
+  currentDrawdownPct    Decimal       @default(0) @db.Decimal(10, 6)
+  maxDrawdownPct        Decimal       @default(0) @db.Decimal(10, 6)
+  lastSignal            String?
+  lastError             String?
+  lastHeartbeatAt       DateTime?
+  endedWithOpenPosition Boolean       @default(false)
+  finalPosition         Json?
+  summary               Json?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  bot                   BotConfig     @relation(fields: [botId], references: [id], onDelete: Cascade)
+  orders                Order[]
+  fills                 Fill[]
+  trades                Trade[]
+  riskEvents            RiskEvent[]
+
+  @@index([botId, testStartedAt])
+  @@index([status, testEndsAt])
 }
 
 model BotLog {

@@ -109,11 +109,11 @@ export default function RobosPage() {
       {/* --- CABEÇALHO --- */}
       <section className="hero">
         <h1>
-          Robôs de Trading <span>(Modo Simulado)</span>
+          Robôs de Trading <span>(Testes Autônomos)</span>
         </h1>
         <p className="sub">
-          Aqui você pode testar estratégias automatizadas em tempo real usando
-          dados ao vivo. Este é o modo SIM (simulação local).
+          Inicie e acompanhe testes com duração definida. O worker persistente
+          controla o prazo mesmo com o navegador ou computador desligado.
         </p>
 
         {/* Chips das moedas */}

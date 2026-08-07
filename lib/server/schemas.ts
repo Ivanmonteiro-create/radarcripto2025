@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { AUTONOMOUS_TEST_AUTHORIZATION, MAX_TEST_DURATION_MINUTES, MIN_TEST_DURATION_MINUTES } from "@/lib/trading/timedTest";
 
 const botBaseSchema = z.object({
   name: z.string().trim().min(1).max(80),
@@ -51,4 +52,9 @@ export const botCreateSchema = botBaseSchema
 
 export const botPatchSchema = botBaseSchema.partial().strict();
 export const botActionSchema = z.object({ confirmation: z.literal(true) }).strict();
+export const botTestStartSchema = z.object({
+  durationMinutes: z.number().int().min(MIN_TEST_DURATION_MINUTES).max(MAX_TEST_DURATION_MINUTES),
+  authorization: z.literal(AUTONOMOUS_TEST_AUTHORIZATION),
+}).strict();
+export const botTestStopSchema = z.object({ confirmation: z.literal(true) }).strict();
 export const killSwitchSchema = z.object({ active: z.boolean(), reason: z.string().trim().min(3).max(240) }).strict();

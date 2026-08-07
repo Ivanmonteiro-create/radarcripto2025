@@ -15,6 +15,7 @@ describeDatabase("PATCH 02 PostgreSQL integration", () => {
     await client!.order.deleteMany({ where: { id: "integration-order" } });
     await client!.position.deleteMany({ where: { id: "integration-position" } });
     await client!.balanceSnapshot.deleteMany({ where: { id: "integration-balance" } });
+    await client!.botTestRun.deleteMany({ where: { id: { startsWith: "integration-test-run" } } });
   });
 
   afterAll(async () => {
@@ -24,6 +25,7 @@ describeDatabase("PATCH 02 PostgreSQL integration", () => {
     await client.order.deleteMany({ where: { id: "integration-order" } });
     await client.position.deleteMany({ where: { id: "integration-position" } });
     await client.balanceSnapshot.deleteMany({ where: { id: "integration-balance" } });
+    await client.botTestRun.deleteMany({ where: { id: { startsWith: "integration-test-run" } } });
     await client.systemSetting.deleteMany({ where: { key: "integration.persistence" } });
     await client.$disconnect();
   });
@@ -106,5 +108,23 @@ describeDatabase("PATCH 02 PostgreSQL integration", () => {
     expect((await client!.workerHeartbeat.findUniqueOrThrow({ where: { id: "primary" } })).instanceId).toBe("restarted");
     expect(await client!.order.count({ where: { id: "integration-order" } })).toBe(1);
     await contender.$disconnect();
+  });
+
+  it("blocks two simultaneous timed tests for the same bot at database level", async () => {
+    const configuration = { strategy: "EMA_CROSS", source: "TICKER" };
+    const testStartedAt = new Date();
+    const testEndsAt = new Date(testStartedAt.getTime() + 3_600_000);
+    await client!.botTestRun.create({ data: {
+      id: "integration-test-run-1", botId: "seed-ema-cross", status: "IN_PROGRESS",
+      testStartedAt, testEndsAt, durationMinutes: 60, requestedDurationMs: 3_600_000,
+      configuration, mode: "SIM", symbol: "BTCUSDT", strategy: "EMA_CROSS",
+      initialEquity: 10, peakEquity: 10,
+    } });
+    await expect(client!.botTestRun.create({ data: {
+      id: "integration-test-run-2", botId: "seed-ema-cross", status: "IN_PROGRESS",
+      testStartedAt, testEndsAt, durationMinutes: 60, requestedDurationMs: 3_600_000,
+      configuration, mode: "SIM", symbol: "BTCUSDT", strategy: "EMA_CROSS",
+      initialEquity: 10, peakEquity: 10,
+    } })).rejects.toThrow();
   });
 });

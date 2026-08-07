@@ -13,6 +13,14 @@ import { getTestnetSpotPrice } from "./publicPrice";
 import { prisma } from "./prisma";
 import { redactSensitive } from "./redact";
 import { getWorkerConfig } from "./env";
+import {
+  activeTimedTest,
+  recordTestDecision,
+  recordTestFailure,
+  recordTestRiskOutcome,
+  stopTimedTestInsideBotLock,
+  timedTestAllowsEntry,
+} from "./botTestService";
 
 type DbBotWithRuntime = DbBotConfig & { runtime: DbBotRuntime | null };
 const jsonValue = (value: unknown): Prisma.InputJsonValue => JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
@@ -110,6 +118,11 @@ export class ExecutionService {
   private async runBotCycleLocked(botId: string): Promise<void> {
     const record = await prisma.botConfig.findUnique({ where: { id: botId }, include: { runtime: true } });
     if (!record || record.status !== "RUNNING") return;
+    const activeTest = await activeTimedTest(botId);
+    if (activeTest && !timedTestAllowsEntry(activeTest)) {
+      await stopTimedTestInsideBotLock(activeTest, "DURATION_COMPLETED");
+      return;
+    }
     const bot = this.mapBot(record);
     const runtime = this.mapRuntime(record);
     const exchange = await createExchange(bot.mode, bot.id);
@@ -140,27 +153,46 @@ export class ExecutionService {
       }
     }
 
+    const heartbeatAt = new Date();
     await prisma.botRuntime.upsert({
       where: { botId },
       create: {
         botId, status: "RUNNING", lastPrice: price, lastSignal: signal.kind,
         lastSignalReason: signal.reason,
-        strategyState: jsonValue(runtime.strategyState), workerHeartbeatAt: new Date(), peakEquity: Math.max(runtime.peakEquity, estimatedEquity),
-        consecutiveFailures: 0, nextRetryAt: null, lastSuccessAt: new Date(),
+        strategyState: jsonValue(runtime.strategyState), workerHeartbeatAt: heartbeatAt, peakEquity: Math.max(runtime.peakEquity, estimatedEquity),
+        consecutiveFailures: 0, nextRetryAt: null, lastSuccessAt: heartbeatAt,
       },
       update: {
         status: "RUNNING", lastPrice: price, lastSignal: signal.kind,
         lastSignalReason: signal.reason, strategyState: jsonValue(runtime.strategyState),
-        workerHeartbeatAt: new Date(), lastError: null,
+        workerHeartbeatAt: heartbeatAt, lastError: null,
         peakEquity: Math.max(runtime.peakEquity, estimatedEquity),
-        consecutiveFailures: 0, nextRetryAt: null, lastSuccessAt: new Date(),
+        consecutiveFailures: 0, nextRetryAt: null, lastSuccessAt: heartbeatAt,
         ...(this.isSameUtcDay(runtime.dailyPnlDate, Date.now()) ? {} : { dailyRealizedPnl: 0, dailyPnlDate: new Date() }),
       },
     });
+    if (activeTest) {
+      const testUnrealizedPnl = positions.reduce((sum, position) => sum + position.unrealizedPnl, 0);
+      const testEquity = Number(activeTest.initialEquity) + Number(activeTest.realizedPnl) + testUnrealizedPnl;
+      await recordTestDecision({
+        test: activeTest,
+        signal: signal.kind,
+        equity: testEquity,
+        unrealizedPnl: testUnrealizedPnl,
+        heartbeatAt,
+      });
+    }
     await this.recordBalances(bot, exchange, price);
     if (signal.kind === "HOLD") return;
 
-    if (signal.kind === "SELL" && !currentPosition) return;
+    if (signal.kind === "SELL" && !currentPosition) {
+      if (activeTest) await recordTestRiskOutcome(activeTest.id, { signal: "SELL", allowed: false, code: "NO_OPEN_POSITION", ignored: true });
+      return;
+    }
+    if (activeTest && !timedTestAllowsEntry(activeTest, new Date())) {
+      await stopTimedTestInsideBotLock(activeTest, "DURATION_COMPLETED");
+      return;
+    }
     const requestedOrderUSDT = signal.kind === "BUY"
       ? resolveAutomaticBuyUSDT(bot)
       : (currentPosition?.quantity ?? 0) * price;
@@ -175,9 +207,12 @@ export class ExecutionService {
       killSwitchActive: system?.killSwitchActive ?? false, hasPendingOrder: Boolean(pendingOrder),
     });
     await prisma.riskEvent.create({
-      data: { botId, allowed: decision.allowed, code: decision.code, reason: decision.reason, signal: jsonValue(signal) },
+      data: { botId, testRunId: activeTest?.id, allowed: decision.allowed, code: decision.code, reason: decision.reason, signal: jsonValue(signal) },
     });
-    if (!decision.allowed) return;
+    if (!decision.allowed) {
+      if (activeTest) await recordTestRiskOutcome(activeTest.id, { signal: signal.kind, allowed: false, code: decision.code });
+      return;
+    }
     if (bot.mode === "TESTNET") {
       const [symbolInfo, balances] = await Promise.all([
         exchange.getSymbolInfo(bot.symbol),
@@ -195,7 +230,7 @@ export class ExecutionService {
         balances,
       });
     }
-    await this.executeSignal(bot, runtime, signal, exchange, price, currentPosition, decision.maxOrderUSDT ?? requestedOrderUSDT);
+    await this.executeSignal(bot, runtime, signal, exchange, price, currentPosition, decision.maxOrderUSDT ?? requestedOrderUSDT, activeTest?.id);
   }
 
   private generateSignal(bot: BotConfig, runtime: BotRuntime, price: number): StrategySignal {
@@ -232,12 +267,20 @@ export class ExecutionService {
     price: number,
     currentPosition: Position | undefined,
     orderValue: number,
+    testRunId?: string,
   ): Promise<void> {
+    if (testRunId) {
+      const test = await prisma.botTestRun.findUnique({ where: { id: testRunId } });
+      if (!test || !timedTestAllowsEntry(test, new Date())) {
+        if (test) await stopTimedTestInsideBotLock(test, "DURATION_COMPLETED");
+        return;
+      }
+    }
     const clientOrderId = `rc-${bot.id.slice(0, 8)}-${randomUUID().slice(0, 12)}`;
     const quantity = signal.kind === "SELL" ? currentPosition?.quantity : undefined;
     const pending = await prisma.order.create({
       data: {
-        botId: bot.id, clientOrderId, symbol: bot.symbol, side: signal.kind === "BUY" ? "BUY" : "SELL",
+        botId: bot.id, testRunId, clientOrderId, symbol: bot.symbol, side: signal.kind === "BUY" ? "BUY" : "SELL",
         type: "MARKET", status: "PENDING", requestedQuantity: quantity ?? orderValue / price,
       },
     });
@@ -270,16 +313,16 @@ export class ExecutionService {
         for (const fill of bot.mode === "SIM" ? result.fills : []) {
           const dbFill = await tx.fill.create({
             data: {
-              botId: bot.id, orderId: pending.id, exchangeFillId: fill.id, symbol: fill.symbol,
+              botId: bot.id, testRunId, orderId: pending.id, exchangeFillId: fill.id, symbol: fill.symbol,
               side: fill.side, price: fill.price, quantity: fill.quantity, feeQuote: fill.feeQuote,
               feeAsset: fill.feeAsset, feeAmount: fill.feeAmount ?? fill.feeQuote,
               timestamp: new Date(fill.timestamp),
             },
           });
-          const realizedPnl = await this.applyPersistedFill(tx, bot.id, dbFill.symbol, dbFill.side, Number(dbFill.quantity), Number(dbFill.price), Number(dbFill.feeQuote));
+          const realizedPnl = await this.applyPersistedFill(tx, bot.id, testRunId, dbFill.symbol, dbFill.side, Number(dbFill.quantity), Number(dbFill.price), Number(dbFill.feeQuote));
           await tx.trade.create({
             data: {
-              botId: bot.id, orderId: pending.id, symbol: fill.symbol, side: fill.side,
+              botId: bot.id, testRunId, orderId: pending.id, symbol: fill.symbol, side: fill.side,
               price: fill.price, quantity: fill.quantity, notionalQuote: fill.price * fill.quantity,
               feeQuote: fill.feeQuote, realizedPnl, timestamp: new Date(fill.timestamp),
               feeAsset: fill.feeAsset, feeAmount: fill.feeAmount ?? fill.feeQuote,
@@ -287,6 +330,7 @@ export class ExecutionService {
           });
           if (realizedPnl !== 0) {
             await tx.botRuntime.update({ where: { botId: bot.id }, data: { dailyRealizedPnl: { increment: realizedPnl }, dailyPnlDate: new Date() } });
+            if (testRunId) await tx.botTestRun.update({ where: { id: testRunId }, data: { realizedPnl: { increment: realizedPnl } } });
           }
         }
         await tx.botRuntime.update({
@@ -338,6 +382,7 @@ export class ExecutionService {
           if (existing) continue;
           const fill = await tx.fill.create({ data: {
             botId: local.botId,
+            testRunId: local.testRunId,
             orderId: local.id,
             exchangeFillId: trade.id,
             symbol: trade.symbol,
@@ -350,10 +395,11 @@ export class ExecutionService {
             timestamp: new Date(trade.timestamp),
           } });
           const realizedPnl = await this.applyPersistedFill(
-            tx, local.botId, fill.symbol, fill.side, Number(fill.quantity), Number(fill.price), Number(fill.feeQuote),
+            tx, local.botId, local.testRunId, fill.symbol, fill.side, Number(fill.quantity), Number(fill.price), Number(fill.feeQuote),
           );
           await tx.trade.create({ data: {
             botId: local.botId,
+            testRunId: local.testRunId,
             orderId: local.id,
             exchangeTradeId: trade.id,
             symbol: trade.symbol,
@@ -369,6 +415,9 @@ export class ExecutionService {
           } });
           if (realizedPnl !== 0) {
             await tx.botRuntime.update({ where: { botId: local.botId }, data: { dailyRealizedPnl: { increment: realizedPnl }, dailyPnlDate: new Date() } });
+            if (local.testRunId) {
+              await tx.botTestRun.update({ where: { id: local.testRunId }, data: { realizedPnl: { increment: realizedPnl } } });
+            }
           }
         }
         await tx.botLog.create({ data: {
@@ -388,12 +437,19 @@ export class ExecutionService {
         where: { id: orderId },
         data: { reconciliationAttempts: { increment: 1 }, lastReconciledAt: new Date(), lastReconciliationError: message },
       });
+      if (local.testRunId) {
+        await prisma.botTestRun.update({
+          where: { id: local.testRunId },
+          data: { errorCount: { increment: 1 }, lastError: message },
+        });
+      }
     }
   }
 
   private async applyPersistedFill(
     tx: Prisma.TransactionClient,
     botId: string,
+    _testRunId: string | null | undefined,
     symbol: string,
     side: "BUY" | "SELL",
     quantity: number,
@@ -505,6 +561,7 @@ export class ExecutionService {
         metadata: { failures, retryLimit: config.retryLimit, nextRetryInMs: exhausted ? null : delayMs },
       } }),
     ]);
+    await recordTestFailure(botId, message, exhausted);
   }
 
   private isSameUtcDay(timestamp: number | undefined, now: number): boolean {
