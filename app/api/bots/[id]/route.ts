@@ -66,7 +66,7 @@ export async function PATCH(request: Request, context: Context) {
       create: { kind: input.strategy, name: input.strategy, version: 1, schema: {} }, update: {},
     }) : null;
     const bot = await prisma.$transaction(async (tx) => {
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${id}))`;
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${id})) IS NULL AS locked`;
       const lockedCurrent = await tx.botConfig.findUnique({ where: { id } });
       if (!lockedCurrent) throw new ApiError(404, "BOT_NOT_FOUND");
       if (lockedCurrent.status === "RUNNING") throw new ApiError(409, "PAUSE_BOT_BEFORE_EDITING");

@@ -46,7 +46,7 @@ export async function POST(request: Request, context: Context) {
     }
     const status = action === "start" ? "RUNNING" : action === "pause" ? "PAUSED" : "STOPPED";
     const bot = await prisma.$transaction(async (tx) => {
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${id}))`;
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${id})) IS NULL AS locked`;
       const updated = await tx.botConfig.update({ where: { id }, data: { status } });
       await tx.botRuntime.upsert({
         where: { botId: id },

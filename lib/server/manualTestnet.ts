@@ -56,7 +56,7 @@ export async function executeManualTestnetOrder(input: ManualTestnetOrderInput) 
 
   const clientOrderId = `rc-manual-${randomUUID().replace(/-/g, "").slice(0, 16)}`;
   const pending = await prisma.$transaction(async (tx) => {
-    await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${bot.id}))`;
+    await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${bot.id})) IS NULL AS locked`;
     const [lockedBot, lockedControl, pendingOrder] = await Promise.all([
       tx.botConfig.findUnique({ where: { id: bot.id } }),
       tx.systemControl.findUnique({ where: { id: "global" } }),
