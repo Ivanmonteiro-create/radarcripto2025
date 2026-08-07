@@ -6,6 +6,7 @@ import { botPatchSchema } from "@/lib/server/schemas";
 import { botCreateSchema } from "@/lib/server/schemas";
 import { getTradingMode } from "@/lib/server/env";
 import { normalizeSymbol } from "@/lib/trading/domain";
+import { createRiskRuntimeReset } from "@/lib/trading/automationPolicy";
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -59,24 +60,61 @@ export async function PATCH(request: Request, context: Context) {
     });
     if (!mergedResult.success) throw new ApiError(400, "INVALID_BOT_CONFIGURATION", mergedResult.error.flatten());
     if (mergedResult.data.mode === "TESTNET" && getTradingMode() !== "TESTNET") throw new ApiError(409, "TESTNET_ENVIRONMENT_DISABLED");
+    const resetRuntime = input.capitalUSDT !== undefined && Number(current.capitalUSDT) !== input.capitalUSDT;
     const strategy = input.strategy ? await prisma.strategy.upsert({
       where: { kind_version: { kind: input.strategy, version: 1 } },
       create: { kind: input.strategy, name: input.strategy, version: 1, schema: {} }, update: {},
     }) : null;
-    const bot = await prisma.botConfig.update({
-      where: { id },
-      data: {
-        name: input.name, symbol: input.symbol ? normalizeSymbol(input.symbol) : undefined, mode: input.mode,
-        strategyId: strategy?.id,
-        strategyParams: input.strategyParams && input.strategy
-          ? { ...input.strategyParams, kind: input.strategy }
-          : input.strategyParams,
-        capitalUSDT: input.capitalUSDT, maxCapitalUSDT: input.maxCapitalUSDT,
-        maxOrderUSDT: input.maxOrderUSDT, maxPositions: input.maxPositions,
-        maxDailyLossUSDT: input.maxDailyLossUSDT, maxDrawdownPct: input.maxDrawdownPct,
-        minOrderIntervalMs: input.minOrderIntervalMs, takeProfitPct: input.takeProfitPct,
-        stopLossPct: input.stopLossPct,
-      },
+    const bot = await prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${id}))`;
+      const lockedCurrent = await tx.botConfig.findUnique({ where: { id } });
+      if (!lockedCurrent) throw new ApiError(404, "BOT_NOT_FOUND");
+      if (lockedCurrent.status === "RUNNING") throw new ApiError(409, "PAUSE_BOT_BEFORE_EDITING");
+      if (resetRuntime) {
+        const [openPositions, pendingOrders] = await Promise.all([
+          tx.position.count({ where: { botId: id, isOpen: true } }),
+          tx.order.count({ where: { botId: id, status: { in: ["PENDING", "UNKNOWN", "OPEN", "PARTIALLY_FILLED"] } } }),
+        ]);
+        if (openPositions > 0 || pendingOrders > 0) throw new ApiError(409, "RUNTIME_RESET_REQUIRES_FLAT_BOT");
+      }
+      const updated = await tx.botConfig.update({
+        where: { id },
+        data: {
+          name: input.name, symbol: input.symbol ? normalizeSymbol(input.symbol) : undefined, mode: input.mode,
+          strategyId: strategy?.id,
+          strategyParams: input.strategyParams && input.strategy
+            ? { ...input.strategyParams, kind: input.strategy }
+            : input.strategyParams,
+          capitalUSDT: input.capitalUSDT, maxCapitalUSDT: input.maxCapitalUSDT,
+          maxOrderUSDT: input.maxOrderUSDT, maxPositions: input.maxPositions,
+          maxDailyLossUSDT: input.maxDailyLossUSDT, maxDrawdownPct: input.maxDrawdownPct,
+          minOrderIntervalMs: input.minOrderIntervalMs, takeProfitPct: input.takeProfitPct,
+          stopLossPct: input.stopLossPct,
+        },
+      });
+      if (resetRuntime) {
+        const runtimeReset = createRiskRuntimeReset(mergedResult.data.capitalUSDT);
+        await tx.botRuntime.upsert({
+          where: { botId: id },
+          create: { botId: id, status: lockedCurrent.status, ...runtimeReset },
+          update: runtimeReset,
+        });
+        await tx.botLog.create({
+          data: { botId: id, level: "INFO", event: "RISK_RUNTIME_RESET", message: `Risk runtime reset for ${mergedResult.data.capitalUSDT} USDT capital` },
+        });
+      }
+      const configuredParams = (input.strategyParams ?? current.strategyParams) as Record<string, unknown>;
+      if (configuredParams.kind === "EMA_CROSS" || input.strategy === "EMA_CROSS") {
+        const samplingIntervalMs = Number(configuredParams.samplingIntervalMs ?? 5_000);
+        await tx.botLog.create({ data: {
+          botId: id,
+          level: "WARN",
+          event: "EMA_TICKER_SAMPLING_CONFIGURED",
+          message: `EMA configured with ticker snapshots every ${samplingIntervalMs} ms; this is not a candle timeframe`,
+          metadata: { priceSource: "TICKER", samplingIntervalMs, candleTimeframe: null },
+        } });
+      }
+      return updated;
     });
     return NextResponse.json({ ok: true, bot });
   } catch (error) {

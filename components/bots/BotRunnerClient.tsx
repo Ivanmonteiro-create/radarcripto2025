@@ -118,6 +118,10 @@ export default function BotRunnerClient({ pair, onPairChange }: Props) {
   const heartbeat = bot.runtime?.workerHeartbeatAt ? new Date(bot.runtime.workerHeartbeatAt).getTime() : 0;
   const workerOnline = now > 0 && now - heartbeat < 15_000;
   const botExecutionStatus = bot.status === "RUNNING" ? (workerOnline ? "ATIVO" : "SEM HEARTBEAT") : bot.status;
+  const samplingIntervalMs = Number(bot.strategyParams.samplingIntervalMs ?? 5_000);
+  const samplingDescription = String(bot.strategyParams.kind ?? "EMA_CROSS") === "EMA_CROSS"
+    ? `Ticker · ${money(samplingIntervalMs / 1_000)} s (não candles)`
+    : "Definida pela estratégia";
   const equity = Number(bot.capitalUSDT) + Number(bot.runtime?.dailyRealizedPnl ?? 0) + Number(position?.unrealizedPnl ?? 0);
 
   return (
@@ -139,6 +143,8 @@ export default function BotRunnerClient({ pair, onPairChange }: Props) {
         <Metric label="Execução do bot" value={botExecutionStatus} />
         <Metric label="Símbolo" value={bot.symbol} />
         <Metric label="Estratégia" value={String(bot.strategyParams.kind ?? "EMA_CROSS")} />
+        <Metric label="Amostragem EMA" value={samplingDescription} />
+        <Metric label="Ordem fixa" value={bot.strategyParams.fixedOrderUSDT ? `${money(Number(bot.strategyParams.fixedOrderUSDT))} USDT` : "Não configurada"} />
         <Metric label="Preço atual" value={money(bot.runtime?.lastPrice)} />
         <Metric label="Saldo/Capital" value={`${money(bot.capitalUSDT)} USDT`} />
         <Metric label="Equity" value={`${money(equity)} USDT`} />

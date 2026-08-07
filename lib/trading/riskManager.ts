@@ -9,7 +9,7 @@ export interface RiskContext {
   openPositions: Position[];
   equityUSDT: number;
   killSwitchActive: boolean;
-  hasEquivalentOpenOrder: boolean;
+  hasPendingOrder: boolean;
   now?: number;
 }
 
@@ -42,10 +42,10 @@ export function evaluateRisk(context: RiskContext): RiskDecision {
   if (drawdownPct >= context.bot.maxDrawdownPct) {
     return denied("DRAWDOWN_LIMIT", "Maximum drawdown reached");
   }
-  if (context.runtime.lastOrderAt && now - context.runtime.lastOrderAt < context.bot.minOrderIntervalMs) {
+  if (context.signal.kind === "BUY" && context.runtime.lastOrderAt && now - context.runtime.lastOrderAt < context.bot.minOrderIntervalMs) {
     return denied("ORDER_COOLDOWN", "Minimum interval between orders has not elapsed");
   }
-  if (context.hasEquivalentOpenOrder) return denied("DUPLICATE_ORDER", "Equivalent order is already pending or open");
+  if (context.hasPendingOrder) return denied("DUPLICATE_ORDER", "Another order is already pending or open for this bot");
   return {
     allowed: true,
     code: "ALLOWED",

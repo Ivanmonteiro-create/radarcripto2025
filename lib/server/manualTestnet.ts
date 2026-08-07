@@ -35,7 +35,7 @@ export async function executeManualTestnetOrder(input: ManualTestnetOrderInput) 
   const control = await prisma.systemControl.findUnique({ where: { id: "global" } });
   if (control?.killSwitchActive) throw new ApiError(409, "KILL_SWITCH_ACTIVE");
   const existing = await prisma.order.findFirst({
-    where: { botId: bot.id, symbol: input.symbol, side: input.side, status: { in: ["PENDING", "UNKNOWN", "OPEN", "PARTIALLY_FILLED"] } },
+    where: { botId: bot.id, status: { in: ["PENDING", "UNKNOWN", "OPEN", "PARTIALLY_FILLED"] } },
   });
   if (existing) throw new ApiError(409, "EQUIVALENT_ORDER_ALREADY_OPEN");
 
@@ -55,21 +55,33 @@ export async function executeManualTestnetOrder(input: ManualTestnetOrderInput) 
   if (!balance || balance.free < requiredAmount) throw new ApiError(409, "INSUFFICIENT_TESTNET_BALANCE");
 
   const clientOrderId = `rc-manual-${randomUUID().replace(/-/g, "").slice(0, 16)}`;
-  const pending = await prisma.order.create({ data: {
-    botId: bot.id,
-    clientOrderId,
-    symbol: input.symbol,
-    side: input.side,
-    type: input.type,
-    status: "PENDING",
-    requestedQuantity: quantity ?? notional / ticker,
-    requestedPrice: price,
-  } });
-  await prisma.botLog.create({ data: {
-    botId: bot.id, level: "INFO", event: "MANUAL_TESTNET_ORDER_AUTHORIZED",
-    message: `Manual Testnet ${input.side} ${input.type} authorized for ${input.symbol}`,
-    metadata: { orderId: pending.id, notional },
-  } });
+  const pending = await prisma.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${bot.id}))`;
+    const [lockedBot, lockedControl, pendingOrder] = await Promise.all([
+      tx.botConfig.findUnique({ where: { id: bot.id } }),
+      tx.systemControl.findUnique({ where: { id: "global" } }),
+      tx.order.findFirst({ where: { botId: bot.id, status: { in: ["PENDING", "UNKNOWN", "OPEN", "PARTIALLY_FILLED"] } } }),
+    ]);
+    if (!lockedBot || lockedBot.mode !== "TESTNET" || lockedBot.status === "RUNNING") throw new ApiError(409, "MANUAL_ORDER_REQUIRES_STOPPED_TESTNET_BOT");
+    if (lockedControl?.killSwitchActive) throw new ApiError(409, "KILL_SWITCH_ACTIVE");
+    if (pendingOrder) throw new ApiError(409, "BOT_ALREADY_HAS_PENDING_ORDER");
+    const created = await tx.order.create({ data: {
+      botId: bot.id,
+      clientOrderId,
+      symbol: input.symbol,
+      side: input.side,
+      type: input.type,
+      status: "PENDING",
+      requestedQuantity: quantity ?? notional / ticker,
+      requestedPrice: price,
+    } });
+    await tx.botLog.create({ data: {
+      botId: bot.id, level: "INFO", event: "MANUAL_TESTNET_ORDER_AUTHORIZED",
+      message: `Manual Testnet ${input.side} ${input.type} authorized for ${input.symbol}`,
+      metadata: { orderId: created.id, notional },
+    } });
+    return created;
+  });
   try {
     const result = input.type === "MARKET"
       ? await exchange.createMarketOrder({

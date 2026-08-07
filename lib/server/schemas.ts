@@ -28,6 +28,17 @@ export const botCreateSchema = botBaseSchema
       if (!Number.isInteger(short) || !Number.isInteger(long) || short < 2 || long <= short) {
         context.addIssue({ code: z.ZodIssueCode.custom, path: ["strategyParams"], message: "EMA requires integer periods with 2 <= shortPeriod < longPeriod" });
       }
+      const fixedOrderUSDT = value.strategyParams.fixedOrderUSDT;
+      if (fixedOrderUSDT !== undefined && (!(Number(fixedOrderUSDT) > 0) || Number(fixedOrderUSDT) > value.maxOrderUSDT || Number(fixedOrderUSDT) > value.capitalUSDT)) {
+        context.addIssue({ code: z.ZodIssueCode.custom, path: ["strategyParams", "fixedOrderUSDT"], message: "EMA fixedOrderUSDT must be positive and within capital and order limits" });
+      }
+      if (value.mode === "TESTNET" && fixedOrderUSDT === undefined) {
+        context.addIssue({ code: z.ZodIssueCode.custom, path: ["strategyParams", "fixedOrderUSDT"], message: "TESTNET EMA requires explicit fixedOrderUSDT" });
+      }
+      const samplingIntervalMs = value.strategyParams.samplingIntervalMs;
+      if (samplingIntervalMs !== undefined && (!Number.isInteger(Number(samplingIntervalMs)) || Number(samplingIntervalMs) < 1_000)) {
+        context.addIssue({ code: z.ZodIssueCode.custom, path: ["strategyParams", "samplingIntervalMs"], message: "EMA samplingIntervalMs must be an integer of at least 1000" });
+      }
     }
     if (value.strategy === "PERCENT_CYCLE") {
       const sell = Number(value.strategyParams.sellRisePct);

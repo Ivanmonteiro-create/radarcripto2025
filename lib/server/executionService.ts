@@ -7,6 +7,7 @@ import { EmaCrossStrategy, type EmaCrossState } from "@/lib/trading/strategies/e
 import { PercentCycleStrategy, type PercentCycleState } from "@/lib/trading/strategies/percentCycle";
 import { evaluateRisk } from "@/lib/trading/riskManager";
 import { reconcileSpotFill } from "@/lib/trading/positionAccounting";
+import { resolveAutomaticBuyUSDT, validateAutomaticSpotPreflight } from "@/lib/trading/automationPolicy";
 import { createExchange } from "./exchangeFactory";
 import { getTestnetSpotPrice } from "./publicPrice";
 import { prisma } from "./prisma";
@@ -161,22 +162,39 @@ export class ExecutionService {
 
     if (signal.kind === "SELL" && !currentPosition) return;
     const requestedOrderUSDT = signal.kind === "BUY"
-      ? Math.min(bot.capitalUSDT * 0.1, bot.maxOrderUSDT)
+      ? resolveAutomaticBuyUSDT(bot)
       : (currentPosition?.quantity ?? 0) * price;
-    const duplicate = await prisma.order.findFirst({
-      where: { botId, symbol: bot.symbol, side: signal.kind, status: { in: ["PENDING", "UNKNOWN", "OPEN", "PARTIALLY_FILLED"] } },
+    const pendingOrder = await prisma.order.findFirst({
+      where: { botId, status: { in: ["PENDING", "UNKNOWN", "OPEN", "PARTIALLY_FILLED"] } },
       select: { id: true },
     });
     const system = await prisma.systemControl.findUnique({ where: { id: "global" } });
     const equity = estimatedEquity;
     const decision = evaluateRisk({
       bot, runtime, signal, requestedOrderUSDT, openPositions: positions, equityUSDT: equity,
-      killSwitchActive: system?.killSwitchActive ?? false, hasEquivalentOpenOrder: Boolean(duplicate),
+      killSwitchActive: system?.killSwitchActive ?? false, hasPendingOrder: Boolean(pendingOrder),
     });
     await prisma.riskEvent.create({
       data: { botId, allowed: decision.allowed, code: decision.code, reason: decision.reason, signal: jsonValue(signal) },
     });
     if (!decision.allowed) return;
+    if (bot.mode === "TESTNET") {
+      const [symbolInfo, balances] = await Promise.all([
+        exchange.getSymbolInfo(bot.symbol),
+        exchange.getAccountBalances(),
+      ]);
+      const orderQuantity = signal.kind === "BUY"
+        ? await exchange.normalizeQuantity(bot.symbol, (decision.maxOrderUSDT ?? requestedOrderUSDT) / price)
+        : await exchange.normalizeQuantity(bot.symbol, currentPosition!.quantity);
+      validateAutomaticSpotPreflight({
+        side: signal.kind,
+        symbolInfo,
+        marketPrice: price,
+        requestedOrderUSDT: decision.maxOrderUSDT ?? requestedOrderUSDT,
+        normalizedQuantity: orderQuantity,
+        balances,
+      });
+    }
     await this.executeSignal(bot, runtime, signal, exchange, price, currentPosition, decision.maxOrderUSDT ?? requestedOrderUSDT);
   }
 

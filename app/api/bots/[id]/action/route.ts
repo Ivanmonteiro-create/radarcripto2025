@@ -23,6 +23,11 @@ export async function POST(request: Request, context: Context) {
     const current = await prisma.botConfig.findUnique({ where: { id } });
     if (!current) throw new ApiError(404, "BOT_NOT_FOUND");
     if (action === "start" && current.mode === "TESTNET") {
+      const params = current.strategyParams as Record<string, unknown>;
+      const fixedOrderUSDT = Number(params.fixedOrderUSDT);
+      if (!(fixedOrderUSDT > 0) || fixedOrderUSDT > Number(current.maxOrderUSDT) || fixedOrderUSDT > Number(current.capitalUSDT)) {
+        throw new ApiError(409, "TESTNET_FIXED_ORDER_CONFIGURATION_REQUIRED");
+      }
       if (getTradingMode() !== "TESTNET") throw new ApiError(409, "TESTNET_ENVIRONMENT_DISABLED");
       const [credentials, worker, otherRunning, manualProof] = await Promise.all([
         getTestnetCredentialSummary(),
@@ -41,6 +46,7 @@ export async function POST(request: Request, context: Context) {
     }
     const status = action === "start" ? "RUNNING" : action === "pause" ? "PAUSED" : "STOPPED";
     const bot = await prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${id}))`;
       const updated = await tx.botConfig.update({ where: { id }, data: { status } });
       await tx.botRuntime.upsert({
         where: { botId: id },
@@ -48,6 +54,17 @@ export async function POST(request: Request, context: Context) {
         update: { status, lastError: null, consecutiveFailures: 0, nextRetryAt: null },
       });
       await tx.botLog.create({ data: { botId: id, level: "INFO", event: `BOT_${status}`, message: `Bot changed to ${status} by internal API` } });
+      if (action === "start" && current.strategyParams && typeof current.strategyParams === "object" && "kind" in current.strategyParams && current.strategyParams.kind === "EMA_CROSS") {
+        const params = current.strategyParams as Record<string, unknown>;
+        const samplingIntervalMs = Number(params.samplingIntervalMs ?? 5_000);
+        await tx.botLog.create({ data: {
+          botId: id,
+          level: "WARN",
+          event: "EMA_TICKER_SAMPLING_ACTIVE",
+          message: `EMA uses ticker snapshots every ${samplingIntervalMs} ms; this is not a candle timeframe`,
+          metadata: { priceSource: "TICKER", samplingIntervalMs, candleTimeframe: null },
+        } });
+      }
       return updated;
     });
     return NextResponse.json({ ok: true, bot });

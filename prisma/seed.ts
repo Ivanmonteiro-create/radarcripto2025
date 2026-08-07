@@ -64,10 +64,15 @@ export async function seed(client: PrismaClient = prisma) {
     create: {
       id: "seed-ema-cross",
       ...defaults,
+      capitalUSDT: 10,
+      maxCapitalUSDT: 10,
+      maxOrderUSDT: 6,
+      maxDailyLossUSDT: 1,
+      maxDrawdownPct: 10,
       name: "EMA Cross Seed",
       strategyId: ema.id,
-      strategyParams: { kind: "EMA_CROSS", shortPeriod: 9, longPeriod: 21 },
-      runtime: { create: { status: "STOPPED", peakEquity: 1_000, strategyState: {} } },
+      strategyParams: { kind: "EMA_CROSS", shortPeriod: 9, longPeriod: 21, fixedOrderUSDT: 6, priceSource: "TICKER", samplingIntervalMs: 5_000, candleTimeframe: null },
+      runtime: { create: { status: "STOPPED", peakEquity: 10, strategyState: {} } },
     },
     update: {},
   });
