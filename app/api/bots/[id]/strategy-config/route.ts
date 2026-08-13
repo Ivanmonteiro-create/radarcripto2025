@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { ApiError, apiErrorResponse, parseJson } from "@/lib/server/api";
 import { requireApiAuth, requireMutationAuth } from "@/lib/server/auth";
+import { createExchange } from "@/lib/server/exchangeFactory";
 import { prisma } from "@/lib/server/prisma";
 import { rangeStrategyConfigSchema } from "@/lib/server/schemas";
 import { findTestnetSpotSymbol } from "@/lib/server/spotSymbolCatalog";
@@ -20,7 +21,17 @@ export async function GET(_request: Request, context: Context) {
       where: { botId: id }, include: { levels: { include: { runtime: true }, orderBy: { levelNumber: "asc" } }, cycles: { orderBy: { createdAt: "desc" }, take: 50, include: { orders: true } } },
       orderBy: { version: "desc" }, take: 20,
     });
-    return NextResponse.json({ ok: true, configurations: serializable(configurations) });
+    const current = configurations.find((configuration) => configuration.isCurrent);
+    const bot = current ? await prisma.botConfig.findUnique({ where: { id }, select: { mode: true } }) : null;
+    let currentPrice: number | null = null;
+    if (current && bot) {
+      try {
+        currentPrice = await (await createExchange(bot.mode, id)).getTickerPrice(current.symbol);
+      } catch {
+        currentPrice = null;
+      }
+    }
+    return NextResponse.json({ ok: true, configurations: serializable(configurations), currentPrice });
   } catch (error) { return apiErrorResponse(error); }
 }
 

@@ -52,6 +52,7 @@ export default function HybridStrategyConfigurator({ botId, botStatus, currentPr
   const [levels, setLevels] = useState<Level[]>(initialLevels);
   const [validation, setValidation] = useState<Validation | null>(null);
   const [configs, setConfigs] = useState<ConfigRecord[]>([]);
+  const [observedPrice, setObservedPrice] = useState(currentPrice);
   const [authorization, setAuthorization] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
@@ -61,7 +62,11 @@ export default function HybridStrategyConfigurator({ botId, botStatus, currentPr
 
   const loadConfigs = useCallback(async () => {
     const response = await fetch(`/api/bots/${botId}/strategy-config`, { cache: "no-store" });
-    if (response.ok) setConfigs(((await response.json()) as { configurations: ConfigRecord[] }).configurations);
+    if (response.ok) {
+      const result = (await response.json()) as { configurations: ConfigRecord[]; currentPrice?: number | null };
+      setConfigs(result.configurations);
+      if (typeof result.currentPrice === "number" && Number.isFinite(result.currentPrice)) setObservedPrice(result.currentPrice);
+    }
   }, [botId]);
   useEffect(() => {
     const initial = window.setTimeout(() => { void loadConfigs(); }, 0);
@@ -108,6 +113,7 @@ export default function HybridStrategyConfigurator({ botId, botStatus, currentPr
   }
 
   const currentConfig = configs.find((config) => config.isCurrent) ?? null;
+  const displayedPrice = observedPrice > 0 ? observedPrice : currentPrice;
 
   return <section className="highlight" style={{ padding: 14, display: "grid", gap: 12 }}>
     <div><strong>{l("RASCUNHO DE EDIÇÃO", "EDITING DRAFT", "BORRADOR DE EDICIÓN")}</strong><div className="muted">{l("Os campos abaixo não representam necessariamente o que o worker executa. A configuração realmente salva aparece no bloco separado.", "The fields below do not necessarily represent what the worker runs. The actually saved configuration is shown separately.", "Los campos siguientes no representan necesariamente lo que ejecuta el worker. La configuración guardada aparece por separado.")}</div></div>
@@ -146,8 +152,8 @@ export default function HybridStrategyConfigurator({ botId, botStatus, currentPr
     <label>{l("Frase de autorização para iniciar", "Authorization phrase to start", "Frase de autorización para iniciar")}<br/><input style={{ width: "100%" }} value={authorization} onChange={(event) => setAuthorization(event.target.value)} placeholder={AUTHORIZATION}/></label>
     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}><button className="btn" disabled={busy || botStatus !== "STOPPED" || authorization !== AUTHORIZATION} onClick={start}>{l("INICIAR TESTE — ESTRATÉGIA B", "START TEST — STRATEGY B", "INICIAR PRUEBA — ESTRATEGIA B")}</button><button className="btn btnSell" disabled={busy || botStatus === "STOPPED"} onClick={stop}>{t("bots.stop").toUpperCase()}</button></div>
     <small className="muted">A opção futura “Sugerir parâmetros com IA” permanece apenas reservada; IA não altera nem inicia esta estratégia.</small>
-    {currentConfig && <ActiveConfiguration config={currentConfig} currentPrice={currentPrice} l={l} />}
-    {configs.length > 0 && <div style={{ display: "grid", gap: 8 }}><strong>{l("VERSÕES E MÉTRICAS POR NÍVEL", "VERSIONS AND METRICS BY LEVEL", "VERSIONES Y MÉTRICAS POR NIVEL")}</strong>{configs.slice(0, 5).map((config) => <details key={config.id} open={config.isCurrent}><summary>v{config.version} · {config.mode} · {config.symbol} · {config.status}{config.isCurrent ? ` · ${l("ATUAL", "CURRENT", "ACTUAL")}` : ""}</summary><div style={{ display: "grid", gap: 8, marginTop: 8 }}>{config.levels.map((level) => <LevelMetrics key={level.id} config={config} level={level} currentPrice={currentPrice} l={l} />)}</div></details>)}</div>}
+    {currentConfig && <ActiveConfiguration config={currentConfig} currentPrice={displayedPrice} l={l} />}
+    {configs.length > 0 && <div style={{ display: "grid", gap: 8 }}><strong>{l("VERSÕES E MÉTRICAS POR NÍVEL", "VERSIONS AND METRICS BY LEVEL", "VERSIONES Y MÉTRICAS POR NIVEL")}</strong>{configs.slice(0, 5).map((config) => <details key={config.id} open={config.isCurrent}><summary>v{config.version} · {config.mode} · {config.symbol} · {config.status}{config.isCurrent ? ` · ${l("ATUAL", "CURRENT", "ACTUAL")}` : ""}</summary><div style={{ display: "grid", gap: 8, marginTop: 8 }}>{config.levels.map((level) => <LevelMetrics key={level.id} config={config} level={level} currentPrice={displayedPrice} l={l} />)}</div></details>)}</div>}
     {message && <div className="muted">{message}</div>}
   </section>;
 }
@@ -186,6 +192,7 @@ function LevelMetrics({ config, level, currentPrice, l }: { config: ConfigRecord
   const distanceToSell = currentPrice > 0 && held > 0 ? (target / currentPrice - 1) * 100 : null;
   const openedAt = latestCycle?.openedAt ?? (held > 0 ? latestCycle?.createdAt : null);
   const costs = number(runtime?.fees) + number(runtime?.slippage);
+  const baseAsset = config.symbol.endsWith("USDT") ? config.symbol.slice(0, -4) : config.symbol;
   return <article style={{ padding: 10, border: "1px solid rgba(24,226,115,.22)", borderRadius: 10 }}>
     <div style={{ display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}><strong>{l("NÍVEL", "LEVEL", "NIVEL")} {level.levelNumber}</strong><strong>{runtime?.state ?? "WAITING_BUY"}</strong></div>
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(135px,1fr))", gap: 8, marginTop: 8 }}>
@@ -193,7 +200,7 @@ function LevelMetrics({ config, level, currentPrice, l }: { config: ConfigRecord
       <Metric label={l("SELL configurado", "Configured SELL", "SELL configurado")} value={price(target)} />
       <Metric label={l("Preço atual", "Current price", "Precio actual")} value={currentPrice > 0 ? price(currentPrice) : "—"} />
       <Metric label={l("Distância até BUY", "Distance to BUY", "Distancia a BUY")} value={pct(distanceToBuy)} />
-      <Metric label={l("Quantidade", "Quantity", "Cantidad")} value={`${number(held || configuredQuantity).toFixed(8)} BTC`} />
+      <Metric label={l("Quantidade", "Quantity", "Cantidad")} value={`${number(held || configuredQuantity).toFixed(8)} ${baseAsset}`} />
       <Metric label={l("Valor", "Value", "Valor")} value={`${quote(level.quoteAmount)} USDT`} />
       <Metric label={l("Capital comprometido", "Committed capital", "Capital comprometido")} value={`${quote(runtime?.committedQuote)} USDT`} />
       <Metric label="Order ID" value={activeOrder?.exchangeOrderId ?? activeOrder?.clientOrderId ?? runtime?.activeOrderId ?? "—"} />
