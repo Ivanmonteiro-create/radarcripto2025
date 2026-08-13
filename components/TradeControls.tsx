@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { SimulationEngine } from "@/lib/trading/simulationEngine";
 import { useI18n } from "@/components/i18n/LocaleProvider";
+import BackHomeButton from "@/components/navigation/BackHomeButton";
 
 export type Pair = "BTCUSDT" | "ETHUSDT" | "BNBUSDT" | "SOLUSDT" | "ADAUSDT" | "XRPUSDT" | "DOGEUSDT" | "LINKUSDT";
 export type TradeSide = "BUY" | "SELL";
@@ -91,35 +92,66 @@ export default function TradeControls({ symbol, onSymbolChange, livePrice, onBuy
 
   return (
     <div className="tcRoot">
-      <div className="tcHead"><h3>{label("Controles de trading", "Trading controls", "Controles de trading")} · Spot SIM</h3><small className="muted">Fee 0.10% · Slippage 1 bps</small></div>
-      <div className="tcGrid">
-        <div className="col">
-          <label className="lbl">{label("Par", "Pair", "Par")}</label><select className="inp" value={symbol} onChange={(event) => changeSymbol(event.target.value as Pair)}>{PAIRS.map((pair) => <option key={pair}>{pair}</option>)}</select>
-          <label className="lbl">{label("Preço ao vivo", "Live price", "Precio en vivo")}</label><input className="inp" disabled value={livePrice ? fmt(livePrice, 8) : "—"} />
-          <label className="lbl">{label("Limite de risco por operação", "Risk limit per trade", "Límite de riesgo por operación")} (%)</label><input className="inp" type="number" min={0.1} max={100} step={0.1} value={riskPct} onChange={(event) => setRiskPct(Number(event.target.value))} />
-          <label className="lbl">{label("Tamanho solicitado", "Requested size", "Tamaño solicitado")} (USDT)</label><input className="inp" type="number" min={0} value={sizeUSDT} onChange={(event) => setSizeUSDT(Number(event.target.value))} />
-          <small className="muted">{label("Executável após risco", "Executable after risk limit", "Ejecutable tras límite de riesgo")}: {fmt(executableUSDT)} USDT</small>
+      <div className="tcHead">
+        <div className="tcHeadCopy">
+          <h3>{label("Controles de trading", "Trading controls", "Controles de trading")}</h3>
+          <span className="tcMode">Spot · SIM</span>
         </div>
-        <div className="col">
-          <Metric label={label("Saldo livre", "Free balance", "Saldo libre")} value={fmt(snapshot.cash)} />
-          <Metric label="Equity" value={fmt(snapshot.equity)} />
-          <Metric label={label("PNL realizado", "Realized PNL", "PNL realizado")} value={fmt(snapshot.realizedPnl)} />
-          <Metric label={label("PNL não realizado", "Unrealized PNL", "PNL no realizado")} value={fmt(snapshot.unrealizedPnl)} />
-          <Metric label={label("Posição", "Position", "Posición")} value={position ? `${position.quantity.toFixed(8)} @ ${fmt(position.averageEntryPrice, 8)}` : "—"} />
-        </div>
-        <div className="row twoCols"><label className="lbl">TP (preço)<input className="inp" type="number" value={tpPrice ?? ""} onChange={(event) => setTpPrice(event.target.value ? Number(event.target.value) : undefined)} /></label><label className="lbl">SL (preço)<input className="inp" type="number" value={slPrice ?? ""} onChange={(event) => setSlPrice(event.target.value ? Number(event.target.value) : undefined)} /></label></div>
-        <div className="row twoCols"><button className="btn btnBuy" disabled={!livePrice || executableUSDT <= 0} onClick={() => execute("BUY")}>{t("actions.buy")}</button><button className="btn btnSell" disabled={!livePrice || !position} onClick={() => execute("SELL")}>{t("actions.sell")}</button></div>
-        <div className="row twoCols"><button className="btn" onClick={reset}>{label("Resetar simulação", "Reset simulation", "Reiniciar simulación")}</button><button className="btn" onClick={exportCsv}>{label("Exportar CSV", "Export CSV", "Exportar CSV")}</button></div>
-        {error && <div className="row pnlNeg">{error}</div>}
-        <div className="row histCard"><strong>{label("Histórico", "History", "Historial")}</strong>{snapshot.trades.slice().reverse().slice(0, 15).map((trade) => <div key={trade.id} className="histLine"><span>{new Date(trade.timestamp).toLocaleString()}</span><span>{trade.side}</span><span>{trade.symbol}</span><span>{fmt(trade.price, 8)}</span><span>fee {fmt(trade.feeQuote, 4)}</span><span>PNL {fmt(trade.realizedPnl)}</span></div>)}</div>
+        <span className="tcBack"><BackHomeButton /></span>
+        <small className="tcCosts">Fee 0.10% · Slippage 1 bps</small>
       </div>
-      <style jsx>{`
-        .tcRoot{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px;height:100%;overflow:auto}.tcHead{display:flex;justify-content:space-between;align-items:center}.tcHead h3{margin:0}.tcGrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.col{display:grid;gap:8px}.row{grid-column:1/-1}.twoCols{display:grid;grid-template-columns:1fr 1fr;gap:10px}.lbl{display:grid;gap:4px;font-size:12px;color:rgba(255,255,255,.75)}.inp{width:100%;height:36px;padding:0 10px;border-radius:10px;background:rgba(255,255,255,.05);color:inherit;border:1px solid rgba(255,255,255,.15)}.btn{border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);border-radius:10px;color:inherit;padding:10px}.btnBuy{color:#1cff80}.btnSell{color:#ff6b6b}.histCard{display:grid;gap:6px}.histLine{display:grid;grid-template-columns:1.4fr .5fr .7fr 1fr .8fr .8fr;gap:5px;font-size:12px}.pnlNeg{color:#ff6b6b}@media(max-width:900px){.tcGrid{grid-template-columns:1fr}.row{grid-column:auto}.twoCols{grid-template-columns:1fr}.histLine{min-width:650px}}
+      <div className="tcSections">
+        <section className="tcSection">
+          <h4>{label("Mercado", "Market", "Mercado")}</h4>
+          <div className="tcTwoCols">
+            <label className="tcField"><span>{label("Par", "Pair", "Par")}</span><select className="tcInput" value={symbol} onChange={(event) => changeSymbol(event.target.value as Pair)}>{PAIRS.map((pair) => <option key={pair}>{pair}</option>)}</select></label>
+            <Metric label={label("Preço ao vivo", "Live price", "Precio en vivo")} value={livePrice ? fmt(livePrice, 8) : "—"} />
+          </div>
+        </section>
+
+        <section className="tcSection">
+          <h4>{label("Capital e risco", "Capital and risk", "Capital y riesgo")}</h4>
+          <div className="tcTwoCols">
+            <Metric label={label("Saldo livre", "Free balance", "Saldo libre")} value={fmt(snapshot.cash)} />
+            <Metric label="Equity" value={fmt(snapshot.equity)} />
+            <label className="tcField"><span>{label("Limite de risco por operação", "Risk limit per trade", "Límite de riesgo por operación")} (%)</span><input className="tcInput" type="number" min={0.1} max={100} step={0.1} value={riskPct} onChange={(event) => setRiskPct(Number(event.target.value))} /></label>
+            <label className="tcField"><span>{label("Tamanho solicitado", "Requested size", "Tamaño solicitado")} (USDT)</span><input className="tcInput" type="number" min={0} value={sizeUSDT} onChange={(event) => setSizeUSDT(Number(event.target.value))} /></label>
+            <Metric className="tcMetricWide" label={label("Executável após risco", "Executable after risk limit", "Ejecutable tras límite de riesgo")} value={`${fmt(executableUSDT)} USDT`} />
+          </div>
+        </section>
+
+        <section className="tcSection">
+          <h4>{label("Posição e resultado", "Position and result", "Posición y resultado")}</h4>
+          <div className="tcTwoCols">
+            <Metric label={label("PNL realizado", "Realized PNL", "PNL realizado")} value={fmt(snapshot.realizedPnl)} />
+            <Metric label={label("PNL não realizado", "Unrealized PNL", "PNL no realizado")} value={fmt(snapshot.unrealizedPnl)} />
+            <Metric className="tcMetricWide" label={label("Posição", "Position", "Posición")} value={position ? `${position.quantity.toFixed(8)} @ ${fmt(position.averageEntryPrice, 8)}` : "—"} />
+          </div>
+        </section>
+
+        <section className="tcSection">
+          <h4>{label("Saída", "Exit", "Salida")}</h4>
+          <div className="tcTwoCols"><label className="tcField"><span>TP ({label("preço", "price", "precio")})</span><input className="tcInput" type="number" value={tpPrice ?? ""} onChange={(event) => setTpPrice(event.target.value ? Number(event.target.value) : undefined)} /></label><label className="tcField"><span>SL ({label("preço", "price", "precio")})</span><input className="tcInput" type="number" value={slPrice ?? ""} onChange={(event) => setSlPrice(event.target.value ? Number(event.target.value) : undefined)} /></label></div>
+        </section>
+
+        <section className="tcSection tcActionSection">
+          <h4>{label("Ações", "Actions", "Acciones")}</h4>
+          <div className="tcTwoCols"><button className="tcButton tcBuy" disabled={!livePrice || executableUSDT <= 0} onClick={() => execute("BUY")}>{t("actions.buy")}</button><button className="tcButton tcSell" disabled={!livePrice || !position} onClick={() => execute("SELL")}>{t("actions.sell")}</button></div>
+          <div className="tcTwoCols"><button className="tcButton tcSecondary" onClick={reset}>{label("Resetar simulação", "Reset simulation", "Reiniciar simulación")}</button><button className="tcButton tcSecondary" onClick={exportCsv}>{label("Exportar CSV", "Export CSV", "Exportar CSV")}</button></div>
+        </section>
+
+        {error && <div className="tcError">{error}</div>}
+        <section className="tcSection tcHistory"><h4>{label("Histórico", "History", "Historial")}</h4><div className="tcHistoryScroll">{snapshot.trades.slice().reverse().slice(0, 15).map((trade) => <div key={trade.id} className="tcHistoryLine"><span>{new Date(trade.timestamp).toLocaleString()}</span><span>{trade.side}</span><span>{trade.symbol}</span><span>{fmt(trade.price, 8)}</span><span>fee {fmt(trade.feeQuote, 4)}</span><span>PNL {fmt(trade.realizedPnl)}</span></div>)}</div></section>
+      </div>
+      <style jsx global>{`
+        .tcRoot,.tcRoot *{box-sizing:border-box}.tcRoot{width:100%;min-width:0;height:100%;overflow:auto;padding:16px;background:linear-gradient(180deg,rgba(9,28,18,.96),rgba(3,14,9,.98));color:#e6fff2}.tcHead{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:start;padding:2px 2px 15px;border-bottom:1px solid rgba(50,219,127,.16)}.tcHeadCopy{display:grid;gap:4px}.tcHead h3{margin:0;color:#effff6;font-size:17px;line-height:1.15;letter-spacing:-.01em}.tcMode{width:max-content;padding:3px 7px;border:1px solid rgba(45,224,128,.34);border-radius:999px;color:#68f5a5;background:rgba(24,226,115,.07);font-size:10px;font-weight:800;letter-spacing:.08em}.tcCosts{grid-column:1/-1;color:rgba(216,248,229,.55);font-size:10px;letter-spacing:.02em}.tcBack .rc-back-home{min-height:28px;padding:0 9px;font-size:10px;white-space:nowrap}.tcBack .rc-back-home>span:first-child{width:16px;height:16px}.tcSections{display:grid;gap:10px;padding-top:12px}.tcSection{display:grid;gap:9px;padding:11px;border:1px solid rgba(61,221,132,.15);border-radius:12px;background:rgba(255,255,255,.018)}.tcSection h4{margin:0;color:rgba(121,247,174,.72);font-size:10px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}.tcTwoCols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.tcField{display:grid;align-content:start;gap:6px;min-width:0;color:rgba(224,248,234,.66);font-size:10px;line-height:1.25}.tcInput{width:100%;height:40px;min-width:0;padding:0 10px;border:1px solid rgba(114,232,165,.18);border-radius:9px;background:rgba(2,12,8,.76);color:#eafff3;font:inherit;font-size:13px;outline:none}.tcInput:focus{border-color:rgba(36,231,124,.72);box-shadow:0 0 0 2px rgba(24,226,115,.1)}.tcMetric{display:grid;align-content:center;gap:5px;min-width:0;min-height:64px;padding:9px 10px;border:1px solid rgba(114,232,165,.14);border-radius:9px;background:rgba(2,12,8,.58)}.tcMetricWide{grid-column:1/-1}.tcMetricLabel{color:rgba(224,248,234,.58);font-size:10px;line-height:1.2}.tcMetricValue{overflow:hidden;color:#effff6;font-size:13px;font-weight:800;line-height:1.25;text-overflow:ellipsis}.tcActionSection{gap:8px}.tcButton{height:40px;border-radius:9px;font:inherit;font-size:12px;font-weight:800;cursor:pointer;transition:border-color .15s,background .15s,color .15s}.tcButton:disabled{cursor:not-allowed;opacity:.38}.tcBuy{border:1px solid rgba(34,235,124,.55);background:rgba(24,226,115,.1);color:#41f58f}.tcSell{border:1px solid rgba(255,100,112,.5);background:rgba(255,75,89,.08);color:#ff7882}.tcBuy:not(:disabled):hover{background:rgba(24,226,115,.18)}.tcSell:not(:disabled):hover{background:rgba(255,75,89,.15)}.tcSecondary{border:1px solid rgba(210,245,225,.16);background:rgba(255,255,255,.035);color:rgba(232,255,242,.8)}.tcSecondary:hover{border-color:rgba(81,225,145,.32);background:rgba(24,226,115,.06)}.tcError{padding:10px;border:1px solid rgba(255,107,107,.3);border-radius:9px;background:rgba(255,75,75,.07);color:#ff8b8b;font-size:11px}.tcHistory{padding-bottom:12px}.tcHistoryScroll{overflow-x:auto}.tcHistoryLine{display:grid;grid-template-columns:1.4fr .5fr .7fr 1fr .8fr .8fr;gap:5px;min-width:650px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:11px;color:rgba(232,255,242,.72)}
+        @media(max-width:720px){.tcRoot{padding:12px}.tcHead{padding-top:0}.tcBack .rc-back-home{min-height:28px}.tcSections{gap:9px}.tcSection{padding:10px}.tcTwoCols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.tcInput{height:42px}.tcHistoryLine{min-width:620px}}
+        @media(max-width:420px){.tcTwoCols{grid-template-columns:1fr}.tcMetricWide{grid-column:auto}.tcHead h3{font-size:16px}.tcBack .rc-back-home>span:last-child{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}.tcBack .rc-back-home{width:28px;padding:0;justify-content:center}}
       `}</style>
     </div>
   );
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
-  return <div><small className="muted">{label}</small><div style={{ fontWeight: 800 }}>{value}</div></div>;
+function Metric({ label, value, className = "" }: { label: string; value: string; className?: string }) {
+  return <div className={`tcMetric ${className}`}><small className="tcMetricLabel">{label}</small><div className="tcMetricValue">{value}</div></div>;
 }

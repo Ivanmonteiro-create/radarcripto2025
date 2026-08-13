@@ -7,7 +7,6 @@ import TradeControls from '../../components/TradeControls';
 import { useLivePrice } from '../../lib/useLivePrice';
 import { useI18n } from '../../components/i18n/LocaleProvider';
 import { pageContent } from '../../lib/i18n/pageContent';
-import BackHomeButton from '../../components/navigation/BackHomeButton';
 
 type Pair =
   | 'BTCUSDT' | 'ETHUSDT' | 'BNBUSDT' | 'SOLUSDT'
@@ -99,8 +98,6 @@ export default function SimPageClient() {
           font-size: 13px; font-weight: 800; letter-spacing: .2px; opacity: .9;
         }
         .chartHeaderActions{ display:flex; align-items:center; gap:8px; position:relative; z-index:5; }
-        body:has(main.page-simulador) .simulatorBack .rc-back-home{ display:inline-flex !important; min-height:24px; padding:0 9px; font-size:11px; }
-        .simulatorBack .rc-back-home > span:first-child{ width:16px; height:16px; }
         .chartHeader .tvFsBtn{
           width: 28px; height: 24px; border-radius: 6px;
           display: grid; place-items: center;
@@ -150,11 +147,6 @@ export default function SimPageClient() {
           .page-simulador .chartTitle{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
           .page-simulador .chartHeaderActions{ flex:0 0 auto; position:absolute; right:8px; top:5px; }
           .page-simulador .tvChartWrap{ min-height:384px; }
-          body:has(main.page-simulador) .chartHeaderActions .simulatorBack .rc-back-home{
-            display:inline-flex !important;
-            width:26px; padding:0; justify-content:center;
-          }
-          .page-simulador .chartHeaderActions .simulatorBack .rc-back-home > span:last-child{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
         }
       `}</style>
 
@@ -175,7 +167,6 @@ export default function SimPageClient() {
         <div className="chartHeader">
           <div className="chartTitle">{copy.chart} — {symbol}</div>
           <div className="chartHeaderActions">
-            {!isFs && <span className="simulatorBack"><BackHomeButton /></span>}
             {!isFs && (
             <button
               aria-label={copy.fullscreen}

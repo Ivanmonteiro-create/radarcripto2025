@@ -29,15 +29,17 @@ describe("global i18n", () => {
     }
   });
 
-  it("keeps the language selector on Home and reuses BackHomeButton inside the simulator header", async () => {
-    const [nav, simulator] = await Promise.all([
+  it("keeps the language selector on Home and reuses BackHomeButton inside the simulator controls", async () => {
+    const [nav, simulator, controls] = await Promise.all([
       readFile("components/TopNav.tsx", "utf8"),
       readFile("app/simulador/SimPageClient.tsx", "utf8"),
+      readFile("components/TradeControls.tsx", "utf8"),
     ]);
     expect(nav).toContain('onHome ? <><Link href="/login"');
     expect(nav).toContain("<LanguageSelector />");
     expect(nav).toContain(": <BackHomeButton />");
-    expect(simulator).toContain("<BackHomeButton />");
     expect(simulator).toContain('className="chartHeaderActions"');
+    expect(simulator).not.toContain("<BackHomeButton />");
+    expect(controls).toContain('<span className="tcBack"><BackHomeButton /></span>');
   });
 });
