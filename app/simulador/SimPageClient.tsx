@@ -90,6 +90,7 @@ export default function SimPageClient() {
         .chartHeader{
           height: 36px;
           display: flex; align-items: center; justify-content: space-between;
+          position: relative; z-index: 4;
           gap: 8px; padding: 0 10px;
           border-bottom: 1px solid rgba(255,255,255,.06);
           background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
@@ -97,8 +98,8 @@ export default function SimPageClient() {
         .chartTitle{
           font-size: 13px; font-weight: 800; letter-spacing: .2px; opacity: .9;
         }
-        .chartHeaderActions{ display:flex; align-items:center; gap:8px; }
-        .simulatorBack .rc-back-home{ min-height:24px; padding:0 9px; font-size:11px; }
+        .chartHeaderActions{ display:flex; align-items:center; gap:8px; position:relative; z-index:5; }
+        body:has(main.page-simulador) .simulatorBack .rc-back-home{ display:inline-flex !important; min-height:24px; padding:0 9px; font-size:11px; }
         .simulatorBack .rc-back-home > span:first-child{ width:16px; height:16px; }
         .chartHeader .tvFsBtn{
           width: 28px; height: 24px; border-radius: 6px;
@@ -139,10 +140,21 @@ export default function SimPageClient() {
             min-height:100dvh;
             overflow:visible !important;
           }
+          .page-simulador > .panel,
+          .page-simulador > .rc-controls{
+            width:100% !important;
+            min-width:0 !important;
+          }
           .page-simulador .panel{ min-height:0 !important; }
+          .page-simulador .chartHeader{ min-width:0; }
+          .page-simulador .chartTitle{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+          .page-simulador .chartHeaderActions{ flex:0 0 auto; position:absolute; right:8px; top:5px; }
           .page-simulador .tvChartWrap{ min-height:384px; }
-          .simulatorBack .rc-back-home{ width:26px; padding:0; justify-content:center; }
-          .simulatorBack .rc-back-home > span:last-child{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+          body:has(main.page-simulador) .chartHeaderActions .simulatorBack .rc-back-home{
+            display:inline-flex !important;
+            width:26px; padding:0; justify-content:center;
+          }
+          .page-simulador .chartHeaderActions .simulatorBack .rc-back-home > span:last-child{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
         }
       `}</style>
 
