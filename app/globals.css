@@ -2557,6 +2557,13 @@ a.rc-module-card:focus-visible {
 .rc-language__menu button { width: 100%; padding: 9px 10px; border: 0; border-radius: 8px; background: transparent; color: #e6fff5; text-align: left; cursor: pointer; }
 .rc-language__menu button:hover, .rc-language__menu button[aria-checked="true"] { background: rgba(24,226,115,.16); color: #71ffa9; }
 @media (max-width: 720px) { .rc-back-home, .rc-language__trigger, .rc-login-link { min-height: 30px; padding: 0 9px; font-size: 11px; } .rc-back-home > span:first-child { width: 17px; height: 17px; } }
+@media (max-width: 700px) {
+  body:has([data-page="home"]) .rc-topnav__utilities {
+    width: 100%;
+    margin-left: 0;
+    justify-content: center;
+  }
+}
 
 /* ================== RADAR DE LISTAGENS ================================ */
 .rc-listings-page { width: min(1180px, calc(100vw - 40px)); margin: 32px auto 70px; display: grid; gap: 22px; }
