@@ -236,7 +236,7 @@ export default function BotRunnerClient({ pair, onPairChange }: Props) {
       {!activeTest && <small className="muted">Término previsto se iniciado agora: {projectedEnd}. O navegador pode ser fechado após a confirmação.</small>}
     </section>
 
-    <HybridStrategyConfigurator botId={bot.id} botStatus={bot.status} onChanged={load} />
+    <HybridStrategyConfigurator botId={bot.id} botStatus={bot.status} currentPrice={Number(bot.runtime?.lastPrice ?? 0)} onChanged={load} />
 
     <section>
       <strong>{l("STATUS DO TESTE", "TEST STATUS", "ESTADO DE LA PRUEBA")} — {latestTest ? statusLabel[latestTest.status] : l("NÃO INICIADO", "NOT STARTED", "NO INICIADA")}</strong>

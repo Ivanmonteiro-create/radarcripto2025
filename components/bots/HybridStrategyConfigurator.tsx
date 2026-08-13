@@ -6,13 +6,36 @@ import { useI18n } from "@/components/i18n/LocaleProvider";
 type Level = { levelNumber: number; entryPrice: number; targetPrice: number; quoteAmount: number; enabled: boolean; repeat: boolean };
 type SymbolInfo = { symbol: string; baseAsset: string; quoteAsset: string; status: string; filter: { tickSize: number; stepSize: number; minQuantity: number; minNotional: number } };
 type Validation = { valid: boolean; errors: string[]; warnings: string[]; committedQuote: number; availableQuote: number; economics: Array<{ levelNumber: number; grossProfitQuote: number; simulatedCostsQuote: number; estimatedNetProfitQuote: number; grossDistancePct: number; belowEstimatedCosts: boolean }> };
-type ConfigRecord = { id: string; version: number; status: string; isCurrent: boolean; mode: string; symbol: string; levels: Array<{ levelNumber: number; runtime?: { state: string; completedCycles: number; grossPnl: string; fees: string; slippage: string; netPnl: string; heldQuantity: string; committedQuote: string; totalHoldingMs: string } }> };
+type CycleOrder = { id: string; clientOrderId: string; exchangeOrderId?: string | null; status: string; side: string; requestedPrice?: string | null; averageFillPrice?: string | null; createdAt: string; updatedAt: string };
+type Cycle = { id: string; levelId: string; status: string; averageBuyPrice?: string | null; averageSellPrice?: string | null; openedAt?: string | null; closedAt?: string | null; createdAt: string; updatedAt: string; orders: CycleOrder[] };
+type LevelRecord = {
+  id: string; levelNumber: number; entryPrice: string; targetPrice: string; quoteAmount: string; enabled: boolean; repeat: boolean; updatedAt: string;
+  runtime?: { state: string; activeOrderId?: string | null; completedCycles: number; grossPnl: string; fees: string; slippage: string; netPnl: string; heldQuantity: string; committedQuote: string; totalHoldingMs: string; lastTransitionAt: string; updatedAt: string };
+};
+type ConfigRecord = {
+  id: string; version: number; status: string; isCurrent: boolean; mode: string; name: string; symbol: string;
+  capitalTotal: string; maxCommitted: string; maxExposure: string; structuralStop: string;
+  simulatedMakerFeeBps: string; simulatedSlippageBps: string; updatedAt: string;
+  levels: LevelRecord[]; cycles: Cycle[];
+};
 
 const AUTHORIZATION = "I_AUTHORIZE_BINANCE_SPOT_TESTNET_STRATEGY_B_START";
 const initialLevels: Level[] = [{ levelNumber: 1, entryPrice: 63600, targetPrice: 64200, quoteAmount: 6, enabled: true, repeat: true }];
 const n = (value: number) => Number.isFinite(value) ? value : 0;
+const number = (value: string | number | null | undefined) => Number(value ?? 0);
+const price = (value: string | number | null | undefined) => number(value).toLocaleString("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 8 });
+const quote = (value: string | number | null | undefined) => number(value).toLocaleString("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 6 });
+const pct = (value: number | null) => value === null || !Number.isFinite(value) ? "—" : `${value >= 0 ? "+" : ""}${value.toFixed(3)}%`;
+const elapsed = (from?: string | null, until?: string | null) => {
+  if (!from) return "—";
+  const milliseconds = Math.max(0, new Date(until ?? Date.now()).getTime() - new Date(from).getTime());
+  const seconds = Math.floor(milliseconds / 1_000);
+  const hours = Math.floor(seconds / 3_600);
+  const minutes = Math.floor((seconds % 3_600) / 60);
+  return `${hours}h ${String(minutes).padStart(2, "0")}m`;
+};
 
-export default function HybridStrategyConfigurator({ botId, botStatus, onChanged }: { botId: string; botStatus: string; onChanged: () => Promise<void> }) {
+export default function HybridStrategyConfigurator({ botId, botStatus, currentPrice, onChanged }: { botId: string; botStatus: string; currentPrice: number; onChanged: () => Promise<void> }) {
   const { locale, t } = useI18n();
   const l = (pt: string, en: string, es: string) => locale === "en" ? en : locale === "es" ? es : pt;
   const [mode, setMode] = useState<"READY" | "CUSTOM">("READY");
@@ -41,8 +64,9 @@ export default function HybridStrategyConfigurator({ botId, botStatus, onChanged
     if (response.ok) setConfigs(((await response.json()) as { configurations: ConfigRecord[] }).configurations);
   }, [botId]);
   useEffect(() => {
-    const timer = window.setTimeout(() => { void loadConfigs(); }, 0);
-    return () => window.clearTimeout(timer);
+    const initial = window.setTimeout(() => { void loadConfigs(); }, 0);
+    const timer = window.setInterval(() => { void loadConfigs(); }, 3_000);
+    return () => { window.clearTimeout(initial); window.clearInterval(timer); };
   }, [loadConfigs]);
   useEffect(() => {
     const timer = window.setTimeout(async () => {
@@ -83,8 +107,10 @@ export default function HybridStrategyConfigurator({ botId, botStatus, onChanged
     await onChanged(); await loadConfigs();
   }
 
+  const currentConfig = configs.find((config) => config.isCurrent) ?? null;
+
   return <section className="highlight" style={{ padding: 14, display: "grid", gap: 12 }}>
-    <div><strong>{l("CRIAR / CONFIGURAR ROBÔ", "CREATE / CONFIGURE BOT", "CREAR / CONFIGURAR ROBOT")}</strong><div className="muted">{l("Estratégia persistida e versionada. SALVAR ≠ INICIAR. Binance Spot Testnet apenas.", "Persisted, versioned strategy. SAVE ≠ START. Binance Spot Testnet only.", "Estrategia persistida y versionada. GUARDAR ≠ INICIAR. Solo Binance Spot Testnet.")}</div></div>
+    <div><strong>{l("RASCUNHO DE EDIÇÃO", "EDITING DRAFT", "BORRADOR DE EDICIÓN")}</strong><div className="muted">{l("Os campos abaixo não representam necessariamente o que o worker executa. A configuração realmente salva aparece no bloco separado.", "The fields below do not necessarily represent what the worker runs. The actually saved configuration is shown separately.", "Los campos siguientes no representan necesariamente lo que ejecuta el worker. La configuración guardada aparece por separado.")}</div></div>
     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
       <button className="btn" type="button" onClick={() => setMode("READY")} aria-pressed={mode === "READY"}>{l("Estratégia Pronta", "Ready Strategy", "Estrategia Lista")}</button>
       <button className="btn" type="button" onClick={() => setMode("CUSTOM")} aria-pressed={mode === "CUSTOM"}>{l("Estratégia Personalizada", "Custom Strategy", "Estrategia Personalizada")}</button>
@@ -120,9 +146,66 @@ export default function HybridStrategyConfigurator({ botId, botStatus, onChanged
     <label>{l("Frase de autorização para iniciar", "Authorization phrase to start", "Frase de autorización para iniciar")}<br/><input style={{ width: "100%" }} value={authorization} onChange={(event) => setAuthorization(event.target.value)} placeholder={AUTHORIZATION}/></label>
     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}><button className="btn" disabled={busy || botStatus !== "STOPPED" || authorization !== AUTHORIZATION} onClick={start}>{l("INICIAR TESTE — ESTRATÉGIA B", "START TEST — STRATEGY B", "INICIAR PRUEBA — ESTRATEGIA B")}</button><button className="btn btnSell" disabled={busy || botStatus === "STOPPED"} onClick={stop}>{t("bots.stop").toUpperCase()}</button></div>
     <small className="muted">A opção futura “Sugerir parâmetros com IA” permanece apenas reservada; IA não altera nem inicia esta estratégia.</small>
-    {configs.length > 0 && <div><strong>VERSÕES E MÉTRICAS POR NÍVEL</strong>{configs.slice(0, 5).map((config) => <details key={config.id}><summary>v{config.version} · {config.mode} · {config.symbol} · {config.status}{config.isCurrent ? " · ATUAL" : ""}</summary>{config.levels.map((level) => <div key={level.levelNumber} className="muted">Nível {level.levelNumber}: {level.runtime?.state ?? "WAITING_BUY"} · ciclos {level.runtime?.completedCycles ?? 0} · PNL líquido {Number(level.runtime?.netPnl ?? 0).toFixed(6)} USDT · comprometido {Number(level.runtime?.committedQuote ?? 0).toFixed(2)} USDT</div>)}</details>)}</div>}
+    {currentConfig && <ActiveConfiguration config={currentConfig} currentPrice={currentPrice} l={l} />}
+    {configs.length > 0 && <div style={{ display: "grid", gap: 8 }}><strong>{l("VERSÕES E MÉTRICAS POR NÍVEL", "VERSIONS AND METRICS BY LEVEL", "VERSIONES Y MÉTRICAS POR NIVEL")}</strong>{configs.slice(0, 5).map((config) => <details key={config.id} open={config.isCurrent}><summary>v{config.version} · {config.mode} · {config.symbol} · {config.status}{config.isCurrent ? ` · ${l("ATUAL", "CURRENT", "ACTUAL")}` : ""}</summary><div style={{ display: "grid", gap: 8, marginTop: 8 }}>{config.levels.map((level) => <LevelMetrics key={level.id} config={config} level={level} currentPrice={currentPrice} l={l} />)}</div></details>)}</div>}
     {message && <div className="muted">{message}</div>}
   </section>;
 }
 
 function Metric({ label, value }: { label: string; value: string }) { return <div><small className="muted">{label}</small><div className="bold">{value}</div></div>; }
+
+function ActiveConfiguration({ config, currentPrice, l }: { config: ConfigRecord; currentPrice: number; l: (pt: string, en: string, es: string) => string }) {
+  return <section style={{ padding: 12, border: "1px solid rgba(24,226,115,.45)", borderRadius: 12, background: "rgba(0,35,18,.35)" }}>
+    <strong>{l("CONFIGURAÇÃO SALVA / ATIVA", "SAVED / ACTIVE CONFIGURATION", "CONFIGURACIÓN GUARDADA / ACTIVA")}</strong>
+    <div className="muted">{l("Fonte de verdade persistida usada pelo worker; não é o formulário acima.", "Persisted source of truth used by the worker; this is not the form above.", "Fuente de verdad persistida usada por el worker; no es el formulario anterior.")}</div>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(145px,1fr))", gap: 8, marginTop: 10 }}>
+      <Metric label={l("Versão", "Version", "Versión")} value={`v${config.version}`} />
+      <Metric label={l("Par", "Pair", "Par")} value={config.symbol} />
+      <Metric label={l("Capital", "Capital", "Capital")} value={`${quote(config.capitalTotal)} USDT`} />
+      <Metric label={l("Máximo comprometido", "Maximum committed", "Máximo comprometido")} value={`${quote(config.maxCommitted)} USDT`} />
+      <Metric label={l("Exposição máxima", "Maximum exposure", "Exposición máxima")} value={`${quote(config.maxExposure)} USDT`} />
+      <Metric label={l("Stop estrutural", "Structural stop", "Stop estructural")} value={price(config.structuralStop)} />
+      <Metric label={l("Níveis ativos", "Active levels", "Niveles activos")} value={String(config.levels.filter((level) => level.enabled).length)} />
+      <Metric label={l("Preço atual", "Current price", "Precio actual")} value={currentPrice > 0 ? price(currentPrice) : "—"} />
+      <Metric label="Status" value={config.status} />
+    </div>
+  </section>;
+}
+
+function LevelMetrics({ config, level, currentPrice, l }: { config: ConfigRecord; level: LevelRecord; currentPrice: number; l: (pt: string, en: string, es: string) => string }) {
+  const runtime = level.runtime;
+  const cycles = config.cycles.filter((cycle) => cycle.levelId === level.id).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const latestCycle = cycles[0];
+  const orders = cycles.flatMap((cycle) => cycle.orders).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const activeOrder = orders.find((order) => ["PENDING", "UNKNOWN", "OPEN", "PARTIALLY_FILLED"].includes(order.status)) ?? orders[0];
+  const entry = number(level.entryPrice);
+  const target = number(level.targetPrice);
+  const held = number(runtime?.heldQuantity);
+  const configuredQuantity = entry > 0 ? number(level.quoteAmount) / entry : 0;
+  const distanceToBuy = currentPrice > 0 ? (entry / currentPrice - 1) * 100 : null;
+  const distanceToSell = currentPrice > 0 && held > 0 ? (target / currentPrice - 1) * 100 : null;
+  const openedAt = latestCycle?.openedAt ?? (held > 0 ? latestCycle?.createdAt : null);
+  const costs = number(runtime?.fees) + number(runtime?.slippage);
+  return <article style={{ padding: 10, border: "1px solid rgba(24,226,115,.22)", borderRadius: 10 }}>
+    <div style={{ display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}><strong>{l("NÍVEL", "LEVEL", "NIVEL")} {level.levelNumber}</strong><strong>{runtime?.state ?? "WAITING_BUY"}</strong></div>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(135px,1fr))", gap: 8, marginTop: 8 }}>
+      <Metric label={l("BUY configurado", "Configured BUY", "BUY configurado")} value={price(entry)} />
+      <Metric label={l("SELL configurado", "Configured SELL", "SELL configurado")} value={price(target)} />
+      <Metric label={l("Preço atual", "Current price", "Precio actual")} value={currentPrice > 0 ? price(currentPrice) : "—"} />
+      <Metric label={l("Distância até BUY", "Distance to BUY", "Distancia a BUY")} value={pct(distanceToBuy)} />
+      <Metric label={l("Quantidade", "Quantity", "Cantidad")} value={`${number(held || configuredQuantity).toFixed(8)} BTC`} />
+      <Metric label={l("Valor", "Value", "Valor")} value={`${quote(level.quoteAmount)} USDT`} />
+      <Metric label={l("Capital comprometido", "Committed capital", "Capital comprometido")} value={`${quote(runtime?.committedQuote)} USDT`} />
+      <Metric label="Order ID" value={activeOrder?.exchangeOrderId ?? activeOrder?.clientOrderId ?? runtime?.activeOrderId ?? "—"} />
+      <Metric label={l("Preço real de entrada", "Actual entry price", "Precio real de entrada")} value={latestCycle?.averageBuyPrice ? price(latestCycle.averageBuyPrice) : "—"} />
+      <Metric label={l("Preço alvo", "Target price", "Precio objetivo")} value={price(target)} />
+      <Metric label={l("Distância até SELL", "Distance to SELL", "Distancia a SELL")} value={pct(distanceToSell)} />
+      <Metric label={l("PNL bruto", "Gross PNL", "PNL bruto")} value={`${quote(runtime?.grossPnl)} USDT`} />
+      <Metric label={l("Custos simulados", "Simulated costs", "Costes simulados")} value={`${quote(costs)} USDT`} />
+      <Metric label={l("PNL líquido", "Net PNL", "PNL neto")} value={`${quote(runtime?.netPnl)} USDT`} />
+      <Metric label={l("Tempo aberto", "Open time", "Tiempo abierto")} value={elapsed(openedAt, latestCycle?.closedAt)} />
+      <Metric label={l("Número de ciclos", "Cycle count", "Número de ciclos")} value={String(runtime?.completedCycles ?? 0)} />
+      <Metric label={l("Última atualização", "Last update", "Última actualización")} value={new Date(runtime?.updatedAt ?? level.updatedAt).toLocaleString("pt-PT")} />
+    </div>
+  </article>;
+}
