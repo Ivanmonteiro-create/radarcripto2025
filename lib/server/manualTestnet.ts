@@ -74,6 +74,9 @@ export async function executeManualTestnetOrder(input: ManualTestnetOrderInput) 
       status: "PENDING",
       requestedQuantity: quantity ?? notional / ticker,
       requestedPrice: price,
+      decisionPrice: ticker,
+      decisionReason: "Manual Testnet order",
+      submittedAt: new Date(),
     } });
     await tx.botLog.create({ data: {
       botId: bot.id, level: "INFO", event: "MANUAL_TESTNET_ORDER_AUTHORIZED",

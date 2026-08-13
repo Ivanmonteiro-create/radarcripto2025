@@ -61,9 +61,21 @@ export async function PATCH(request: Request, context: Context) {
     if (!mergedResult.success) throw new ApiError(400, "INVALID_BOT_CONFIGURATION", mergedResult.error.flatten());
     if (mergedResult.data.mode === "TESTNET" && getTradingMode() !== "TESTNET") throw new ApiError(409, "TESTNET_ENVIRONMENT_DISABLED");
     const resetRuntime = input.capitalUSDT !== undefined && Number(current.capitalUSDT) !== input.capitalUSDT;
-    const strategy = input.strategy ? await prisma.strategy.upsert({
-      where: { kind_version: { kind: input.strategy, version: 1 } },
-      create: { kind: input.strategy, name: input.strategy, version: 1, schema: {} }, update: {},
+    const requestedKind = input.strategy ?? String(currentParams.kind ?? "EMA_CROSS") as "EMA_CROSS" | "PERCENT_CYCLE" | "RANGE_CYCLE";
+    const requestedParams = (input.strategyParams ?? currentParams) as Record<string, unknown>;
+    const strategyVersion = requestedKind === "EMA_CROSS" && requestedParams.variant === "A2.1"
+      ? 3
+      : requestedKind === "EMA_CROSS" && requestedParams.variant === "A2" ? 2 : 1;
+    const strategy = input.strategy || input.strategyParams ? await prisma.strategy.upsert({
+      where: { kind_version: { kind: requestedKind, version: strategyVersion } },
+      create: {
+        kind: requestedKind,
+        name: strategyVersion === 3 ? "EMA 9/21 A2.1" : strategyVersion === 2 ? "EMA 9/21 A2" : requestedKind,
+        version: strategyVersion,
+        schema: strategyVersion === 3
+          ? { baseline: "EMA 9/21 original", parent: "A2", variant: "A2.1" }
+          : strategyVersion === 2 ? { baseline: "EMA 9/21 original", variant: "A2" } : {},
+      }, update: {},
     }) : null;
     const bot = await prisma.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${id})) IS NULL AS locked`;

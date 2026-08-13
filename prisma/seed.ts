@@ -43,6 +43,42 @@ export async function seed(client: PrismaClient = prisma) {
     },
     update: {},
   });
+  await client.strategy.upsert({
+    where: { kind_version: { kind: "EMA_CROSS", version: 2 } },
+    create: {
+      kind: "EMA_CROSS",
+      name: "EMA 9/21 A2",
+      version: 2,
+      schema: {
+        baseline: "EMA 9/21 original",
+        variant: "A2",
+        shortPeriod: 9,
+        longPeriod: 21,
+        rollingRangeWindow: 21,
+        minExpectedEdgeBps: 5,
+        minEmaSeparationBps: 0.5,
+        minRollingRangeBps: 20,
+      },
+    },
+    update: {},
+  });
+  await client.strategy.upsert({
+    where: { kind_version: { kind: "EMA_CROSS", version: 3 } },
+    create: {
+      kind: "EMA_CROSS",
+      name: "EMA 9/21 A2.1",
+      version: 3,
+      schema: {
+        baseline: "EMA 9/21 original",
+        parent: "EMA 9/21 A2",
+        variant: "A2.1",
+        priceSource: "TICKER",
+        windowsMinutes: [2, 5, 15],
+        proposedThresholds: { minExpectedEdgeBps: 0, minEmaSeparationBps: 0.1, minRange5mBps: 3, minRange15mBps: 6 },
+      },
+    },
+    update: {},
+  });
 
   const defaults = {
     userId: user.id,

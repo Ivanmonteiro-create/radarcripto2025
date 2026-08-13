@@ -11,7 +11,7 @@ export type OrderStatus =
 export type OrderSide = "BUY" | "SELL";
 export type PositionSide = "LONG";
 export type OrderType = "MARKET" | "LIMIT";
-export type StrategyKind = "EMA_CROSS" | "PERCENT_CYCLE";
+export type StrategyKind = "EMA_CROSS" | "PERCENT_CYCLE" | "RANGE_CYCLE";
 export type StrategySignalKind = "BUY" | "SELL" | "HOLD";
 
 export interface Position {

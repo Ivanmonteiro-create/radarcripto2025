@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createRiskRuntimeReset, resolveAutomaticBuyUSDT, validateAutomaticSpotPreflight } from "@/lib/trading/automationPolicy";
 import { evaluateRisk } from "@/lib/trading/riskManager";
 import type { BotConfig, SymbolInfo } from "@/lib/trading/domain";
+import { EmaCrossStrategy } from "@/lib/trading/strategies/emaCross";
 
 const bot: BotConfig = {
   id: "seed-ema-cross",
@@ -35,6 +36,11 @@ const symbolInfo: SymbolInfo = {
 };
 
 describe("automatic Testnet safety policy", () => {
+  it("preserves the EMA 9/21 baseline and 21-observation warm-up", () => {
+    const strategy = new EmaCrossStrategy("BTCUSDT", { shortPeriod: 9, longPeriod: 21 });
+    for (let index = 0; index < 21; index += 1) expect(strategy.update(100).kind).toBe("HOLD");
+    expect(strategy.update(120).kind).toBe("BUY");
+  });
   it("uses the explicit 6 USDT order and validates it above Binance minimum", () => {
     const requestedOrderUSDT = resolveAutomaticBuyUSDT(bot);
     expect(requestedOrderUSDT).toBe(6);

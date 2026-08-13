@@ -2,71 +2,36 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
+import { useI18n } from "@/components/i18n/LocaleProvider";
+import { pageContent } from "@/lib/i18n/pageContent";
 
 export default function SobrePage() {
+  const { locale, t } = useI18n();
+  const copy = pageContent[locale].about;
   return (
     <main className="page-sobre">
-      {/* ---- BOTÃO SUPERIOR DIREITO ---- */}
-      <div className="top-button">
-        <Link href="/" className="rc-btn rc-btn--green">Voltar ao início</Link>
-      </div>
-
       {/* ---- HERO / CABEÇALHO ---- */}
       <section className="hero">
         <h1>
-          SOBRE O <span>RADARCRYPTO</span>
+          {t("about.title")}
         </h1>
         <p className="sub">
-          Onde o aprendizado encontra a prática — o risco fica de fora. Aqui, você
-          aprende trading sem perder <strong>dinheiro real</strong>, dentro de um ambiente
-          virtual seguro, moderno e acessível.
+          {copy.subtitle}
         </p>
 
         {/* ---- PILLS ---- */}
         <div className="pills">
-          <div className="pill">Produto experimental · modo SIM</div>
-          <div className="pill">Ferramentas de quem vive o mercado</div>
+          {copy.pills.map((pill) => <div className="pill" key={pill}>{pill}</div>)}
         </div>
       </section>
 
       {/* ---- CONTEÚDO / CARDS ---- */}
-      <section className="cardsWrap">
-        <article className="card">
-          <div className="cardTitle">
-            <span className="icon">🔒</span> Erre sem riscos
-          </div>
-          <p>
-            Teste estratégias no simulador com <strong>10.000 USDT virtuais</strong> e descubra
-            como o mercado se comporta — <em>sem arriscar um centavo</em>.
-          </p>
-        </article>
-
-        <article className="card">
-          <div className="cardTitle">
-            <span className="icon">🧠</span> Aprenda de verdade
-          </div>
-          <p>
-            Experimente o trading no <strong>Spot</strong> ou <strong>Futuro</strong>, pratique leitura
-            de gráficos e desenvolva controle emocional: é escola e prática real.
-          </p>
-        </article>
-
-        <article className="card">
-          <div className="cardTitle">
-            <span className="icon">🚀</span> Evolua sempre
-          </div>
-          <p>
-            Revise resultados, teste novas ideias e acompanhe sua performance com
-            clareza: quanto mais você pratica, mais se prepara para o mercado real.
-          </p>
-        </article>
-      </section>
+      <section className="cardsWrap">{copy.cards.map(([icon, title, text]) => <article className="card" key={title}><div className="cardTitle"><span className="icon">{icon}</span>{title}</div><p>{text}</p></article>)}</section>
 
       {/* ---- FECHO ---- */}
       <section className="closer">
         <p>
-          Treine hoje. Entenda amanhã. <strong>Aja com confiança.</strong>
+          {copy.closer}
         </p>
       </section>
 
@@ -89,12 +54,6 @@ export default function SobrePage() {
         }
 
         /* ===== BOTÃO SUPERIOR DIREITO ===== */
-        .top-button {
-          position: absolute;
-          top: 20px;
-          right: 30px;
-          z-index: 5;
-        }
 
         .rc-btn {
           display: inline-flex;
@@ -229,13 +188,6 @@ export default function SobrePage() {
         @media (max-width: 960px) {
           .cardsWrap {
             grid-template-columns: 1fr;
-          }
-          .top-button {
-            position: static;
-            margin: 0 auto 10px;
-            display: flex;
-            justify-content: flex-end;
-            width: var(--w);
           }
           .hero {
             margin-top: 10px;

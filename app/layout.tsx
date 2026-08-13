@@ -2,20 +2,22 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import TopNav from "@/components/TopNav";
+import { cookies } from "next/headers";
+import { LocaleProvider } from "@/components/i18n/LocaleProvider";
+import { LOCALE_COOKIE, localeTag, normalizeLocale } from "@/lib/i18n/config";
 
 export const metadata: Metadata = {
-  title: "RadarCrypto — Fundação Experimental SIM & Testnet",
+  title: "RadarCrypto — Inteligência, informação e automação cripto",
   description:
-    "Projeto experimental com simulador Spot e fundação para Binance Spot Testnet. Sem operação Live.",
+    "Mercado, robôs, estratégias e ferramentas de informação cripto em uma única plataforma experimental.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = normalizeLocale((await cookies()).get(LOCALE_COOKIE)?.value);
   return (
-    <html lang="pt-BR">
+    <html lang={localeTag[locale]}>
       <body className="rc-root">
-        {/* TopNav sempre presente e independente de faixas */}
-        <TopNav />
-        <main className="rc-main">{children}</main>
+        <LocaleProvider initialLocale={locale}><TopNav /><main className="rc-main">{children}</main></LocaleProvider>
       </body>
     </html>
   );

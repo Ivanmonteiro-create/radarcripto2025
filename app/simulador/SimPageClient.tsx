@@ -2,16 +2,19 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
 import TradingViewWidget from '../../components/TradingViewWidget';
 import TradeControls from '../../components/TradeControls';
 import { useLivePrice } from '../../lib/useLivePrice';
+import { useI18n } from '../../components/i18n/LocaleProvider';
+import { pageContent } from '../../lib/i18n/pageContent';
 
 type Pair =
   | 'BTCUSDT' | 'ETHUSDT' | 'BNBUSDT' | 'SOLUSDT'
   | 'ADAUSDT' | 'XRPUSDT' | 'DOGEUSDT' | 'LINKUSDT';
 
 export default function SimPageClient() {
+  const { locale } = useI18n();
+  const copy = pageContent[locale].simulator;
   const [symbol, setSymbol] = useState<Pair>('BTCUSDT');
   const { price: livePrice } = useLivePrice(symbol);
 
@@ -71,19 +74,6 @@ export default function SimPageClient() {
       }}
     >
       <style>{`
-        /* ==== LIMPA QUALQUER TOPBAR GLOBAL NESTA ROTA ==================== */
-        body:has(main.page-simulador) nav,
-        body:has(main.page-simulador) header,
-        body:has(main.page-simulador) .rc-topnav,
-        body:has(main.page-simulador) .rc-topbar,
-        body:has(main.page-simulador) .rc-topband,
-        body:has(main.page-simulador) .rc-topstrip,
-        body:has(main.page-simulador) .rc-page-top,
-        body:has(main.page-simulador) .rc-backtop {
-          display: none !important;
-          height: 0 !important; margin: 0 !important; padding: 0 !important;
-          border: 0 !important; background: transparent !important; box-shadow: none !important;
-        }
         body:has(main.page-simulador) .rc-main,
         body:has(main.page-simulador) main.page-simulador{ padding-top:0 !important; margin-top:0 !important; }
         body:has(main.page-simulador) .panel{ border-top:0 !important; border-radius:0 !important; }
@@ -121,10 +111,6 @@ export default function SimPageClient() {
 
         /* ==== CONTROLES: botão verde no topo-direito ====================== */
         .rc-controls{ position: relative; padding-top: 8px; }
-        .backBtnInPanel{
-          position: absolute; top: 22px; right: 10px; z-index: 5;
-          display: inline-flex; align-items: center; height: 34px; white-space: nowrap;
-        }
         .rc-btn--green{
           display:inline-flex; height:34px; padding:0 14px; border-radius:8px;
           font-weight:800; background:#18e273; color:#052515;
@@ -158,11 +144,11 @@ export default function SimPageClient() {
       >
         {/* Barra do gráfico (restaurada) */}
         <div className="chartHeader">
-          <div className="chartTitle">Gráfico — {symbol}</div>
+          <div className="chartTitle">{copy.chart} — {symbol}</div>
           {!isFs && (
             <button
-              aria-label="Tela cheia"
-              title="Tela cheia"
+              aria-label={copy.fullscreen}
+              title={copy.fullscreen}
               className="tvFsBtn"
               onClick={toggleFs}
             >
@@ -189,11 +175,6 @@ export default function SimPageClient() {
           borderLeft: '1px solid rgba(255,255,255,.06)',
         }}
       >
-        {/* Botão verde dentro do painel de controles */}
-        <div className="backBtnInPanel">
-          <Link href="/" className="rc-btn rc-btn--green">Voltar ao início</Link>
-        </div>
-
         <TradeControls
           symbol={symbol}
           onSymbolChange={(s: string) => setSymbol(s as Pair)}

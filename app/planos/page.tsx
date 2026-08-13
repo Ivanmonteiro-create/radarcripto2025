@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
+import { useI18n } from "@/components/i18n/LocaleProvider";
+import { pageContent } from "@/lib/i18n/pageContent";
 
 type Plan = {
   slug: "start" | "trader" | "pro" | "elite";
@@ -76,6 +77,9 @@ const PLANS: Plan[] = [
 ];
 
 export default function PlanosPage() {
+  const { locale, t } = useI18n();
+  const copy = pageContent[locale].plans;
+  const plans = PLANS.map((plan, index) => ({ ...plan, ribbon: copy.items[index][0], title: copy.items[index][1], price: copy.items[index][2], features: [...copy.items[index][3]] }));
   return (
     <main className="page-planos">
       <style jsx global>{`
@@ -112,26 +116,20 @@ export default function PlanosPage() {
 
       <header className="hero">
         <h1>
-          Planos do <span>RadarCrypto</span>
+          {t("plans.title")}
         </h1>
         <p className="sub">
-          Produto experimental em desenvolvimento. O modo SIM está disponível;
-          planos pagos, Testnet e operação com dinheiro real não estão à venda nesta fase.
+          {copy.subtitle}
         </p>
 
         <div className="proofs" role="list">
-          <span className="proof">Fase experimental</span>
-          <span className="proof">SIM disponível</span>
-          <span className="proof">Sem operação Live</span>
+          {copy.proofs.map((proof) => <span className="proof" key={proof}>{proof}</span>)}
         </div>
 
-        <div className="backTopRight">
-          <Link href="/" className="rc-btn rc-btn--green">Voltar ao início</Link>
-        </div>
       </header>
 
       <section className="plansGrid">
-        {PLANS.map((p) => (
+        {plans.map((p) => (
           <article key={p.slug} className={`plan plan--${p.slug}`}>
             <div className="plan-head">
               <span className="ribbon">{p.ribbon}</span>
@@ -150,9 +148,9 @@ export default function PlanosPage() {
 
             <div className="plan-cta">
               {p.slug === "start" ? (
-                <a href="/simulador" className="rc-btn rc-btn--green">{p.cta}</a>
+                <a href="/simulador" className="rc-btn rc-btn--green">{copy.start}</a>
               ) : (
-                <span className="rc-btn" aria-disabled="true">Em desenvolvimento</span>
+                <span className="rc-btn" aria-disabled="true">{copy.unavailable}</span>
               )}
             </div>
           </article>
@@ -160,7 +158,7 @@ export default function PlanosPage() {
       </section>
 
       <aside className="ctaDock">
-        <a href="/simulador" className="rc-btn rc-btn--green">Começar de graça</a>
+        <a href="/simulador" className="rc-btn rc-btn--green">{copy.start}</a>
       </aside>
 
       <style jsx>{`
@@ -214,11 +212,6 @@ export default function PlanosPage() {
           font-size: 11.5px;
         }
 
-        .backTopRight {
-          position: absolute;
-          top: 0;
-          right: 0;
-        }
 
         /* SUBIR CARDS ~1cm */
         .plansGrid {

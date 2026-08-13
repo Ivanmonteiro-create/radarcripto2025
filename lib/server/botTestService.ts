@@ -8,10 +8,11 @@ import {
   type TestSignal,
 } from "@/lib/trading/timedTest";
 import { ApiError } from "./api";
-import { getTradingMode } from "./env";
+import { getCostModelConfig, getTradingMode } from "./env";
 import { getTestnetCredentialSummary } from "./exchangeCredentials";
 import { workerHealth } from "./health";
 import { prisma } from "./prisma";
+import { calculateStorageMetrics, calculateTestFinancialMetrics } from "@/lib/trading/testFinancialMetrics";
 
 const pendingStatuses = ["PENDING", "UNKNOWN", "OPEN", "PARTIALLY_FILLED"] as const;
 const jsonValue = (value: unknown): Prisma.InputJsonValue => JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
@@ -62,6 +63,7 @@ export async function startTimedBotTest(botId: string, durationMinutes: number, 
     }
 
     const initialEquity = Number(bot.capitalUSDT) + Number(bot.runtime?.dailyRealizedPnl ?? 0);
+    const costModel = getCostModelConfig();
     const configuration = {
       mode: bot.mode,
       symbol: bot.symbol,
@@ -79,6 +81,20 @@ export async function startTimedBotTest(botId: string, durationMinutes: number, 
       priceSource: params.priceSource ?? null,
       samplingIntervalMs: params.samplingIntervalMs ?? null,
       candleTimeframe: params.candleTimeframe ?? null,
+      strategyVariant: params.variant ?? "A",
+      strategyName: params.variant === "A2.1" ? "EMA 9/21 A2.1" : params.variant === "A2" ? "EMA 9/21 A2" : strategy === "EMA_CROSS" ? "EMA 9/21 original" : strategy,
+      thresholds: params.variant === "A2" ? {
+        minExpectedEdgeBps: params.minExpectedEdgeBps,
+        minEmaSeparationBps: params.minEmaSeparationBps,
+        minRollingRangeBps: params.minRollingRangeBps,
+        rollingRangeWindow: params.rollingRangeWindow,
+      } : params.variant === "A2.1" ? {
+        minExpectedEdgeBps: params.minExpectedEdgeBps,
+        minEmaSeparationBps: params.minEmaSeparationBps,
+        minRange5mBps: params.minRange5mBps,
+        minRange15mBps: params.minRange15mBps,
+      } : null,
+      costModel,
     };
     const test = await tx.botTestRun.create({
       data: {
@@ -91,6 +107,29 @@ export async function startTimedBotTest(botId: string, durationMinutes: number, 
         strategy,
         initialEquity,
         peakEquity: initialEquity,
+        currentEquity: initialEquity,
+        grossPnl: 0,
+        actualNetPnl: 0,
+        realisticNetPnl: 0,
+        simulatedNetPnl: 0,
+        exchangeFeeActual: 0,
+        realisticFee: 0,
+        realisticSlippage: 0,
+        simulatedFee: 0,
+        actualSlippage: 0,
+        simulatedSlippage: 0,
+        costModelEnabled: costModel.enabled,
+        realisticTakerFeeBps: costModel.realisticTakerFeeBps,
+        realisticSlippageBps: costModel.realisticSlippageBps,
+        simulatedMakerFeeBps: costModel.simulatedMakerFeeBps,
+        simulatedTakerFeeBps: costModel.simulatedTakerFeeBps,
+        simulatedSlippageBps: costModel.simulatedSlippageBps,
+        insufficientEdgeBlocks: 0,
+        insufficientRangeBlocks: 0,
+        microCrossoversFiltered: 0,
+        insufficientRealisticEdgeBlocks: 0,
+        insufficient5mRangeBlocks: 0,
+        insufficient15mRangeBlocks: 0,
       },
     });
     await tx.botConfig.update({ where: { id: botId }, data: { status: "RUNNING" } });
@@ -208,14 +247,46 @@ export async function finalizeTestRun(testRunId: string, now = new Date()) {
     if (!test || test.status !== "IN_PROGRESS" || !test.stopRequestedAt) return test;
     const pendingOrders = await tx.order.count({ where: { testRunId, status: { in: [...pendingStatuses] } } });
     if (pendingOrders > 0) return test;
-    const [orders, fills, trades, risks, positions] = await Promise.all([
-      tx.order.findMany({ where: { testRunId }, select: { side: true, status: true } }),
+    const [orders, fills, trades, risks, positions, snapshotRows] = await Promise.all([
+      tx.order.findMany({ where: { testRunId }, select: { id: true, side: true, status: true, decisionReason: true, decisionTelemetry: true } }),
       tx.fill.count({ where: { testRunId } }),
-      tx.trade.aggregate({ where: { testRunId }, _sum: { realizedPnl: true } }),
+      tx.trade.findMany({ where: { testRunId }, select: {
+        orderId: true, side: true, realizedPnl: true, grossPnl: true, actualNetPnl: true,
+        realisticNetPnl: true, simulatedNetPnl: true, exchangeFeeActual: true,
+        realisticFee: true, realisticSlippage: true, simulatedFee: true,
+        actualSlippage: true, simulatedSlippage: true,
+        maeQuote: true, maeBps: true, mfeQuote: true, mfeBps: true,
+        exitEfficiencyPct: true, profitGivebackBps: true, totalRealisticCost: true, totalSimulatedCost: true,
+      }, orderBy: { timestamp: "asc" } }),
       tx.riskEvent.findMany({ where: { testRunId }, select: { allowed: true, code: true } }),
       tx.position.findMany({ where: { botId: test.botId, isOpen: true } }),
+      tx.balanceSnapshot.count({ where: { testRunId } }),
     ]);
-    const realizedPnl = Number(trades._sum.realizedPnl ?? 0);
+    const orderReasons = new Map(orders.map((order) => [order.id, order.decisionReason]));
+    const financialMetrics = calculateTestFinancialMetrics(trades.map((trade) => ({
+      orderId: trade.orderId,
+      side: trade.side,
+      grossPnl: trade.grossPnl === null ? null : Number(trade.grossPnl),
+      actualNetPnl: trade.actualNetPnl === null ? Number(trade.realizedPnl) : Number(trade.actualNetPnl),
+      realisticNetPnl: trade.realisticNetPnl === null ? Number(trade.realizedPnl) : Number(trade.realisticNetPnl),
+      simulatedNetPnl: trade.simulatedNetPnl === null ? Number(trade.realizedPnl) : Number(trade.simulatedNetPnl),
+      exchangeFeeActual: trade.exchangeFeeActual === null ? Number(trade.realizedPnl) * 0 : Number(trade.exchangeFeeActual),
+      simulatedFee: trade.simulatedFee === null ? 0 : Number(trade.simulatedFee),
+      actualSlippage: trade.actualSlippage === null ? 0 : Number(trade.actualSlippage),
+      realisticFee: trade.realisticFee === null ? 0 : Number(trade.realisticFee),
+      realisticSlippage: trade.realisticSlippage === null ? 0 : Number(trade.realisticSlippage),
+      simulatedSlippage: trade.simulatedSlippage === null ? 0 : Number(trade.simulatedSlippage),
+      decisionReason: orderReasons.get(trade.orderId),
+      maeQuote: trade.maeQuote === null ? null : Number(trade.maeQuote),
+      maeBps: trade.maeBps === null ? null : Number(trade.maeBps),
+      mfeQuote: trade.mfeQuote === null ? null : Number(trade.mfeQuote),
+      mfeBps: trade.mfeBps === null ? null : Number(trade.mfeBps),
+      exitEfficiencyPct: trade.exitEfficiencyPct === null ? null : Number(trade.exitEfficiencyPct),
+      profitGivebackBps: trade.profitGivebackBps === null ? null : Number(trade.profitGivebackBps),
+      totalSimulatedCost: trade.totalSimulatedCost === null ? null : Number(trade.totalSimulatedCost),
+      totalRealisticCost: trade.totalRealisticCost === null ? null : Number(trade.totalRealisticCost),
+    })));
+    const realizedPnl = trades.reduce((sum, trade) => sum + Number(trade.actualNetPnl ?? trade.realizedPnl), 0);
     const unrealizedPnl = positions.reduce((sum, position) => sum + Number(position.unrealizedPnl), 0);
     const initialEquity = Number(test.initialEquity);
     const finalEquity = initialEquity + realizedPnl + unrealizedPnl;
@@ -259,6 +330,28 @@ export async function finalizeTestRun(testRunId: string, now = new Date()) {
       finalPosition,
       stopReason: test.stopReason ?? "OPERATOR_STOPPED",
     });
+    const storage = calculateStorageMetrics(snapshotRows, summary.actualDurationMs);
+    const filters = {
+      buySignals: test.buySignals,
+      buyExecuted,
+      cooldownBlocks: risks.filter((risk) => risk.code === "ORDER_COOLDOWN").length,
+      insufficientExpectedEdge: risks.filter((risk) => risk.code === "INSUFFICIENT_EXPECTED_EDGE").length,
+      insufficientRealisticEdge: risks.filter((risk) => risk.code === "INSUFFICIENT_REALISTIC_EDGE").length,
+      insufficient5mRange: risks.filter((risk) => risk.code === "INSUFFICIENT_5M_RANGE").length,
+      insufficient15mRange: risks.filter((risk) => risk.code === "INSUFFICIENT_15M_RANGE").length,
+      insufficientMarketRange: risks.filter((risk) => risk.code === "INSUFFICIENT_MARKET_RANGE").length,
+      microCrossoversFiltered: risks.filter((risk) => risk.code === "MICRO_CROSSOVER_FILTERED").length,
+      sellExecuted,
+      sellIgnoredWithoutPosition: test.sellIgnored,
+    };
+    const a2WouldHaveBlockedExecutedBuys = orders.filter((order) => {
+      if (order.side !== "BUY" || order.status !== "FILLED" || !order.decisionTelemetry || typeof order.decisionTelemetry !== "object") return false;
+      return (order.decisionTelemetry as Record<string, unknown>).a2WouldBlock === true;
+    }).length;
+    const enrichedSummary = {
+      ...summary, ...financialMetrics, filters, storage,
+      comparison: { a2WouldHaveBlockedExecutedBuys },
+    };
     const status = finalStatusForReason(test.stopReason ?? "OPERATOR_STOPPED");
     const updated = await tx.botTestRun.update({
       where: { id: testRunId },
@@ -275,9 +368,30 @@ export async function finalizeTestRun(testRunId: string, now = new Date()) {
         maxDrawdownPct,
         endedWithOpenPosition: positions.length > 0,
         finalPosition: jsonValue(finalPosition),
-        summary: jsonValue(summary),
+        currentEquity: finalEquity,
+        grossPnl: financialMetrics.finance.grossPnl,
+        actualNetPnl: financialMetrics.finance.actualNetPnl,
+        realisticNetPnl: financialMetrics.finance.realisticNetPnl,
+        simulatedNetPnl: financialMetrics.finance.simulatedNetPnl,
+        exchangeFeeActual: financialMetrics.finance.exchangeFeeActual,
+        realisticFee: financialMetrics.finance.realisticFee,
+        realisticSlippage: financialMetrics.finance.realisticSlippage,
+        simulatedFee: financialMetrics.finance.simulatedFee,
+        actualSlippage: financialMetrics.finance.actualSlippage,
+        simulatedSlippage: financialMetrics.finance.simulatedSlippage,
+        summary: jsonValue(enrichedSummary),
       },
     });
+    const lastSnapshot = await tx.balanceSnapshot.findFirst({
+      where: { botId: test.botId }, orderBy: { timestamp: "desc" }, select: { timestamp: true },
+    });
+    if (lastSnapshot) {
+      const balances = await tx.balanceSnapshot.findMany({ where: { botId: test.botId, timestamp: lastSnapshot.timestamp } });
+      if (balances.length) await tx.balanceSnapshot.createMany({ data: balances.map((balance) => ({
+        botId: balance.botId, testRunId, asset: balance.asset, free: balance.free, locked: balance.locked,
+        total: balance.total, equityUSDT: balance.equityUSDT, reason: "TEST_END", timestamp: now,
+      })) });
+    }
     await tx.botLog.create({
       data: {
         botId: test.botId,
@@ -299,6 +413,7 @@ export async function recordTestDecision(input: {
   equity: number;
   unrealizedPnl: number;
   heartbeatAt: Date;
+  metadata?: Record<string, number | string | boolean | null>;
 }) {
   const peakEquity = Math.max(Number(input.test.peakEquity), input.equity);
   const drawdown = calculateDrawdown(peakEquity, input.equity);
@@ -311,11 +426,22 @@ export async function recordTestDecision(input: {
       sellSignals: { increment: input.signal === "SELL" ? 1 : 0 },
       holdSignals: { increment: input.signal === "HOLD" ? 1 : 0 },
       peakEquity,
+      currentEquity: input.equity,
       unrealizedPnl: input.unrealizedPnl,
       currentDrawdownPct: drawdown,
       maxDrawdownPct: Math.max(Number(input.test.maxDrawdownPct), drawdown),
       lastSignal: input.signal,
       lastHeartbeatAt: input.heartbeatAt,
+      lastExpectedMoveBps: typeof input.metadata?.expectedMoveBps === "number" ? input.metadata.expectedMoveBps : undefined,
+      lastRollingRangeBps: typeof input.metadata?.rollingRangeBps === "number" ? input.metadata.rollingRangeBps : undefined,
+      lastEmaSeparationBps: typeof input.metadata?.emaSeparationBps === "number" ? input.metadata.emaSeparationBps : undefined,
+      lastRange2mBps: typeof input.metadata?.range2mBps === "number" ? input.metadata.range2mBps : undefined,
+      lastRange5mBps: typeof input.metadata?.range5mBps === "number" ? input.metadata.range5mBps : undefined,
+      lastRange15mBps: typeof input.metadata?.range15mBps === "number" ? input.metadata.range15mBps : undefined,
+      lastMomentum2mBps: typeof input.metadata?.momentum2mBps === "number" ? input.metadata.momentum2mBps : undefined,
+      lastMomentum5mBps: typeof input.metadata?.momentum5mBps === "number" ? input.metadata.momentum5mBps : undefined,
+      lastMomentum15mBps: typeof input.metadata?.momentum15mBps === "number" ? input.metadata.momentum15mBps : undefined,
+      lastExpectedMoveA21Bps: typeof input.metadata?.expectedMoveBpsA21 === "number" ? input.metadata.expectedMoveBpsA21 : undefined,
     },
   });
 }
@@ -332,6 +458,12 @@ export async function recordTestRiskOutcome(testRunId: string, input: {
       buyBlocked: { increment: input.signal === "BUY" && !input.allowed ? 1 : 0 },
       sellIgnored: { increment: input.signal === "SELL" && input.ignored ? 1 : 0 },
       cooldownBlocks: { increment: input.code === "ORDER_COOLDOWN" ? 1 : 0 },
+      insufficientEdgeBlocks: { increment: input.code === "INSUFFICIENT_EXPECTED_EDGE" ? 1 : 0 },
+      insufficientRangeBlocks: { increment: input.code === "INSUFFICIENT_MARKET_RANGE" ? 1 : 0 },
+      microCrossoversFiltered: { increment: input.code === "MICRO_CROSSOVER_FILTERED" ? 1 : 0 },
+      insufficientRealisticEdgeBlocks: { increment: input.code === "INSUFFICIENT_REALISTIC_EDGE" ? 1 : 0 },
+      insufficient5mRangeBlocks: { increment: input.code === "INSUFFICIENT_5M_RANGE" ? 1 : 0 },
+      insufficient15mRangeBlocks: { increment: input.code === "INSUFFICIENT_15M_RANGE" ? 1 : 0 },
     },
   });
 }

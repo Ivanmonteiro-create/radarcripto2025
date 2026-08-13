@@ -22,6 +22,38 @@ enum BotStatus {
 enum StrategyKind {
   EMA_CROSS
   PERCENT_CYCLE
+  RANGE_CYCLE
+}
+
+enum StrategyConfigMode {
+  READY
+  CUSTOM
+}
+
+enum StrategyConfigStatus {
+  DRAFT
+  VALIDATED
+  ACTIVE
+  ARCHIVED
+}
+
+enum StrategyLevelState {
+  WAITING_BUY
+  BUY_PENDING
+  WAITING_SELL
+  SELL_PENDING
+  COMPLETED
+  STOPPED
+  ERROR
+}
+
+enum StrategyCycleStatus {
+  BUY_PENDING
+  HOLDING
+  SELL_PENDING
+  COMPLETED
+  STOPPED
+  ERROR
 }
 
 enum OrderSide {
@@ -65,6 +97,7 @@ model User {
   updatedAt        DateTime          @updatedAt
   exchangeAccounts ExchangeAccount[]
   botConfigs       BotConfig[]
+  strategyConfigs  StrategyConfig[]
 }
 
 model ExchangeAccount {
@@ -135,6 +168,7 @@ model BotConfig {
   riskEvents         RiskEvent[]
   logs               BotLog[]
   testRuns           BotTestRun[]
+  strategyConfigs    StrategyConfig[]
 
   @@index([status, mode])
   @@index([userId])
@@ -162,36 +196,158 @@ model BotRuntime {
 }
 
 model Order {
-  id                      String      @id @default(cuid())
+  id                      String         @id @default(cuid())
   botId                   String
   testRunId               String?
+  strategyCycleId         String?
   exchangeOrderId         String?
-  clientOrderId           String      @unique
+  clientOrderId           String         @unique
   symbol                  String
   side                    OrderSide
   type                    OrderType
   status                  OrderStatus
-  requestedQuantity       Decimal     @db.Decimal(36, 18)
-  executedQuantity        Decimal     @default(0) @db.Decimal(36, 18)
-  requestedPrice          Decimal?    @db.Decimal(24, 8)
-  averageFillPrice        Decimal?    @db.Decimal(24, 8)
+  requestedQuantity       Decimal        @db.Decimal(36, 18)
+  executedQuantity        Decimal        @default(0) @db.Decimal(36, 18)
+  requestedPrice          Decimal?       @db.Decimal(24, 8)
+  decisionPrice           Decimal?       @db.Decimal(24, 8)
+  decisionReason          String?
+  decisionTelemetry       Json?
+  submittedAt             DateTime?
+  firstFillAt             DateTime?
+  averageFillPrice        Decimal?       @db.Decimal(24, 8)
+  slippageQuote           Decimal?       @db.Decimal(24, 8)
+  slippageBps             Decimal?       @db.Decimal(14, 6)
+  exchangeFeeActual       Decimal?       @db.Decimal(24, 8)
+  realisticFee            Decimal?       @db.Decimal(24, 8)
+  realisticSlippage       Decimal?       @db.Decimal(24, 8)
+  simulatedFee            Decimal?       @db.Decimal(24, 8)
+  simulatedSlippage       Decimal?       @db.Decimal(24, 8)
   rejectReason            String?
   rawResponseRedacted     Json?
-  submissionUncertain     Boolean     @default(false)
-  reconciliationAttempts  Int         @default(0)
+  submissionUncertain     Boolean        @default(false)
+  reconciliationAttempts  Int            @default(0)
   lastReconciledAt        DateTime?
   lastReconciliationError String?
   exchangeUpdatedAt       DateTime?
-  createdAt               DateTime    @default(now())
-  updatedAt               DateTime    @updatedAt
-  bot                     BotConfig   @relation(fields: [botId], references: [id], onDelete: Cascade)
-  testRun                 BotTestRun? @relation(fields: [testRunId], references: [id], onDelete: SetNull)
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
+  bot                     BotConfig      @relation(fields: [botId], references: [id], onDelete: Cascade)
+  testRun                 BotTestRun?    @relation(fields: [testRunId], references: [id], onDelete: SetNull)
+  strategyCycle           StrategyCycle? @relation(fields: [strategyCycleId], references: [id], onDelete: SetNull)
   fills                   Fill[]
   trades                  Trade[]
 
   @@index([botId, status])
   @@index([testRunId, createdAt])
+  @@index([strategyCycleId, createdAt])
   @@index([exchangeOrderId])
+}
+
+model StrategyConfig {
+  id                   String               @id @default(cuid())
+  botId                String
+  ownerUserId          String
+  version              Int
+  mode                 StrategyConfigMode
+  status               StrategyConfigStatus @default(DRAFT)
+  name                 String
+  symbol               String
+  capitalTotal         Decimal              @db.Decimal(24, 8)
+  maxCommitted         Decimal              @db.Decimal(24, 8)
+  maxExposure          Decimal              @db.Decimal(24, 8)
+  structuralStop       Decimal              @db.Decimal(24, 8)
+  simulatedMakerFeeBps Decimal              @default(10) @db.Decimal(14, 6)
+  simulatedSlippageBps Decimal              @default(5) @db.Decimal(14, 6)
+  costWarningAccepted  Boolean              @default(false)
+  validationSnapshot   Json?
+  validatedAt          DateTime?
+  activatedAt          DateTime?
+  archivedAt           DateTime?
+  isCurrent            Boolean              @default(true)
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  bot                  BotConfig            @relation(fields: [botId], references: [id], onDelete: Cascade)
+  owner                User                 @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  levels               StrategyLevel[]
+  cycles               StrategyCycle[]
+
+  @@unique([botId, version])
+  @@index([botId, isCurrent])
+  @@index([ownerUserId, createdAt])
+}
+
+model StrategyLevel {
+  id               String                @id @default(cuid())
+  strategyConfigId String
+  levelNumber      Int
+  entryPrice       Decimal               @db.Decimal(24, 8)
+  targetPrice      Decimal               @db.Decimal(24, 8)
+  quoteAmount      Decimal               @db.Decimal(24, 8)
+  enabled          Boolean               @default(true)
+  repeat           Boolean               @default(true)
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  strategyConfig   StrategyConfig        @relation(fields: [strategyConfigId], references: [id], onDelete: Cascade)
+  runtime          StrategyLevelRuntime?
+  cycles           StrategyCycle[]
+
+  @@unique([strategyConfigId, levelNumber])
+  @@index([strategyConfigId, enabled])
+}
+
+model StrategyLevelRuntime {
+  id                 String             @id @default(cuid())
+  levelId            String             @unique
+  state              StrategyLevelState @default(WAITING_BUY)
+  activeCycleId      String?
+  activeOrderId      String?
+  heldQuantity       Decimal            @default(0) @db.Decimal(36, 18)
+  committedQuote     Decimal            @default(0) @db.Decimal(24, 8)
+  completedCycles    Int                @default(0)
+  buys               Int                @default(0)
+  sells              Int                @default(0)
+  grossPnl           Decimal            @default(0) @db.Decimal(24, 8)
+  fees               Decimal            @default(0) @db.Decimal(24, 8)
+  slippage           Decimal            @default(0) @db.Decimal(24, 8)
+  netPnl             Decimal            @default(0) @db.Decimal(24, 8)
+  totalHoldingMs     BigInt             @default(0)
+  bestCyclePnl       Decimal?           @db.Decimal(24, 8)
+  worstCyclePnl      Decimal?           @db.Decimal(24, 8)
+  stopTriggeredCount Int                @default(0)
+  lastTransitionAt   DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  level              StrategyLevel      @relation(fields: [levelId], references: [id], onDelete: Cascade)
+
+  @@index([state, updatedAt])
+}
+
+model StrategyCycle {
+  id               String              @id @default(cuid())
+  strategyConfigId String
+  levelId          String
+  cycleNumber      Int
+  status           StrategyCycleStatus
+  entryLimitPrice  Decimal             @db.Decimal(24, 8)
+  targetLimitPrice Decimal             @db.Decimal(24, 8)
+  quoteAmount      Decimal             @db.Decimal(24, 8)
+  filledQuantity   Decimal             @default(0) @db.Decimal(36, 18)
+  averageBuyPrice  Decimal?            @db.Decimal(24, 8)
+  averageSellPrice Decimal?            @db.Decimal(24, 8)
+  grossPnl         Decimal             @default(0) @db.Decimal(24, 8)
+  fees             Decimal             @default(0) @db.Decimal(24, 8)
+  slippage         Decimal             @default(0) @db.Decimal(24, 8)
+  netPnl           Decimal             @default(0) @db.Decimal(24, 8)
+  stopTriggered    Boolean             @default(false)
+  openedAt         DateTime?
+  closedAt         DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  strategyConfig   StrategyConfig      @relation(fields: [strategyConfigId], references: [id], onDelete: Cascade)
+  level            StrategyLevel       @relation(fields: [levelId], references: [id], onDelete: Cascade)
+  orders           Order[]
+
+  @@unique([levelId, cycleNumber])
+  @@index([strategyConfigId, status])
 }
 
 model Fill {
@@ -219,61 +375,106 @@ model Fill {
 }
 
 model Position {
-  id                String    @id @default(cuid())
-  botId             String
-  symbol            String
-  quantity          Decimal   @db.Decimal(36, 18)
-  averageEntryPrice Decimal   @db.Decimal(24, 8)
-  side              String    @default("LONG")
-  costBasisQuote    Decimal   @db.Decimal(24, 8)
-  realizedPnl       Decimal   @default(0) @db.Decimal(24, 8)
-  unrealizedPnl     Decimal   @default(0) @db.Decimal(24, 8)
-  isOpen            Boolean   @default(true)
-  openedAt          DateTime
-  closedAt          DateTime?
-  updatedAt         DateTime  @updatedAt
-  bot               BotConfig @relation(fields: [botId], references: [id], onDelete: Cascade)
+  id                     String    @id @default(cuid())
+  botId                  String
+  symbol                 String
+  quantity               Decimal   @db.Decimal(36, 18)
+  averageEntryPrice      Decimal   @db.Decimal(24, 8)
+  side                   String    @default("LONG")
+  costBasisQuote         Decimal   @db.Decimal(24, 8)
+  decisionCostBasisQuote Decimal?  @db.Decimal(24, 8)
+  simulatedEntryFee      Decimal?  @db.Decimal(24, 8)
+  simulatedEntrySlippage Decimal?  @db.Decimal(24, 8)
+  actualEntryFee         Decimal?  @db.Decimal(24, 8)
+  actualEntrySlippage    Decimal?  @db.Decimal(24, 8)
+  realisticEntryFee      Decimal?  @db.Decimal(24, 8)
+  realisticEntrySlippage Decimal?  @db.Decimal(24, 8)
+  lowestPrice            Decimal?  @db.Decimal(24, 8)
+  highestPrice           Decimal?  @db.Decimal(24, 8)
+  maeQuote               Decimal?  @db.Decimal(24, 8)
+  maeBps                 Decimal?  @db.Decimal(14, 6)
+  mfeQuote               Decimal?  @db.Decimal(24, 8)
+  mfeBps                 Decimal?  @db.Decimal(14, 6)
+  maeAt                  DateTime?
+  mfeAt                  DateTime?
+  realizedPnl            Decimal   @default(0) @db.Decimal(24, 8)
+  unrealizedPnl          Decimal   @default(0) @db.Decimal(24, 8)
+  isOpen                 Boolean   @default(true)
+  openedAt               DateTime
+  closedAt               DateTime?
+  updatedAt              DateTime  @updatedAt
+  bot                    BotConfig @relation(fields: [botId], references: [id], onDelete: Cascade)
 
   @@index([botId, isOpen])
 }
 
 model Trade {
-  id              String      @id @default(cuid())
-  botId           String
-  testRunId       String?
-  orderId         String
-  exchangeTradeId String?
-  symbol          String
-  side            OrderSide
-  price           Decimal     @db.Decimal(24, 8)
-  quantity        Decimal     @db.Decimal(36, 18)
-  notionalQuote   Decimal     @db.Decimal(24, 8)
-  feeQuote        Decimal     @default(0) @db.Decimal(24, 8)
-  feeAsset        String?
-  feeAmount       Decimal     @default(0) @db.Decimal(36, 18)
-  realizedPnl     Decimal     @default(0) @db.Decimal(24, 8)
-  timestamp       DateTime
-  bot             BotConfig   @relation(fields: [botId], references: [id], onDelete: Cascade)
-  order           Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  testRun         BotTestRun? @relation(fields: [testRunId], references: [id], onDelete: SetNull)
+  id                     String      @id @default(cuid())
+  botId                  String
+  testRunId              String?
+  orderId                String
+  exchangeTradeId        String?
+  symbol                 String
+  side                   OrderSide
+  price                  Decimal     @db.Decimal(24, 8)
+  quantity               Decimal     @db.Decimal(36, 18)
+  notionalQuote          Decimal     @db.Decimal(24, 8)
+  feeQuote               Decimal     @default(0) @db.Decimal(24, 8)
+  feeAsset               String?
+  feeAmount              Decimal     @default(0) @db.Decimal(36, 18)
+  realizedPnl            Decimal     @default(0) @db.Decimal(24, 8)
+  grossPnl               Decimal?    @db.Decimal(24, 8)
+  actualNetPnl           Decimal?    @db.Decimal(24, 8)
+  realisticNetPnl        Decimal?    @db.Decimal(24, 8)
+  simulatedNetPnl        Decimal?    @db.Decimal(24, 8)
+  exchangeFeeActual      Decimal?    @db.Decimal(24, 8)
+  simulatedFee           Decimal?    @db.Decimal(24, 8)
+  actualSlippage         Decimal?    @db.Decimal(24, 8)
+  realisticFee           Decimal?    @db.Decimal(24, 8)
+  realisticSlippage      Decimal?    @db.Decimal(24, 8)
+  simulatedSlippage      Decimal?    @db.Decimal(24, 8)
+  actualFeeCost          Decimal?    @db.Decimal(24, 8)
+  realisticFeeCost       Decimal?    @db.Decimal(24, 8)
+  simulatedFeeCost       Decimal?    @db.Decimal(24, 8)
+  observedSlippageCost   Decimal?    @db.Decimal(24, 8)
+  realisticSlippageCost  Decimal?    @db.Decimal(24, 8)
+  simulatedSlippageCost  Decimal?    @db.Decimal(24, 8)
+  totalRealisticCost     Decimal?    @db.Decimal(24, 8)
+  totalSimulatedCost     Decimal?    @db.Decimal(24, 8)
+  costAsPctOfGrossProfit Decimal?    @db.Decimal(14, 6)
+  maeQuote               Decimal?    @db.Decimal(24, 8)
+  maeBps                 Decimal?    @db.Decimal(14, 6)
+  mfeQuote               Decimal?    @db.Decimal(24, 8)
+  mfeBps                 Decimal?    @db.Decimal(14, 6)
+  maeAt                  DateTime?
+  mfeAt                  DateTime?
+  exitEfficiencyPct      Decimal?    @db.Decimal(14, 6)
+  profitGivebackBps      Decimal?    @db.Decimal(14, 6)
+  timestamp              DateTime
+  bot                    BotConfig   @relation(fields: [botId], references: [id], onDelete: Cascade)
+  order                  Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  testRun                BotTestRun? @relation(fields: [testRunId], references: [id], onDelete: SetNull)
 
   @@unique([orderId, exchangeTradeId])
   @@index([botId, timestamp])
-  @@index([testRunId, timestamp])
 }
 
 model BalanceSnapshot {
-  id         String    @id @default(cuid())
+  id         String      @id @default(cuid())
   botId      String
+  testRunId  String?
   asset      String
-  free       Decimal   @db.Decimal(24, 8)
-  locked     Decimal   @db.Decimal(24, 8)
-  total      Decimal   @db.Decimal(24, 8)
-  equityUSDT Decimal   @db.Decimal(24, 8)
-  timestamp  DateTime  @default(now())
-  bot        BotConfig @relation(fields: [botId], references: [id], onDelete: Cascade)
+  free       Decimal     @db.Decimal(24, 8)
+  locked     Decimal     @db.Decimal(24, 8)
+  total      Decimal     @db.Decimal(24, 8)
+  equityUSDT Decimal     @db.Decimal(24, 8)
+  timestamp  DateTime    @default(now())
+  reason     String      @default("PERIODIC")
+  bot        BotConfig   @relation(fields: [botId], references: [id], onDelete: Cascade)
+  testRun    BotTestRun? @relation(fields: [testRunId], references: [id], onDelete: SetNull)
 
   @@index([botId, timestamp])
+  @@index([testRunId, timestamp])
 }
 
 model RiskEvent {
@@ -293,51 +494,85 @@ model RiskEvent {
 }
 
 model BotTestRun {
-  id                    String        @id @default(cuid())
-  botId                 String
-  status                BotTestStatus @default(IN_PROGRESS)
-  testStartedAt         DateTime
-  testEndsAt            DateTime
-  durationMinutes       Int
-  requestedDurationMs   Int
-  actualDurationMs      Int?
-  stopRequestedAt       DateTime?
-  completedAt           DateTime?
-  stopReason            String?
-  configuration         Json
-  mode                  ExchangeMode
-  symbol                String
-  strategy              StrategyKind
-  observations          Int           @default(0)
-  crossoverCount        Int           @default(0)
-  buySignals            Int           @default(0)
-  sellSignals           Int           @default(0)
-  holdSignals           Int           @default(0)
-  buyBlocked            Int           @default(0)
-  sellIgnored           Int           @default(0)
-  cooldownBlocks        Int           @default(0)
-  errorCount            Int           @default(0)
-  initialEquity         Decimal       @db.Decimal(24, 8)
-  peakEquity            Decimal       @db.Decimal(24, 8)
-  finalEquity           Decimal?      @db.Decimal(24, 8)
-  realizedPnl           Decimal       @default(0) @db.Decimal(24, 8)
-  unrealizedPnl         Decimal       @default(0) @db.Decimal(24, 8)
-  finalPnl              Decimal?      @db.Decimal(24, 8)
-  currentDrawdownPct    Decimal       @default(0) @db.Decimal(10, 6)
-  maxDrawdownPct        Decimal       @default(0) @db.Decimal(10, 6)
-  lastSignal            String?
-  lastError             String?
-  lastHeartbeatAt       DateTime?
-  endedWithOpenPosition Boolean       @default(false)
-  finalPosition         Json?
-  summary               Json?
-  createdAt             DateTime      @default(now())
-  updatedAt             DateTime      @updatedAt
-  bot                   BotConfig     @relation(fields: [botId], references: [id], onDelete: Cascade)
-  orders                Order[]
-  fills                 Fill[]
-  trades                Trade[]
-  riskEvents            RiskEvent[]
+  id                              String            @id @default(cuid())
+  botId                           String
+  status                          BotTestStatus     @default(IN_PROGRESS)
+  testStartedAt                   DateTime
+  testEndsAt                      DateTime
+  durationMinutes                 Int
+  requestedDurationMs             Int
+  actualDurationMs                Int?
+  stopRequestedAt                 DateTime?
+  completedAt                     DateTime?
+  stopReason                      String?
+  configuration                   Json
+  mode                            ExchangeMode
+  symbol                          String
+  strategy                        StrategyKind
+  observations                    Int               @default(0)
+  crossoverCount                  Int               @default(0)
+  buySignals                      Int               @default(0)
+  sellSignals                     Int               @default(0)
+  holdSignals                     Int               @default(0)
+  buyBlocked                      Int               @default(0)
+  sellIgnored                     Int               @default(0)
+  cooldownBlocks                  Int               @default(0)
+  errorCount                      Int               @default(0)
+  initialEquity                   Decimal           @db.Decimal(24, 8)
+  peakEquity                      Decimal           @db.Decimal(24, 8)
+  currentEquity                   Decimal?          @db.Decimal(24, 8)
+  finalEquity                     Decimal?          @db.Decimal(24, 8)
+  realizedPnl                     Decimal           @default(0) @db.Decimal(24, 8)
+  unrealizedPnl                   Decimal           @default(0) @db.Decimal(24, 8)
+  finalPnl                        Decimal?          @db.Decimal(24, 8)
+  grossPnl                        Decimal?          @db.Decimal(24, 8)
+  actualNetPnl                    Decimal?          @db.Decimal(24, 8)
+  realisticNetPnl                 Decimal?          @db.Decimal(24, 8)
+  simulatedNetPnl                 Decimal?          @db.Decimal(24, 8)
+  exchangeFeeActual               Decimal?          @db.Decimal(24, 8)
+  simulatedFee                    Decimal?          @db.Decimal(24, 8)
+  actualSlippage                  Decimal?          @db.Decimal(24, 8)
+  realisticFee                    Decimal?          @db.Decimal(24, 8)
+  realisticSlippage               Decimal?          @db.Decimal(24, 8)
+  simulatedSlippage               Decimal?          @db.Decimal(24, 8)
+  costModelEnabled                Boolean?
+  realisticTakerFeeBps            Decimal?          @db.Decimal(14, 6)
+  realisticSlippageBps            Decimal?          @db.Decimal(14, 6)
+  simulatedMakerFeeBps            Decimal?          @db.Decimal(14, 6)
+  simulatedTakerFeeBps            Decimal?          @db.Decimal(14, 6)
+  simulatedSlippageBps            Decimal?          @db.Decimal(14, 6)
+  insufficientEdgeBlocks          Int?
+  insufficientRangeBlocks         Int?
+  microCrossoversFiltered         Int?
+  insufficientRealisticEdgeBlocks Int?
+  insufficient5mRangeBlocks       Int?
+  insufficient15mRangeBlocks      Int?
+  lastExpectedMoveBps             Decimal?          @db.Decimal(14, 6)
+  lastRollingRangeBps             Decimal?          @db.Decimal(14, 6)
+  lastEmaSeparationBps            Decimal?          @db.Decimal(14, 6)
+  lastRange2mBps                  Decimal?          @db.Decimal(14, 6)
+  lastRange5mBps                  Decimal?          @db.Decimal(14, 6)
+  lastRange15mBps                 Decimal?          @db.Decimal(14, 6)
+  lastMomentum2mBps               Decimal?          @db.Decimal(14, 6)
+  lastMomentum5mBps               Decimal?          @db.Decimal(14, 6)
+  lastMomentum15mBps              Decimal?          @db.Decimal(14, 6)
+  lastExpectedMoveA21Bps          Decimal?          @db.Decimal(14, 6)
+  currentDrawdownPct              Decimal           @default(0) @db.Decimal(10, 6)
+  maxDrawdownPct                  Decimal           @default(0) @db.Decimal(10, 6)
+  lastSignal                      String?
+  lastError                       String?
+  lastHeartbeatAt                 DateTime?
+  endedWithOpenPosition           Boolean           @default(false)
+  finalPosition                   Json?
+  summary                         Json?
+  createdAt                       DateTime          @default(now())
+  updatedAt                       DateTime          @updatedAt
+  bot                             BotConfig         @relation(fields: [botId], references: [id], onDelete: Cascade)
+  orders                          Order[]
+  fills                           Fill[]
+  trades                          Trade[]
+  riskEvents                      RiskEvent[]
+  balanceSnapshots                BalanceSnapshot[]
 
   @@index([botId, testStartedAt])
   @@index([status, testEndsAt])
@@ -391,4 +626,234 @@ model AuditEvent {
   createdAt DateTime @default(now())
 
   @@index([event, createdAt])
+}
+
+model MarketAiAnalysis {
+  id               String   @id @default(cuid())
+  symbol           String
+  status           String
+  price            Decimal  @db.Decimal(24, 8)
+  marketDataSource String
+  marketSnapshot   Json
+  result           Json?
+  promptVersion    String
+  model            String
+  openAiResponseId String?
+  inputTokens      Int?
+  outputTokens     Int?
+  totalTokens      Int?
+  estimatedCostUsd Decimal? @db.Decimal(18, 8)
+  errorCode        String?
+  locale           String   @default("pt")
+  createdAt        DateTime @default(now())
+
+  @@index([symbol, createdAt])
+  @@index([status, createdAt])
+}
+
+model ContentTranslation {
+  id            String   @id @default(cuid())
+  entityType    String
+  entityId      String
+  locale        String
+  payload       Json
+  sourceHash    String
+  model         String
+  promptVersion String
+  inputTokens   Int?
+  outputTokens  Int?
+  totalTokens   Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([entityType, entityId, locale])
+  @@index([entityType, locale, updatedAt])
+}
+
+model NewsSource {
+  id            String     @id @default(cuid())
+  key           String     @unique
+  name          String
+  feedUrl       String
+  homepageUrl   String
+  tier          Int
+  confidence    String
+  enabled       Boolean    @default(true)
+  lastFetchedAt DateTime?
+  lastSuccessAt DateTime?
+  lastError     String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  items         NewsItem[]
+}
+
+model NewsItem {
+  id              String           @id @default(cuid())
+  sourceId        String
+  externalId      String?
+  title           String
+  normalizedTitle String
+  url             String           @unique
+  excerpt         String?
+  publishedAt     DateTime
+  fetchedAt       DateTime         @default(now())
+  assets          String[]
+  category        String
+  contentHash     String
+  source          NewsSource       @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  eventLink       NewsEventSource?
+
+  @@index([sourceId, publishedAt])
+  @@index([contentHash])
+}
+
+model NewsEvent {
+  id                String            @id @default(cuid())
+  canonicalTitle    String
+  normalizedTitle   String
+  category          String
+  assets            String[]
+  firstPublishedAt  DateTime
+  lastPublishedAt   DateTime
+  sourceCount       Int               @default(1)
+  sourceConfidence  String
+  normalizedSummary String?
+  aiStatus          String            @default("PENDING")
+  aiErrorCode       String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  sources           NewsEventSource[]
+  aiAnalysis        NewsAiAnalysis?
+
+  @@index([lastPublishedAt])
+  @@index([category, lastPublishedAt])
+}
+
+model NewsEventSource {
+  id        String    @id @default(cuid())
+  eventId   String
+  itemId    String    @unique
+  createdAt DateTime  @default(now())
+  event     NewsEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  item      NewsItem  @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, itemId])
+  @@index([eventId])
+}
+
+model NewsAiAnalysis {
+  id             String    @id @default(cuid())
+  eventId        String    @unique
+  summary        String
+  whyItMatters   String
+  affectedAssets String[]
+  impact         String
+  sentiment      String
+  confidence     String
+  model          String
+  promptVersion  String
+  inputTokens    Int?
+  outputTokens   Int?
+  totalTokens    Int?
+  createdAt      DateTime  @default(now())
+  event          NewsEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+}
+
+model ListingSource {
+  id            String               @id @default(cuid())
+  key           String               @unique
+  exchange      String
+  name          String
+  endpointUrl   String
+  homepageUrl   String
+  enabled       Boolean              @default(true)
+  lastFetchedAt DateTime?
+  lastSuccessAt DateTime?
+  lastError     String?
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  references    ListingEventSource[]
+}
+
+model ListingEvent {
+  id                      String               @id @default(cuid())
+  exchange                String
+  asset                   String
+  symbol                  String
+  title                   String
+  normalizedTitle         String
+  type                    String
+  status                  String
+  confirmation            String
+  announcedAt             DateTime
+  tradingStartsAt         DateTime?
+  pairs                   String[]
+  network                 String?
+  alreadyTradingExchanges String[]
+  announcementPrice       Decimal?             @db.Decimal(30, 12)
+  currentPrice            Decimal?             @db.Decimal(30, 12)
+  volume24h               Decimal?             @db.Decimal(30, 8)
+  change24hPercent        Decimal?             @db.Decimal(18, 8)
+  changeSinceAnnouncement Decimal?             @db.Decimal(18, 8)
+  marketUpdatedAt         DateTime?
+  aiStatus                String               @default("PENDING")
+  aiErrorCode             String?
+  createdAt               DateTime             @default(now())
+  updatedAt               DateTime             @updatedAt
+  sources                 ListingEventSource[]
+  markets                 ListingMarket[]
+  aiAnalysis              ListingAiAnalysis?
+
+  @@unique([exchange, symbol, type, announcedAt])
+  @@index([announcedAt])
+  @@index([exchange, announcedAt])
+  @@index([type, status])
+}
+
+model ListingEventSource {
+  id          String        @id @default(cuid())
+  eventId     String
+  sourceId    String
+  externalId  String?
+  title       String
+  url         String        @unique
+  excerpt     String?
+  publishedAt DateTime
+  fetchedAt   DateTime      @default(now())
+  event       ListingEvent  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  source      ListingSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, sourceId])
+  @@index([sourceId, publishedAt])
+}
+
+model ListingMarket {
+  id               String       @id @default(cuid())
+  eventId          String
+  exchange         String
+  pair             String
+  price            Decimal?     @db.Decimal(30, 12)
+  volume24h        Decimal?     @db.Decimal(30, 8)
+  change24hPercent Decimal?     @db.Decimal(18, 8)
+  observedAt       DateTime     @default(now())
+  event            ListingEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, exchange, pair])
+  @@index([eventId])
+}
+
+model ListingAiAnalysis {
+  id            String       @id @default(cuid())
+  eventId       String       @unique
+  summary       String
+  explanation   String
+  impact        String
+  confidence    String
+  model         String
+  promptVersion String
+  inputTokens   Int?
+  outputTokens  Int?
+  totalTokens   Int?
+  createdAt     DateTime     @default(now())
+  event         ListingEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
 }

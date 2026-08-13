@@ -58,6 +58,16 @@ export function calculateDrawdown(peakEquity: number, equity: number): number {
   return Math.max(0, ((peakEquity - equity) / peakEquity) * 100);
 }
 
+export function currentEquityValue(input: {
+  currentEquity?: number | null;
+  finalEquity?: number | null;
+  initialEquity: number;
+  realizedPnl: number;
+  unrealizedPnl: number;
+}): number {
+  return input.currentEquity ?? input.finalEquity ?? (input.initialEquity + input.realizedPnl + input.unrealizedPnl);
+}
+
 export interface TestSummaryInput {
   testStartedAt: Date;
   completedAt: Date;

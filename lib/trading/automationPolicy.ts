@@ -1,4 +1,4 @@
-import type { AccountBalance, BotConfig, SymbolInfo } from "./domain";
+import type { AccountBalance, BotConfig, Position, StrategySignal, SymbolInfo } from "./domain";
 
 type BuySizingConfig = Pick<BotConfig, "capitalUSDT" | "maxCapitalUSDT" | "maxOrderUSDT" | "strategyParams">;
 
@@ -58,4 +58,22 @@ export function createRiskRuntimeReset(capitalUSDT: number, now = new Date()) {
     lastSuccessAt: null,
     workerHeartbeatAt: null,
   };
+}
+
+export function resolveProtectiveExit(input: {
+  signal: StrategySignal;
+  position?: Position;
+  price: number;
+  takeProfitPct?: number;
+  stopLossPct?: number;
+}): StrategySignal {
+  if (!input.position) return input.signal;
+  const changePct = ((input.price - input.position.averageEntryPrice) / input.position.averageEntryPrice) * 100;
+  if (input.takeProfitPct && changePct >= input.takeProfitPct) {
+    return { kind: "SELL", symbol: input.signal.symbol, strategy: input.signal.strategy, reason: "Server take-profit reached", timestamp: Date.now() };
+  }
+  if (input.stopLossPct && changePct <= -input.stopLossPct) {
+    return { kind: "SELL", symbol: input.signal.symbol, strategy: input.signal.strategy, reason: "Server stop-loss reached", timestamp: Date.now() };
+  }
+  return input.signal;
 }

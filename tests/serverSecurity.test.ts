@@ -28,7 +28,8 @@ describe("server security configuration", () => {
     const encrypted = encryptSecret("testnet-secret-value");
     expect(encrypted).not.toContain("testnet-secret-value");
     expect(decryptSecret(encrypted)).toBe("testnet-secret-value");
-    expect(() => decryptSecret(`${encrypted.slice(0, -1)}x`)).toThrow();
+    const replacement = encrypted.endsWith("x") ? "y" : "x";
+    expect(() => decryptSecret(`${encrypted.slice(0, -1)}${replacement}`)).toThrow();
   });
 
   it("redacts credentials and database passwords from logs", () => {

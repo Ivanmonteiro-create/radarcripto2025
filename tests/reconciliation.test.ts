@@ -21,4 +21,18 @@ describe("persisted Spot fill reconciliation", () => {
     expect(closed.position).toBeNull();
     expect(closed.realizedPnl).toBe(5);
   });
+
+  it("separates gross, actual net, and simulated net PNL", () => {
+    const buy = reconcileSpotFill(null, {
+      side: "BUY", quantity: 1, price: 101, feeQuote: 0.1, decisionPrice: 100,
+      simulatedFee: 0.1, simulatedSlippage: 0.05,
+    });
+    const sell = reconcileSpotFill(buy.position, {
+      side: "SELL", quantity: 1, price: 109, feeQuote: 0.1, decisionPrice: 110,
+      simulatedFee: 0.11, simulatedSlippage: 0.055,
+    });
+    expect(sell.grossPnl).toBe(10);
+    expect(sell.actualNetPnl).toBeCloseTo(7.8);
+    expect(sell.simulatedNetPnl).toBeCloseTo(9.685);
+  });
 });

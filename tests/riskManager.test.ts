@@ -22,6 +22,12 @@ describe("risk manager", () => {
     const position = { id: "position", symbol: "BTCUSDT", quantity: 0.001, averageEntryPrice: 60_000, side: "LONG" as const, openedAt: 0, updatedAt: 0, realizedPnl: 0, unrealizedPnl: 0, costBasisQuote: 60 };
     expect(evaluateRisk({ ...base, openPositions: [position] }).code).toBe("POSITION_LIMIT");
   });
+  it("allows Strategy B levels to share one aggregated Spot position but not multiple positions", () => {
+    const position = { id: "position", symbol: "BTCUSDT", quantity: 0.001, averageEntryPrice: 60_000, side: "LONG" as const, openedAt: 0, updatedAt: 0, realizedPnl: 0, unrealizedPnl: 0, costBasisQuote: 60 };
+    const range = { ...base, bot: { ...base.bot, strategy: "RANGE_CYCLE" as const }, signal: { ...base.signal, strategy: "RANGE_CYCLE" as const } };
+    expect(evaluateRisk({ ...range, openPositions: [position] }).code).toBe("ALLOWED");
+    expect(evaluateRisk({ ...range, openPositions: [position, { ...position, id: "unexpected" }] }).code).toBe("POSITION_LIMIT");
+  });
   it("blocks daily loss and drawdown", () => {
     expect(evaluateRisk({ ...base, runtime: { ...base.runtime, dailyRealizedPnl: -50 } }).code).toBe("DAILY_LOSS_LIMIT");
     expect(evaluateRisk({ ...base, equityUSDT: 899 }).code).toBe("DRAWDOWN_LIMIT");

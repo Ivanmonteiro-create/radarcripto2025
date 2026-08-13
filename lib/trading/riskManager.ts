@@ -30,8 +30,11 @@ export function evaluateRisk(context: RiskContext): RiskDecision {
   if (context.requestedOrderUSDT > context.bot.maxOrderUSDT) {
     return denied("ORDER_LIMIT", "Order value exceeds the per-order limit");
   }
-  if (context.signal.kind === "BUY" && context.openPositions.length >= context.bot.maxPositions) {
+  if (context.signal.kind === "BUY" && context.bot.strategy !== "RANGE_CYCLE" && context.openPositions.length >= context.bot.maxPositions) {
     return denied("POSITION_LIMIT", "Maximum number of open positions reached");
+  }
+  if (context.signal.kind === "BUY" && context.bot.strategy === "RANGE_CYCLE" && context.openPositions.length > 1) {
+    return denied("POSITION_LIMIT", "Strategy B supports one aggregated Spot position per symbol");
   }
   if (context.runtime.dailyRealizedPnl <= -Math.abs(context.bot.maxDailyLossUSDT)) {
     return denied("DAILY_LOSS_LIMIT", "Maximum daily loss reached");
