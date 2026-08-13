@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_LOCALE, LOCALE_COOKIE, normalizeLocale } from "@/lib/i18n/config";
 import { dictionaries, pt, translate } from "@/lib/i18n/dictionaries";
 import { pageContent } from "@/lib/i18n/pageContent";
+import { readFile } from "node:fs/promises";
 
 describe("global i18n", () => {
   it("defaults unknown and absent preferences safely to Portuguese", () => {
@@ -26,5 +27,17 @@ describe("global i18n", () => {
       expect(pageContent[locale].about.cards).toHaveLength(3);
       expect(pageContent[locale].contact.questions).toHaveLength(4);
     }
+  });
+
+  it("keeps the language selector on Home and reuses BackHomeButton inside the simulator header", async () => {
+    const [nav, simulator] = await Promise.all([
+      readFile("components/TopNav.tsx", "utf8"),
+      readFile("app/simulador/SimPageClient.tsx", "utf8"),
+    ]);
+    expect(nav).toContain('onHome ? <><Link href="/login"');
+    expect(nav).toContain("<LanguageSelector />");
+    expect(nav).toContain(": <BackHomeButton />");
+    expect(simulator).toContain("<BackHomeButton />");
+    expect(simulator).toContain('className="chartHeaderActions"');
   });
 });

@@ -7,6 +7,7 @@ import TradeControls from '../../components/TradeControls';
 import { useLivePrice } from '../../lib/useLivePrice';
 import { useI18n } from '../../components/i18n/LocaleProvider';
 import { pageContent } from '../../lib/i18n/pageContent';
+import BackHomeButton from '../../components/navigation/BackHomeButton';
 
 type Pair =
   | 'BTCUSDT' | 'ETHUSDT' | 'BNBUSDT' | 'SOLUSDT'
@@ -96,6 +97,9 @@ export default function SimPageClient() {
         .chartTitle{
           font-size: 13px; font-weight: 800; letter-spacing: .2px; opacity: .9;
         }
+        .chartHeaderActions{ display:flex; align-items:center; gap:8px; }
+        .simulatorBack .rc-back-home{ min-height:24px; padding:0 9px; font-size:11px; }
+        .simulatorBack .rc-back-home > span:first-child{ width:16px; height:16px; }
         .chartHeader .tvFsBtn{
           width: 28px; height: 24px; border-radius: 6px;
           display: grid; place-items: center;
@@ -127,6 +131,19 @@ export default function SimPageClient() {
         :is(:fullscreen, :-webkit-full-screen, :-moz-full-screen) .tvChartWrap{
           height:100% !important; min-height:0 !important;
         }
+        @media(max-width:720px){
+          main.page-simulador{
+            grid-template-columns:1fr !important;
+            grid-template-rows:minmax(420px,55dvh) auto !important;
+            height:auto !important;
+            min-height:100dvh;
+            overflow:visible !important;
+          }
+          .page-simulador .panel{ min-height:0 !important; }
+          .page-simulador .tvChartWrap{ min-height:384px; }
+          .simulatorBack .rc-back-home{ width:26px; padding:0; justify-content:center; }
+          .simulatorBack .rc-back-home > span:last-child{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+        }
       `}</style>
 
       {/* ======= GRÁFICO ======= */}
@@ -145,7 +162,9 @@ export default function SimPageClient() {
         {/* Barra do gráfico (restaurada) */}
         <div className="chartHeader">
           <div className="chartTitle">{copy.chart} — {symbol}</div>
-          {!isFs && (
+          <div className="chartHeaderActions">
+            {!isFs && <span className="simulatorBack"><BackHomeButton /></span>}
+            {!isFs && (
             <button
               aria-label={copy.fullscreen}
               title={copy.fullscreen}
@@ -154,7 +173,8 @@ export default function SimPageClient() {
             >
               [ ]
             </button>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Canvas/iframe do TradingView */}

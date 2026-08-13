@@ -44,7 +44,9 @@ export default function TopNav() {
         {onHome && <div className="rc-topnav__secondary">
           {SECONDARY_LINKS.map((link) => <Link key={link.href} href={link.href}>{t(link.key)}</Link>)}
         </div>}
-        <div className="rc-topnav__utilities">{!onHome && <BackHomeButton />}<LanguageSelector /></div>
+        <div className="rc-topnav__utilities">
+          {onHome ? <><Link href="/login" className="rc-login-link">{t("actions.login")}</Link><LanguageSelector /></> : <BackHomeButton />}
+        </div>
       </nav>
     </>
   );
