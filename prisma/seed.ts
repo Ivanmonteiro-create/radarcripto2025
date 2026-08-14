@@ -1,0 +1,137 @@
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
+
+export async function seed(client: PrismaClient = prisma) {
+  const user = await client.user.upsert({
+    where: { email: "internal@radarcrypto.local" },
+    create: { email: "internal@radarcrypto.local", displayName: "RadarCrypto Internal" },
+    update: {},
+  });
+
+  await client.systemControl.upsert({
+    where: { id: "global" },
+    create: { id: "global", killSwitchActive: false },
+    update: {},
+  });
+  await client.systemSetting.upsert({
+    where: { key: "trading.defaults" },
+    create: {
+      key: "trading.defaults",
+      value: { mode: "SIM", maxPositions: 1, automaticActivation: false },
+    },
+    update: {},
+  });
+
+  const ema = await client.strategy.upsert({
+    where: { kind_version: { kind: "EMA_CROSS", version: 1 } },
+    create: {
+      kind: "EMA_CROSS",
+      name: "EMA Cross",
+      version: 1,
+      schema: { shortPeriod: 9, longPeriod: 21 },
+    },
+    update: {},
+  });
+  const percent = await client.strategy.upsert({
+    where: { kind_version: { kind: "PERCENT_CYCLE", version: 1 } },
+    create: {
+      kind: "PERCENT_CYCLE",
+      name: "Percent Cycle",
+      version: 1,
+      schema: { sellRisePct: 2, rebuyDropPct: 1 },
+    },
+    update: {},
+  });
+  await client.strategy.upsert({
+    where: { kind_version: { kind: "EMA_CROSS", version: 2 } },
+    create: {
+      kind: "EMA_CROSS",
+      name: "EMA 9/21 A2",
+      version: 2,
+      schema: {
+        baseline: "EMA 9/21 original",
+        variant: "A2",
+        shortPeriod: 9,
+        longPeriod: 21,
+        rollingRangeWindow: 21,
+        minExpectedEdgeBps: 5,
+        minEmaSeparationBps: 0.5,
+        minRollingRangeBps: 20,
+      },
+    },
+    update: {},
+  });
+  await client.strategy.upsert({
+    where: { kind_version: { kind: "EMA_CROSS", version: 3 } },
+    create: {
+      kind: "EMA_CROSS",
+      name: "EMA 9/21 A2.1",
+      version: 3,
+      schema: {
+        baseline: "EMA 9/21 original",
+        parent: "EMA 9/21 A2",
+        variant: "A2.1",
+        priceSource: "TICKER",
+        windowsMinutes: [2, 5, 15],
+        proposedThresholds: { minExpectedEdgeBps: 0, minEmaSeparationBps: 0.1, minRange5mBps: 3, minRange15mBps: 6 },
+      },
+    },
+    update: {},
+  });
+
+  const defaults = {
+    userId: user.id,
+    symbol: "BTCUSDT",
+    mode: "SIM" as const,
+    status: "STOPPED" as const,
+    capitalUSDT: 1_000,
+    maxCapitalUSDT: 1_000,
+    maxOrderUSDT: 25,
+    maxPositions: 1,
+    maxDailyLossUSDT: 10,
+    maxDrawdownPct: 5,
+    minOrderIntervalMs: 300_000,
+    takeProfitPct: 2,
+    stopLossPct: 1,
+  };
+  await client.botConfig.upsert({
+    where: { id: "seed-ema-cross" },
+    create: {
+      id: "seed-ema-cross",
+      ...defaults,
+      capitalUSDT: 10,
+      maxCapitalUSDT: 10,
+      maxOrderUSDT: 6,
+      maxDailyLossUSDT: 1,
+      maxDrawdownPct: 10,
+      name: "EMA Cross Seed",
+      strategyId: ema.id,
+      strategyParams: { kind: "EMA_CROSS", shortPeriod: 9, longPeriod: 21, fixedOrderUSDT: 6, priceSource: "TICKER", samplingIntervalMs: 5_000, candleTimeframe: null },
+      runtime: { create: { status: "STOPPED", peakEquity: 10, strategyState: {} } },
+    },
+    update: {},
+  });
+  await client.botConfig.upsert({
+    where: { id: "seed-percent-cycle" },
+    create: {
+      id: "seed-percent-cycle",
+      ...defaults,
+      name: "Percent Cycle Seed",
+      strategyId: percent.id,
+      strategyParams: { kind: "PERCENT_CYCLE", sellRisePct: 2, rebuyDropPct: 1 },
+      runtime: { create: { status: "STOPPED", peakEquity: 1_000, strategyState: {} } },
+    },
+    update: {},
+  });
+}
+
+if (process.env.NODE_ENV !== "test") {
+  seed()
+    .then(() => prisma.$disconnect())
+    .catch(async (error) => {
+      console.error(error instanceof Error ? error.message : "Seed failed");
+      await prisma.$disconnect();
+      process.exitCode = 1;
+    });
+}

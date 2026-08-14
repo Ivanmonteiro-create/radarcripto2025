@@ -1,0 +1,18 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "if [ \"$VERCEL_ENV\" = \"preview\" ]; then npm run prisma:migrate; fi && npm run build",
+  "functions": {
+    "app/api/exchange-credentials/route.ts": {
+      "regions": ["fra1"]
+    },
+    "app/api/health/route.ts": {
+      "regions": ["fra1"]
+    },
+    "app/api/health/binance/route.ts": {
+      "regions": ["fra1"]
+    },
+    "app/api/testnet/orders/route.ts": {
+      "regions": ["fra1"]
+    }
+  }
+}

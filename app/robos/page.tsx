@@ -3,6 +3,8 @@
 
 import React, { useEffect, useState } from "react";
 import BotRunnerClient from "@/components/bots/BotRunnerClient";
+import TestnetAdminPanel from "@/components/bots/TestnetAdminPanel";
+import { useI18n } from "@/components/i18n/LocaleProvider";
 
 const PAIRS = [
   "ADAUSDT",
@@ -16,6 +18,7 @@ const PAIRS = [
 ] as const;
 
 export default function RobosPage() {
+  const { locale, t } = useI18n();
   const [active, setActive] = useState<string>("BTCUSDT");
 
   // Atualiza o select do BotRunnerClient (id="robotPair")
@@ -38,11 +41,6 @@ export default function RobosPage() {
       {/* --- CORREÇÕES GLOBAIS EXCLUSIVAS PARA ESTA PÁGINA --- */}
       <style jsx global>{`
         /* Esconde o botão superior antigo de “Voltar ao início” */
-        .rc-backtop,
-        .rc-backtop * {
-          display: none !important;
-        }
-
         /* Botão verde fluorescente (padrão global RadarCrypto) */
         .rc-btn {
           display: inline-flex;
@@ -107,11 +105,10 @@ export default function RobosPage() {
       {/* --- CABEÇALHO --- */}
       <section className="hero">
         <h1>
-          Robôs de Trading <span>(Modo Simulado)</span>
+          {t("bots.title")} <span>(Testnet)</span>
         </h1>
         <p className="sub">
-          Aqui você pode testar estratégias automatizadas em tempo real usando
-          dados ao vivo. Este é o modo SIM (simulação local).
+          {locale === "en" ? "Start and monitor fixed-duration tests. The persistent worker controls the deadline even when the browser or computer is off." : locale === "es" ? "Inicia y supervisa pruebas de duración definida. El worker persistente controla el plazo aunque el navegador o el ordenador estén apagados." : "Inicie e acompanhe testes com duração definida. O worker persistente controla o prazo mesmo com o navegador ou computador desligado."}
         </p>
 
         {/* Chips das moedas */}
@@ -133,14 +130,10 @@ export default function RobosPage() {
         </div>
       </section>
 
+      <TestnetAdminPanel symbol={active} />
+
       {/* --- PAINEL CENTRAL COM BOTÃO À DIREITA --- */}
       <section className="panelWrap">
-        <div className="backBtnInPanel">
-          <a href="/" className="rc-btn rc-btn--green">
-            Voltar ao início
-          </a>
-        </div>
-
         <BotRunnerClient pair={active} onPairChange={setActive} />
       </section>
 
@@ -192,19 +185,6 @@ export default function RobosPage() {
         }
 
         /* Botão dentro do painel (lado direito) */
-        .backBtnInPanel {
-          position: absolute;
-          top: 14px;
-          right: 18px;
-          z-index: 5;
-        }
-
-        @media (max-width: 720px) {
-          .backBtnInPanel {
-            top: 10px;
-            right: 10px;
-          }
-        }
       `}</style>
     </main>
   );

@@ -1,6 +1,8 @@
 "use client";
 
 import React from "react";
+import { useI18n } from "@/components/i18n/LocaleProvider";
+import { pageContent } from "@/lib/i18n/pageContent";
 
 type Plan = {
   slug: "start" | "trader" | "pro" | "elite";
@@ -75,6 +77,9 @@ const PLANS: Plan[] = [
 ];
 
 export default function PlanosPage() {
+  const { locale, t } = useI18n();
+  const copy = pageContent[locale].plans;
+  const plans = PLANS.map((plan, index) => ({ ...plan, ribbon: copy.items[index][0], title: copy.items[index][1], price: copy.items[index][2], features: [...copy.items[index][3]] }));
   return (
     <main className="page-planos">
       <style jsx global>{`
@@ -111,26 +116,20 @@ export default function PlanosPage() {
 
       <header className="hero">
         <h1>
-          Planos do <span>RadarCrypto</span>
+          {t("plans.title")}
         </h1>
         <p className="sub">
-          Escolha seu caminho. Comece no SIM (simulador) sem riscos e evolua
-          para gráficos, quando quiser, com robôs e ferramentas profissionais.
+          {copy.subtitle}
         </p>
 
         <div className="proofs" role="list">
-          <span className="proof">+2.000 traders já testaram</span>
-          <span className="proof">100% local e seguro</span>
-          <span className="proof">Ferramentas de quem vive o mercado</span>
+          {copy.proofs.map((proof) => <span className="proof" key={proof}>{proof}</span>)}
         </div>
 
-        <div className="backTopRight">
-          <a href="/" className="rc-btn rc-btn--green">Voltar ao início</a>
-        </div>
       </header>
 
       <section className="plansGrid">
-        {PLANS.map((p) => (
+        {plans.map((p) => (
           <article key={p.slug} className={`plan plan--${p.slug}`}>
             <div className="plan-head">
               <span className="ribbon">{p.ribbon}</span>
@@ -148,22 +147,18 @@ export default function PlanosPage() {
             </ul>
 
             <div className="plan-cta">
-              <a
-                href={p.slug === "start" ? "/simulador" : "/login"}
-                className="rc-btn rc-btn--green"
-              >
-                {p.cta}
-              </a>
+              {p.slug === "start" ? (
+                <a href="/simulador" className="rc-btn rc-btn--green">{copy.start}</a>
+              ) : (
+                <span className="rc-btn" aria-disabled="true">{copy.unavailable}</span>
+              )}
             </div>
           </article>
         ))}
       </section>
 
       <aside className="ctaDock">
-        <a href="/simulador" className="rc-btn rc-btn--green">Começar de graça</a>
-        <a href="/login?plan=trader" className="rc-btn rc-btn--green">Quero ser Trader</a>
-        <a href="/login?plan=pro" className="rc-btn rc-btn--green">Subir para Pro</a>
-        <a href="/login?plan=elite" className="rc-btn rc-btn--green">Virar Elite</a>
+        <a href="/simulador" className="rc-btn rc-btn--green">{copy.start}</a>
       </aside>
 
       <style jsx>{`
@@ -217,11 +212,6 @@ export default function PlanosPage() {
           font-size: 11.5px;
         }
 
-        .backTopRight {
-          position: absolute;
-          top: 0;
-          right: 0;
-        }
 
         /* SUBIR CARDS ~1cm */
         .plansGrid {

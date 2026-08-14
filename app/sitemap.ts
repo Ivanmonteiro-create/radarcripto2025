@@ -9,5 +9,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/acessar-simulador`, priority: 0.7 },
     { url: `${base}/fale-com-agente`, priority: 0.4 },
     { url: `${base}/simulador`, priority: 0.8 },
+    { url: `${base}/robos`, priority: 0.7 },
   ];
 }
