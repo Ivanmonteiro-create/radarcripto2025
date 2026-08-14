@@ -2,12 +2,18 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useI18n } from "@/components/i18n/LocaleProvider";
+import { rangeLabel, type RadarLocale } from "@/lib/trading/rangeLabels";
 
 type Level = { levelNumber: number; entryPrice: number; targetPrice: number; quoteAmount: number; enabled: boolean; repeat: boolean };
 type SymbolInfo = { symbol: string; baseAsset: string; quoteAsset: string; status: string; filter: { tickSize: number; stepSize: number; minQuantity: number; minNotional: number } };
 type Validation = { valid: boolean; errors: string[]; warnings: string[]; committedQuote: number; availableQuote: number; economics: Array<{ levelNumber: number; grossProfitQuote: number; simulatedCostsQuote: number; estimatedNetProfitQuote: number; grossDistancePct: number; belowEstimatedCosts: boolean }> };
-type CycleOrder = { id: string; clientOrderId: string; exchangeOrderId?: string | null; status: string; side: string; requestedPrice?: string | null; averageFillPrice?: string | null; createdAt: string; updatedAt: string };
-type Cycle = { id: string; levelId: string; status: string; averageBuyPrice?: string | null; averageSellPrice?: string | null; openedAt?: string | null; closedAt?: string | null; createdAt: string; updatedAt: string; orders: CycleOrder[] };
+type CycleFill = { side: string; price: string; quantity: string; feeQuote: string; timestamp: string };
+type CycleOrder = { id: string; clientOrderId: string; exchangeOrderId?: string | null; status: string; side: string; type: string; requestedPrice?: string | null; averageFillPrice?: string | null; decisionReason?: string | null; createdAt: string; updatedAt: string; fills: CycleFill[] };
+type Cycle = { id: string; levelId: string; cycleNumber: number; status: string; averageBuyPrice?: string | null; averageSellPrice?: string | null; openedAt?: string | null; closedAt?: string | null; createdAt: string; updatedAt: string; orders: CycleOrder[] };
+type CycleAccounting = { buyPrice: number; sellPrice: number; quantity: number; entryValue: number; exitValue: number; realizedGrossPnl: number; realFees: number; observedSlippage: number; simulatedFee: number; simulatedSlippage: number; simulatedCost: number; realizedNetPnl: number; simulatedNetPnl: number; exitReason: string; durationMs: number | null; legacyDifference: number; needsRecomputation: boolean };
+type OpenAccounting = { entryPrice: number; quantity: number; currentPrice: number; currentValue: number; unrealizedGrossPnl: number; realEntryFees: number; estimatedRealExitFee: number; unrealizedNetEstimated: number; observedEntrySlippage: number; simulatedEntryFee: number; simulatedEntrySlippage: number; simulatedEntryCost: number; simulatedExitFee: number; simulatedExitSlippage: number; simulatedExitCost: number; unrealizedSimulatedNet: number; distanceToTargetPct: number | null };
+type LevelAccounting = { realizedGrossPnl: number; unrealizedGrossPnl: number; totalGrossPnl: number; realFees: number; observedSlippage: number; simulatedFee: number; simulatedSlippage: number; simulatedCost: number; realizedNetPnl: number; simulatedNetPnl: number; completedCycles: number; openPositions: number; committedCapital: number; currentExposure: number; open: OpenAccounting | null };
+type AggregateAccounting = LevelAccounting & { capitalFree: number };
 type LevelRecord = {
   id: string; levelNumber: number; entryPrice: string; targetPrice: string; quoteAmount: string; enabled: boolean; repeat: boolean; updatedAt: string;
   runtime?: { state: string; activeOrderId?: string | null; completedCycles: number; grossPnl: string; fees: string; slippage: string; netPnl: string; heldQuantity: string; committedQuote: string; totalHoldingMs: string; lastTransitionAt: string; updatedAt: string };
@@ -17,6 +23,7 @@ type ConfigRecord = {
   capitalTotal: string; maxCommitted: string; maxExposure: string; structuralStop: string;
   simulatedMakerFeeBps: string; simulatedSlippageBps: string; updatedAt: string;
   levels: LevelRecord[]; cycles: Cycle[];
+  accounting?: { cycles: Record<string, CycleAccounting | null>; levels: Record<string, LevelAccounting>; aggregate: AggregateAccounting };
 };
 
 const AUTHORIZATION = "I_AUTHORIZE_BINANCE_SPOT_TESTNET_STRATEGY_B_START";
@@ -34,10 +41,18 @@ const elapsed = (from?: string | null, until?: string | null) => {
   const minutes = Math.floor((seconds % 3_600) / 60);
   return `${hours}h ${String(minutes).padStart(2, "0")}m`;
 };
+const durationMs = (milliseconds: number | null) => {
+  if (milliseconds === null) return "—";
+  const seconds = Math.max(0, Math.floor(milliseconds / 1_000));
+  const hours = Math.floor(seconds / 3_600);
+  const minutes = Math.floor((seconds % 3_600) / 60);
+  return `${hours}h ${String(minutes).padStart(2, "0")}m ${String(seconds % 60).padStart(2, "0")}s`;
+};
 
 export default function HybridStrategyConfigurator({ botId, botStatus, currentPrice, onChanged }: { botId: string; botStatus: string; currentPrice: number; onChanged: () => Promise<void> }) {
   const { locale, t } = useI18n();
   const l = (pt: string, en: string, es: string) => locale === "en" ? en : locale === "es" ? es : pt;
+  const localized = (value: string) => rangeLabel(value, locale as RadarLocale);
   const [mode, setMode] = useState<"READY" | "CUSTOM">("READY");
   const [symbol, setSymbol] = useState("BTCUSDT");
   const [query, setQuery] = useState("BTC");
@@ -152,15 +167,16 @@ export default function HybridStrategyConfigurator({ botId, botStatus, currentPr
     <label>{l("Frase de autorização para iniciar", "Authorization phrase to start", "Frase de autorización para iniciar")}<br/><input style={{ width: "100%" }} value={authorization} onChange={(event) => setAuthorization(event.target.value)} placeholder={AUTHORIZATION}/></label>
     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}><button className="btn" disabled={busy || botStatus !== "STOPPED" || authorization !== AUTHORIZATION} onClick={start}>{l("INICIAR TESTE — ESTRATÉGIA B", "START TEST — STRATEGY B", "INICIAR PRUEBA — ESTRATEGIA B")}</button><button className="btn btnSell" disabled={busy || botStatus === "STOPPED"} onClick={stop}>{t("bots.stop").toUpperCase()}</button></div>
     <small className="muted">A opção futura “Sugerir parâmetros com IA” permanece apenas reservada; IA não altera nem inicia esta estratégia.</small>
-    {currentConfig && <ActiveConfiguration config={currentConfig} currentPrice={displayedPrice} l={l} />}
-    {configs.length > 0 && <div style={{ display: "grid", gap: 8 }}><strong>{l("VERSÕES E MÉTRICAS POR NÍVEL", "VERSIONS AND METRICS BY LEVEL", "VERSIONES Y MÉTRICAS POR NIVEL")}</strong>{configs.slice(0, 5).map((config) => <details key={config.id} open={config.isCurrent}><summary>v{config.version} · {config.mode} · {config.symbol} · {config.status}{config.isCurrent ? ` · ${l("ATUAL", "CURRENT", "ACTUAL")}` : ""}</summary><div style={{ display: "grid", gap: 8, marginTop: 8 }}>{config.levels.map((level) => <LevelMetrics key={level.id} config={config} level={level} currentPrice={displayedPrice} l={l} />)}</div></details>)}</div>}
+    {currentConfig && <ActiveConfiguration config={currentConfig} currentPrice={displayedPrice} l={l} localized={localized} />}
+    {configs.length > 0 && <div style={{ display: "grid", gap: 8 }}><strong>{l("VERSÕES E MÉTRICAS POR NÍVEL", "VERSIONS AND METRICS BY LEVEL", "VERSIONES Y MÉTRICAS POR NIVEL")}</strong>{configs.slice(0, 5).map((config) => <details key={config.id} open={config.isCurrent}><summary>v{config.version} · {localized(config.mode)} · {config.symbol} · {localized(config.status)}{config.isCurrent ? ` · ${l("ATUAL", "CURRENT", "ACTUAL")}` : ""}</summary><div style={{ display: "grid", gap: 8, marginTop: 8 }}>{config.levels.map((level) => <LevelMetrics key={level.id} config={config} level={level} currentPrice={displayedPrice} l={l} localized={localized} />)}</div></details>)}</div>}
     {message && <div className="muted">{message}</div>}
   </section>;
 }
 
 function Metric({ label, value }: { label: string; value: string }) { return <div><small className="muted">{label}</small><div className="bold">{value}</div></div>; }
 
-function ActiveConfiguration({ config, currentPrice, l }: { config: ConfigRecord; currentPrice: number; l: (pt: string, en: string, es: string) => string }) {
+function ActiveConfiguration({ config, currentPrice, l, localized }: { config: ConfigRecord; currentPrice: number; l: (pt: string, en: string, es: string) => string; localized: (value: string) => string }) {
+  const accounting = config.accounting?.aggregate;
   return <section style={{ padding: 12, border: "1px solid rgba(24,226,115,.45)", borderRadius: 12, background: "rgba(0,35,18,.35)" }}>
     <strong>{l("CONFIGURAÇÃO SALVA / ATIVA", "SAVED / ACTIVE CONFIGURATION", "CONFIGURACIÓN GUARDADA / ACTIVA")}</strong>
     <div className="muted">{l("Fonte de verdade persistida usada pelo worker; não é o formulário acima.", "Persisted source of truth used by the worker; this is not the form above.", "Fuente de verdad persistida usada por el worker; no es el formulario anterior.")}</div>
@@ -173,12 +189,22 @@ function ActiveConfiguration({ config, currentPrice, l }: { config: ConfigRecord
       <Metric label={l("Stop estrutural", "Structural stop", "Stop estructural")} value={price(config.structuralStop)} />
       <Metric label={l("Níveis ativos", "Active levels", "Niveles activos")} value={String(config.levels.filter((level) => level.enabled).length)} />
       <Metric label={l("Preço atual", "Current price", "Precio actual")} value={currentPrice > 0 ? price(currentPrice) : "—"} />
-      <Metric label="Status" value={config.status} />
+      <Metric label="Status" value={localized(config.status)} />
+      {accounting && <><Metric label={l("PNL bruto realizado", "Realized gross PNL", "PNL bruto realizado")} value={`${quote(accounting.realizedGrossPnl)} USDT`} />
+      <Metric label={l("PNL não realizado", "Unrealized PNL", "PNL no realizado")} value={`${quote(accounting.unrealizedGrossPnl)} USDT`} />
+      <Metric label={l("Fees reais", "Real fees", "Comisiones reales")} value={`${quote(accounting.realFees)} USDT`} />
+      <Metric label={l("Slippage observado", "Observed slippage", "Slippage observado")} value={`${accounting.observedSlippage >= 0 ? "+" : ""}${quote(accounting.observedSlippage)} USDT`} />
+      <Metric label={l("Custo simulado", "Simulated cost", "Coste simulado")} value={`${quote(accounting.simulatedCost)} USDT`} />
+      <Metric label={l("PNL líquido real", "Real net PNL", "PNL neto real")} value={`${quote(accounting.realizedNetPnl)} USDT`} />
+      <Metric label={l("PNL líquido simulado", "Simulated net PNL", "PNL neto simulado")} value={`${quote(accounting.simulatedNetPnl)} USDT`} />
+      <Metric label={l("Ciclos / posições abertas", "Cycles / open positions", "Ciclos / posiciones abiertas")} value={`${accounting.completedCycles} / ${accounting.openPositions}`} />
+      <Metric label={l("Capital comprometido", "Committed capital", "Capital comprometido")} value={`${quote(accounting.committedCapital)} USDT`} />
+      <Metric label={l("Capital livre", "Free capital", "Capital libre")} value={`${quote(accounting.capitalFree)} USDT`} /></>}
     </div>
   </section>;
 }
 
-function LevelMetrics({ config, level, currentPrice, l }: { config: ConfigRecord; level: LevelRecord; currentPrice: number; l: (pt: string, en: string, es: string) => string }) {
+function LevelMetrics({ config, level, currentPrice, l, localized }: { config: ConfigRecord; level: LevelRecord; currentPrice: number; l: (pt: string, en: string, es: string) => string; localized: (value: string) => string }) {
   const runtime = level.runtime;
   const cycles = config.cycles.filter((cycle) => cycle.levelId === level.id).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   const latestCycle = cycles[0];
@@ -187,14 +213,15 @@ function LevelMetrics({ config, level, currentPrice, l }: { config: ConfigRecord
   const entry = number(level.entryPrice);
   const target = number(level.targetPrice);
   const held = number(runtime?.heldQuantity);
+  const accounting = config.accounting?.levels[level.id];
+  const open = accounting?.open;
   const configuredQuantity = entry > 0 ? number(level.quoteAmount) / entry : 0;
   const distanceToBuy = currentPrice > 0 ? (entry / currentPrice - 1) * 100 : null;
-  const distanceToSell = currentPrice > 0 && held > 0 ? (target / currentPrice - 1) * 100 : null;
+  const distanceToSell = open?.distanceToTargetPct ?? (currentPrice > 0 && held > 0 ? (target / currentPrice - 1) * 100 : null);
   const openedAt = latestCycle?.openedAt ?? (held > 0 ? latestCycle?.createdAt : null);
-  const costs = number(runtime?.fees) + number(runtime?.slippage);
   const baseAsset = config.symbol.endsWith("USDT") ? config.symbol.slice(0, -4) : config.symbol;
   return <article style={{ padding: 10, border: "1px solid rgba(24,226,115,.22)", borderRadius: 10 }}>
-    <div style={{ display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}><strong>{l("NÍVEL", "LEVEL", "NIVEL")} {level.levelNumber}</strong><strong>{runtime?.state ?? "WAITING_BUY"}</strong></div>
+    <div style={{ display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}><strong>{l("NÍVEL", "LEVEL", "NIVEL")} {level.levelNumber}</strong><strong>{localized(runtime?.state ?? "WAITING_BUY")}</strong></div>
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(135px,1fr))", gap: 8, marginTop: 8 }}>
       <Metric label={l("BUY configurado", "Configured BUY", "BUY configurado")} value={price(entry)} />
       <Metric label={l("SELL configurado", "Configured SELL", "SELL configurado")} value={price(target)} />
@@ -204,15 +231,43 @@ function LevelMetrics({ config, level, currentPrice, l }: { config: ConfigRecord
       <Metric label={l("Valor", "Value", "Valor")} value={`${quote(level.quoteAmount)} USDT`} />
       <Metric label={l("Capital comprometido", "Committed capital", "Capital comprometido")} value={`${quote(runtime?.committedQuote)} USDT`} />
       <Metric label="Order ID" value={activeOrder?.exchangeOrderId ?? activeOrder?.clientOrderId ?? runtime?.activeOrderId ?? "—"} />
-      <Metric label={l("Preço real de entrada", "Actual entry price", "Precio real de entrada")} value={latestCycle?.averageBuyPrice ? price(latestCycle.averageBuyPrice) : "—"} />
+      <Metric label={l("Preço real de entrada", "Actual entry price", "Precio real de entrada")} value={open ? price(open.entryPrice) : latestCycle?.averageBuyPrice ? price(latestCycle.averageBuyPrice) : "—"} />
       <Metric label={l("Preço alvo", "Target price", "Precio objetivo")} value={price(target)} />
       <Metric label={l("Distância até SELL", "Distance to SELL", "Distancia a SELL")} value={pct(distanceToSell)} />
-      <Metric label={l("PNL bruto", "Gross PNL", "PNL bruto")} value={`${quote(runtime?.grossPnl)} USDT`} />
-      <Metric label={l("Custos simulados", "Simulated costs", "Costes simulados")} value={`${quote(costs)} USDT`} />
-      <Metric label={l("PNL líquido", "Net PNL", "PNL neto")} value={`${quote(runtime?.netPnl)} USDT`} />
+      <Metric label={l("PNL bruto realizado acumulado", "Accumulated realized gross PNL", "PNL bruto realizado acumulado")} value={`${quote(accounting?.realizedGrossPnl)} USDT`} />
+      <Metric label={l("PNL não realizado atual", "Current unrealized PNL", "PNL no realizado actual")} value={open ? `${quote(open.unrealizedGrossPnl)} USDT` : "—"} />
+      <Metric label={l("PNL total do nível", "Total level PNL", "PNL total del nivel")} value={`${quote(accounting?.totalGrossPnl)} USDT`} />
+      <Metric label={l("Fees reais acumuladas", "Accumulated real fees", "Comisiones reales acumuladas")} value={`${quote(accounting?.realFees)} USDT`} />
+      <Metric label={l("Slippage observado acumulado", "Accumulated observed slippage", "Slippage observado acumulado")} value={`${number(accounting?.observedSlippage) >= 0 ? "+" : ""}${quote(accounting?.observedSlippage)} USDT`} />
+      <Metric label={l("Fee simulada acumulada", "Accumulated simulated fee", "Comisión simulada acumulada")} value={`${quote(accounting?.simulatedFee)} USDT`} />
+      <Metric label={l("Slippage simulado acumulado", "Accumulated simulated slippage", "Slippage simulado acumulado")} value={`${quote(accounting?.simulatedSlippage)} USDT`} />
+      <Metric label={l("Custo simulado total", "Total simulated cost", "Coste simulado total")} value={`${quote(accounting?.simulatedCost)} USDT`} />
+      <Metric label={l("PNL líquido real acumulado", "Accumulated real net PNL", "PNL neto real acumulado")} value={`${quote(accounting?.realizedNetPnl)} USDT`} />
+      <Metric label={l("PNL líquido simulado acumulado", "Accumulated simulated net PNL", "PNL neto simulado acumulado")} value={`${quote(accounting?.simulatedNetPnl)} USDT`} />
+      <Metric label={l("PNL não realizado líquido estimado", "Estimated unrealized net PNL", "PNL neto no realizado estimado")} value={open ? `${quote(open.unrealizedNetEstimated)} USDT` : "—"} />
       <Metric label={l("Tempo aberto", "Open time", "Tiempo abierto")} value={elapsed(openedAt, latestCycle?.closedAt)} />
-      <Metric label={l("Número de ciclos", "Cycle count", "Número de ciclos")} value={String(runtime?.completedCycles ?? 0)} />
-      <Metric label={l("Última atualização", "Last update", "Última actualización")} value={new Date(runtime?.updatedAt ?? level.updatedAt).toLocaleString("pt-PT")} />
+      <Metric label={l("Número de ciclos", "Cycle count", "Número de ciclos")} value={String(accounting?.completedCycles ?? runtime?.completedCycles ?? 0)} />
+      <div title={l("Última persistência que alterou ordem, fill ou estado deste nível.", "Last persistence that changed an order, fill, or this level state.", "Última persistencia que cambió una orden, fill o el estado de este nivel.")}><Metric label={l("Última alteração do nível", "Last level change", "Último cambio del nivel")} value={new Date(runtime?.updatedAt ?? level.updatedAt).toLocaleString("pt-PT")} /></div>
     </div>
+    {cycles.some((cycle) => cycle.status === "COMPLETED") && <details style={{ marginTop: 10 }}><summary>{l("CICLOS CONCLUÍDOS", "COMPLETED CYCLES", "CICLOS COMPLETADOS")}</summary><div style={{ display: "grid", gap: 8, marginTop: 8 }}>{cycles.filter((cycle) => cycle.status === "COMPLETED").map((cycle) => {
+      const cycleAccounting = config.accounting?.cycles[cycle.id];
+      const buyFill = cycle.orders.find((order) => order.side === "BUY")?.fills[0];
+      const sellFill = cycle.orders.find((order) => order.side === "SELL")?.fills[0];
+      if (!cycleAccounting) return <div key={cycle.id} className="muted">#{cycle.cycleNumber} · {l("Histórico legado incompleto", "Incomplete legacy history", "Historial legado incompleto")}</div>;
+      return <div key={cycle.id} style={{ padding: 8, border: "1px solid rgba(24,226,115,.16)", borderRadius: 8 }}><strong>#{cycle.cycleNumber} · {localized(cycleAccounting.exitReason)}</strong><div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(135px,1fr))", gap: 6, marginTop: 6 }}>
+        <Metric label="BUY fill" value={`${price(cycleAccounting.buyPrice)} · ${buyFill ? new Date(buyFill.timestamp).toLocaleString("pt-PT") : "—"}`} />
+        <Metric label="SELL fill" value={`${price(cycleAccounting.sellPrice)} · ${sellFill ? new Date(sellFill.timestamp).toLocaleString("pt-PT") : "—"}`} />
+        <Metric label={l("Quantidade", "Quantity", "Cantidad")} value={`${cycleAccounting.quantity.toFixed(8)} ${baseAsset}`} />
+        <Metric label={l("Entrada / saída", "Entry / exit", "Entrada / salida")} value={`${quote(cycleAccounting.entryValue)} / ${quote(cycleAccounting.exitValue)} USDT`} />
+        <Metric label={l("PNL bruto realizado", "Realized gross PNL", "PNL bruto realizado")} value={`${quote(cycleAccounting.realizedGrossPnl)} USDT`} />
+        <Metric label={l("Fees reais", "Real fees", "Comisiones reales")} value={`${quote(cycleAccounting.realFees)} USDT`} />
+        <Metric label={l("Slippage observado", "Observed slippage", "Slippage observado")} value={`${cycleAccounting.observedSlippage >= 0 ? "+" : ""}${quote(cycleAccounting.observedSlippage)} USDT`} />
+        <Metric label={l("Fee / slippage simulados", "Simulated fee / slippage", "Comisión / slippage simulados")} value={`${quote(cycleAccounting.simulatedFee)} / ${quote(cycleAccounting.simulatedSlippage)} USDT`} />
+        <Metric label={l("Custo simulado", "Simulated cost", "Coste simulado")} value={`${quote(cycleAccounting.simulatedCost)} USDT`} />
+        <Metric label={l("PNL líquido real", "Real net PNL", "PNL neto real")} value={`${quote(cycleAccounting.realizedNetPnl)} USDT`} />
+        <Metric label={l("PNL líquido simulado", "Simulated net PNL", "PNL neto simulado")} value={`${quote(cycleAccounting.simulatedNetPnl)} USDT`} />
+        <Metric label={l("Duração", "Duration", "Duración")} value={durationMs(cycleAccounting.durationMs)} />
+      </div></div>;
+    })}</div></details>}
   </article>;
 }

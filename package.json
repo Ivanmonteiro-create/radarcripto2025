@@ -15,6 +15,7 @@
     "prisma:migrate": "prisma migrate deploy",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:seed": "prisma db seed",
+    "strategy-b:recompute": "tsx scripts/recomputeRangeAccounting.ts",
     "test:integration": "vitest run tests/integration",
     "postinstall": "prisma generate"
   },

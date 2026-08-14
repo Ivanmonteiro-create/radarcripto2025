@@ -4,6 +4,7 @@ import { ApiError, apiErrorResponse, parseJson } from "@/lib/server/api";
 import { requireApiAuth, requireMutationAuth } from "@/lib/server/auth";
 import { createExchange } from "@/lib/server/exchangeFactory";
 import { prisma } from "@/lib/server/prisma";
+import { buildRangeAccountingView } from "@/lib/server/rangeAccountingView";
 import { rangeStrategyConfigSchema } from "@/lib/server/schemas";
 import { findTestnetSpotSymbol } from "@/lib/server/spotSymbolCatalog";
 import { validateRangeConfiguration } from "@/lib/trading/rangeCycle";
@@ -18,7 +19,10 @@ export async function GET(_request: Request, context: Context) {
   try {
     const { id } = await context.params;
     const configurations = await prisma.strategyConfig.findMany({
-      where: { botId: id }, include: { levels: { include: { runtime: true }, orderBy: { levelNumber: "asc" } }, cycles: { orderBy: { createdAt: "desc" }, take: 50, include: { orders: true } } },
+      where: { botId: id }, include: {
+        levels: { include: { runtime: true, cycles: { include: { orders: { include: { fills: true } } }, orderBy: { cycleNumber: "asc" } } }, orderBy: { levelNumber: "asc" } },
+        cycles: { orderBy: { createdAt: "desc" }, take: 50, include: { orders: { include: { fills: true } } } },
+      },
       orderBy: { version: "desc" }, take: 20,
     });
     const current = configurations.find((configuration) => configuration.isCurrent);
@@ -31,7 +35,11 @@ export async function GET(_request: Request, context: Context) {
         currentPrice = null;
       }
     }
-    return NextResponse.json({ ok: true, configurations: serializable(configurations), currentPrice });
+    const enriched = configurations.map((configuration) => ({
+      ...configuration,
+      accounting: buildRangeAccountingView(configuration, currentPrice),
+    }));
+    return NextResponse.json({ ok: true, configurations: serializable(enriched), currentPrice });
   } catch (error) { return apiErrorResponse(error); }
 }
 

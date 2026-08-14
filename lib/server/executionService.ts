@@ -677,7 +677,9 @@ export class ExecutionService {
             const addedSlippage = orderCosts?.slippageQuote ?? 0;
             const totalFees = Number(cycle.fees) + addedFees;
             const totalSlippage = Number(cycle.slippage) + addedSlippage;
-            const netPnl = grossPnl - totalFees - totalSlippage;
+            // Fill prices already contain execution quality. Observed slippage remains telemetry
+            // and must not be subtracted a second time from the real economic result.
+            const netPnl = grossPnl - totalFees;
             const holdingMs = cycle.openedAt ? Date.now() - cycle.openedAt.getTime() : 0;
             const repeat = local.strategyCycle.level.repeat;
             await tx.strategyCycle.update({ where: { id: cycle.id }, data: {
